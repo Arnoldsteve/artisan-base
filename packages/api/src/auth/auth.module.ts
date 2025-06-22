@@ -4,17 +4,11 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt'; // <-- Still need this
 import { JwtStrategy } from './jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [
-    PrismaModule,
-    // We still import JwtModule to make JwtService available,
-    // but the main configuration will happen in the strategy.
-    JwtModule.register({}),
-  ],
+  imports: [PrismaModule, JwtModule.register({})], // <-- Simplified registration
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })

@@ -7,14 +7,16 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt'; // <-- Import this
+import { ConfigService } from '@nestjs/config'; // <-- 1. Import ConfigService
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   // Inject both PrismaService and JwtService
-  constructor(
+   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService, // <-- Inject this
+    private jwtService: JwtService,
+    private configService: ConfigService, // <-- 2. Inject it
   ) {}
 
   async signup(email: string, password: string) {
@@ -38,27 +40,27 @@ export class AuthService {
     return result;
   }
 
-  // 1. Add the new login method
-  async login(email: string, pass: string) {
-    console.log("Test dada")
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
+    async login(email: string, pass: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isMatch = await bcrypt.compare(pass, user.hashedPassword);
-
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // 2. If passwords match, generate the JWT
     const payload = { sub: user.id, email: user.email };
+    
+    // 3. Get the secret and sign the token here
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET not found in environment variables.');
+    }
+
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jwtService.signAsync(payload, { secret }),
     };
   }
 }
