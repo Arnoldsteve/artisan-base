@@ -52,8 +52,6 @@ export class AuthController {
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   getProfile(@Request() req) {
-    console.log('Cookies received:', req.cookies);
-    console.log('Headers received:', req.headers);
     return req.user;
   }
 }

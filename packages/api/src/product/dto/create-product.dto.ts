@@ -1,16 +1,19 @@
+
 import {
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUrl,
   Min,
+  MinLength,
+  ValidateIf,
 } from 'class-validator';
 
-export class CreateProductDto {
+export class UpdateProductDto {
   @IsString()
-  @IsNotEmpty()
-  name!: string;
+  @MinLength(3)
+  @IsOptional()
+  name?: string;
 
   @IsString()
   @IsOptional()
@@ -18,9 +21,11 @@ export class CreateProductDto {
 
   @IsNumber()
   @Min(0)
-  price!: number;
+  @IsOptional()
+  price?: number;
 
   @IsUrl()
+  @ValidateIf(o => o.imageUrl !== '')
   @IsOptional()
   imageUrl?: string;
 }
