@@ -1,5 +1,3 @@
-// In packages/api/src/store/store.service.ts
-
 import {
   Injectable,
   ConflictException,

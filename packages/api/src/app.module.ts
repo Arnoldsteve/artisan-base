@@ -1,13 +1,12 @@
-// In packages/api/src/app.module.ts
-
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config'; // <-- Import
+import { ConfigModule } from '@nestjs/config';
 import { TenantModule } from './tenant/tenant.module';
 import { StoreModule } from './store/store.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -19,6 +18,7 @@ import { StoreModule } from './store/store.module';
     AuthModule,
     TenantModule,
     StoreModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

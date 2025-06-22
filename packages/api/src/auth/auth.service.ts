@@ -1,13 +1,11 @@
-// In packages/api/src/auth/auth.service.ts
-
 import {
   Injectable,
   ConflictException,
-  UnauthorizedException, // <-- Import this
+  UnauthorizedException, 
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config'; // <-- 1. Import ConfigService
+import { ConfigService } from '@nestjs/config'; 
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -16,11 +14,10 @@ export class AuthService {
    constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private configService: ConfigService, // <-- 2. Inject it
+    private configService: ConfigService, 
   ) {}
 
   async signup(email: string, password: string) {
-    // ... our existing signup code ...
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -53,7 +50,7 @@ export class AuthService {
 
     const payload = { sub: user.id, email: user.email };
     
-    // 3. Get the secret and sign the token here
+    //  Get the secret and sign the token here
     const secret = this.configService.get<string>('JWT_SECRET');
     if (!secret) {
       throw new Error('JWT_SECRET not found in environment variables.');

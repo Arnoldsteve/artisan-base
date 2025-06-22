@@ -1,5 +1,3 @@
-// In packages/api/src/auth/jwt.strategy.ts
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -30,6 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: { sub: string; email: string }): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
+       include: {
+        store: true, 
+      },
     });
 
     if (!user) {

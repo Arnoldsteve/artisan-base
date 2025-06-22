@@ -1,5 +1,3 @@
-// In packages/api/src/store/dto/create-store.dto.ts
-
 import { IsNotEmpty, IsString, IsAlphanumeric, MinLength, MaxLength } from 'class-validator';
 
 export class CreateStoreDto {
