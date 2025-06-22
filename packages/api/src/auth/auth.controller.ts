@@ -1,11 +1,21 @@
 // In packages/api/src/auth/auth.controller.ts
 
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards, Request } from '@nestjs/common'; // <-- 1. Add HttpCode and HttpStatus
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  UseGuards,
+  Request,
+  Res,
+} from '@nestjs/common'; // <-- 1. Add HttpCode and HttpStatus
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto'; // <-- 2. Import the new DTO
-import { AuthGuard } from '@nestjs/passport'; // <-- Import
-
+import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express'; // <-- Import Response from express
 
 @Controller('auth')
 export class AuthController {
@@ -16,18 +26,34 @@ export class AuthController {
     return this.authService.signup(signUpDto.email, signUpDto.password);
   }
 
-  // 3. Add the new login endpoint
   @Post('login')
-  @HttpCode(HttpStatus.OK) // 4. Set the success status code to 200 OK
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto.email, loginDto.password);
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const loginData = await this.authService.login(
+      loginDto.email,
+      loginDto.password,
+    );
+
+    res.cookie('access_token', loginData.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development', // This is still correct
+      sameSite: 'lax', // <-- THE FINAL FIX
+      domain: 'localhost', // Keeping this is a good, explicit practice
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return { message: 'Login successful' };
   }
 
-   @Get('profile')
-  @UseGuards(AuthGuard('jwt')) // This is the guard that protects the route
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
   getProfile(@Request() req) {
-    // Because of our JwtStrategy's `validate` method, `req.user`
-    // now contains the user object we fetched from the database.
+    console.log('Cookies received:', req.cookies);
+    console.log('Headers received:', req.headers);
     return req.user;
   }
 }
