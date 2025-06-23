@@ -41,7 +41,7 @@ export function ProductView({ store }: ProductViewProps) {
           <p className="text-muted-foreground">Manage the products for {store.name}.</p>
         </div>
         {/* 3. Pass the fetchProducts function as a prop */}
-        <AddProductDialog onProductAdded={fetchProducts} />
+        <AddProductDialog onProductAdded={fetchProducts} store={store} />
       </div>
 
       {isLoading ? (

@@ -155,3 +155,16 @@ export async function getPublicProduct(storeId: string, productId: string) {
   if (!response.ok) return null;
   return response.json();
 }
+
+// FETCH STOREd PRODUCTS IMAGES
+export async function getUploadUrl(fileName: string, fileType: string) {
+  const response = await fetch(`${API_BASE_URL}/storage/upload-url`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ fileName, fileType }),
+  });
+  console.log('Upload URL response:', response);
+  // ... error handling
+  return response.json();
+}
