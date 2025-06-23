@@ -1,9 +1,12 @@
 
-// const API_BASE_URL = 'http://localhost:3001'; 
-const API_BASE_URL = '/api'; 
+// 1. Check if we are running on the server or client
+const isServer = typeof window === 'undefined';
 
-// We can add functions here for signup, login, etc.
-// For example:
+// 2. Define the base URL based on the environment
+const API_BASE_URL = isServer
+  ? 'http://localhost:3001' // Use the absolute URL for the backend on the server
+  : '/api'; // Use the relative proxy path on the client
+
 export async function signupUser(data: any) {
   const response = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: 'POST',
@@ -60,9 +63,6 @@ export async function getProfile() {
   return responseData; // This will be the user object
 }
 
-// In packages/web/src/lib/api.ts
-// ...
-
 export async function createStore(data: { id: string; name: string }) {
   const response = await fetch(`${API_BASE_URL}/stores`, {
     method: 'POST',
@@ -117,7 +117,7 @@ export async function deleteProduct(productId: string) {
     method: 'DELETE',
     credentials: 'include',
   });
-  console.log('Delete response:', response);
+
   if (response.status !== 204) { // Check for 204 No Content
     // Handle potential errors if needed
     const errorData = await response.json().catch(() => ({}));
@@ -125,4 +125,20 @@ export async function deleteProduct(productId: string) {
   }
   // No need to return response.json() for a 204 response
   return;
+}
+
+export async function getPublicStoreProducts(storeId: string) {
+  // We directly fetch from the proxied API route
+  const response = await fetch(`${API_BASE_URL}/public/stores/${storeId}/products`);
+
+  // We need to handle the case where a store doesn't exist (404 Not Found)
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null; // Return null to indicate the store was not found
+    }
+    // For other errors, we can throw
+    throw new Error('Failed to fetch store products');
+  }
+
+  return response.json();
 }

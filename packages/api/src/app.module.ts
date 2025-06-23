@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TenantModule } from './tenant/tenant.module';
 import { StoreModule } from './store/store.module';
 import { ProductModule } from './product/product.module';
+import { PublicModule } from './public/public.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ProductModule } from './product/product.module';
     TenantModule,
     StoreModule,
     ProductModule,
+    PublicModule,
   ],
   controllers: [AppController],
   providers: [AppService],

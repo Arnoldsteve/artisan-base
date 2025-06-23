@@ -4,34 +4,46 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // 1. Get the access token cookie from the request
+  const url = request.nextUrl.clone();
+  const hostname = request.headers.get('host') || '';
+
+  // Define your main application's host (for dashboard, login, etc.)
+  // In development, this might be localhost:3000. In production, it would be 'app.artisanbase.com'.
+  // We'll use a simple check for localhost for now.
+  const isAppHostname = hostname.includes('localhost'); // Adjust for production
+
   const accessToken = request.cookies.get('access_token')?.value;
 
-  // 2. Define which paths are considered "auth" pages (login, signup)
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup');
+  // Extract the potential subdomain
+  const subdomain = hostname.split('.')[0];
+  const isStoreSubdomain = !isAppHostname && subdomain !== 'www';
 
-  // 3. If the user is trying to access an auth page but is already logged in,
-  //    redirect them to the dashboard.
-  if (isAuthPage) {
-    if (accessToken) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+  // --- Main App Logic (Dashboard, Login) ---
+  if (isAppHostname) {
+    const isAuthPage = url.pathname.startsWith('/login');
+
+    if (isAuthPage) {
+      return accessToken ? NextResponse.redirect(new URL('/dashboard', request.url)) : null;
     }
-    return null; // Allow them to see the login/signup page
+
+    if (!accessToken && url.pathname.startsWith('/dashboard')) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    return NextResponse.next();
   }
 
-  // 4. If the user is trying to access any other page (e.g., /dashboard)
-  //    but is NOT logged in, redirect them to the login page.
-  if (!accessToken) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // --- Public Storefront Logic ---
+  if (isStoreSubdomain) {
+    // Rewrite the URL to our dynamic route, passing the subdomain as a parameter
+    // e.g., 'malaikabeads.localhost:3000' becomes '/malaikabeads'
+    url.pathname = `/${subdomain}${url.pathname}`;
+    return NextResponse.rewrite(url);
   }
 
-  // 5. If they are logged in and not on an auth page, allow them to proceed.
-  return null;
+  return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  // This matcher ensures the middleware runs on all routes EXCEPT
-  // static assets, images, and special Next.js files.
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

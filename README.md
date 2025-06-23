@@ -1,84 +1,215 @@
-# Turborepo starter
+# ArtisanBase 🎨
 
-This Turborepo starter is maintained by the Turborepo core team.
+> **Empowering artisans with professional e-commerce solutions**
 
-## Using this example
+ArtisanBase is a modern, full-stack SaaS platform that enables independent artisans and craftspeople to launch professional online storefronts without the technical complexity. Built with enterprise-grade architecture, it provides secure, isolated environments for each creator while maintaining simplicity and ease of use.
 
-Run the following command:
+![ArtisanBase Platform](https://via.placeholder.com/800x400/667eea/ffffff?text=ArtisanBase+Platform+Screenshot)
+*Professional storefronts tailored for artisans and creators*
 
-```sh
-npx create-turbo@latest
+---
+
+## ✨ Why ArtisanBase?
+
+**For Artisans:** Focus on your craft, not on technology. Get a professional online presence with zero technical knowledge required.
+
+**For Developers:** Experience modern full-stack architecture with multi-tenancy, advanced security patterns, and scalable design principles.
+
+---
+
+## 🚀 Key Features
+
+### 🏪 **Multi-Tenant Architecture**
+- **Isolated Environments:** Each artisan receives a completely separate database schema
+- **Enterprise Security:** Data isolation at the database level ensures maximum security
+- **Scalable Design:** Handle thousands of stores without performance degradation
+
+### 🌐 **Professional Storefronts**
+- **SEO-Optimized:** Server-side rendered pages for maximum search visibility
+- **Mobile-First Design:** Responsive layouts that work beautifully on all devices
+- **Custom Branding:** Each store maintains its unique identity and style
+
+### 🔐 **Enterprise-Grade Security**
+- **JWT Authentication:** Secure, stateless authentication with httpOnly cookies
+- **Protected Dashboards:** Role-based access control for store management
+- **Data Encryption:** All sensitive data encrypted at rest and in transit
+
+### ⚡ **Developer Experience**
+- **Type-Safe:** End-to-end TypeScript for reliability and developer productivity
+- **Modern Tooling:** Built with the latest frameworks and best practices
+- **Monorepo Architecture:** Organized codebase with shared libraries and utilities
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend (`packages/web`)
+```
+Next.js 14+          App Router, SSR, and modern React patterns
+TypeScript           Type safety and enhanced developer experience
+Tailwind CSS         Utility-first styling with responsive design
+shadcn/ui           Beautiful, accessible component library
+React Hook Form      Performant forms with built-in validation
+Zod                 Runtime type validation and schema parsing
 ```
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
+### Backend (`packages/api`)
 ```
-cd my-turborepo
-pnpm build
+NestJS              Scalable Node.js framework with dependency injection
+TypeScript          Type-safe server-side development
+Prisma ORM          Type-safe database access with migrations
+Passport.js         Flexible authentication middleware
+PostgreSQL          Robust relational database with JSON support
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
+### Infrastructure & DevOps
 ```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+pnpm Workspaces     Efficient monorepo package management
+Turborepo           Build system optimization and caching
+Supabase            Managed PostgreSQL with real-time features
+Vercel              Serverless deployment and edge optimization
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+---
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+## 🏗️ Architecture Highlights
+
+### **Schema-per-Tenant Multi-Tenancy**
+Revolutionary approach to data isolation where each store gets its own dedicated PostgreSQL schema (`tenant_[storeId]`). This provides:
+- **Maximum Security:** Complete data isolation between tenants
+- **Scalability:** Independent scaling and optimization per tenant
+- **Compliance:** Easy adherence to data protection regulations
+
+### **Dynamic Tenant Resolution**
+Custom `TenantPrismaService` factory creates request-scoped database connections:
+```typescript
+// Automatic tenant resolution from request context
+const tenantPrisma = await this.tenantPrismaService.getTenantClient(storeId);
+const products = await tenantPrisma.product.findMany();
+```
+
+### **Seamless Development Experience**
+- **Proxy Architecture:** Next.js proxies API requests to eliminate CORS issues
+- **Hot Reloading:** Full-stack development with instant feedback
+- **Type Sharing:** Shared types and schemas across frontend and backend
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and pnpm
+- PostgreSQL database (we recommend Supabase)
+- Git
+
+### Installation
+
+1. **Clone and Install**
+   ```bash
+   git clone https://github.com/Arnoldsteve/artisan-base.git
+   cd artisan-base
+   pnpm install
+   ```
+
+2. **Environment Setup**
+   ```bash
+   cd packages/api
+   cp .env.example .env
+   ```
+   
+   Update `.env` with your configuration:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://user:password@host:port/dbname"
+   
+   # Security
+   JWT_SECRET="your-super-secret-jwt-key-minimum-32-characters"
+   
+   # Optional: Environment
+   NODE_ENV="development"
+   ```
+
+3. **Database Setup**
+   ```bash
+   # Run migrations
+   pnpm exec prisma migrate dev
+   
+   # Generate Prisma client
+   pnpm exec prisma generate
+   ```
+
+4. **Start Development**
+   ```bash
+   # From project root
+   pnpm dev
+   ```
+   
+   🎉 **Ready!** Visit http://localhost:3000
+
+---
+
+## 📚 Project Structure
 
 ```
-npx turbo link
+artisan-base/
+├── packages/
+│   ├── api/                 # NestJS backend
+│   │   ├── src/
+│   │   │   ├── auth/        # Authentication modules
+│   │   │   ├── store/       # Store management
+│   │   │   ├── product/     # Product CRUD
+│   │   │   └── tenant/      # Multi-tenancy logic
+│   │   └── prisma/          # Database schema & migrations
+│   ├── web/                 # Next.js frontend
+│   │   ├── app/             # App Router pages
+│   │   ├── components/      # Reusable UI components
+│   │   └── lib/             # Utilities and configurations
+│   └── shared/              # Shared types and utilities
+├── turbo.json              # Turborepo configuration
+└── package.json            # Workspace configuration
 ```
 
-## Useful Links
+---
 
-Learn more about the power of Turborepo:
+## 🎯 Roadmap
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- [ ] **Dynamic Subdomains** - `artisan.artisanbase.com` routing
+- [ ] **Payment Integration** - Stripe/PayPal checkout flows
+- [ ] **Order Management** - Complete order lifecycle
+- [ ] **Analytics Dashboard** - Sales insights and reporting
+- [ ] **Theme Customization** - Visual store customization
+- [ ] **Mobile App** - React Native companion app
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with ❤️ for the artisan community. Special thanks to all the open-source projects that make this possible.
+
+---
+
+<div align="center">
+
+**[Live Demo](https://artisanbase.vercel.app)** • **[Documentation](https://docs.artisanbase.com)** • **[Report Bug](https://github.com/Arnoldsteve/artisan-base/issues)**
+
+Made with 🎨 by [Arnold Steve](https://github.com/Arnoldsteve)
+
+</div>
