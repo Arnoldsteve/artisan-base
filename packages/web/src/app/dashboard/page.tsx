@@ -2,47 +2,45 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getProfile } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { getProfile, logoutUser } from '@/lib/api';
+import { UserProfile } from '@/lib/types';
+import { Button } from '@/components/ui/button';
 import { CreateStoreForm } from '@/components/dashboard/create-store-form';
 import { ProductView } from '@/components/dashboard/product-view';
-import { UserProfile } from '@/lib/types';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getProfile();
-        setUser(userData);
-      } catch (error) {
-        console.error('Failed to fetch profile', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchUser();
+    // ... your data fetching logic here ...
+    getProfile().then(setUser).catch(console.error).finally(() => setIsLoading(false));
   }, []);
 
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
+  const handleLogout = async () => {
+    await logoutUser();
+    router.push('/login');
+  };
 
-  if (!user) {
-    return <div className="p-8">Could not load user data. Please try logging in again.</div>;
-  }
+  if (isLoading) return <p className="p-4 pt-6">Loading...</p>;
+  if (!user) return <p className="p-4 pt-6">Could not load user data.</p>;
 
- return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold">Welcome, {user.email}!</h1>
-      <div className="mt-6">
+  // This is the content that will be placed inside the DashboardLayout
+  return (
+    <>
+      <div className="flex justify-between items-center mb-6 pt-6">
+        <h1 className="text-2xl font-bold">Welcome, {user.email}!</h1>
+        <Button onClick={handleLogout} variant="outline">Logout</Button>
+      </div>
+      <div>
         {user.store ? (
-          <ProductView store={user.store} /> 
+          <ProductView store={user.store} />
         ) : (
           <CreateStoreForm />
         )}
       </div>
-    </div>
+    </>
   );
 }

@@ -54,4 +54,34 @@ model Product {
   updatedAt   DateTime  @updatedAt
 
   @@map("products")
+  OrderItem OrderItem[]
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  customerEmail String
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relation to the items in the order
+  items         OrderItem[]
+
+  @@map("orders")
+}
+
+// This is the join table for the many-to-many relationship
+model OrderItem {
+  id          String @id @default(uuid())
+  quantity    Int
+  
+  // Relation to the Order
+  order       Order  @relation(fields: [orderId], references: [id])
+  orderId     String
+  
+  // Relation to the Product
+  product     Product @relation(fields: [productId], references: [id])
+  productId   String
+
+  @@map("order_items")
 }

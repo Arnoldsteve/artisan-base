@@ -1,4 +1,6 @@
 import React from 'react';
+import { CartIcon } from './cart-icon'; // <-- Import
+
 
 interface PublicLayoutProps {
   storeName: string;
@@ -12,6 +14,7 @@ export function PublicLayout({ storeName, children }: PublicLayoutProps) {
       <header className="border-b">
         <div className="container mx-auto h-16 flex items-center justify-between px-4">
           <h1 className="text-2xl font-bold tracking-tight">{storeName}</h1>
+          <CartIcon />
           {/* Future navigation links can go here (e.g., Cart, About) */}
         </div>
       </header>

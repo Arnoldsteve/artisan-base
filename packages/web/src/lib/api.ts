@@ -1,3 +1,4 @@
+import { Order } from "./types";
 
 // 1. Check if we are running on the server or client
 const isServer = typeof window === 'undefined';
@@ -37,6 +38,7 @@ export async function loginUser(data: any) {
   // We need to handle both successful and error responses
   const responseData = await response.json();
 
+  console.log('Login response:', responseData);
   if (!response.ok) {
     // The API returns error details in the response body
     throw new Error(responseData.message || 'Failed to login');
@@ -61,6 +63,18 @@ export async function getProfile() {
   }
 
   return responseData; // This will be the user object
+}
+
+export async function logoutUser() {
+  // We don't need to handle the response body, just check if it was successful
+  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to logout');
+  }
 }
 
 export async function createStore(data: { id: string; name: string }) {
@@ -164,7 +178,32 @@ export async function getUploadUrl(fileName: string, fileType: string) {
     credentials: 'include',
     body: JSON.stringify({ fileName, fileType }),
   });
-  console.log('Upload URL response:', response);
-  // ... error handling
+  return response.json();
+}
+
+// ============ ORDERS ============//
+export async function getOrders(): Promise<Order[]> {
+  const response = await fetch(`${API_BASE_URL}/orders`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+
+  console.log('Orders response:', response);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch orders');
+  }
+
+  return response.json();
+}
+
+export async function createOrder(storeId: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/public/stores/${storeId}/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  // ... error handling ...
   return response.json();
 }

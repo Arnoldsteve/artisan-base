@@ -26,10 +26,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { getUploadUrl, createProduct } from "@/lib/api"; // Assuming you are using the signed URL method
+import { getUploadUrl, createProduct } from "@/lib/api"; 
 import { createProductSchema } from "@/lib/schemas";
 import { Store } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
+import { toast } from 'sonner'; 
 
 interface AddProductDialogProps {
   onProductAdded: () => void;
@@ -99,6 +100,7 @@ export function AddProductDialog({
       });
 
       form.reset();
+      toast.success('Product created successfully!');
       setOpen(false);
       onProductAdded();
     } catch (error: any) {

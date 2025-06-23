@@ -11,6 +11,7 @@ import { PublicModule } from './public/public.module';
 import { StorageService } from './storage/storage.service';
 import { StorageController } from './storage/storage.controller';
 import { StorageModule } from './storage/storage.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StorageModule } from './storage/storage.module';
     ProductModule,
     PublicModule,
     StorageModule,
+    OrderModule,
   ],
   controllers: [AppController, StorageController],
   providers: [AppService, StorageService],

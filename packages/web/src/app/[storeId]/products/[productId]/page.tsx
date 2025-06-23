@@ -4,6 +4,7 @@ import { getPublicProduct, getPublicStoreInfo } from '@/lib/api';
 import { PublicLayout } from '@/components/public/public-layout';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { AddToCartButton } from '@/components/public/add-to-cart-button'; // <-- Import
 
 interface ProductDetailPageProps {
   params: {
@@ -49,6 +50,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <p className="mt-4 text-lg text-muted-foreground">{product.description}</p>
             )}
             {/* Add to Cart button would go here */}
+            <AddToCartButton product={product} />
           </div>
         </div>
       </div>

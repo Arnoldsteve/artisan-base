@@ -1,12 +1,15 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Post, Body } from '@nestjs/common';
 import { TenantPrismaService } from '../prisma/tenant-prisma.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateOrderDto } from 'src/order/dto/create-order.dto';
+import { OrderService } from 'src/order/order.service';
 
 @Controller('public/stores')
 export class PublicController {
   constructor(
     private readonly tenantPrisma: TenantPrismaService,
     private readonly prisma: PrismaService,
+    private readonly orderService: OrderService,
   ) {}
 
   @Get(':storeId/products')
@@ -56,5 +59,19 @@ export class PublicController {
     } catch (error) {
       throw new NotFoundException('Store or product not found.');
     }
+  }
+
+  @Post(':storeId/orders')
+  async createOrder(
+    @Param('storeId') storeId: string,
+    @Body() createOrderDto: CreateOrderDto,
+  ) {
+    // 2. We need to ensure the store actually exists first
+    const store = await this.prisma.store.findUnique({ where: { id: storeId } });
+    if (!store) {
+      throw new NotFoundException('Store not found.');
+    }
+
+    return this.orderService.create(storeId, createOrderDto);
   }
 }
