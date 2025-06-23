@@ -117,6 +117,7 @@ export async function deleteProduct(productId: string) {
     method: 'DELETE',
     credentials: 'include',
   });
+  console.log('Delete response:', response);
   if (response.status !== 204) { // Check for 204 No Content
     // Handle potential errors if needed
     const errorData = await response.json().catch(() => ({}));

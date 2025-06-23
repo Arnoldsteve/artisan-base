@@ -19,13 +19,14 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface EditProductDialogProps {
   product: Product;
+  onProductUpdated: () => void; // <-- Accept the prop
 }
 
 // We can reuse the create schema, but make fields optional for partial updates
 const editSchema = createProductSchema.partial();
 
-export function EditProductDialog({ product }: EditProductDialogProps) {
-  const router = useRouter();
+export function EditProductDialog({ product, onProductUpdated }: EditProductDialogProps) {
+  // const router = useRouter();
   const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof editSchema>>({
@@ -43,7 +44,7 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
     try {
       await updateProduct(product.id, values);
       setOpen(false);
-      router.refresh();
+      onProductUpdated(); // <-- Call the callback
     } catch (error) {
       console.error('Failed to update product', error);
     }

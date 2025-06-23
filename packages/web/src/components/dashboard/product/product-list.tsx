@@ -11,14 +11,14 @@ import {
 } from "@/components/ui/table";
 import { Product } from "@/lib/types";
 import { EditProductDialog } from "./edit-product-dialog"; // <-- Import
-import { DeleteProductDialog } from './delete-product-dialog'; // <-- Import
-
+import { DeleteProductDialog } from "./delete-product-dialog"; // <-- Import
 
 interface ProductListProps {
   products: Product[];
+  onProductMutated: () => void; // <-- Accept the callback
 }
 
-export function ProductList({ products }: ProductListProps) {
+export function ProductList({ products, onProductMutated }: ProductListProps) {
   return (
     <div className="border rounded-md">
       <Table>
@@ -49,8 +49,16 @@ export function ProductList({ products }: ProductListProps) {
                   {new Date(product.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell className="text-right">
-                  <EditProductDialog product={product} />{" "}
-                  <DeleteProductDialog product={product} />
+                  <div className="flex justify-end items-center space-x-2">
+                    <EditProductDialog
+                      product={product}
+                      onProductUpdated={onProductMutated}
+                    />
+                    <DeleteProductDialog
+                      product={product}
+                      onProductDeleted={onProductMutated}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))

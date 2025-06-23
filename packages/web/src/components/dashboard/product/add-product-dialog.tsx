@@ -30,8 +30,12 @@ import {
 import { createProduct } from '@/lib/api';
 import { createProductSchema } from '@/lib/schemas';
 
-export function AddProductDialog() {
-  const router = useRouter();
+interface AddProductDialogProps {
+  onProductAdded: () => void; // 1. Define the prop type
+}
+
+export function AddProductDialog({ onProductAdded }: AddProductDialogProps) { 
+  // const router = useRouter();
   const [open, setOpen] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -51,7 +55,7 @@ export function AddProductDialog() {
       await createProduct(values);
       form.reset();
       setOpen(false);
-      router.refresh();
+      onProductAdded(); // 3. Call the callback function instead of router.refresh()
     } catch (error: any) {
       console.error('Failed to create product', error);
       setApiError(error.message || 'An unexpected error occurred.');

@@ -22,9 +22,10 @@ import { Product } from '@/lib/types';
 
 interface DeleteProductDialogProps {
   product: Product;
+  onProductDeleted: () => void; // Optional callback for when product is deleted 
 }
 
-export function DeleteProductDialog({ product }: DeleteProductDialogProps) {
+export function DeleteProductDialog({ product, onProductDeleted }: DeleteProductDialogProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -32,7 +33,7 @@ export function DeleteProductDialog({ product }: DeleteProductDialogProps) {
     setIsDeleting(true);
     try {
       await deleteProduct(product.id);
-      router.refresh(); // Refresh the product list
+      onProductDeleted(); // Call the callback to refresh the product list
     } catch (error) {
       console.error('Failed to delete product', error);
     } finally {

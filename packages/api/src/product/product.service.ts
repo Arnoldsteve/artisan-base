@@ -53,4 +53,14 @@ export class ProductService {
     });
   }
 
+   async delete(tenantId: string, productId: string) {
+    const prisma = this.tenantPrisma.getClient(tenantId);
+
+    // Prisma's delete operation will automatically throw an error
+    // if the product is not found, which is what we want.
+    return prisma.product.delete({
+      where: { id: productId },
+    });
+  }
+
 }
