@@ -142,3 +142,16 @@ export async function getPublicStoreProducts(storeId: string) {
 
   return response.json();
 }
+
+export async function getPublicStoreInfo(storeId: string) {
+  const response = await fetch(`${API_BASE_URL}/public/stores/${storeId}`);
+  if (!response.ok) return null;
+  console.log('Store info response:', response);
+  return response.json();
+}
+
+export async function getPublicProduct(storeId: string, productId: string) {
+  const response = await fetch(`${API_BASE_URL}/public/stores/${storeId}/products/${productId}`);
+  if (!response.ok) return null;
+  return response.json();
+}

@@ -1,12 +1,12 @@
-// In packages/api/src/public/public.module.ts
 import { Module } from '@nestjs/common';
 import { PublicController } from './public.controller';
-import { PrismaModule } from '../prisma/prisma.module'; // <-- Import PrismaModule
-import { TenantPrismaService } from '../prisma/tenant-prisma.service'; // <-- Import TenantPrismaService
+import { PrismaModule } from '../prisma/prisma.module';
+import { TenantPrismaService } from '../prisma/tenant-prisma.service';
+import { PrismaService } from '../prisma/prisma.service'; // Import it
 
 @Module({
-  imports: [PrismaModule], // <-- Make Prisma providers available
+  imports: [PrismaModule],
   controllers: [PublicController],
-  providers: [TenantPrismaService], // <-- Provide TenantPrismaService
+  providers: [TenantPrismaService, PrismaService],
 })
 export class PublicModule {}

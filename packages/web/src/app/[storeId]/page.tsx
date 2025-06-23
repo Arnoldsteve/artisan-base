@@ -1,54 +1,77 @@
-// In packages/web/src/app/[storeId]/page.tsx
-
-import { getPublicStoreProducts } from '@/lib/api';
-import { notFound } from 'next/navigation';
+import { getPublicStoreProducts, getPublicStoreInfo } from "@/lib/api";
+import { notFound } from "next/navigation";
+import { PublicLayout } from "@/components/public/public-layout";
+import { ProductCard } from "@/components/public/product-card";
+import { Metadata } from "next";
+import Link from "next/link";
 
 interface StorePageProps {
   params: {
     storeId: string;
   };
 }
+export async function generateMetadata({
+  params,
+}: StorePageProps): Promise<Metadata> {
+  const storeInfo = await getPublicStoreInfo(params.storeId);
+  if (!storeInfo) {
+    return {
+      title: "Store Not Found",
+    };
+  }
+  return {
+    title: `${storeInfo.name} | ArtisanBase`,
+    description: `Explore the unique collection from ${storeInfo.name}.`,
+  };
+}
 
-// This is a Server Component, so we can make it async
-export default async function StorePage(props: { params: { storeId: string } }) {
-  const { params } = props; // De-structure from props instead of the argument directly
-  const products = await getPublicStoreProducts(params.storeId);
+export default async function StorePage({ params }: StorePageProps) {
+  const { storeId } = params;
 
-  // If the store doesn't exist (our API function returns null), show a 404 page
-  if (!products) {
+  // Fetch store info and products in parallel for better performance
+  const [storeInfo, products] = await Promise.all([
+    getPublicStoreInfo(storeId),
+    getPublicStoreProducts(storeId),
+  ]);
+
+  // If either call fails (e.g., store not found), show a 404 page
+  if (!storeInfo || !products) {
     notFound();
   }
 
   return (
-    <div className="container mx-auto p-8">
-      {/* We'll fetch the store name later, for now we use the ID */}
-      <h1 className="text-4xl font-bold mb-2">Welcome to {params.storeId}</h1>
-      <p className="text-lg text-muted-foreground mb-8">Browse our unique products below.</p>
+    <PublicLayout storeName={storeInfo.name}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-extrabold tracking-tight">
+            Our Collection
+          </h2>
+          <p className="mt-2 text-lg text-muted-foreground">
+            Handcrafted with passion. Explore our unique products below.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.length > 0 ? (
-          products.map((product) => (
-            <div key={product.id} className="border rounded-lg overflow-hidden">
-              <div className="w-full h-64 bg-gray-200">
-                {product.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-lg">{product.name}</h3>
-                <p className="text-gray-600 mt-1">${product.price}</p>
-              </div>
-            </div>
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {/* Use any remove and make a better typescript */}
+            {products.map((product: any) => (
+              <Link
+                key={product.id}
+                href={`/${storeId}/products/${product.id}`}
+              >
+                <ProductCard product={product} />
+              </Link>
+            ))}
+          </div>
         ) : (
-          <p>This store has no products yet.</p>
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold">Coming Soon!</h3>
+            <p className="text-muted-foreground mt-2">
+              This artisan is preparing their collection. Check back soon!
+            </p>
+          </div>
         )}
       </div>
-    </div>
+    </PublicLayout>
   );
 }

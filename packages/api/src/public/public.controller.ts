@@ -1,31 +1,60 @@
-// In packages/api/src/public/public.controller.ts
-
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { TenantPrismaService } from '../prisma/tenant-prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
-@Controller('public/stores') // Base path is /public/stores
+@Controller('public/stores')
 export class PublicController {
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  constructor(
+    private readonly tenantPrisma: TenantPrismaService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  @Get(':storeId/products') // Handles GET /public/stores/malaikabeads/products
+  @Get(':storeId/products')
   async getPublicProducts(@Param('storeId') storeId: string) {
-    // We use a try-catch block to handle cases where a store doesn't exist
     try {
-      // Get the tenant-specific client
       const prisma = this.tenantPrisma.getClient(storeId);
-
-      // Fetch the products
       const products = await prisma.product.findMany({
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
       });
-
       return products;
     } catch (error) {
-      // If getClient fails or findMany fails, it likely means the tenant doesn't exist.
-      console.error(`Error fetching public products for store: ${storeId}`, error);
+      console.error(
+        `Error fetching public products for store: ${storeId}`,
+        error,
+      );
       throw new NotFoundException('Store not found.');
+    }
+  }
+
+  @Get(':storeId')
+  async getPublicStore(@Param('storeId') storeId: string) {
+    const store = await this.prisma.store.findUnique({
+      where: { id: storeId },
+    });
+
+    if (!store) {
+      throw new NotFoundException('Store not found.');
+    }
+    return store;
+  }
+
+  @Get(':storeId/products/:productId')
+  async getPublicProduct(
+    @Param('storeId') storeId: string,
+    @Param('productId') productId: string,
+  ) {
+    try {
+      const prisma = this.tenantPrisma.getClient(storeId);
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product) {
+        throw new NotFoundException('Product not found.');
+      }
+      return product;
+    } catch (error) {
+      throw new NotFoundException('Store or product not found.');
     }
   }
 }
