@@ -1,63 +1,50 @@
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException, 
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+// In packages/api/src/auth/auth.service.ts
+import { ConflictException, Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service'; // This is the ManagementPrismaService
+import { SignUpDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config'; 
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  // Inject both PrismaService and JwtService
-   constructor(
+  // Inject the ManagementPrismaService
+  constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService,
-    private configService: ConfigService, 
+    private jwtService: JwtService, // Inject JwtService
   ) {}
 
-  async signup(email: string, password: string) {
+  async signUp(signUpDto: SignUpDto) {
+    const { email, password, firstName } = signUpDto;
+
+    // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
-
     if (existingUser) {
-      throw new ConflictException('A user with this email already exists.');
+      throw new ConflictException('Email already in use.');
     }
-    
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the user in the public.users table
     const user = await this.prisma.user.create({
-      data: { email, hashedPassword },
+      data: {
+        email,
+        hashedPassword,
+        firstName,
+      },
     });
 
-    const { hashedPassword: _, ...result } = user;
-    return result;
-  }
+    const { hashedPassword: _, ...userWithoutPassword } = user;
 
-    async login(email: string, pass: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isMatch = await bcrypt.compare(pass, user.hashedPassword);
-    if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const payload = { sub: user.id, email: user.email };
-    
-    //  Get the secret and sign the token here
-    const secret = this.configService.get<string>('JWT_SECRET');
-    if (!secret) {
-      throw new Error('JWT_SECRET not found in environment variables.');
-    }
+    const payload = { email: user.email, sub: user.id };
+    const accessToken = this.jwtService.sign(payload);
 
     return {
-      access_token: await this.jwtService.signAsync(payload, { secret }),
+      message: 'Signup successful',
+      accessToken,
+      user: userWithoutPassword,
     };
   }
 }

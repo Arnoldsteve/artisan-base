@@ -1,34 +1,36 @@
+// In packages/api/src/app.module.ts
+
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
-import { TenantModule } from './tenant/tenant.module';
-import { StoreModule } from './store/store.module';
-import { ProductModule } from './product/product.module';
-import { PublicModule } from './public/public.module';
-import { StorageService } from './storage/storage.service';
-import { StorageController } from './storage/storage.controller';
-import { StorageModule } from './storage/storage.module';
-import { OrderModule } from './order/order.module';
+
+// Core Modules for our new architecture
+import { PrismaModule } from './prisma/prisma.module'; // Provides global ManagementPrismaService
+import { AuthModule } from './auth/auth.module';       // Handles User signup/login
+import { TenantModule } from './tenant/tenant.module';   // Handles Tenant creation
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
-      isGlobal: true, 
-      ignoreEnvFile: false,
+    // --- CORE CONFIGURATION ---
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
+    // Provides ManagementPrismaService globally
     PrismaModule,
+
+    // --- FEATURE MODULES ---
+    // Handles user creation in the 'public' schema
     AuthModule,
+    // Handles tenant creation and schema provisioning
     TenantModule,
-    StoreModule,
-    ProductModule,
-    PublicModule,
-    StorageModule,
-    OrderModule,
+
+    // We will re-introduce these modules later once they are refactored
+    // to use the new tenant-specific database connection.
+    // ProductModule,
+    // OrderModule,
   ],
-  controllers: [AppController, StorageController],
-  providers: [AppService, StorageService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

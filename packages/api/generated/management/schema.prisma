@@ -1,0 +1,136 @@
+// =================================================================
+// ||                MANAGEMENT PRISMA SCHEMA                     ||
+// =================================================================
+// This schema defines the "public" tables for the entire SaaS platform.
+// It manages tenants, platform users (owners), and subscriptions.
+
+generator client {
+  provider = "prisma-client-js"
+  // This will be your primary, always-available Prisma Client
+  output   = "../generated/management"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===============================================
+// Models for the "public" schema
+// ===============================================
+
+// Represents the tenant (a single store).
+// This is the central record for each customer's store.
+model Tenant {
+  id           String  @id @default(cuid())
+  name         String // The human-friendly store name, e.g., "Malaika Beads"
+  subdomain    String  @unique // The unique subdomain for routing, e.g., "malaikabeads"
+  customDomain String? @unique // Optional custom domain for pro plans
+
+  // The unique name of the PostgreSQL schema for this tenant's data.
+  // This is the key to the schema-per-tenant architecture.
+  dbSchema String @unique
+
+  status TenantStatus @default(PENDING)
+
+  // A tenant must be owned by one user.
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  // The subscription plan the tenant is on.
+  plan   SubscriptionPlan? @relation(fields: [planId], references: [id])
+  planId String?
+
+  // The live subscription details from the payment provider.
+  subscription TenantSubscription?
+
+  // A JSONB field for tenant-wide settings that don't need a full table.
+  // e.g., { "logoUrl": "...", "themeColor": "#ff0000" }
+  settings Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tenants")
+}
+
+// Represents a user of the SAAS PLATFORM itself, not a tenant's customer.
+// This user can own a tenant.
+model User {
+  id             String  @id @default(cuid())
+  email          String  @unique
+  hashedPassword String
+  firstName      String?
+  lastName       String?
+
+  // The tenant that this user owns (if any).
+  ownedTenant Tenant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// Defines the available subscription plans you offer (e.g., Basic, Pro).
+model SubscriptionPlan {
+  id           String       @id @default(cuid())
+  name         String // "Basic", "Pro", "Enterprise"
+  price        Decimal      @db.Decimal(10, 2)
+  billingCycle BillingCycle
+
+  // A JSONB field to control features and limits.
+  // This is key for the Open/Closed Principle.
+  // e.g., { "maxProducts": 100, "customDomain": true, "analytics": false }
+  features Json
+
+  tenants       Tenant[]
+  subscriptions TenantSubscription[]
+
+  createdAt DateTime @default(now())
+
+  @@map("subscription_plans")
+}
+
+// Represents a tenant's active subscription instance.
+model TenantSubscription {
+  id       String             @id @default(cuid())
+  tenantId String             @unique
+  tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId   String
+  plan     SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status   SubscriptionStatus @default(ACTIVE)
+
+  // Timestamps managed by the payment provider (e.g., Stripe)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+
+  // The unique ID from the payment provider's system.
+  stripeSubscriptionId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tenant_subscriptions")
+}
+
+// --- Enums ---
+
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+}
