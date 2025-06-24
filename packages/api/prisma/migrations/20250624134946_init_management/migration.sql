@@ -74,9 +74,6 @@ CREATE UNIQUE INDEX "tenants_customDomain_key" ON "tenants"("customDomain");
 CREATE UNIQUE INDEX "tenants_dbSchema_key" ON "tenants"("dbSchema");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tenants_ownerId_key" ON "tenants"("ownerId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
