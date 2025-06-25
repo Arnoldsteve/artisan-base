@@ -1,1 +1,0 @@
-// export const TENANT_ID = 'TENANT_ID';

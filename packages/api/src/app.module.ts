@@ -1,36 +1,43 @@
-// In packages/api/src/app.module.ts
-
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-// Core Modules for our new architecture
+// --- CORE MODULES ---
 import { PrismaModule } from './prisma/prisma.module'; // Provides global ManagementPrismaService
-import { AuthModule } from './auth/auth.module';       // Handles User signup/login
-import { TenantModule } from './tenant/tenant.module';   // Handles Tenant creation
+import { TenantMiddleware } from './tenant/middleware/tenant.middleware';
+
+// --- FEATURE MODULES ---
+import { AuthModule } from './auth/auth.module';
+import { TenantModule } from './tenant/tenant.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
     // --- CORE CONFIGURATION ---
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    // Provides ManagementPrismaService globally
-    PrismaModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule, // Provides the global Management client
 
     // --- FEATURE MODULES ---
-    // Handles user creation in the 'public' schema
     AuthModule,
-    // Handles tenant creation and schema provisioning
     TenantModule,
-
-    // We will re-introduce these modules later once they are refactored
-    // to use the new tenant-specific database connection.
-    // ProductModule,
-    // OrderModule,
+    ProductModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // ** REMOVED **: TenantPrismaService is no longer provided here.
+    // It's now neatly encapsulated within TenantPrismaModule, which
+    // ProductModule imports directly.
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // The middleware setup remains the same, but you might need to ensure
+    // TenantMiddleware is available. Since PrismaModule is global, it will be.
+    consumer
+      .apply(TenantMiddleware)
+      .forRoutes('products');
+  }
+}

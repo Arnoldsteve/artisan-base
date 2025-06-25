@@ -1,31 +1,31 @@
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
 
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUrl,
-  Min,
-  MinLength,
-  ValidateIf,
-} from 'class-validator';
-
-export class UpdateProductDto {
+export class CreateProductDto {
   @IsString()
-  @MinLength(3)
-  @IsOptional()
-  name?: string;
+  @IsNotEmpty()
+  name: string;
 
   @IsString()
+  @IsNotEmpty()
+  slug: string;
+
   @IsOptional()
+  @IsString()
   description?: string;
+
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  price: number;
+
+  @IsOptional()
+  @IsString()
+  sku?: string;
 
   @IsNumber()
   @Min(0)
-  @IsOptional()
-  price?: number;
+  inventoryQuantity: number;
 
-  @IsUrl()
-  @ValidateIf(o => o.imageUrl !== '')
   @IsOptional()
-  imageUrl?: string;
+  @IsBoolean()
+  isFeatured?: boolean;
 }

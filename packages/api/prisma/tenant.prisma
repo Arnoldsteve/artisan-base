@@ -9,10 +9,10 @@ generator tenant_template_generator {
   provider = "prisma-client-js"
   // This output is for reference and to help create migrations.
   // It will NOT be used directly in the running application.
-  output   = "../generated/tenant_template"
+  output   = "../generated/tenant"
 }
 
-datasource db_template {
+datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
@@ -25,8 +25,8 @@ model Product {
   id                String  @id @default(cuid())
   name              String
   slug              String  @unique
-  description       String? @db_template.Text // CORRECTED
-  price             Decimal @db_template.Decimal(10, 2) // CORRECTED
+  description       String? @db.Text 
+  price             Decimal @db.Decimal(10, 2) 
   sku               String? @unique
   inventoryQuantity Int     @default(0)
   isFeatured        Boolean @default(false)
@@ -77,7 +77,7 @@ model ProductVariant {
   sku               String? @unique
   inventoryQuantity Int     @default(0)
 
-  price Decimal? @db_template.Decimal(10, 2) // CORRECTED
+  price Decimal? @db.Decimal(10, 2) 
 
   attributes Json @default("{}")
 
@@ -92,10 +92,10 @@ model Order {
   orderNumber    String        @unique
   status         OrderStatus   @default(PENDING)
   paymentStatus  PaymentStatus @default(PENDING)
-  totalAmount    Decimal       @db_template.Decimal(10, 2) // CORRECTED
-  subtotal       Decimal       @db_template.Decimal(10, 2) // CORRECTED
-  taxAmount      Decimal       @db_template.Decimal(10, 2) @default(0) // CORRECTED
-  shippingAmount Decimal       @db_template.Decimal(10, 2) @default(0) // CORRECTED
+  totalAmount    Decimal       @db.Decimal(10, 2) 
+  subtotal       Decimal       @db.Decimal(10, 2) 
+  taxAmount      Decimal       @db.Decimal(10, 2) @default(0) 
+  shippingAmount Decimal       @db.Decimal(10, 2) @default(0) 
   notes          String?
 
   shippingAddress Json
@@ -115,7 +115,7 @@ model Order {
 model OrderItem {
   id          String  @id @default(cuid())
   quantity    Int
-  unitPrice   Decimal @db_template.Decimal(10, 2) // CORRECTED
+  unitPrice   Decimal @db.Decimal(10, 2) 
 
   productName String
   variantName String?

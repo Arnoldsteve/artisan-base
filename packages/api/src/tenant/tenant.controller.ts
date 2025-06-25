@@ -11,42 +11,28 @@ import {
 } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 import { CreateTenantDto, CheckSubdomainDto } from './dto/create-tenant.dto';
-// Remove JwtService if it's only used for the insecure decode
-// import { JwtService } from '@nestjs/jwt'; 
-import { GetUser } from 'src/auth/get-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-// import { GetUser } from '../auth/decorators/get-user.decorator'; // <-- Import your Decorator
-
-// Define what the user payload looks like from the JWT
-interface UserPayload {
-  sub: string;
-  email: string;
-  // ... other properties
-}
+import { GetUser } from '../auth/decorators/get-user.decorator'; 
+import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 
 
 @Controller('tenants')
-@UseGuards(JwtAuthGuard) // <-- Protect all routes in this controller
+@UseGuards(JwtAuthGuard) 
 export class TenantController {
   constructor(
     private readonly tenantService: TenantService,
-    // You likely don't need JwtService here anymore
   ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createTenant(
     @Body(ValidationPipe) createTenantDto: CreateTenantDto,
-    @GetUser() user: UserPayload, // <-- Use the decorator!
+    @GetUser() user: UserPayload, 
   ) {
     const { subdomain, storeName } = createTenantDto;
-    const ownerId = user.sub; // <-- So much cleaner! No checks needed.
+    const ownerId = user.sub; 
 
-    // The guard has already ensured we have a valid user, so no need for:
-    // if (!ownerId) {
-    //   throw new UnauthorizedException('Valid authentication token required');
-    // }
-
+  
     try {
       const tenant = await this.tenantService.createTenant(ownerId, subdomain, storeName);
 
@@ -76,36 +62,4 @@ export class TenantController {
       throw error;
     }
   }
-
-  // This endpoint might be public, so you can override the controller-level guard
-  // by not adding a @UseGuards here if you want. Let's assume it's also protected.
-  @Post('my-tenants')
-  @HttpCode(HttpStatus.OK)
-  async getMyTenants(
-    @GetUser() user: UserPayload,
-  ) {
-    const ownerId = user.sub;
-    
-    // const tenants = await this.tenantService.getTenantsByOwner(ownerId);
-    return {
-      message: 'Method not implemented yet',
-    };
-  }
-
-  // The check-availability endpoint should probably be public, so no guard.
-  // We can achieve this by adding @Public() decorator if you have one, or just by
-  // structuring your controllers so public routes are separate.
-  // For simplicity, let's assume it's public. We need to import a Public decorator for this.
-  
-  /*
-  @Public() // <-- Custom decorator to bypass the JwtAuthGuard
-  @Post('check-availability')
-  @HttpCode(HttpStatus.OK)
-  async checkSubdomainAvailability(
-    @Body(ValidationPipe) checkDto: CheckSubdomainDto,
-  ) { ... }
-  */
-  
-  // You no longer need this private method AT ALL.
-  // private async extractUserIdFromToken(...) {}
 }

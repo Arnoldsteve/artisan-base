@@ -2,7 +2,7 @@
 import { Controller, Post, Body, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { StorageService } from './storage.service';
-import { GetUser } from 'src/auth/get-user.decorator';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
 
 @Controller('storage')
 @UseGuards(AuthGuard('jwt'))
