@@ -1,4 +1,4 @@
-import { Injectable, Scope, Inject } from '@nestjs/common';
+import { Injectable, Scope, Inject, Logger } from '@nestjs/common';
 import { PrismaClient } from '../../generated/tenant';
 import { REQUEST } from '@nestjs/core';
 import { RequestWithTenant } from '../common/interfaces/request-with-tenant.interface';
@@ -15,6 +15,7 @@ export class TenantPrismaService extends PrismaClient {
         if (!tenant) {
             throw new Error('Tenant information is not available on the request.');
         }
+        Logger.log(`[TenantPrismaService] Creating instance for schema: ${tenant.dbSchema}`);
         
         const databaseUrl = process.env.DATABASE_URL;
         const urlWithSchema = `${databaseUrl}?schema=${tenant.dbSchema}`;

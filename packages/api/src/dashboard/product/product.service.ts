@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { TenantPrismaService } from '../prisma/tenant-prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 
 @Injectable({ scope: Scope.REQUEST }) // The service will be instantiated per request
 export class ProductService {

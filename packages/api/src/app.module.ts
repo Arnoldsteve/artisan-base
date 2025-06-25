@@ -11,7 +11,7 @@ import { TenantMiddleware } from './tenant/middleware/tenant.middleware';
 // --- FEATURE MODULES ---
 import { AuthModule } from './auth/auth.module';
 import { TenantModule } from './tenant/tenant.module';
-import { ProductModule } from './product/product.module';
+import { ProductModule } from './dashboard/product/product.module';
 
 @Module({
   imports: [
@@ -38,6 +38,6 @@ export class AppModule implements NestModule {
     // TenantMiddleware is available. Since PrismaModule is global, it will be.
     consumer
       .apply(TenantMiddleware)
-      .forRoutes('products');
+      .forRoutes('v1/dashboard/*path')
   }
 }

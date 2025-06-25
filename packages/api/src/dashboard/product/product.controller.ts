@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, ValidationPipe, Scope } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 
 // Note: In a real app, you would add a @UseGuards(DashboardAuthGuard) here
 // to ensure only logged-in dashboard users can access these routes.
 
-@Controller('v1/products')
+@Controller({
+  path: 'v1/dashboard/products',
+  scope: Scope.REQUEST, 
+})
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
