@@ -12,6 +12,7 @@ import { TenantMiddleware } from './tenant/middleware/tenant.middleware';
 import { AuthModule } from './auth/auth.module';
 import { TenantModule } from './tenant/tenant.module';
 import { ProductModule } from './dashboard/product/product.module';
+import { CategoryModule } from './dashboard/category/category.module'; // <-- IMPORT
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ProductModule } from './dashboard/product/product.module';
     AuthModule,
     TenantModule,
     ProductModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [

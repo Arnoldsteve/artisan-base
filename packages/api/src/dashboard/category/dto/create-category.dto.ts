@@ -1,0 +1,16 @@
+import { Transform } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+
+export class CreateCategoryDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(2, 100)
+  @Transform(({ value }) => value?.trim())
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  @Length(2, 255)
+  @Transform(({ value }) => value?.trim())
+  description?: string;
+}
