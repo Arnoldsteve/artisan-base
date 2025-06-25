@@ -16,7 +16,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 
 
-@Controller('tenants')
+@Controller('api/v1/tenants')
 @UseGuards(JwtAuthGuard) 
 export class TenantController {
   constructor(

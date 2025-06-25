@@ -5,7 +5,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 // Note: In a real app, you would add a @UseGuards(DashboardAuthGuard) here
 // to ensure only logged-in dashboard users can access these routes.
 
-@Controller('products')
+@Controller('v1/products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
