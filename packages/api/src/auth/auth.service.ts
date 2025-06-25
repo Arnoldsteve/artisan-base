@@ -1,4 +1,3 @@
-// In packages/api/src/auth/auth.service.ts
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service'; // This is the ManagementPrismaService
 import { SignUpDto } from './dto/signup.dto';
@@ -10,7 +9,7 @@ export class AuthService {
   // Inject the ManagementPrismaService
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService, // Inject JwtService
+    private jwtService: JwtService, 
   ) {}
 
   async signUp(signUpDto: SignUpDto) {
