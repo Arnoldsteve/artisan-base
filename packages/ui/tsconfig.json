@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    // This is the most important setting. It solves the error.
+    "jsx": "react-jsx",
+
+    // Standard settings for a modern library
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true,
+
+    // If you want to use the '@/' alias internally (we'll fix this later)
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"], // Only compile files within the 'src' folder
+  "exclude": ["node_modules", "dist"] // Ignore these folders
+}
