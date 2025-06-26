@@ -2,15 +2,18 @@ import uiConfig from "@repo/ui/tailwind.config";
 
 /** @type {import('tailwindcss').Config} */
 const config = {
-  // 1. Spread the config to inherit everything
-  ...uiConfig,
+  // Use the preset from the UI package to get the theme, plugins, etc.
+  presets: [uiConfig],
 
-  // 2. Override the content to scan BOTH packages
+  // This is the critical fix. We explicitly tell Tailwind to scan
+  // both the local dashboard files AND the shared UI package's source files.
   content: [
-    ...uiConfig.content, // Scans the UI package
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}', // Scans the dashboard
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+
+    // Path to the shared UI package, relative from this config file.
+    '../../packages/ui/src/**/*.{ts,tsx}',
   ],
 };
 
