@@ -24,7 +24,7 @@ export class CategoryService {
     });
   }
 
- async findAll(paginationQuery: PaginationQueryDto) {
+ async findAll() {
     return  this.tenantPrisma.category.findMany({
       orderBy: { name: 'asc' },
     });

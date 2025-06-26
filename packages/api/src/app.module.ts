@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { TenantModule } from './tenant/tenant.module';
 import { ProductModule } from './dashboard/product/product.module';
 import { CategoryModule } from './dashboard/category/category.module'; // <-- IMPORT
+import { OrderModule } from './dashboard/order/order.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CategoryModule } from './dashboard/category/category.module'; // <-- IM
     TenantModule,
     ProductModule,
     CategoryModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [
