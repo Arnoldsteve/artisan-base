@@ -6,10 +6,9 @@
         "name": "next"
       }
     ],
+     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ] // This is for local aliases inside the dashboard app
+      "@/*": ["./src/*"]
     },
     // Keep your other settings like lib, jsx, etc.
     "lib": [
