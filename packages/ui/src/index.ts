@@ -7,3 +7,4 @@ export * from "./components/ui/label";
 export * from "./components/ui/badge";
 export * from "./components/ui/avatar";
 export * from "./components/ui/card";
+export * from "./components/ui/dropdown-menu";

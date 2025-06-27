@@ -20,5 +20,11 @@
   "dependencies": {
     "autoprefixer": "^10",
     "postcss": "^8"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^18.0.0",
+      "@types/react-dom": "^18.0.0"
+    }
   }
 }
