@@ -7,4 +7,9 @@ export default defineConfig({
   sourcemap: true,
   clean: true,                  // Clean the dist folder before building
   external: ["react"],          // Don't bundle React, the consuming app will provide it
+  
+  // Add this banner to preserve the 'use client' directive
+  banner: {
+    js: "'use client';",
+  },
 });
