@@ -1,22 +1,64 @@
-'use client';
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui";
 
-import { DataTable } from '@repo/ui';
-
-const columns: { key: 'name' | 'price'; label: string }[] = [
-  { key: 'name', label: 'Name' },
-  { key: 'price', label: 'Price' },
-];
-
-const rows = [
-  { name: 'Smoothie', price: '$5.00' },
-  { name: 'Juice', price: '$4.50' },
+const invoices = [
+  {
+    invoice: "INV001",
+    paymentStatus: "Paid",
+    totalAmount: "$250.00",
+    paymentMethod: "Credit Card",
+  },
+  {
+    invoice: "INV002",
+    paymentStatus: "Pending",
+    totalAmount: "$150.00",
+    paymentMethod: "PayPal",
+  },
+  {
+    invoice: "INV003",
+    paymentStatus: "Unpaid",
+    totalAmount: "$350.00",
+    paymentMethod: "Bank Transfer",
+  },
 ];
 
 export default function Home() {
   return (
-    <main className="p-8 space-y-4">
-      <h1 className="text-2xl font-bold">Product Table</h1>
-      <DataTable columns={columns} rows={rows} />
-    </main>
+    <div className="container mx-auto py-10">
+      <h1 className="text-4xl font-bold mb-4 text-center">
+        Welcome to ArtisanBase!
+      </h1>
+      <div className="mb-8 text-center">
+        <Button variant="destructive">My First shadcn Button</Button>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[100px]">Invoice</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Method</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {invoices.map((invoice) => (
+            <TableRow key={invoice.invoice}>
+              <TableCell className="font-medium">{invoice.invoice}</TableCell>
+              <TableCell>{invoice.paymentStatus}</TableCell>
+              <TableCell>{invoice.paymentMethod}</TableCell>
+              <TableCell className="text-right">{invoice.totalAmount}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
