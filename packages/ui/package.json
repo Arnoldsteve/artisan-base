@@ -12,6 +12,7 @@
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
+      
     },
     "./styles.css": "./dist/index.css",
     "./tailwind.config": "./tailwind.config.mjs"
