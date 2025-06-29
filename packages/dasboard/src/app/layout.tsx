@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css"; // Your dashboard's global styles
 import "@repo/ui/styles.css"; // ✅ This should work with your package.json exports
+import "./globals.css"; // Your dashboard's global styles
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
