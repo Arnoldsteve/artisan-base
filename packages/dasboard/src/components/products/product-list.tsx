@@ -7,6 +7,8 @@ import { columns } from '@/app/dashboard/products/columns';
 import { EditProductSheet } from './edit-product-sheet';
 import { DeleteProductDialog } from './delete-product-dialog';
 import { toast } from 'sonner';
+import { PageHeader } from '../shared/page-header';
+import { Button } from '@repo/ui';
 
 // --- MOCK API CALLS ---
 async function updateProductApi(product: Product): Promise<{ success: boolean }> {
@@ -29,7 +31,7 @@ async function deleteProductApi(productId: string): Promise<{ success: boolean }
   return { success: true };
 }
 
- function duplicateProductApi(originalProduct: Product): Promise<Product> {
+function duplicateProductApi(originalProduct: Product): Promise<Product> {
   console.log(`Attempting to duplicate product: ${originalProduct.name}`);
   
   const promise = new Promise<Product>((resolve, reject) => {
@@ -56,20 +58,46 @@ async function deleteProductApi(productId: string): Promise<{ success: boolean }
   return promise;
 }
 
+async function createProductApi(newProductData: Omit<Product, 'id' | 'createdAt'>): Promise<Product> {
+  console.log(`Attempting to create product:`, newProductData);
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const newProduct: Product = {
+    id: `prod_new_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    isFeatured: false,
+    images: [{ id: 'img_new', url: 'https://picsum.photos/seed/new/400/400' }],
+    // Important: Use sane defaults if fields are missing
+    name: newProductData.name || "New Product",
+    price: newProductData.price || 0,
+    inventoryQuantity: newProductData.inventoryQuantity || 0,
+    isActive: newProductData.isActive || false,
+  };
+  console.log("Product created successfully.", newProduct);
+  return newProduct;
+}
+
 
 interface ProductListProps {
   initialProducts: Product[];
 }
 
 export function ProductList({ initialProducts }: ProductListProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null); 
   const [isEditPending, setIsEditPending] = useState(false); 
+  
+  // 2. CONFIRM THIS STATE EXISTS
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
-   const openDeleteDialog = (product: Product) => setProductToDelete(product);
-   const openEditSheet = (product: Product) => setProductToEdit(product);
+  const openDeleteDialog = (product: Product) => setProductToDelete(product);
+  const openEditSheet = (product: Product) => setProductToEdit(product);
+  const openAddSheet = () => {
+    setProductToEdit(null); 
+    setIsAddSheetOpen(true);
+  };
+
 
   const handleConfirmDelete = async () => {
     if (!productToDelete) return;
@@ -90,20 +118,25 @@ export function ProductList({ initialProducts }: ProductListProps) {
 
     setProductToDelete(null); // Close the dialog
   };
-  const handleSaveChanges = async (updatedProduct: Product) => {
-    setIsEditPending(true);
-    const { success } = await updateProductApi(updatedProduct);
-    setIsEditPending(false);
 
-    if (success) {
-      setProducts(currentProducts => 
-        currentProducts.map(p => (p.id === updatedProduct.id ? updatedProduct : p))
-      );
-      toast.success(`Product "${updatedProduct.name}" has been updated.`);
-      setProductToEdit(null); // Close the sheet
+  const handleSaveChanges = async (productData: Partial<Product>) => {
+    setIsEditPending(true);
+    if (productData.id) {
+      const { success } = await updateProductApi(productData as Product);
+      if (success) {
+        setProducts(current => current.map(p => (p.id === productData.id ? (productData as Product) : p)));
+        toast.success(`Product "${productData.name}" has been updated.`);
+        setProductToEdit(null);
+      } else {
+        toast.error("Failed to update product.");
+      }
     } else {
-       toast.error("Failed to update the product. Please try again.");
+      const newProduct = await createProductApi(productData as Omit<Product, 'id' | 'createdAt'>);
+      setProducts(current => [newProduct, ...current]);
+      toast.success(`Product "${newProduct.name}" has been created.`);
+      setIsAddSheetOpen(false);
     }
+    setIsEditPending(false);
   };
  
   const handleDuplicateProduct = async (productToDuplicate: Product) => {
@@ -118,8 +151,13 @@ export function ProductList({ initialProducts }: ProductListProps) {
     });
   };
 
+
+
   return (
     <>
+     <PageHeader title="Products" description="Manage all products for your store.">
+         <Button onClick={openAddSheet}>Add Product</Button>
+      </PageHeader>
       <DataTable
         columns={columns}
         data={products}
@@ -138,10 +176,13 @@ export function ProductList({ initialProducts }: ProductListProps) {
         productName={productToDelete?.name || ''}
         isPending={isDeletePending}
       />
-       <EditProductSheet
-        isOpen={!!productToEdit}
-        onClose={() => setProductToEdit(null)}
-        product={productToEdit}
+      <EditProductSheet
+        isOpen={!!productToEdit || isAddSheetOpen} 
+        onClose={() => {
+          setProductToEdit(null);     
+          setIsAddSheetOpen(false);
+        }}
+        product={productToEdit} 
         onSave={handleSaveChanges}
         isPending={isEditPending}
       />
