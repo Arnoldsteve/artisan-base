@@ -14,3 +14,5 @@ export * from "./components/ui/sidebar";
 export * from "./components/ui/skeleton";
 export * from "./components/ui/separator";
 export * from "./components/ui/checkbox";
+export * from "./components/ui/alert-dialog";
+export * from "./components/ui/sonner";

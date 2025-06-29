@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "@repo/ui/styles.css"; // ✅ This should work with your package.json exports
-import "./globals.css"; // Your dashboard's global styles
+import "@repo/ui/styles.css"; 
+import "./globals.css"; 
+import { Toaster } from "@repo/ui";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

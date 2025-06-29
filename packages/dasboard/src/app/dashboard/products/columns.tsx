@@ -9,6 +9,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui';
 import { Product } from '@/types/products';
 
+// Extend the TableMeta interface to include our custom function
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends unknown> {
+    openDeleteDialog: (product: TData) => void;
+  }
+}
+
 export const columns: ColumnDef<Product>[] = [
   // Column for row selection
   {
@@ -112,28 +119,34 @@ export const columns: ColumnDef<Product>[] = [
   },
 
   // Column for Actions
-  {
+    {
     id: 'actions',
-    cell: ({ row }) => {
+    cell: ({ row, table }) => { // <--- We now have access to `table` here
       const product = row.original;
       return (
         <div className="text-right">
-            <DropdownMenu>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
-                </Button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => alert(`Editing ${product.name}`)}>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => alert(`Editing ${product.name}`)}>
                 Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+              </DropdownMenuItem>
+              <DropdownMenuItem>Duplicate</DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                // Call the function from our table's meta options!
+                onClick={() => table.options.meta?.openDeleteDialog(product)}
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
-            </DropdownMenu>
+          </DropdownMenu>
         </div>
       );
     },

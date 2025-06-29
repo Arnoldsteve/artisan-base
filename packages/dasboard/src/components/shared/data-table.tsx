@@ -12,6 +12,7 @@ import {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  TableMeta,
 } from '@tanstack/react-table';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui';
@@ -25,9 +26,10 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   // We add a prop to specify which column to use for filtering.
   filterColumn: string; 
+   meta?: TableMeta<TData>;
 }
 
-export function DataTable<TData, TValue>({ columns, data, filterColumn }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, filterColumn, meta }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -36,6 +38,7 @@ export function DataTable<TData, TValue>({ columns, data, filterColumn }: DataTa
   const table = useReactTable({
     data,
     columns,
+    meta,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
