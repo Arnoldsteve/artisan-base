@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState,
   TableMeta,
+  RowSelectionState,
 } from '@tanstack/react-table';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui';
@@ -24,35 +25,45 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  // We add a prop to specify which column to use for filtering.
   filterColumn: string; 
-   meta?: TableMeta<TData>;
+  meta?: TableMeta<TData>;
+  rowSelection?: RowSelectionState; // Prop to receive the current selection state
+  onRowSelectionChange?: (updater: RowSelectionState | ((old: RowSelectionState) => RowSelectionState)) => void; // Prop to receive the state updater function
 }
 
-export function DataTable<TData, TValue>({ columns, data, filterColumn, meta }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ 
+    columns, 
+    data, 
+    filterColumn, 
+    meta,
+    rowSelection,
+    onRowSelectionChange 
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  
+  // Internal row selection state has been removed to allow parent control.
 
   const table = useReactTable({
     data,
     columns,
     meta,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
+      rowSelection, // Use the rowSelection state passed in via props
     },
+    enableRowSelection: true, // Enable row selection feature
+    onRowSelectionChange: onRowSelectionChange, // Connect the updater function from props
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   });
 
   return (
