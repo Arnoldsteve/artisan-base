@@ -14,6 +14,7 @@ declare module '@tanstack/react-table' {
   interface TableMeta<TData extends unknown> {
     openDeleteDialog: (product: TData) => void;
     openEditSheet: (product: TData) => void;
+    handleDuplicateProduct: (product: TData) => void;
   }
 }
 
@@ -138,7 +139,9 @@ export const columns: ColumnDef<Product>[] = [
               <DropdownMenuItem onClick={() => table.options.meta?.openEditSheet(product)}>
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem>Duplicate</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => table.options.meta?.handleDuplicateProduct(product)}>
+                Duplicate
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
                 // Call the function from our table's meta options!

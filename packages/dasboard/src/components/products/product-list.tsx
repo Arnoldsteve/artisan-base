@@ -1,4 +1,3 @@
-// src/components/dashboard/products/product-list.tsx
 'use client';
 
 import { useState } from 'react';
@@ -30,17 +29,44 @@ async function deleteProductApi(productId: string): Promise<{ success: boolean }
   return { success: true };
 }
 
+ function duplicateProductApi(originalProduct: Product): Promise<Product> {
+  console.log(`Attempting to duplicate product: ${originalProduct.name}`);
+  
+  const promise = new Promise<Product>((resolve, reject) => {
+    setTimeout(() => {
+      // Simulate potential failure
+      if (originalProduct.name.includes('Fail')) {
+        reject(new Error('Failed to duplicate product in the backend.'));
+        return;
+      }
+      
+      // Create the new product object
+      const duplicatedProduct: Product = {
+        ...originalProduct,
+        id: `prod_copy_${Date.now()}`, // Create a new unique ID
+        name: `${originalProduct.name} (Copy)`, // Append (Copy) to the name
+        isActive: false, // Set the new product as a draft by default
+      };
+      
+      console.log("Product duplicated successfully.", duplicatedProduct);
+      resolve(duplicatedProduct);
+    }, 1000); // 1-second delay
+  });
+
+  return promise;
+}
+
+
 interface ProductListProps {
   initialProducts: Product[];
 }
 
 export function ProductList({ initialProducts }: ProductListProps) {
-  // const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
-  const [productToEdit, setProductToEdit] = useState<Product | null>(null); // <-- 2. Add state for editing
-  const [isEditPending, setIsEditPending] = useState(false); // <-- 2. Add pending state for editing
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null); 
+  const [isEditPending, setIsEditPending] = useState(false); 
 
    const openDeleteDialog = (product: Product) => setProductToDelete(product);
    const openEditSheet = (product: Product) => setProductToEdit(product);
@@ -64,8 +90,6 @@ export function ProductList({ initialProducts }: ProductListProps) {
 
     setProductToDelete(null); // Close the dialog
   };
-
-    // 4. Add handler for saving changes from the sheet
   const handleSaveChanges = async (updatedProduct: Product) => {
     setIsEditPending(true);
     const { success } = await updateProductApi(updatedProduct);
@@ -81,6 +105,18 @@ export function ProductList({ initialProducts }: ProductListProps) {
        toast.error("Failed to update the product. Please try again.");
     }
   };
+ 
+  const handleDuplicateProduct = async (productToDuplicate: Product) => {
+    toast.promise(duplicateProductApi(productToDuplicate), {
+      loading: `Duplicating "${productToDuplicate.name}"...`,
+      success: (newProduct) => {
+        // On success, add the new product to the top of our list
+        setProducts((currentProducts) => [newProduct, ...currentProducts]);
+        return `Product "${productToDuplicate.name}" has been duplicated.`;
+      },
+      error: (err) => err.message || 'Failed to duplicate product.',
+    });
+  };
 
   return (
     <>
@@ -92,6 +128,7 @@ export function ProductList({ initialProducts }: ProductListProps) {
         meta={{
           openDeleteDialog,
           openEditSheet,
+          handleDuplicateProduct,
         }}
       />
       <DeleteProductDialog
