@@ -67,7 +67,15 @@ export const columns: ColumnDef<Product>[] = [
   // Column for Status (isActive)
   {
     accessorKey: 'isActive',
-    header: 'Status',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Status
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
       const isActive = row.getValue('isActive');
       return (
@@ -76,12 +84,25 @@ export const columns: ColumnDef<Product>[] = [
         </Badge>
       );
     },
+    // Add a filter function for our new dropdown
+    filterFn: (row, columnId, value) => {
+        if (value === 'all') return true;
+        return row.getValue(columnId) === (value === 'true');
+    }
   },
 
   // Column for Inventory
   {
-    accessorKey: 'inventoryQuantity',
-    header: 'Inventory',
+     accessorKey: 'inventoryQuantity',
+    header: ({ column }) => ( 
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Inventory
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
         const quantity = row.original.inventoryQuantity;
         return (

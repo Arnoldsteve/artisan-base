@@ -1,0 +1,43 @@
+'use client';
+
+import { Table } from '@tanstack/react-table';
+import { Input } from '@repo/ui';
+import { Button } from '@repo/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui';
+import { Product } from '@/types/products';
+
+interface DataTableViewOptionsProps {
+  table: Table<Product>;
+}
+
+export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
+  return (
+    <div className="flex items-center gap-4 py-4">
+      <Input
+        placeholder="Filter by name..."
+        value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+        onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
+        className="max-w-sm"
+      />
+      
+      <Select
+        value={(table.getColumn('isActive')?.getFilterValue() as string) ?? 'all'}
+        onValueChange={(value) => table.getColumn('isActive')?.setFilterValue(value)}
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Filter by status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Statuses</SelectItem>
+          <SelectItem value="true">Active</SelectItem>
+          <SelectItem value="false">Draft</SelectItem>
+        </SelectContent>
+      </Select>
+      
+      {/* Optional: Add a clear filters button */}
+      <Button variant="outline" onClick={() => table.resetColumnFilters()}>
+        Clear Filters
+      </Button>
+    </div>
+  );
+}

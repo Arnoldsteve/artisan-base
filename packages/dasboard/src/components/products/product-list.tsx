@@ -11,20 +11,34 @@ import { toast } from "sonner";
 import { PageHeader } from "../shared/page-header";
 import { Button } from "@repo/ui";
 import { Trash2 } from "lucide-react";
+import { 
+  useReactTable, 
+  getCoreRowModel, 
+  getPaginationRowModel, 
+  getSortedRowModel, 
+  getFilteredRowModel,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+} from '@tanstack/react-table';
+import { DataTableViewOptions } from './data-table-view-options';
 
 // --- MOCK API CALLS ---
 async function updateProductApi(product: Product): Promise<{ success: boolean }> {
+  console.log("Updating product:", product.id);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   return { success: true };
 }
 
 async function deleteProductApi(productId: string): Promise<{ success: boolean }> {
+  console.log("Deleting product:", productId);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   if (productId === "prod_fail") return { success: false };
   return { success: true };
 }
 
 function duplicateProductApi(originalProduct: Product): Promise<Product> {
+  console.log("Duplicating product:", originalProduct.id);
   return new Promise<Product>((resolve, reject) => {
     setTimeout(() => {
       if (originalProduct.name.includes("Fail")) {
@@ -38,6 +52,7 @@ function duplicateProductApi(originalProduct: Product): Promise<Product> {
 }
 
 async function createProductApi(newProductData: Omit<Product, "id" | "createdAt">): Promise<Product> {
+  console.log("Creating new product with name:", newProductData.name);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const newProduct: Product = {
     id: `prod_new_${Date.now()}`,
@@ -57,8 +72,16 @@ interface ProductListProps {
 }
 
 export function ProductList({ initialProducts }: ProductListProps) {
+  // Data State
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  
+  // Table State
   const [rowSelection, setRowSelection] = useState({});
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+
+  // UI State for Modals/Sheets
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
@@ -67,9 +90,11 @@ export function ProductList({ initialProducts }: ProductListProps) {
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [isBulkDeletePending, setIsBulkDeletePending] = useState(false);
 
+  // Derived State
   const selectedProductIds = useMemo(() => Object.keys(rowSelection), [rowSelection]);
   const numSelected = selectedProductIds.length;
 
+  // Action Handlers
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
   const openEditSheet = (product: Product) => setProductToEdit(product);
   const openAddSheet = () => {
@@ -80,13 +105,9 @@ export function ProductList({ initialProducts }: ProductListProps) {
   const handleConfirmDelete = async () => {
     if (!productToDelete) return;
     setIsDeletePending(true);
-    const { success } = await deleteProductApi(productToDelete.id);
-    if (success) {
-      setProducts((current) => current.filter((p) => p.id !== productToDelete.id));
-      toast.success(`Product "${productToDelete.name}" has been deleted.`);
-    } else {
-      toast.error("Error: Failed to delete the product.");
-    }
+    await deleteProductApi(productToDelete.id);
+    setProducts((current) => current.filter((p) => p.id !== productToDelete.id));
+    toast.success(`Product "${productToDelete.name}" has been deleted.`);
     setIsDeletePending(false);
     setProductToDelete(null);
   };
@@ -94,14 +115,10 @@ export function ProductList({ initialProducts }: ProductListProps) {
   const handleSaveChanges = async (productData: Partial<Product>) => {
     setIsEditPending(true);
     if (productData.id) {
-      const { success } = await updateProductApi(productData as Product);
-      if (success) {
-        setProducts((current) => current.map((p) => (p.id === productData.id ? (productData as Product) : p)));
-        toast.success(`Product "${productData.name}" has been updated.`);
-        setProductToEdit(null);
-      } else {
-        toast.error("Failed to update product.");
-      }
+      await updateProductApi(productData as Product);
+      setProducts((current) => current.map((p) => (p.id === productData.id ? (productData as Product) : p)));
+      toast.success(`Product "${productData.name}" has been updated.`);
+      setProductToEdit(null);
     } else {
       const newProduct = await createProductApi(productData as Omit<Product, "id" | "createdAt">);
       setProducts((current) => [newProduct, ...current]);
@@ -132,51 +149,52 @@ export function ProductList({ initialProducts }: ProductListProps) {
     setIsBulkDeleteDialogOpen(false);
   };
 
+  const table = useReactTable({
+    data: products,
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    meta: {
+      openDeleteDialog,
+      openEditSheet,
+      handleDuplicateProduct,
+    },
+  });
+
   return (
     <div>
       <PageHeader title="Products" description="Manage all products for your store.">
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>
 
-      <DataTable
-        columns={columns}
-        data={products}
-        filterColumn="name"
-        meta={{
-          openDeleteDialog,
-          openEditSheet,
-          handleDuplicateProduct,
-        }}
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-      />
+      <DataTableViewOptions table={table} />
+      
+      <DataTable table={table} />
 
-      {/* Floating Action Bar - positioned relative to the viewport */}
       <div
-        className={`
-          fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out
-          ${numSelected > 0 ? 'translate-y-0' : 'translate-y-24'}
-        `}
+        className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? 'translate-y-0' : 'translate-y-24'}`}
       >
         {numSelected > 0 && (
           <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
-            <div className="text-sm font-medium">
-              <span className="font-semibold">{numSelected}</span> selected
-            </div>
+            <div className="text-sm font-medium"><span className="font-semibold">{numSelected}</span> selected</div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setIsBulkDeleteDialogOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+              <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleteDialogOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setRowSelection({})}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>
                 Cancel
               </Button>
             </div>
@@ -184,30 +202,9 @@ export function ProductList({ initialProducts }: ProductListProps) {
         )}
       </div>
 
-      <DeleteProductDialog
-        isOpen={!!productToDelete}
-        onClose={() => setProductToDelete(null)}
-        onConfirm={handleConfirmDelete}
-        productName={productToDelete?.name || ""}
-        isPending={isDeletePending}
-      />
-      <EditProductSheet
-        isOpen={!!productToEdit || isAddSheetOpen}
-        onClose={() => {
-          setProductToEdit(null);
-          setIsAddSheetOpen(false);
-        }}
-        product={productToEdit}
-        onSave={handleSaveChanges}
-        isPending={isEditPending}
-      />
-      <BulkDeleteAlertDialog
-        isOpen={isBulkDeleteDialogOpen}
-        onClose={() => setIsBulkDeleteDialogOpen(false)}
-        onConfirm={handleBulkDelete}
-        selectedCount={numSelected}
-        isPending={isBulkDeletePending}
-      />
+      <DeleteProductDialog isOpen={!!productToDelete} onClose={() => setProductToDelete(null)} onConfirm={handleConfirmDelete} productName={productToDelete?.name || ""} isPending={isDeletePending} />
+      <EditProductSheet isOpen={!!productToEdit || isAddSheetOpen} onClose={() => { setProductToEdit(null); setIsAddSheetOpen(false); }} product={productToEdit} onSave={handleSaveChanges} isPending={isEditPending} />
+      <BulkDeleteAlertDialog isOpen={isBulkDeleteDialogOpen} onClose={() => setIsBulkDeleteDialogOpen(false)} onConfirm={handleBulkDelete} selectedCount={numSelected} isPending={isBulkDeletePending} />
     </div>
   );
 }
