@@ -8,7 +8,6 @@ import { EditProductSheet } from "./edit-product-sheet";
 import { DeleteProductDialog } from "./delete-product-dialog";
 import { BulkDeleteAlertDialog } from "./bulk-delete-alert-dialog";
 import { toast } from "sonner";
-import { PageHeader } from "../shared/page-header";
 import { Button } from "@repo/ui";
 import { Trash2 } from "lucide-react";
 import { 
@@ -22,6 +21,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 import { DataTableViewOptions } from './data-table-view-options';
+import { PageHeader } from "@/components/shared/page-header";
 
 // --- MOCK API CALLS ---
 async function updateProductApi(product: Product): Promise<{ success: boolean }> {
@@ -71,7 +71,7 @@ interface ProductListProps {
   initialProducts: Product[];
 }
 
-export function ProductList({ initialProducts }: ProductListProps) {
+export function ProductsView({ initialProducts }: ProductListProps) {
   // Data State
   const [products, setProducts] = useState<Product[]>(initialProducts);
   
