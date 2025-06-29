@@ -5,9 +5,9 @@ import { ProductsView } from './components/products-view';
 
 async function getProducts() {
   // --- ADD THIS DELAY ---
-  console.log('Fetching products... this will take 2 seconds.');
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  // ---------------------
+  // console.log('Fetching products... this will take 2 seconds.');
+  // await new Promise(resolve => setTimeout(resolve, 2000));
+  // // ---------------------
 
   return mockProducts;
 }
