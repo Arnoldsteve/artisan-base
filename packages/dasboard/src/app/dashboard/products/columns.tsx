@@ -13,6 +13,7 @@ import { Product } from '@/types/products';
 declare module '@tanstack/react-table' {
   interface TableMeta<TData extends unknown> {
     openDeleteDialog: (product: TData) => void;
+    openEditSheet: (product: TData) => void;
   }
 }
 
@@ -134,7 +135,7 @@ export const columns: ColumnDef<Product>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => alert(`Editing ${product.name}`)}>
+              <DropdownMenuItem onClick={() => table.options.meta?.openEditSheet(product)}>
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem>Duplicate</DropdownMenuItem>

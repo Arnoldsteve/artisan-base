@@ -5,11 +5,18 @@ import { useState } from 'react';
 import { Product } from '@/types/products';
 import { DataTable } from '@/components/shared/data-table';
 import { columns } from '@/app/dashboard/products/columns';
+import { EditProductSheet } from './edit-product-sheet';
 import { DeleteProductDialog } from './delete-product-dialog';
-// import { useToast } from '@repo/ui/use-toast'; // Assuming you have a toast component
 import { toast } from 'sonner';
 
-// A mock API call function
+// --- MOCK API CALLS ---
+async function updateProductApi(product: Product): Promise<{ success: boolean }> {
+  console.log(`Attempting to update product:`, product);
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log("Product updated successfully.");
+  return { success: true };
+}
+
 async function deleteProductApi(productId: string): Promise<{ success: boolean }> {
   console.log(`Attempting to delete product with ID: ${productId}`);
   // Simulate network delay
@@ -32,10 +39,11 @@ export function ProductList({ initialProducts }: ProductListProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null); // <-- 2. Add state for editing
+  const [isEditPending, setIsEditPending] = useState(false); // <-- 2. Add pending state for editing
 
-  const openDeleteDialog = (product: Product) => {
-    setProductToDelete(product);
-  };
+   const openDeleteDialog = (product: Product) => setProductToDelete(product);
+   const openEditSheet = (product: Product) => setProductToEdit(product);
 
   const handleConfirmDelete = async () => {
     if (!productToDelete) return;
@@ -57,6 +65,23 @@ export function ProductList({ initialProducts }: ProductListProps) {
     setProductToDelete(null); // Close the dialog
   };
 
+    // 4. Add handler for saving changes from the sheet
+  const handleSaveChanges = async (updatedProduct: Product) => {
+    setIsEditPending(true);
+    const { success } = await updateProductApi(updatedProduct);
+    setIsEditPending(false);
+
+    if (success) {
+      setProducts(currentProducts => 
+        currentProducts.map(p => (p.id === updatedProduct.id ? updatedProduct : p))
+      );
+      toast.success(`Product "${updatedProduct.name}" has been updated.`);
+      setProductToEdit(null); // Close the sheet
+    } else {
+       toast.error("Failed to update the product. Please try again.");
+    }
+  };
+
   return (
     <>
       <DataTable
@@ -66,6 +91,7 @@ export function ProductList({ initialProducts }: ProductListProps) {
         // Pass our action handler function to the table via the `meta` prop
         meta={{
           openDeleteDialog,
+          openEditSheet,
         }}
       />
       <DeleteProductDialog
@@ -74,6 +100,13 @@ export function ProductList({ initialProducts }: ProductListProps) {
         onConfirm={handleConfirmDelete}
         productName={productToDelete?.name || ''}
         isPending={isDeletePending}
+      />
+       <EditProductSheet
+        isOpen={!!productToEdit}
+        onClose={() => setProductToEdit(null)}
+        product={productToEdit}
+        onSave={handleSaveChanges}
+        isPending={isEditPending}
       />
     </>
   );
