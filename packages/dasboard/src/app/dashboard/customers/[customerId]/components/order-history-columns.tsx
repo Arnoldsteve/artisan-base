@@ -1,0 +1,46 @@
+// src/app/dashboard/customers/[customerId]/components/order-history-columns.tsx
+'use client';
+
+import { ColumnDef } from '@tanstack/react-table';
+import { Order, OrderStatus } from '@/types/orders';
+import { Badge } from '@repo/ui';
+import Link from 'next/link';
+import { Button } from '@repo/ui';
+
+// We can reuse the same color logic!
+const getOrderStatusColor = (status: OrderStatus) => {
+  // ... (paste the getOrderStatusColor function from the main orders columns file)
+};
+
+export const orderHistoryColumns: ColumnDef<Order>[] = [
+  {
+    accessorKey: 'orderNumber',
+    header: 'Order',
+    cell: ({ row }) => (
+      <Link href={`/dashboard/orders/${row.original.id}`} className="font-medium text-blue-500 hover:underline">
+        {row.original.orderNumber}
+      </Link>
+    ),
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+        const status = row.getValue('status') as OrderStatus;
+        return <Badge className={`${getOrderStatusColor(status)} hover:bg-none capitalize`}>{status.toLowerCase()}</Badge>;
+    }
+  },
+  {
+    accessorKey: 'totalAmount',
+    header: () => <div className="text-right">Total</div>,
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue('totalAmount'));
+      return <div className="text-right font-medium">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)}</div>;
+    },
+  },
+   {
+    accessorKey: 'createdAt',
+    header: () => <div className="text-right">Date</div>,
+    cell: ({ row }) => <div className="text-right">{new Date(row.getValue('createdAt')).toLocaleDateString()}</div>
+  },
+];

@@ -7,13 +7,15 @@ import { Input } from '@repo/ui';
 import { Label } from '@repo/ui';
 import { CardWrapper } from './card-wrapper';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { api } from '@/api'; 
 
 export function LoginForm() {
   const router = useRouter();
 
   // State for form inputs
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('derrick@gmail.com'); // Pre-fill for easier testing
+  const [password, setPassword] = useState('password123'); // Pre-fill for easier testing
 
   // State for submission process
   const [error, setError] = useState<string | null>(null);
@@ -25,36 +27,25 @@ export function LoginForm() {
     setError(null);
 
     try {
-      // --- API CALL: Replace with your actual login API endpoint ---
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // });
+      const data = await api.auth.login({ email, password });
+      console.log('Login response:', data);
 
-      // Mocking a successful API call for demonstration
-      console.log('Attempting login for:', email);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate an error for a specific user for testing
-      if (password === 'wrong') {
-        throw new Error('Invalid credentials. Please try again.');
-      }
-      
-      const response = { ok: true }; // Assume success for any other password
-
-      if (!response.ok) {
-        // const errorData = await response.json();
-        // throw new Error(errorData.message || 'Failed to login.');
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      } else {
+        throw new Error('Login successful, but no access token was provided.');
       }
 
-      // --- REDIRECTION ON SUCCESS ---
-      console.log('Login successful. Redirecting to dashboard...');
-      router.push('/dashboard');
+      toast.success(data.message || "Login successful! Redirecting...");
+      
+      console.log('User Organizations:', data.organizations);
+
+      router.replace('/dashboard');
 
     } catch (err) {
-      setError((err as Error).message);
-      setIsSubmitting(false); // Stop loading on error so user can try again
+      const errorMessage = (err as Error).message;
+      setError(errorMessage);
+      setIsSubmitting(false); 
     }
   };
 
@@ -62,7 +53,7 @@ export function LoginForm() {
     <CardWrapper
       headerLabel="Welcome back! Please sign in to continue."
       backButtonLabel="Don't have an account? Create one"
-      backButtonHref="/signup" // Link this to your signup page
+      backButtonHref="/signup"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

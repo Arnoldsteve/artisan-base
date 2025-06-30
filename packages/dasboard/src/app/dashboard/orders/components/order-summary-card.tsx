@@ -1,8 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { Badge } from "@repo/ui";
-import { Order, OrderStatus, PaymentStatus } from "@/types/orders";
-import { getOrderStatusColor, getPaymentStatusColor } from "./columns"; // Let's reuse our color logic
-import { User, Calendar, Truck } from "lucide-react";
+import { Order, OrderStatus, PaymentStatus } from "@/types/orders";import { User, Calendar, Truck } from "lucide-react";
+import { getOrderStatusColor, getPaymentStatusColor } from "./order-utils";
 
 export function OrderSummaryCard({ order }: { order: Order }) {
   return (

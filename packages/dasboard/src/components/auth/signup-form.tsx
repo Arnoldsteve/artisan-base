@@ -1,18 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Use this for Next.js App Router
+import { useRouter } from 'next/navigation';
 import { Button } from '@repo/ui';
 import { Input } from '@repo/ui';
 import { Label } from '@repo/ui';
 import { CardWrapper } from './card-wrapper';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { api } from '@/api'; 
 
 export function SignupForm() {
   const router = useRouter();
 
   // State for form inputs
-  const [name, setName] = useState('');
+  // Let's use `firstName` to match your NestJS DTO
+  const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -21,40 +24,40 @@ export function SignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // --- API CALL: Replace with your actual signup API endpoint ---
-      // const response = await fetch('/api/auth/signup', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ name, email, password }),
-      // });
+      // --- REAL API CALL using our clean API layer ---
+      const data = await api.auth.signUp({
+        firstName,
+        email,
+        password,
+      });
 
-      // Mocking a successful API call for demonstration
-      console.log('Submitting signup:', { name, email });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const response = { ok: true }; // Assume success
-
-      if (!response.ok) {
-        // If API returns an error, handle it here
-        // const errorData = await response.json();
-        // throw new Error(errorData.message || 'Failed to create account.');
-        throw new Error('This email is already in use.'); // Example error
+      // --- SUCCESS HANDLING ---
+      // After a successful sign-up, the user is immediately "logged in".
+      // We should store their access token just like we do on the login page.
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      } else {
+        throw new Error('Account created, but no access token was provided.');
       }
 
+      toast.success(data.message || "Account created successfully!");
+      
       // --- REDIRECTION ON SUCCESS ---
-      // If the signup is successful, redirect the user
-      console.log('Account created successfully. Redirecting...');
+      // The first step after creating an account is usually to set up
+      // their first organization/tenant. This redirection is perfect.
       router.push('/setup-organization');
 
     } catch (err) {
-      setError((err as Error).message);
-      setIsSubmitting(false); // Stop loading on error
-    } 
-    // No need for a `finally` block here because successful navigation will unmount the component
+      // Our API layer formats the error message from the NestJS backend.
+      const errorMessage = (err as Error).message;
+      setError(errorMessage);
+      setIsSubmitting(false); // Stop loading on error so the user can try again
+    }
   };
 
   return (
@@ -65,13 +68,14 @@ export function SignupForm() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
+          {/* Renamed to First Name for clarity */}
+          <Label htmlFor="firstName">First Name</Label>
           <Input
-            id="name"
+            id="firstName"
             type="text"
-            placeholder="John Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="John"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             disabled={isSubmitting}
             required
           />
@@ -97,6 +101,7 @@ export function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}
             required
+            minLength={8} // Good practice to enforce a minimum length
           />
         </div>
 
