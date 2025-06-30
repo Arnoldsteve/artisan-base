@@ -9,6 +9,7 @@ import { OrderSummaryCard } from "../components/order-summary-card";
 // This is the main Server Component for the page
 export default async function OrderDetailPage({ params }: { params: { orderId: string } }) {
   const { orderId } = params;
+  console.log("OrderDetailPage params:", params)
   const order = mockOrders.find(o => o.id === orderId); 
 
   if (!order) {

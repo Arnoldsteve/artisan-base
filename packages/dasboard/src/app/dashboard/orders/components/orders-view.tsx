@@ -21,13 +21,10 @@ import {
 } from '@tanstack/react-table';
 import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
 import { DeleteOrderDialog } from "./delete-order-dialog";
+// Import our real API layer
+import { api } from "@/api";
 
-async function deleteOrderApi(orderId: string): Promise<{ success: boolean }> {
-  console.log(`Deleting order with ID: ${orderId}`);
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return { success: true };
-}
-
+// This is a placeholder component for table view options. Can be built out later.
 function OrdersTableViewOptions() {
     return <div className="py-4"></div>;
 }
@@ -39,44 +36,64 @@ interface OrdersViewProps {
 export function OrdersView({ initialOrders }: OrdersViewProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   
+  // State for table interactions (no changes here)
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   
+  // State for modals and dialogs (no changes here)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [isBulkDeletePending, setIsBulkDeletePending] = useState(false);
 
+  // Derived state for selected rows (no changes here)
   const selectedOrderIds = useMemo(() => {
     const selectedRows = Object.keys(rowSelection).map(index => orders[parseInt(index, 10)]);
     return selectedRows.map(row => row.id);
   }, [rowSelection, orders]);
   const numSelected = selectedOrderIds.length;
 
+  // Function to open the delete dialog (no changes here)
   const openDeleteDialog = (order: Order) => setOrderToDelete(order);
 
+  // --- UPDATED FUNCTION ---
+  // This now calls our real, secure API endpoint
   const handleConfirmDelete = async () => {
     if (!orderToDelete) return;
     setIsDeletePending(true);
-    await deleteOrderApi(orderToDelete.id);
-    setOrders((current) => current.filter((o) => o.id !== orderToDelete.id));
-    toast.success(`Order ${orderToDelete.orderNumber} has been deleted.`);
-    setIsDeletePending(false);
-    setOrderToDelete(null);
+    try {
+      await api.orders.deleteOrder(orderToDelete.id);
+      setOrders((current) => current.filter((o) => o.id !== orderToDelete.id));
+      toast.success(`Order #${orderToDelete.orderNumber} has been deleted.`);
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setIsDeletePending(false);
+      setOrderToDelete(null);
+    }
   };
 
+  // --- UPDATED FUNCTION ---
+  // This now calls our real, secure API endpoint in a loop
   const handleBulkDelete = async () => {
+    if (numSelected === 0) return;
     setIsBulkDeletePending(true);
-    await Promise.all(selectedOrderIds.map(id => deleteOrderApi(id)));
-    setOrders(current => current.filter(o => !selectedOrderIds.includes(o.id)));
-    toast.success(`${numSelected} order(s) deleted successfully.`);
-    setRowSelection({});
-    setIsBulkDeletePending(false);
-    setIsBulkDeleteDialogOpen(false);
+    try {
+      await Promise.all(selectedOrderIds.map(id => api.orders.deleteOrder(id)));
+      setOrders(current => current.filter(o => !selectedOrderIds.includes(o.id)));
+      toast.success(`${numSelected} order(s) deleted successfully.`);
+      setRowSelection({}); // Clear selection after deletion
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setIsBulkDeletePending(false);
+      setIsBulkDeleteDialogOpen(false);
+    }
   };
 
+  // The tanstack-table instance setup remains the same
   const table = useReactTable({
     data: orders,
     columns,
@@ -100,6 +117,7 @@ export function OrdersView({ initialOrders }: OrdersViewProps) {
     },
   });
 
+  // The entire JSX return block remains the same
   return (
     <div>
       <PageHeader title="Orders" description="View and manage all customer orders.">
