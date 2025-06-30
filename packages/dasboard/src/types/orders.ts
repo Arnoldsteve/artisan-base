@@ -1,55 +1,40 @@
 // src/types/orders.ts
 
-// Enums from your schema. These are great for type safety.
+// These enums must match your generated prisma types
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
 
-// A simplified Customer type for embedding in the Order object.
-// In a real app, this would come from a JOIN query.
-export interface OrderCustomer {
-  firstName: string | null;
-  lastName: string | null;
-  email: string;
-}
-
-// New type for an item within an order
-export interface OrderItem {
-  id: string;
-  productName: string;
-  variantName?: string;
-  sku?: string;
-  image?: string;
+// This matches the OrderItemDto class in your backend
+export interface CreateOrderItemDto {
+  productId: string;
   quantity: number;
-  unitPrice: number;
 }
 
-// New type for a structured address
-export interface Address {
-    firstName: string;
-    lastName: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
+// This matches the CreateOrderDto class in your backend
+export interface CreateOrderDto {
+  items: CreateOrderItemDto[];
+  shippingAddress: string;
+  customerName: string;
+  customerEmail: string;
 }
 
-// Update the main Order type
+// This matches the UpdateOrderDto class in your backend
+export interface UpdateOrderStatusDto {
+    status: OrderStatus;
+}
+
+// This matches the UpdatePaymentStatusDto class in your backend
+export interface UpdatePaymentStatusDto {
+    paymentStatus: PaymentStatus;
+}
+
+
+// You should also have your main Order type here for responses
 export interface Order {
-  id: string;
-  orderNumber: string;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  totalAmount: number;
-  subtotal: number;
-  taxAmount: number;
-  shippingAmount: number;
-  customer: OrderCustomer | null;
-  createdAt: string;
-  
-  // Add the new, detailed fields
-  shippingAddress: Address;
-  billingAddress: Address;
-  items: OrderItem[];
+    id: string;
+    orderNumber: string;
+    status: OrderStatus;
+    paymentStatus: PaymentStatus;
+    totalAmount: number;
+    // ... add all other fields that your API returns for an order
 }

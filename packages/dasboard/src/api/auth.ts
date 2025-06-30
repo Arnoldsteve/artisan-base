@@ -1,39 +1,58 @@
-import { apiClient } from './client'; 
-import { LoginDto, SignUpDto, LoginResponse, SignUpResponse } from '@/types/auth';
-import { AxiosError } from 'axios';
+// src/api/auth.ts
+import axios, { AxiosError } from "axios";
+
+import { LoginDto, SignUpDto, SignUpResponse } from "@/types/auth";
+
+const bffApi = axios.create({
+  baseURL: "/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export interface LoginBffResponse {
+  success: boolean;
+  hasOrganizations: boolean;
+}
 
 /**
- * Handles the user login request using axios.
- * @param credentials - The user's email and password.
- * @returns The login response data including the access token.
- * @throws An error if the login fails.
+ * Calls our internal BFF login endpoint (/api/auth/login) using axios.
+ * This is designed to be called from the LoginForm component.
  */
-export async function login(credentials: LoginDto): Promise<LoginResponse> {
+export async function login(credentials: LoginDto): Promise<LoginBffResponse> {
   try {
-    const response = await apiClient.post('/auth/login', credentials);
+    const response = await bffApi.post<LoginBffResponse>(
+      "/auth/login",
+      credentials
+    );
+
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      throw new Error(error.response.data.message || 'Login failed. Please try again.');
+      throw new Error(error.response.data.message || "Login failed.");
     }
-    throw new Error('An unexpected error occurred during login.');
+
+    throw new Error("An unexpected network error occurred.");
   }
 }
 
 /**
- * Handles the user sign-up request using axios.
- * @param signUpData - The user's details for creating a new account.
- * @returns The sign-up response data.
- * @throws An error if sign-up fails (e.g., email already in use).
+ * Calls our internal BFF sign-up endpoint (/api/auth/signup).
+ * (This function remains unchanged)
  */
 export async function signUp(signUpData: SignUpDto): Promise<SignUpResponse> {
+  console.log("Sign-up data:", signUpData);
   try {
-    const response = await apiClient.post('/auth/signup', signUpData);
+    const response = await bffApi.post<SignUpResponse>(
+      "/auth/signup",
+      signUpData
+    );
+    console.log("Sign-up response:", response.data);
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
-      throw new Error(error.response.data.message || 'Sign-up failed. Please try again.');
+      throw new Error(error.response.data.message || "Sign-up failed.");
     }
-    throw new Error('An unexpected error occurred during sign-up.');
+    throw new Error("An unexpected network error occurred.");
   }
 }

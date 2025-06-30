@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@repo/ui';
-import { Input } from '@repo/ui';
-import { Label } from '@repo/ui';
-import { CardWrapper } from './card-wrapper';
-import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { api } from '@/api'; 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@repo/ui";
+import { Input } from "@repo/ui";
+import { Label } from "@repo/ui";
+import { CardWrapper } from "./card-wrapper";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { api } from "@/api";
 
 export function SignupForm() {
   const router = useRouter();
 
-  // State for form inputs
-  // Let's use `firstName` to match your NestJS DTO
-  const [firstName, setFirstName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // State for form inputs remains the same
+  const [firstName, setFirstName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // State for submission process
+  // State for submission process remains the same
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,34 +28,22 @@ export function SignupForm() {
     setError(null);
 
     try {
-      // --- REAL API CALL using our clean API layer ---
       const data = await api.auth.signUp({
         firstName,
         email,
         password,
       });
 
-      // --- SUCCESS HANDLING ---
-      // After a successful sign-up, the user is immediately "logged in".
-      // We should store their access token just like we do on the login page.
-      if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-      } else {
-        throw new Error('Account created, but no access token was provided.');
-      }
-
       toast.success(data.message || "Account created successfully!");
-      
-      // --- REDIRECTION ON SUCCESS ---
-      // The first step after creating an account is usually to set up
-      // their first organization/tenant. This redirection is perfect.
-      router.push('/setup-organization');
 
+      router.push("/setup-organization");
+
+      router.refresh();
     } catch (err) {
-      // Our API layer formats the error message from the NestJS backend.
       const errorMessage = (err as Error).message;
       setError(errorMessage);
-      setIsSubmitting(false); // Stop loading on error so the user can try again
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -68,7 +55,6 @@ export function SignupForm() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          {/* Renamed to First Name for clarity */}
           <Label htmlFor="firstName">First Name</Label>
           <Input
             id="firstName"
@@ -101,7 +87,7 @@ export function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}
             required
-            minLength={8} // Good practice to enforce a minimum length
+            minLength={8}
           />
         </div>
 
@@ -110,7 +96,7 @@ export function SignupForm() {
             {error}
           </p>
         )}
-        
+
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
@@ -118,7 +104,7 @@ export function SignupForm() {
               Creating Account...
             </>
           ) : (
-            'Create Account'
+            "Create Account"
           )}
         </Button>
       </form>

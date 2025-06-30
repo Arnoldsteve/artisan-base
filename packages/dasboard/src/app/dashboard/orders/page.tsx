@@ -1,17 +1,17 @@
-import React from 'react'
-// src/app/dashboard/orders/page.tsx
-import { mockOrders } from '@/lib/mock-data/orders';
+// NO 'use client' directive
+import { api } from "@/api";
 import { OrdersView } from './components/orders-view';
 
 async function getOrders() {
-  // Simulate a network delay to test our loading state
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return mockOrders;
+  // This runs ON THE SERVER
+  return api.orders.getAllOrders();
 }
 
 export default async function OrdersPage() {
+  // This runs ON THE SERVER
   const orders = await getOrders();
 
+  // The component is rendered on the server with data already included
   return (
     <div className="p-4 md:p-8 lg:p-10">
       <OrdersView initialOrders={orders} />
