@@ -1,9 +1,7 @@
 import * as auth from './auth';
-// import * as products from './products'; 
-// import * as orders from './orders';
+import * as tenant from './tenant'; 
 
 export const api = {
   auth,
-  // products,
-  // orders,
+  tenant, 
 };

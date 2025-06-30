@@ -7,7 +7,9 @@ import {
   ConflictException,
   BadRequestException,
   ValidationPipe,
-  UseGuards, 
+  UseGuards,
+  Get,
+  Query, 
 } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 import { CreateTenantDto, CheckSubdomainDto } from './dto/create-tenant.dto';
@@ -16,13 +18,30 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 
 
-@Controller('api/v1/tenants')
+@Controller('v1/tenants')
 @UseGuards(JwtAuthGuard) 
 export class TenantController {
   constructor(
     private readonly tenantService: TenantService,
   ) {}
 
+  @Get('availability')
+  @HttpCode(HttpStatus.OK)
+  async checkSubdomainAvailability(
+    @Query(new ValidationPipe({ transform: true, whitelist: true })) 
+    query: CheckSubdomainDto,
+  ) {
+    const { subdomain } = query; // <-- Destructure the validated and transformed subdomain
+
+    const isAvailable = await this.tenantService.isSubdomainAvailable(subdomain);
+    let suggestions: string[] = [];
+    if (!isAvailable) {
+      suggestions = await this.tenantService.suggestAlternativeSubdomains(subdomain);
+    }
+    return { isAvailable, suggestions };
+  }
+
+  
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createTenant(
@@ -62,4 +81,6 @@ export class TenantController {
       throw error;
     }
   }
+
+
 }
