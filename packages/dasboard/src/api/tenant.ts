@@ -1,49 +1,45 @@
 // src/api/tenant.ts
-import { apiClient } from './client';
+import axios, { AxiosError } from 'axios';
 import { CreateTenantDto, CreateTenantResponse, AvailabilityResponse } from '@/types/tenant';
-import { AxiosError } from 'axios';
 
-// Helper to get the auth token from localStorage
-function getAuthHeader() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-        // This will be caught by the calling function's try/catch block
-        throw new Error('Authentication token not found. Please log in again.');
-    }
-    return { Authorization: `Bearer ${token}` };
-}
+// We use the same pattern as auth.ts: a dedicated client for our internal BFF.
+const bffApi = axios.create({
+  baseURL: '/api', // Points to our /app/api folder
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 /**
- * Checks if a subdomain is available by calling the real backend endpoint.
+ * Checks if a subdomain is available by calling our internal BFF endpoint.
  */
 export async function checkSubdomainAvailability(subdomain: string): Promise<AvailabilityResponse> {
-    try {
-        const response = await apiClient.get('/tenants/availability', {
-            params: { subdomain }, 
-            headers: getAuthHeader(),
-        });
-        return response.data;
-    } catch (error) {
-        if (error instanceof AxiosError && error.response) {
-            throw new Error(error.response.data.message || "Could not check subdomain availability.");
-        }
-        throw new Error("An unexpected network error occurred.");
+  try {
+    // Call GET /api/tenants/availability?subdomain=...
+    const response = await bffApi.get('/tenants/availability', {
+      params: { subdomain },
+    });
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(error.response.data.message || "Could not check subdomain availability.");
     }
+    throw new Error("An unexpected network error occurred.");
+  }
 }
 
 /**
- * Creates a new tenant (organization).
+ * Creates a new tenant (organization) by calling our internal BFF endpoint.
  */
 export async function createTenant(tenantData: CreateTenantDto): Promise<CreateTenantResponse> {
-    try {
-        const response = await apiClient.post('/tenants', tenantData, {
-            headers: getAuthHeader(),
-        });
-        return response.data;
-    } catch (error) {
-        if (error instanceof AxiosError && error.response) {
-            throw new Error(error.response.data.message || 'Failed to create organization.');
-        }
-        throw new Error('An unexpected error occurred during organization creation.');
+  try {
+    // Call POST /api/tenants
+    const response = await bffApi.post('/tenants', tenantData);
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      throw new Error(error.response.data.message || 'Failed to create organization.');
     }
+    throw new Error('An unexpected error occurred during organization creation.');
+  }
 }
