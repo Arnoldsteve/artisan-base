@@ -42,6 +42,8 @@ export class AppModule implements NestModule {
     // TenantMiddleware is available. Since PrismaModule is global, it will be.
     consumer
       .apply(TenantMiddleware)
-      .forRoutes('v1/dashboard/*path')
+      // .forRoutes('v1/dashboard/*path')
+      .forRoutes('*'); 
+
   }
 }

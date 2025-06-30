@@ -22,56 +22,18 @@ import {
 } from '@tanstack/react-table';
 import { DataTableViewOptions } from './data-table-view-options';
 import { PageHeader } from "@/components/shared/page-header";
+import { api } from "@/api";
+import { CreateProductDto, UpdateProductDto } from "@/types/products.dto";
 
-// --- MOCK API CALLS ---
-async function updateProductApi(product: Product): Promise<{ success: boolean }> {
-  console.log("Updating product:", product.id);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return { success: true };
-}
+// Helper function to create a URL-friendly slug from a string
+const slugify = (text: string) =>
+  text.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
 
-async function deleteProductApi(productId: string): Promise<{ success: boolean }> {
-  console.log("Deleting product:", productId);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  if (productId === "prod_fail") return { success: false };
-  return { success: true };
-}
-
-function duplicateProductApi(originalProduct: Product): Promise<Product> {
-  console.log("Duplicating product:", originalProduct.id);
-  return new Promise<Product>((resolve, reject) => {
-    setTimeout(() => {
-      if (originalProduct.name.includes("Fail")) {
-        reject(new Error("Failed to duplicate product."));
-        return;
-      }
-      const duplicatedProduct: Product = { ...originalProduct, id: `prod_copy_${Date.now()}`, name: `${originalProduct.name} (Copy)`, isActive: false };
-      resolve(duplicatedProduct);
-    }, 1000);
-  });
-}
-
-async function createProductApi(newProductData: Omit<Product, "id" | "createdAt">): Promise<Product> {
-  console.log("Creating new product with name:", newProductData.name);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  const newProduct: Product = {
-    id: `prod_new_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    isFeatured: false,
-    images: [{ id: "img_new", url: "https://picsum.photos/seed/new/400/400" }],
-    name: newProductData.name || "New Product",
-    price: newProductData.price || 0,
-    inventoryQuantity: newProductData.inventoryQuantity || 0,
-    isActive: newProductData.isActive || false,
-  };
-  return newProduct;
-}
-
-interface ProductListProps {
+interface ProductsViewProps {
   initialProducts: Product[];
 }
 
-export function ProductsView({ initialProducts }: ProductListProps) {
+export function ProductsView({ initialProducts }: ProductsViewProps) {
   // Data State
   const [products, setProducts] = useState<Product[]>(initialProducts);
   
@@ -91,7 +53,10 @@ export function ProductsView({ initialProducts }: ProductListProps) {
   const [isBulkDeletePending, setIsBulkDeletePending] = useState(false);
 
   // Derived State
-  const selectedProductIds = useMemo(() => Object.keys(rowSelection), [rowSelection]);
+  const selectedProductIds = useMemo(() => {
+    const selectedRows = Object.keys(rowSelection).map(index => products[parseInt(index, 10)]);
+    return selectedRows.map(row => row.id);
+  }, [rowSelection, products]);
   const numSelected = selectedProductIds.length;
 
   // Action Handlers
@@ -105,59 +70,96 @@ export function ProductsView({ initialProducts }: ProductListProps) {
   const handleConfirmDelete = async () => {
     if (!productToDelete) return;
     setIsDeletePending(true);
-    await deleteProductApi(productToDelete.id);
-    setProducts((current) => current.filter((p) => p.id !== productToDelete.id));
-    toast.success(`Product "${productToDelete.name}" has been deleted.`);
-    setIsDeletePending(false);
-    setProductToDelete(null);
+    try {
+        await api.products.deleteProduct(productToDelete.id);
+        setProducts((current) => current.filter((p) => p.id !== productToDelete.id));
+        toast.success(`Product "${productToDelete.name}" has been deleted.`);
+    } catch (error) {
+        toast.error((error as Error).message);
+    } finally {
+        setIsDeletePending(false);
+        setProductToDelete(null);
+    }
   };
 
   const handleSaveChanges = async (productData: Partial<Product>) => {
     setIsEditPending(true);
-    if (productData.id) {
-      await updateProductApi(productData as Product);
-      setProducts((current) => current.map((p) => (p.id === productData.id ? (productData as Product) : p)));
-      toast.success(`Product "${productData.name}" has been updated.`);
-      setProductToEdit(null);
-    } else {
-      const newProduct = await createProductApi(productData as Omit<Product, "id" | "createdAt">);
-      setProducts((current) => [newProduct, ...current]);
-      toast.success(`Product "${newProduct.name}" has been created.`);
-      setIsAddSheetOpen(false);
+    try {
+      if (productData.id) { // Update existing product
+        const updateDto: UpdateProductDto = {
+          name: productData.name,
+          price: productData.price,
+          inventoryQuantity: productData.inventoryQuantity,
+          description: productData.description,
+          isFeatured: productData.isFeatured,
+          slug: productData.name ? slugify(productData.name) : undefined,
+        };
+        const updatedProduct = await api.products.updateProduct(productData.id, updateDto);
+        setProducts(current => current.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
+        toast.success(`Product "${updatedProduct.name}" has been updated.`);
+        setProductToEdit(null);
+      } else { // Create new product
+        if (!productData.name) throw new Error("Product name is required.");
+        const createDto: CreateProductDto = {
+          name: productData.name,
+          slug: slugify(productData.name),
+          price: productData.price || 0,
+          inventoryQuantity: productData.inventoryQuantity || 0,
+          description: productData.description || '',
+          isFeatured: productData.isFeatured || false,
+        };
+        const newProduct = await api.products.createProduct(createDto);
+        setProducts(current => [newProduct, ...current]);
+        toast.success(`Product "${newProduct.name}" has been created.`);
+        setIsAddSheetOpen(false);
+      }
+    } catch (error) {
+        toast.error((error as Error).message);
+    } finally {
+        setIsEditPending(false);
     }
-    setIsEditPending(false);
   };
 
   const handleDuplicateProduct = (productToDuplicate: Product) => {
-    toast.promise(duplicateProductApi(productToDuplicate), {
+    const newName = `${productToDuplicate.name} (Copy)`;
+    const createDto: CreateProductDto = {
+      name: newName,
+      slug: slugify(newName),
+      price: productToDuplicate.price,
+      inventoryQuantity: productToDuplicate.inventoryQuantity,
+      description: productToDuplicate.description,
+      isFeatured: false,
+    };
+    
+    toast.promise(api.products.createProduct(createDto), {
       loading: `Duplicating "${productToDuplicate.name}"...`,
       success: (newProduct) => {
         setProducts((current) => [newProduct, ...current]);
-        return `Product "${productToDuplicate.name}" has been duplicated.`;
+        return `Product has been duplicated.`;
       },
-      error: (err) => err.message || "Failed to duplicate product.",
+      error: (err) => (err as Error).message,
     });
   };
 
   const handleBulkDelete = async () => {
     setIsBulkDeletePending(true);
-    await Promise.all(selectedProductIds.map((id) => deleteProductApi(id)));
-    setProducts((current) => current.filter((p) => !selectedProductIds.includes(p.id)));
-    toast.success(`${numSelected} product(s) deleted successfully.`);
-    setIsBulkDeletePending(false);
-    setRowSelection({});
-    setIsBulkDeleteDialogOpen(false);
+    try {
+      await Promise.all(selectedProductIds.map((id) => api.products.deleteProduct(id)));
+      setProducts((current) => current.filter((p) => !selectedProductIds.includes(p.id)));
+      toast.success(`${numSelected} product(s) deleted successfully.`);
+      setRowSelection({});
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setIsBulkDeletePending(false);
+      setIsBulkDeleteDialogOpen(false);
+    }
   };
 
   const table = useReactTable({
     data: products,
     columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-    },
+    state: { sorting, columnVisibility, rowSelection, columnFilters },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -167,11 +169,7 @@ export function ProductsView({ initialProducts }: ProductListProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: {
-      openDeleteDialog,
-      openEditSheet,
-      handleDuplicateProduct,
-    },
+    meta: { openDeleteDialog, openEditSheet, handleDuplicateProduct },
   });
 
   return (
@@ -179,14 +177,9 @@ export function ProductsView({ initialProducts }: ProductListProps) {
       <PageHeader title="Products" description="Manage all products for your store.">
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>
-
       <DataTableViewOptions table={table} />
-      
       <DataTable table={table} />
-
-      <div
-        className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? 'translate-y-0' : 'translate-y-24'}`}
-      >
+      <div className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? 'translate-y-0' : 'translate-y-24'}`}>
         {numSelected > 0 && (
           <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
             <div className="text-sm font-medium"><span className="font-semibold">{numSelected}</span> selected</div>
@@ -194,14 +187,11 @@ export function ProductsView({ initialProducts }: ProductListProps) {
               <Button variant="destructive" size="sm" onClick={() => setIsBulkDeleteDialogOpen(true)}>
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>
-                Cancel
-              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>Cancel</Button>
             </div>
           </div>
         )}
       </div>
-
       <DeleteProductDialog isOpen={!!productToDelete} onClose={() => setProductToDelete(null)} onConfirm={handleConfirmDelete} productName={productToDelete?.name || ""} isPending={isDeletePending} />
       <EditProductSheet isOpen={!!productToEdit || isAddSheetOpen} onClose={() => { setProductToEdit(null); setIsAddSheetOpen(false); }} product={productToEdit} onSave={handleSaveChanges} isPending={isEditPending} />
       <BulkDeleteAlertDialog isOpen={isBulkDeleteDialogOpen} onClose={() => setIsBulkDeleteDialogOpen(false)} onConfirm={handleBulkDelete} selectedCount={numSelected} isPending={isBulkDeletePending} />

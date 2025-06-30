@@ -17,7 +17,7 @@ import { CreateManualOrderDto, UpdateOrderDto, UpdatePaymentStatusDto } from './
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller({
-  path: 'v1/dashboard/orders',
+  path: 'dashboard/orders',
   scope: Scope.REQUEST, 
 })
 @UseGuards(JwtAuthGuard)

@@ -4,7 +4,7 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 
 @Controller({ 
-  path:'v1/dashboard/categories',
+  path:'dashboard/categories',
   scope: Scope.REQUEST,
 })
 @UseGuards(JwtAuthGuard)

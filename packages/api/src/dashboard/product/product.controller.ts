@@ -9,7 +9,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 // to ensure only logged-in dashboard users can access these routes.
 
 @Controller({
-  path: 'v1/dashboard/products',
+  path: 'dashboard/products',
   scope: Scope.REQUEST, 
 })
 @UseGuards(JwtAuthGuard)
@@ -18,6 +18,7 @@ export class ProductController {
 
   @Post()
   create(@Body(ValidationPipe) createProductDto: CreateProductDto) {
+    console.log('Creating product with data:', createProductDto);
     return this.productService.create(createProductDto);
   }
 

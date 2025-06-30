@@ -1,21 +1,24 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common'; 
+import { ValidationPipe, Logger } from '@nestjs/common'; 
 import * as cookieParser from 'cookie-parser'; 
-
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-   app.enableCors({
-    origin: 'http://localhost:3000', // Your frontend origin
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed methods
-    allowedHeaders: 'Content-Type, Accept, Authorization', // Allowed headers
-    credentials: true, // This is the CRITICAL line that was correct
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization, x-tenant-id', 
+    credentials: true,
   });
+
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser()); 
-  app.setGlobalPrefix('api');
-  // app.enableShutdownHooks();
-  await app.listen(process.env.PORT ?? 3001);
+  app.setGlobalPrefix('api/v1');
+  
+  const port = process.env.PORT ?? 3001;
+  await app.listen(port);
+  Logger.log(`🚀 API is running on: http://localhost:${port}`);
 }
 bootstrap();
