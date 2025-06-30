@@ -1,5 +1,5 @@
-// src/app/dashboard/orders/new/page.tsx
 import { PageHeader } from "@/components/shared/page-header";
+import { NewOrderForm } from "../components/NewOrderForm";
 
 export default function NewOrderPage() {
   return (
@@ -10,15 +10,7 @@ export default function NewOrderPage() {
       />
       
       <div className="mt-8">
-        {/* The full order creation form will be built here.
-            This would involve components for:
-            - Searching for and selecting a customer
-            - Searching for and adding products to the cart
-            - Entering shipping and billing addresses
-            - Calculating totals
-            - Taking payment information
-        */}
-        <p className="text-muted-foreground">The order creation form will be built here.</p>
+        <NewOrderForm />
       </div>
     </div>
   );
