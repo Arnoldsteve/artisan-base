@@ -31,6 +31,7 @@ export interface UpdatePaymentStatusDto {
 
 // You should also have your main Order type here for responses
 export interface Order {
+    items: any[];
     id: string;
     orderNumber: string;
     status: OrderStatus;
