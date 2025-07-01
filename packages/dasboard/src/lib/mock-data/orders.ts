@@ -1,11 +1,15 @@
-// src/lib/mock-data/orders.ts
-
 import { Order } from "@/types/orders";
 
-export const mockOrders: Order[] = [
+// To make our mock data more robust for lookups, we'll add `customerId`.
+// In a real scenario, your base `Order` type would likely include this.
+type MockOrder = Order & { customerId: string | null };
+
+export const mockOrders: MockOrder[] = [
+  // --- Orders for John Doe (cus_1) ---
   {
-    id: 'ord_1001',
-    orderNumber: 'ORD-2024-0001',
+    id: 'ord_2001',
+    customerId: 'cus_1',
+    orderNumber: 'ART-001',
     status: 'DELIVERED',
     paymentStatus: 'PAID',
     totalAmount: 159.99,
@@ -13,64 +17,154 @@ export const mockOrders: Order[] = [
     taxAmount: 10.00,
     shippingAmount: 0.00,
     createdAt: '2024-03-10T10:00:00Z',
-    customer: { firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com' },
+    customer: { firstName: 'John', lastName: 'Doe', email: 'john.d@example.com' },
     shippingAddress: { firstName: 'John', lastName: 'Doe', addressLine1: '123 Main St', city: 'Anytown', state: 'CA', postalCode: '12345', country: 'USA' },
     billingAddress: { firstName: 'John', lastName: 'Doe', addressLine1: '123 Main St', city: 'Anytown', state: 'CA', postalCode: '12345', country: 'USA' },
-    items: [
-      { id: 'item_1', productName: 'Ergonomic Office Chair', quantity: 1, unitPrice: 149.99, image: 'https://picsum.photos/seed/chair/100' },
-    ],
+    items: [ { id: 'item_1', productName: 'Ergonomic Office Chair', quantity: 1, unitPrice: 149.99, image: 'https://picsum.photos/seed/chair/100' } ],
   },
   {
-    id: 'ord_1002',
-    orderNumber: 'ORD-2024-0002',
+    id: 'ord_2002',
+    customerId: 'cus_1',
+    orderNumber: 'ART-002',
     status: 'SHIPPED',
     paymentStatus: 'PAID',
-    totalAmount: 99.50,
-    subtotal: 89.50,
-    taxAmount: 5.00,
-    shippingAmount: 5.00,
-    createdAt: '2024-03-09T14:30:00Z',
-    customer: { firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com' },
-    shippingAddress: { firstName: 'Jane', lastName: 'Smith', addressLine1: '456 Oak Ave', city: 'Someville', state: 'NY', postalCode: '54321', country: 'USA' },
-    billingAddress: { firstName: 'Jane', lastName: 'Smith', addressLine1: '456 Oak Ave', city: 'Someville', state: 'NY', postalCode: '54321', country: 'USA' },
-    items: [
-      { id: 'item_2', productName: 'Wireless Mechanical Keyboard', quantity: 1, unitPrice: 89.50, image: 'https://picsum.photos/seed/keyboard/100' },
-    ],
+    totalAmount: 45.50,
+    subtotal: 40.00,
+    taxAmount: 2.50,
+    shippingAmount: 3.00,
+    createdAt: '2024-04-01T11:20:00Z',
+    customer: { firstName: 'John', lastName: 'Doe', email: 'john.d@example.com' },
+    shippingAddress: { firstName: 'John', lastName: 'Doe', addressLine1: '123 Main St', city: 'Anytown', state: 'CA', postalCode: '12345', country: 'USA' },
+    billingAddress: { firstName: 'John', lastName: 'Doe', addressLine1: '123 Main St', city: 'Anytown', state: 'CA', postalCode: '12345', country: 'USA' },
+    items: [ { id: 'item_2', productName: 'Artisan Desk Lamp', quantity: 1, unitPrice: 40.00, image: 'https://picsum.photos/seed/lamp/100' } ],
   },
+
+  // --- Orders for Jane Smith (cus_2) ---
   {
-    id: 'ord_1003',
-    orderNumber: 'ORD-2024-0003',
+    id: 'ord_2003',
+    customerId: 'cus_2',
+    orderNumber: 'ART-003',
     status: 'PROCESSING',
     paymentStatus: 'PAID',
     totalAmount: 220.00,
     subtotal: 210.00,
     taxAmount: 10.00,
     shippingAmount: 0.00,
-    createdAt: '2024-03-09T09:15:00Z',
-    customer: { firstName: 'Peter', lastName: 'Jones', email: 'peter.jones@example.com' },
-    shippingAddress: { firstName: 'Peter', lastName: 'Jones', addressLine1: '789 Pine Ln', city: 'Metropolis', state: 'TX', postalCode: '67890', country: 'USA' },
-    billingAddress: { firstName: 'Peter', lastName: 'Jones', addressLine1: '789 Pine Ln', city: 'Metropolis', state: 'TX', postalCode: '67890', country: 'USA' },
+    createdAt: '2024-04-15T09:15:00Z',
+    customer: { firstName: 'Jane', lastName: 'Smith', email: 'jane.s@example.com' },
+    shippingAddress: { firstName: 'Jane', lastName: 'Smith', addressLine1: '456 Oak Ave', city: 'Someville', state: 'NY', postalCode: '54321', country: 'USA' },
+    billingAddress: { firstName: 'Jane', lastName: 'Smith', addressLine1: '456 Oak Ave', city: 'Someville', state: 'NY', postalCode: '54321', country: 'USA' },
     items: [
       { id: 'item_3a', productName: 'Premium Leather Mousepad', quantity: 2, unitPrice: 45.00, image: 'https://picsum.photos/seed/mousepad/100' },
       { id: 'item_3b', productName: '4K Ultra-Wide Monitor', quantity: 1, unitPrice: 120.00, image: 'https://picsum.photos/seed/monitor/100' },
     ],
   },
-  // Add more detailed mock orders as needed...
+  
+  // --- Order for Alice Johnson (cus_3) - CANCELLED ---
   {
-    id: 'ord_1008',
-    orderNumber: 'ORD-2024-0008',
+    id: 'ord_2004',
+    customerId: 'cus_3',
+    orderNumber: 'ART-004',
+    status: 'CANCELLED',
+    paymentStatus: 'REFUNDED',
+    totalAmount: 75.00,
+    subtotal: 70.00,
+    taxAmount: 5.00,
+    shippingAmount: 0.00,
+    createdAt: '2024-03-20T18:00:00Z',
+    customer: { firstName: 'Alice', lastName: 'Johnson', email: 'alice.j@example.com' },
+    shippingAddress: { firstName: 'Alice', lastName: 'Johnson', addressLine1: '789 Pine Way', city: 'Mapleton', state: 'FL', postalCode: '33101', country: 'USA' },
+    billingAddress: { firstName: 'Alice', lastName: 'Johnson', addressLine1: '789 Pine Way', city: 'Mapleton', state: 'FL', postalCode: '33101', country: 'USA' },
+    items: [ { id: 'item_4', productName: 'Leather-bound Journal', quantity: 2, unitPrice: 35.00, image: 'https://picsum.photos/seed/journal/100' } ],
+  },
+
+  // --- Orders for Michael Brown (cus_4) ---
+  {
+    id: 'ord_2005',
+    customerId: 'cus_4',
+    orderNumber: 'ART-005',
+    status: 'DELIVERED',
+    paymentStatus: 'PAID',
+    totalAmount: 129.99,
+    subtotal: 129.99,
+    taxAmount: 0.00,
+    shippingAmount: 0.00,
+    createdAt: '2024-02-10T13:00:00Z',
+    customer: { firstName: 'Michael', lastName: 'Brown', email: 'michael.b@example.com' },
+    shippingAddress: { firstName: 'Michael', lastName: 'Brown', addressLine1: '101 Maple Dr', city: 'Oakland', state: 'CA', postalCode: '94601', country: 'USA' },
+    billingAddress: { firstName: 'Michael', lastName: 'Brown', addressLine1: '101 Maple Dr', city: 'Oakland', state: 'CA', postalCode: '94601', country: 'USA' },
+    items: [ { id: 'item_5', productName: 'Standing Desk Converter', quantity: 1, unitPrice: 129.99, image: 'https://picsum.photos/seed/desk/100' } ],
+  },
+
+  // --- Order for David Wilson (cus_6) ---
+  {
+    id: 'ord_2006',
+    customerId: 'cus_6',
+    orderNumber: 'ART-006',
+    status: 'DELIVERED',
+    paymentStatus: 'PAID',
+    totalAmount: 24.99,
+    subtotal: 24.99,
+    taxAmount: 0.00,
+    shippingAmount: 0.00,
+    createdAt: '2023-12-25T19:45:00Z',
+    customer: { firstName: 'David', lastName: 'Wilson', email: 'david.w@example.com' },
+    shippingAddress: { firstName: 'David', lastName: 'Wilson', addressLine1: '321 Elm St', city: 'Denver', state: 'CO', postalCode: '80202', country: 'USA' },
+    billingAddress: { firstName: 'David', lastName: 'Wilson', addressLine1: '321 Elm St', city: 'Denver', state: 'CO', postalCode: '80202', country: 'USA' },
+    items: [ { id: 'item_6', productName: 'Mechanical Pencil Set', quantity: 1, unitPrice: 24.99, image: 'https://picsum.photos/seed/pencil/100' } ],
+  },
+
+  // --- Order for Sarah Martinez (cus_7) ---
+  {
+    id: 'ord_2007',
+    customerId: 'cus_7',
+    orderNumber: 'ART-007',
+    status: 'PENDING',
+    paymentStatus: 'PENDING',
+    totalAmount: 88.00,
+    subtotal: 80.00,
+    taxAmount: 8.00,
+    shippingAmount: 0.00,
+    createdAt: '2024-04-18T16:00:00Z',
+    customer: { firstName: 'Sarah', lastName: 'Martinez', email: 'sarah.m@example.com' },
+    shippingAddress: { firstName: 'Sarah', lastName: 'Martinez', addressLine1: '654 Cedar Blvd', city: 'Miami', state: 'FL', postalCode: '33101', country: 'USA' },
+    billingAddress: { firstName: 'Sarah', lastName: 'Martinez', addressLine1: '654 Cedar Blvd', city: 'Miami', state: 'FL', postalCode: '33101', country: 'USA' },
+    items: [ { id: 'item_7', productName: 'Wireless Mechanical Keyboard', quantity: 1, unitPrice: 80.00, image: 'https://picsum.photos/seed/keyboard2/100' } ],
+  },
+
+  // --- A Guest Order ---
+  {
+    id: 'ord_2008',
+    customerId: null,
+    orderNumber: 'ART-008',
     status: 'SHIPPED',
     paymentStatus: 'PAID',
-    totalAmount: 99.99,
-    subtotal: 99.99,
+    totalAmount: 19.99,
+    subtotal: 19.99,
     taxAmount: 0.00,
     shippingAmount: 0.00,
     createdAt: '2024-03-04T10:00:00Z',
     customer: null,
     shippingAddress: { firstName: 'Guest', lastName: 'User', addressLine1: '101 Guest Rd', city: 'Anonville', state: 'FL', postalCode: '11223', country: 'USA' },
     billingAddress: { firstName: 'Guest', lastName: 'User', addressLine1: '101 Guest Rd', city: 'Anonville', state: 'FL', postalCode: '11223', country: 'USA' },
-    items: [
-      { id: 'item_4', productName: 'Standing Desk Converter', quantity: 1, unitPrice: 99.99, image: 'https://picsum.photos/seed/desk/100' },
-    ]
+    items: [ { id: 'item_8', productName: 'Noise-Cancelling Earbuds', quantity: 1, unitPrice: 19.99, image: 'https://picsum.photos/seed/earbuds/100' } ],
+  },
+
+  // --- Order for Daniel Lee (cus_10) ---
+  {
+    id: 'ord_2009',
+    customerId: 'cus_10',
+    orderNumber: 'ART-009',
+    status: 'DELIVERED',
+    paymentStatus: 'PAID',
+    totalAmount: 55.00,
+    subtotal: 50.00,
+    taxAmount: 5.00,
+    shippingAmount: 0.00,
+    createdAt: '2024-04-06T11:10:00Z',
+    customer: { firstName: 'Daniel', lastName: 'Lee', email: 'daniel.l@example.com' },
+    shippingAddress: { firstName: 'Daniel', lastName: 'Lee', addressLine1: '987 Birch Ave', city: 'Los Angeles', state: 'CA', postalCode: '90001', country: 'USA' },
+    billingAddress: { firstName: 'Daniel', lastName: 'Lee', addressLine1: '987 Birch Ave', city: 'Los Angeles', state: 'CA', postalCode: '90001', country: 'USA' },
+    items: [ { id: 'item_9', productName: 'Portable Laptop Stand', quantity: 2, unitPrice: 25.00, image: 'https://picsum.photos/seed/stand/100' } ],
   },
 ];

@@ -1,10 +1,19 @@
 // src/app/dashboard/customers/[customerId]/components/customer-contact-card.tsx
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { Separator } from "@repo/ui";
 import { Customer } from "@/types/customers";
 import { Mail, Phone } from "lucide-react";
 
 export function CustomerContactCard({ customer }: { customer: Customer }) {
+  // ✅ THE FIX: Safely get the default address.
+  // Check if the addresses array exists and has at least one item.
+  const defaultAddress =
+    customer.addresses && customer.addresses.length > 0
+      ? customer.addresses[0]
+      : null;
+
   return (
     <Card>
         <CardHeader><CardTitle>Contact Information</CardTitle></CardHeader>
@@ -21,12 +30,21 @@ export function CustomerContactCard({ customer }: { customer: Customer }) {
             <div>
                 <h4 className="font-semibold mb-2">Default Address</h4>
                 <div className="text-muted-foreground">
-                    <p>{customer.firstName} {customer.lastName}</p>
-                    <p>{customer.addresses[0].addressLine1}</p>
-                    <p>{customer.addresses[0].city}, {customer.addresses[0].state} {customer.addresses[0].postalCode}</p>
+                    {/* ✅ THE FIX: Conditionally render the address only if it exists. */}
+                    {defaultAddress ? (
+                        <>
+                            <p>{defaultAddress.firstName} {defaultAddress.lastName}</p>
+                            <p>{defaultAddress.addressLine1}</p>
+                            {defaultAddress.addressLine2 && <p>{defaultAddress.addressLine2}</p>}
+                            <p>{defaultAddress.city}, {defaultAddress.state} {defaultAddress.postalCode}</p>
+                            <p>{defaultAddress.country}</p>
+                        </>
+                    ) : (
+                        <p>No address on file.</p>
+                    )}
                 </div>
             </div>
         </CardContent>
     </Card>
-  )
+  );
 }
