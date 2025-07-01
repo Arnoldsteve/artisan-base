@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import { flexRender, Table as TanstackTable } from '@tanstack/react-table';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui';
-import { Button } from '@repo/ui';
-import { Skeleton } from '@repo/ui';
+import { flexRender, Table as TanstackTable } from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui";
+import { Button } from "@repo/ui";
+import { Skeleton } from "@repo/ui";
 
 // --- The Main DataTable Component ---
 // This component is now a "dumb" renderer.
@@ -23,7 +30,12 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -32,15 +44,27 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                <TableCell
+                  colSpan={table.getAllColumns().length}
+                  className="h-24 text-center"
+                  data-testid="products-empty-state"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -52,19 +76,29 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
       {/* Pagination */}
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
           Previous
         </Button>
-        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
           Next
         </Button>
       </div>
     </div>
   );
 }
-
 
 // --- The Skeleton Component (Now part of the same file) ---
 // We keep the padding here as it's used directly by loading.tsx
@@ -93,7 +127,9 @@ export function DataTableSkeleton() {
           <TableHeader>
             <TableRow>
               {Array.from({ length: 5 }).map((_, i) => (
-                <TableHead key={i}><Skeleton className="h-5 w-full" /></TableHead>
+                <TableHead key={i}>
+                  <Skeleton className="h-5 w-full" />
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -101,7 +137,9 @@ export function DataTableSkeleton() {
             {Array.from({ length: 8 }).map((_, i) => (
               <TableRow key={i}>
                 {Array.from({ length: 5 }).map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-6 w-full" /></TableCell>
+                  <TableCell key={j}>
+                    <Skeleton className="h-6 w-full" />
+                  </TableCell>
                 ))}
               </TableRow>
             ))}

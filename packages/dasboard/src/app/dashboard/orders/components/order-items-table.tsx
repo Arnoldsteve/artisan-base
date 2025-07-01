@@ -1,11 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui";
 import { OrderItem } from "@/types/orders";
-import Image from 'next/image';
+import Image from "next/image";
+import { formatCurrency } from "@/utils/format-currency";
 
 export function OrderItemsTable({ items }: { items: OrderItem[] }) {
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-
   return (
     <Card>
       <CardHeader>
@@ -26,12 +32,24 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
             {items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
-                  <Image src={item.image || '/placeholder.svg'} alt={item.productName} width={64} height={64} className="rounded-md" />
+                  <Image
+                    src={item.image || "/placeholder.svg"}
+                    alt={item.productName}
+                    width={64}
+                    height={64}
+                    className="rounded-md"
+                  />
                 </TableCell>
-                <TableCell className="font-medium">{item.productName}</TableCell>
+                <TableCell className="font-medium">
+                  {item.productName}
+                </TableCell>
                 <TableCell className="text-right">{item.quantity}</TableCell>
-                <TableCell className="text-right">{formatCurrency(item.unitPrice)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(item.unitPrice * item.quantity)}</TableCell>
+                <TableCell className="text-right">
+                  {formatCurrency(item.unitPrice)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatCurrency(item.unitPrice * item.quantity)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

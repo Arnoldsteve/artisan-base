@@ -6,16 +6,12 @@
         "name": "next"
       }
     ],
-     "baseUrl": ".",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
     // Keep your other settings like lib, jsx, etc.
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -33,9 +29,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "tailwind.config.mjs"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    ".next/types/**/*.ts",
+    "tailwind.config.mjs"
+  ],
+  "exclude": ["node_modules"]
 }

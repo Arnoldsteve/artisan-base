@@ -1,16 +1,22 @@
-'use client';
+"use client";
 
-import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
-import { Button } from '@repo/ui';
-import { Badge } from '@repo/ui';
-import { Checkbox } from '@repo/ui';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@repo/ui';
-import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui';
-import { Product } from '@/types/products';
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { Button } from "@repo/ui";
+import { Badge } from "@repo/ui";
+import { Checkbox } from "@repo/ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@repo/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui";
+import { Product } from "@/types/products";
 
 // Extend the TableMeta interface to include our custom function
-declare module '@tanstack/react-table' {
+declare module "@tanstack/react-table" {
   interface TableMeta<TData extends unknown> {
     openDeleteDialog: (product: TData) => void;
     openEditSheet: (product: TData) => void;
@@ -20,16 +26,16 @@ declare module '@tanstack/react-table' {
 
 export const columns: ColumnDef<Product>[] = [
   // Column for row selection
-   {
-    id: 'select',
+  {
+    id: "select",
     header: ({ table }) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected()
             ? true
             : table.getIsSomePageRowsSelected()
-            ? "indeterminate"
-            : false
+              ? "indeterminate"
+              : false
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -48,17 +54,28 @@ export const columns: ColumnDef<Product>[] = [
 
   // Column for Product Name and Image
   {
-    accessorKey: 'name',
-    header: 'Product',
+    accessorKey: "name",
+    header: "Product",
     cell: ({ row }) => {
       const product = row.original;
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 rounded-md">
-            <AvatarImage src={product.images?.[0]?.url} alt={product.name} className="object-cover" />
-            <AvatarFallback className="rounded-md">{product.name.charAt(0)}</AvatarFallback>
+            <AvatarImage
+              src={product.images?.[0]?.url}
+              alt={product.name}
+              className="object-cover"
+            />
+            <AvatarFallback className="rounded-md">
+              {product.name.charAt(0)}
+            </AvatarFallback>
           </Avatar>
-          <span className="font-medium">{product.name}</span>
+          <span
+            className="font-medium"
+            data-testid={`product-name-${product.id}`}
+          >
+            {product.name}
+          </span>
         </div>
       );
     },
@@ -66,71 +83,71 @@ export const columns: ColumnDef<Product>[] = [
 
   // Column for Status (isActive)
   {
-    accessorKey: 'isActive',
+    accessorKey: "isActive",
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Status
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
-      const isActive = row.getValue('isActive');
+      const isActive = row.getValue("isActive");
       return (
-        <Badge variant={isActive ? 'default' : 'secondary'}>
-          {isActive ? 'Active' : 'Draft'}
+        <Badge variant={isActive ? "default" : "secondary"}>
+          {isActive ? "Active" : "Draft"}
         </Badge>
       );
     },
     // Add a filter function for our new dropdown
     filterFn: (row, columnId, value) => {
-        if (value === 'all') return true;
-        return row.getValue(columnId) === (value === 'true');
-    }
+      if (value === "all") return true;
+      return row.getValue(columnId) === (value === "true");
+    },
   },
 
   // Column for Inventory
   {
-     accessorKey: 'inventoryQuantity',
-    header: ({ column }) => ( 
+    accessorKey: "inventoryQuantity",
+    header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Inventory
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
-        const quantity = row.original.inventoryQuantity;
-        return (
-            <div className="flex items-center gap-2">
-                {quantity > 0 ? (
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                ) : (
-                     <span className="relative flex h-2 w-2">
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
-                )}
-                <span>{quantity} in stock</span>
-            </div>
-        )
-    }
+      const quantity = row.original.inventoryQuantity;
+      return (
+        <div className="flex items-center gap-2">
+          {quantity > 0 ? (
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+          ) : (
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
+          <span>{quantity} in stock</span>
+        </div>
+      );
+    },
   },
 
   // Column for Price
   {
-    accessorKey: 'price',
+    accessorKey: "price",
     header: ({ column }) => (
       <div className="text-right">
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Price
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -138,19 +155,20 @@ export const columns: ColumnDef<Product>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('price'));
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      const amount = parseFloat(row.getValue("price"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
       }).format(amount);
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
 
   // Column for Actions
-    {
-    id: 'actions',
-    cell: ({ row, table }) => { // <--- We now have access to `table` here
+  {
+    id: "actions",
+    cell: ({ row, table }) => {
+      // <--- We now have access to `table` here
       const product = row.original;
       return (
         <div className="text-right">
@@ -163,10 +181,16 @@ export const columns: ColumnDef<Product>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => table.options.meta?.openEditSheet(product)}>
+              <DropdownMenuItem
+                onClick={() => table.options.meta?.openEditSheet(product)}
+              >
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => table.options.meta?.handleDuplicateProduct(product)}>
+              <DropdownMenuItem
+                onClick={() =>
+                  table.options.meta?.handleDuplicateProduct(product)
+                }
+              >
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuItem
