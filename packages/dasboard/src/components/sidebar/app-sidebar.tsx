@@ -1,3 +1,5 @@
+"use client";
+import { usePathname } from "next/navigation";
 import { Home, Package, ShoppingCart, Users, Settings } from "lucide-react";
 
 import {
@@ -42,6 +44,7 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
   return (
     <Sidebar>
       <SidebarContent>
@@ -56,9 +59,7 @@ export function AppSidebar() {
                       href={item.url}
                       className="group flex items-center gap-3 text-sidebar-foreground hover:text-sidebar-primary [&>svg]:transition-colors [&>svg]:text-sidebar-foreground group-hover:[&>svg]:text-sidebar-primary"
                       aria-current={
-                        window.location.pathname === `/${item.url}`
-                          ? "page"
-                          : undefined
+                        pathname === `/${item.url}` ? "page" : undefined
                       }
                     >
                       <item.icon className="size-5 mr-2" />
