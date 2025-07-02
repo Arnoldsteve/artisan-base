@@ -8,7 +8,6 @@ import { CardWrapper } from "./card-wrapper";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api } from "@/api";
 import { useSetupOrganization } from "@/hooks/use-setup-organization";
 
 // --- Helper Functions & Types --- (No changes needed here)

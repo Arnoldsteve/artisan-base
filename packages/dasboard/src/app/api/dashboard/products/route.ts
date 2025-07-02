@@ -1,5 +1,5 @@
+import { createServerApiClient } from '@/services/server-api';
 import { NextResponse } from 'next/server';
-import { createServerApiClient } from '@/api/server-api';
 
 // GET all products (with search and pagination)
 export async function GET(request: Request) {

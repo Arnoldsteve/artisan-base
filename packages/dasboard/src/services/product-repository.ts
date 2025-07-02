@@ -55,6 +55,7 @@ export class ProductRepository {
         `/dashboard/products/${id}`,
         productData
       );
+      console.log("product response", response.data);
       return response.data;
     } catch (error) {
       handleError(error, "Failed to update product.");
@@ -62,8 +63,10 @@ export class ProductRepository {
   }
 
   static async deleteProduct(id: string): Promise<void> {
+    console.log("id from repository deleteProduct", id);
     try {
       await bffApi.delete(`/dashboard/products/${id}`);
+      console.log("product deleted successfully with id", id );
     } catch (error) {
       handleError(error, "Failed to delete product.");
     }

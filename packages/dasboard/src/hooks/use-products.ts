@@ -45,6 +45,7 @@ export function useProducts(initialProducts: Product[]) {
       setError(null);
       try {
         const updated = await productService.updateProduct(id, dto);
+        console.log("updated product response from hooks", updated);
         setProducts((current) =>
           current.map((p) => (p.id === updated.id ? updated : p))
         );

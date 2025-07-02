@@ -1,4 +1,3 @@
-// src/api/server-api.ts
 import axios from 'axios';
 import { cookies } from 'next/headers';
 
@@ -11,10 +10,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
  * 
  * This function itself must be async to use await.
  */
-export async function createServerApiClient() { // <--- Make the function async
-  // The 'cookies()' function returns a promise-like object that must be awaited.
-  const cookieStore = await cookies(); // <--- PUT THE AWAIT BACK
-  
+export async function createServerApiClient() {
+  console.log("createServerApiClient called");
+
+  const cookieStore = await cookies();
+    
   const token = cookieStore.get('accessToken')?.value;
   const orgSubdomain = cookieStore.get('selectedOrgSubdomain')?.value;
 

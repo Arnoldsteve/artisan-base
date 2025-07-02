@@ -1,6 +1,5 @@
-// packages/dashboard/src/app/api/dashboard/orders/[id]/route.ts
+import { createServerApiClient } from "@/services/server-api";
 import { NextResponse } from "next/server";
-import { createServerApiClient } from "@/api/server-api";
 
 // GET a single order by ID
 export async function GET(

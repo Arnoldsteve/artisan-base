@@ -1,6 +1,5 @@
-// packages/dashboard/src/app/api/dashboard/orders/[id]/status/route.ts
+import { createServerApiClient } from '@/services/server-api';
 import { NextResponse } from 'next/server';
-import { createServerApiClient } from '@/api/server-api';
 
 // PATCH to update order status
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {

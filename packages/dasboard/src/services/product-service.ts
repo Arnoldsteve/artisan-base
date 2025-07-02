@@ -32,10 +32,12 @@ class ProductService {
   }
 
   async updateProduct(id: string, productData: UpdateProductDto) {
+    console.log("productData from service ProductRepository updateProduct", productData);
     return ProductRepository.updateProduct(id, productData);
   }
 
   async deleteProduct(id: string) {
+    console.log("id from service ProductRepository deleteProduct", id);
     return ProductRepository.deleteProduct(id);
   }
 }

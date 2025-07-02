@@ -1,7 +1,7 @@
 // packages/dashboard/src/app/api/tenants/route.ts
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createServerApiClient } from '@/api/server-api'; // Our authenticated server client!
+import { createServerApiClient } from '@/services/server-api';
 
 export async function POST(request: Request) {
   try {
