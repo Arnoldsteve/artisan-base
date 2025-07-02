@@ -16,23 +16,28 @@ export interface LoginBffResponse {
 }
 
 /**
- * Calls our internal BFF login endpoint (/api/auth/login) using axios.
+ * Calls our internal BFF login endpoint (/api/auth/login) using fetch.
  * This is designed to be called from the LoginForm component.
  */
 export async function login(credentials: LoginDto): Promise<LoginBffResponse> {
   try {
-    const response = await bffApi.post<LoginBffResponse>(
-      "/auth/login",
-      credentials
-    );
-
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError && error.response) {
-      throw new Error(error.response.data.message || "Login failed.");
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+      credentials: "include",
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || "Login failed.");
     }
-
-    throw new Error("An unexpected network error occurred.");
+    return await response.json();
+  } catch (error) {
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : "An unexpected network error occurred."
+    );
   }
 }
 
