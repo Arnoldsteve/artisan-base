@@ -9,38 +9,19 @@ import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/api";
+import { useLogin } from "@/hooks/use-login";
 
 export function LoginForm() {
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    isSubmitting,
+    handleSubmit,
+  } = useLogin();
   const router = useRouter();
-  const [email, setEmail] = useState("derrick@gmail.com");
-  const [password, setPassword] = useState("password123");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const data = await api.auth.login({ email, password });
-
-      if (data.hasOrganizations) {
-        toast.success(`Welcome back! Loading your dashboard...`);
-        router.replace("/dashboard");
-      } else {
-        toast.info("Welcome! Let's set up your first organization.");
-        router.push("/setup-organization");
-      }
-
-      router.refresh();
-    } catch (err) {
-      const errorMessage = (err as Error).message;
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <CardWrapper

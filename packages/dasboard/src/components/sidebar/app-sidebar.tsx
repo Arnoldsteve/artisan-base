@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@repo/ui"
+} from "@repo/ui";
 
 // Menu items.
 
@@ -17,17 +17,17 @@ const items = [
   {
     title: "Home",
     url: "dashboard",
-    icon: Home, 
+    icon: Home,
   },
   {
     title: "Orders",
     url: "dashboard/orders",
-    icon: ShoppingCart, 
+    icon: ShoppingCart,
   },
   {
     title: "Products",
     url: "dashboard/products",
-    icon: Package, 
+    icon: Package,
   },
   {
     title: "Customers",
@@ -37,7 +37,7 @@ const items = [
   {
     title: "Settings",
     url: "dashboard/settings",
-    icon: Settings, 
+    icon: Settings,
   },
 ];
 
@@ -52,8 +52,16 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
+                    <a
+                      href={item.url}
+                      className="group flex items-center gap-3 text-sidebar-foreground hover:text-sidebar-primary [&>svg]:transition-colors [&>svg]:text-sidebar-foreground group-hover:[&>svg]:text-sidebar-primary"
+                      aria-current={
+                        window.location.pathname === `/${item.url}`
+                          ? "page"
+                          : undefined
+                      }
+                    >
+                      <item.icon className="size-5 mr-2" />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -64,5 +72,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

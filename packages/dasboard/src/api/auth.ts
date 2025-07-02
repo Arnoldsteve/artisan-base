@@ -56,3 +56,6 @@ export async function signUp(signUpData: SignUpDto): Promise<SignUpResponse> {
     throw new Error("An unexpected network error occurred.");
   }
 }
+
+// DEPRECATED: API logic moved to services/auth-repository.ts for SRP and testability.
+export * from "@/types/auth";

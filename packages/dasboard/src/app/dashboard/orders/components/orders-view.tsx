@@ -22,6 +22,7 @@ import {
 import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
 import { DeleteOrderDialog } from "./delete-order-dialog";
 import { orderService, OrderService } from "@/services/order-service";
+import { useOrders } from "@/hooks/use-orders";
 
 /**
  * Table view options for orders (memoized for performance).
@@ -42,8 +43,15 @@ export function OrdersView({
   initialOrders,
   service = orderService,
 }: OrdersViewProps) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const [loading, setLoading] = useState(false);
+  const {
+    orders,
+    loading,
+    error,
+    refreshOrders,
+    deleteOrder,
+    batchDeleteOrders,
+    setOrders,
+  } = useOrders(initialOrders);
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -52,18 +60,6 @@ export function OrdersView({
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [isBulkDeletePending, setIsBulkDeletePending] = useState(false);
-
-  // Fetch latest orders on mount (optional, for real-time updates)
-  useEffect(() => {
-    setLoading(true);
-    service
-      .getAll()
-      .then(setOrders)
-      .catch((e) =>
-        toast.error((e as Error).message || "Failed to fetch orders.")
-      )
-      .finally(() => setLoading(false));
-  }, [service]);
 
   const selectedOrderIds = useMemo(() => {
     const selectedRows = Object.keys(rowSelection).map(

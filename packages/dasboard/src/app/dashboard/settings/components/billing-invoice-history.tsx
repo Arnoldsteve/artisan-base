@@ -1,18 +1,37 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui";
 import { Button } from "@repo/ui";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
-
-type Invoice = { id: string; date: Date; amount: number; status: 'PAID' | 'DUE' | 'FAILED' };
+import { useBilling } from "@/hooks/use-billing";
+import { Invoice } from "@/types/billing";
 
 interface BillingInvoiceHistoryProps {
-  invoices: Invoice[];
+  invoices?: Invoice[];
 }
 
-export function BillingInvoiceHistory({ invoices }: BillingInvoiceHistoryProps) {
+export function BillingInvoiceHistory({
+  invoices: propInvoices,
+}: BillingInvoiceHistoryProps) {
+  const { invoices, downloadInvoice, loading, error } = useBilling();
+  const allInvoices = propInvoices || invoices;
+  if (loading) return <div>Loading invoices...</div>;
+  if (error) return <div className="text-destructive">{error}</div>;
   return (
     <Card>
       <CardHeader>
@@ -30,15 +49,26 @@ export function BillingInvoiceHistory({ invoices }: BillingInvoiceHistoryProps) 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => (
+            {allInvoices.map((invoice) => (
               <TableRow key={invoice.id}>
-                <TableCell>{new Intl.DateTimeFormat('en-US').format(invoice.date)}</TableCell>
+                <TableCell>
+                  {new Intl.DateTimeFormat("en-US").format(
+                    new Date(invoice.date)
+                  )}
+                </TableCell>
                 <TableCell>{invoice.status}</TableCell>
                 <TableCell className="text-right">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.amount)}
+                  {new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  }).format(invoice.amount)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="outline" size="icon" onClick={() => toast.info("Downloading invoice...")}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => downloadInvoice(invoice.id)}
+                  >
                     <Download className="h-4 w-4" />
                   </Button>
                 </TableCell>

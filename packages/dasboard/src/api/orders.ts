@@ -1,10 +1,14 @@
-import axios, { AxiosError } from 'axios';
-import { CreateOrderDto, Order, OrderStatus, PaymentStatus } from '@/types/orders';
-
+import axios, { AxiosError } from "axios";
+import {
+  CreateOrderDto,
+  Order,
+  OrderStatus,
+  PaymentStatus,
+} from "@/types/orders";
 
 const bffApi = axios.create({
-  baseURL: '/api', 
-  });
+  baseURL: "/api",
+});
 
 const handleError = (error: unknown, defaultMessage: string): never => {
   if (error instanceof AxiosError && error.response) {
@@ -17,7 +21,7 @@ const handleError = (error: unknown, defaultMessage: string): never => {
 export async function getAllOrders(): Promise<Order[]> {
   try {
     // Calls GET /api/dashboard/orders
-    const response = await bffApi.get('/dashboard/orders');
+    const response = await bffApi.get("/dashboard/orders");
     return response.data;
   } catch (error) {
     handleError(error, "Failed to fetch orders.");
@@ -38,7 +42,7 @@ export async function getOrderById(orderId: string): Promise<Order> {
 export async function createOrder(orderData: CreateOrderDto): Promise<Order> {
   try {
     // Calls POST /api/dashboard/orders
-    const response = await bffApi.post('/dashboard/orders', orderData);
+    const response = await bffApi.post("/dashboard/orders", orderData);
     return response.data;
   } catch (error) {
     handleError(error, "Failed to create order.");
@@ -46,20 +50,31 @@ export async function createOrder(orderData: CreateOrderDto): Promise<Order> {
 }
 
 // --- PATCH Requests ---
-export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<Order> {
+export async function updateOrderStatus(
+  orderId: string,
+  newStatus: OrderStatus
+): Promise<Order> {
   try {
     // Calls PATCH /api/dashboard/orders/{id}/status
-    const response = await bffApi.patch(`/dashboard/orders/${orderId}/status`, { status: newStatus });
+    const response = await bffApi.patch(`/dashboard/orders/${orderId}/status`, {
+      status: newStatus,
+    });
     return response.data;
   } catch (error) {
     handleError(error, "Failed to update order status.");
   }
 }
 
-export async function updatePaymentStatus(orderId: string, newPaymentStatus: PaymentStatus): Promise<Order> {
+export async function updatePaymentStatus(
+  orderId: string,
+  newPaymentStatus: PaymentStatus
+): Promise<Order> {
   try {
     // Calls PATCH /api/dashboard/orders/{id}/payment-status
-    const response = await bffApi.patch(`/dashboard/orders/${orderId}/payment-status`, { paymentStatus: newPaymentStatus });
+    const response = await bffApi.patch(
+      `/dashboard/orders/${orderId}/payment-status`,
+      { paymentStatus: newPaymentStatus }
+    );
     return response.data;
   } catch (error) {
     handleError(error, "Failed to update payment status.");
@@ -75,3 +90,6 @@ export async function deleteOrder(orderId: string): Promise<void> {
     handleError(error, "Failed to delete order.");
   }
 }
+
+// DEPRECATED: API logic moved to services/order-repository.ts for SRP and testability.
+export * from "@/types/orders";

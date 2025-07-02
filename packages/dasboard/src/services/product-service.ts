@@ -1,5 +1,6 @@
+import { ProductRepository } from "./product-repository";
 import { Product } from "@/types/products";
-import { getProducts } from "@/api/products";
+import { CreateProductDto, UpdateProductDto } from "@/types/products.dto";
 
 /**
  * ProductService provides product search with in-memory caching for performance.
@@ -16,10 +17,26 @@ class ProductService {
     if (this.searchCache.has(searchTerm)) {
       return this.searchCache.get(searchTerm)!;
     }
-    const response = await getProducts(1, 5, searchTerm);
+    const response = await ProductRepository.getProducts(1, 5, searchTerm);
     const products = response.data;
     this.searchCache.set(searchTerm, products);
     return products;
+  }
+
+  async getProducts(page = 1, limit = 10, search?: string) {
+    return ProductRepository.getProducts(page, limit, search);
+  }
+
+  async createProduct(productData: CreateProductDto) {
+    return ProductRepository.createProduct(productData);
+  }
+
+  async updateProduct(id: string, productData: UpdateProductDto) {
+    return ProductRepository.updateProduct(id, productData);
+  }
+
+  async deleteProduct(id: string) {
+    return ProductRepository.deleteProduct(id);
   }
 }
 

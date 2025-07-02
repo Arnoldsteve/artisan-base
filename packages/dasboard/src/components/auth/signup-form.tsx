@@ -9,43 +9,21 @@ import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/api";
+import { useSignup } from "@/hooks/use-signup";
 
 export function SignupForm() {
   const router = useRouter();
-
-  // State for form inputs remains the same
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  // State for submission process remains the same
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const data = await api.auth.signUp({
-        firstName,
-        email,
-        password,
-      });
-
-      toast.success(data.message || "Account created successfully!");
-
-      router.push("/setup-organization");
-
-      router.refresh();
-    } catch (err) {
-      const errorMessage = (err as Error).message;
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    firstName,
+    setFirstName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    isSubmitting,
+    handleSubmit,
+  } = useSignup();
 
   return (
     <CardWrapper

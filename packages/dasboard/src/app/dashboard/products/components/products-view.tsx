@@ -26,6 +26,7 @@ import { api } from "@/api";
 import { CreateProductDto, UpdateProductDto } from "@/types/products.dto";
 import { useDebounce } from "@/hooks/use-debounce";
 import { productService } from "@/services/product-service";
+import { useProducts } from "@/hooks/use-products";
 
 // Helper function to create a URL-friendly slug from a string
 const slugify = (text: string) =>
@@ -42,8 +43,16 @@ interface ProductsViewProps {
 }
 
 export function ProductsView({ initialProducts }: ProductsViewProps) {
-  // Data State
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const {
+    products,
+    loading,
+    error,
+    searchProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    setProducts,
+  } = useProducts(initialProducts);
 
   // Table State
   const [rowSelection, setRowSelection] = useState({});
@@ -77,10 +86,7 @@ export function ProductsView({ initialProducts }: ProductsViewProps) {
   React.useEffect(() => {
     // Only search if filter is not empty
     if (debouncedNameFilter) {
-      productService
-        .searchProducts(debouncedNameFilter)
-        .then(setProducts)
-        .catch(() => setProducts([]));
+      searchProducts(debouncedNameFilter);
     } else {
       setProducts(initialProducts);
     }
@@ -99,10 +105,7 @@ export function ProductsView({ initialProducts }: ProductsViewProps) {
     if (!productToDelete) return;
     setIsDeletePending(true);
     try {
-      await api.products.deleteProduct(productToDelete.id);
-      setProducts((current) =>
-        current.filter((p) => p.id !== productToDelete.id)
-      );
+      await deleteProduct(productToDelete.id);
       toast.success(`Product "${productToDelete.name}" has been deleted.`);
     } catch (error) {
       toast.error((error as Error).message);
@@ -125,10 +128,7 @@ export function ProductsView({ initialProducts }: ProductsViewProps) {
           isFeatured: productData.isFeatured,
           slug: productData.name ? slugify(productData.name) : undefined,
         };
-        const updatedProduct = await api.products.updateProduct(
-          productData.id,
-          updateDto
-        );
+        const updatedProduct = await updateProduct(productData.id, updateDto);
         setProducts((current) =>
           current.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
         );
@@ -145,7 +145,7 @@ export function ProductsView({ initialProducts }: ProductsViewProps) {
           description: productData.description || "",
           isFeatured: productData.isFeatured || false,
         };
-        const newProduct = await api.products.createProduct(createDto);
+        const newProduct = await createProduct(createDto);
         setProducts((current) => [newProduct, ...current]);
         toast.success(`Product "${newProduct.name}" has been created.`);
         setIsAddSheetOpen(false);
@@ -168,7 +168,7 @@ export function ProductsView({ initialProducts }: ProductsViewProps) {
       isFeatured: false,
     };
 
-    toast.promise(api.products.createProduct(createDto), {
+    toast.promise(createProduct(createDto), {
       loading: `Duplicating "${productToDuplicate.name}"...`,
       success: (newProduct) => {
         setProducts((current) => [newProduct, ...current]);
@@ -181,12 +181,7 @@ export function ProductsView({ initialProducts }: ProductsViewProps) {
   const handleBulkDelete = async () => {
     setIsBulkDeletePending(true);
     try {
-      await Promise.all(
-        selectedProductIds.map((id) => api.products.deleteProduct(id))
-      );
-      setProducts((current) =>
-        current.filter((p) => !selectedProductIds.includes(p.id))
-      );
+      await Promise.all(selectedProductIds.map((id) => deleteProduct(id)));
       toast.success(`${numSelected} product(s) deleted successfully.`);
       setRowSelection({});
     } catch (error) {
