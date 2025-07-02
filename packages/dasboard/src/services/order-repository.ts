@@ -42,6 +42,7 @@ export const orderRepository: IOrderRepository = {
   async getById(orderId) {
     try {
       const response = await bffApi.get(`/dashboard/orders/${orderId}`);
+      console.log("order response", response.data);
       return response.data;
     } catch (error) {
       handleError(error, "Failed to fetch order.");

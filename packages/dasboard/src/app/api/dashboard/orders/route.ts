@@ -1,15 +1,18 @@
 // packages/dashboard/src/app/api/dashboard/orders/route.ts
-import { NextResponse } from 'next/server';
-import { createServerApiClient } from '@/api/server-api';
+import { NextResponse } from "next/server";
+import { createServerApiClient } from "@/api/server-api";
 
 // GET all orders
 export async function GET(request: Request) {
   try {
     const serverApi = await createServerApiClient();
-    const response = await serverApi.get('/dashboard/orders');
+    const response = await serverApi.get("/dashboard/orders");
     return NextResponse.json(response.data);
   } catch (error: any) {
-    return NextResponse.json({ message: error.response?.data?.message || 'Failed to fetch orders.' }, { status: error.response?.status || 500 });
+    return NextResponse.json(
+      { message: error.response?.data?.message || "Failed to fetch orders." },
+      { status: error.response?.status || 500 }
+    );
   }
 }
 
@@ -18,9 +21,15 @@ export async function POST(request: Request) {
   try {
     const orderData = await request.json();
     const serverApi = await createServerApiClient();
-    const response = await serverApi.post('/dashboard/orders', orderData);
+    const response = await serverApi.post("/dashboard/orders", orderData);
+    console.log(response.data);
     return NextResponse.json(response.data);
   } catch (error: any) {
-    return NextResponse.json({ message: error.response?.data?.message || 'Failed to create order.' }, { status: error.response?.status || 500 });
+    console.error("Login error:", error);
+    const status = error.response?.status || 500;
+    const message =
+      error.response?.data?.message ||
+      "An unexpected error occurred during login.";
+    return NextResponse.json({ message }, { status });
   }
 }

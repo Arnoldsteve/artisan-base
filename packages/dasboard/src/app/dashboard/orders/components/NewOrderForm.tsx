@@ -3,9 +3,22 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/products";
-import { CreateOrderDto } from "@/types/orders";
+import {
+  CreateOrderDto,
+  CustomerDetailsDto,
+  AddressDto,
+  ManualOrderItemDto,
+} from "@/types/orders";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui";
 import { toast } from "sonner";
 import { Loader2, X, PlusCircle, MinusCircle } from "lucide-react";
 import { productService } from "@/services/product-service";
@@ -20,7 +33,13 @@ type OrderItemState = Product & { quantity: number };
 /**
  * Subcomponent for managing order items input.
  */
-function OrderItemsInput({ items, setItems }: { items: OrderItemState[]; setItems: React.Dispatch<React.SetStateAction<OrderItemState[]>> }) {
+function OrderItemsInput({
+  items,
+  setItems,
+}: {
+  items: OrderItemState[];
+  setItems: React.Dispatch<React.SetStateAction<OrderItemState[]>>;
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -32,33 +51,50 @@ function OrderItemsInput({ items, setItems }: { items: OrderItemState[]; setItem
       return;
     }
     setIsSearching(true);
-    productService.searchProducts(debouncedSearchTerm)
+    productService
+      .searchProducts(debouncedSearchTerm)
       .then(setSearchResults)
       .catch(() => toast.error("Failed to search for products."))
       .finally(() => setIsSearching(false));
   }, [debouncedSearchTerm]);
 
-  const handleAddItem = useCallback((product: Product) => {
-    setItems((currentItems) => {
-      const existingItem = currentItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        return currentItems.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
+  const handleAddItem = useCallback(
+    (product: Product) => {
+      if (product.inventoryQuantity <= 0) {
+        toast.error(`Product '${product.name}' is out of stock.`);
+        return;
       }
-      return [...currentItems, { ...product, quantity: 1 }];
-    });
-    setSearchTerm("");
-    setSearchResults([]);
-  }, [setItems]);
+      setItems((currentItems) => {
+        const existingItem = currentItems.find(
+          (item) => item.id === product.id
+        );
+        if (existingItem) {
+          return currentItems.map((item) =>
+            item.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+        return [...currentItems, { ...product, quantity: 1 }];
+      });
+      setSearchTerm("");
+      setSearchResults([]);
+    },
+    [setItems]
+  );
 
-  const handleQuantityChange = useCallback((productId: string, quantity: number) => {
-    setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === productId ? { ...item, quantity: Math.max(0, quantity) } : item
-      )
-    );
-  }, [setItems]);
+  const handleQuantityChange = useCallback(
+    (productId: string, quantity: number) => {
+      setItems((currentItems) =>
+        currentItems.map((item) =>
+          item.id === productId
+            ? { ...item, quantity: Math.max(0, quantity) }
+            : item
+        )
+      );
+    },
+    [setItems]
+  );
 
   return (
     <Card>
@@ -110,7 +146,9 @@ function OrderItemsInput({ items, setItems }: { items: OrderItemState[]; setItem
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                    onClick={() =>
+                      handleQuantityChange(item.id, item.quantity - 1)
+                    }
                     aria-label="Decrease quantity"
                   >
                     <MinusCircle className="h-4 w-4" />
@@ -131,7 +169,9 @@ function OrderItemsInput({ items, setItems }: { items: OrderItemState[]; setItem
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                    onClick={() =>
+                      handleQuantityChange(item.id, item.quantity + 1)
+                    }
                     aria-label="Increase quantity"
                   >
                     <PlusCircle className="h-4 w-4" />
@@ -152,13 +192,30 @@ function OrderItemsInput({ items, setItems }: { items: OrderItemState[]; setItem
 /**
  * Subcomponent for customer details input.
  */
-function CustomerDetailsForm({ customerName, setCustomerName, customerEmail, setCustomerEmail, shippingAddress, setShippingAddress }: {
-  customerName: string;
-  setCustomerName: React.Dispatch<React.SetStateAction<string>>;
+function CustomerDetailsForm({
+  customerFirstName,
+  setCustomerFirstName,
+  customerLastName,
+  setCustomerLastName,
+  customerEmail,
+  setCustomerEmail,
+  shippingAddress,
+  setShippingAddress,
+  billingAddress,
+  setBillingAddress,
+}: {
+  customerFirstName: string;
+  setCustomerFirstName: React.Dispatch<React.SetStateAction<string>>;
+  customerLastName: string;
+  setCustomerLastName: React.Dispatch<React.SetStateAction<string>>;
   customerEmail: string;
   setCustomerEmail: React.Dispatch<React.SetStateAction<string>>;
-  shippingAddress: string;
-  setShippingAddress: React.Dispatch<React.SetStateAction<string>>;
+  shippingAddress: AddressDto;
+  setShippingAddress: React.Dispatch<React.SetStateAction<AddressDto>>;
+  billingAddress: AddressDto | undefined;
+  setBillingAddress: React.Dispatch<
+    React.SetStateAction<AddressDto | undefined>
+  >;
 }) {
   return (
     <Card>
@@ -167,11 +224,20 @@ function CustomerDetailsForm({ customerName, setCustomerName, customerEmail, set
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="customer-name">Full Name</Label>
+          <Label htmlFor="customer-first-name">First Name</Label>
           <Input
-            id="customer-name"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
+            id="customer-first-name"
+            value={customerFirstName}
+            onChange={(e) => setCustomerFirstName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="customer-last-name">Last Name</Label>
+          <Input
+            id="customer-last-name"
+            value={customerLastName}
+            onChange={(e) => setCustomerLastName(e.target.value)}
             required
           />
         </div>
@@ -189,9 +255,27 @@ function CustomerDetailsForm({ customerName, setCustomerName, customerEmail, set
           <Label htmlFor="shipping-address">Shipping Address</Label>
           <Input
             id="shipping-address"
-            value={shippingAddress}
-            onChange={(e) => setShippingAddress(e.target.value)}
+            value={shippingAddress.addressLine1}
+            onChange={(e) =>
+              setShippingAddress({
+                ...shippingAddress,
+                addressLine1: e.target.value,
+              })
+            }
             required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="billing-address">Billing Address</Label>
+          <Input
+            id="billing-address"
+            value={billingAddress?.addressLine1}
+            onChange={(e) =>
+              setBillingAddress({
+                ...billingAddress,
+                addressLine1: e.target.value,
+              })
+            }
           />
         </div>
       </CardContent>
@@ -202,7 +286,11 @@ function CustomerDetailsForm({ customerName, setCustomerName, customerEmail, set
 /**
  * Subcomponent for order summary and submission.
  */
-function OrderSummary({ totalAmount, formError, isSubmitting }: {
+function OrderSummary({
+  totalAmount,
+  formError,
+  isSubmitting,
+}: {
   totalAmount: number;
   formError: string | null;
   isSubmitting: boolean;
@@ -220,18 +308,167 @@ function OrderSummary({ totalAmount, formError, isSubmitting }: {
         {formError && (
           <p className="text-sm text-destructive mt-4">{formError}</p>
         )}
-        <Button
-          type="submit"
-          className="w-full mt-6"
-          disabled={isSubmitting}
-        >
-          {isSubmitting && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          )}
+        <Button type="submit" className="w-full mt-6" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Create Order
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+function AddressForm({
+  address,
+  setAddress,
+  prefix,
+}: {
+  address: AddressDto;
+  setAddress: (a: AddressDto) => void;
+  prefix: string;
+}) {
+  return (
+    <div className="grid gap-2">
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor={`${prefix}-firstName`}>First Name</Label>
+          <Input
+            id={`${prefix}-firstName`}
+            value={address.firstName}
+            onChange={(e) =>
+              setAddress({ ...address, firstName: e.target.value })
+            }
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor={`${prefix}-lastName`}>Last Name</Label>
+          <Input
+            id={`${prefix}-lastName`}
+            value={address.lastName}
+            onChange={(e) =>
+              setAddress({ ...address, lastName: e.target.value })
+            }
+            required
+          />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor={`${prefix}-addressLine1`}>Address Line 1</Label>
+        <Input
+          id={`${prefix}-addressLine1`}
+          value={address.addressLine1}
+          onChange={(e) =>
+            setAddress({ ...address, addressLine1: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor={`${prefix}-addressLine2`}>Address Line 2</Label>
+        <Input
+          id={`${prefix}-addressLine2`}
+          value={address.addressLine2}
+          onChange={(e) =>
+            setAddress({ ...address, addressLine2: e.target.value })
+          }
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor={`${prefix}-city`}>City</Label>
+          <Input
+            id={`${prefix}-city`}
+            value={address.city}
+            onChange={(e) => setAddress({ ...address, city: e.target.value })}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor={`${prefix}-state`}>State</Label>
+          <Input
+            id={`${prefix}-state`}
+            value={address.state}
+            onChange={(e) => setAddress({ ...address, state: e.target.value })}
+            required
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor={`${prefix}-postalCode`}>Postal Code</Label>
+          <Input
+            id={`${prefix}-postalCode`}
+            value={address.postalCode}
+            onChange={(e) =>
+              setAddress({ ...address, postalCode: e.target.value })
+            }
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor={`${prefix}-country`}>Country</Label>
+          <Input
+            id={`${prefix}-country`}
+            value={address.country}
+            onChange={(e) =>
+              setAddress({ ...address, country: e.target.value })
+            }
+            required
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CustomerForm({
+  firstName,
+  setFirstName,
+  lastName,
+  setLastName,
+  email,
+  setEmail,
+}: {
+  firstName: string;
+  setFirstName: (v: string) => void;
+  lastName: string;
+  setLastName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
+}) {
+  return (
+    <div className="grid gap-2">
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor="customer-firstName">First Name</Label>
+          <Input
+            id="customer-firstName"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="customer-lastName">Last Name</Label>
+          <Input
+            id="customer-lastName"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="customer-email">Email</Label>
+        <Input
+          id="customer-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+    </div>
   );
 }
 
@@ -240,10 +477,35 @@ function OrderSummary({ totalAmount, formError, isSubmitting }: {
  */
 export function NewOrderForm() {
   const router = useRouter();
-  const [customerName, setCustomerName] = useState("");
+  const [customerFirstName, setCustomerFirstName] = useState("");
+  const [customerLastName, setCustomerLastName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingAddress, setShippingAddress] = useState<AddressDto>({
+    firstName: "",
+    lastName: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+  });
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+  const [billingAddress, setBillingAddress] = useState<AddressDto>({
+    firstName: "",
+    lastName: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+  });
   const [items, setItems] = useState<OrderItemState[]>([]);
+  const [shippingAmount, setShippingAmount] = useState<number | undefined>(
+    undefined
+  );
+  const [notes, setNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -260,13 +522,22 @@ export function NewOrderForm() {
     }
     setIsSubmitting(true);
     const orderData: CreateOrderDto = {
-      customerName,
-      customerEmail,
-      shippingAddress,
+      customer: {
+        email: customerEmail,
+        firstName: customerFirstName,
+        lastName: customerLastName,
+      },
+      shippingAddress: { ...shippingAddress },
+      billingAddress: billingSameAsShipping
+        ? { ...shippingAddress }
+        : { ...billingAddress },
       items: items.map((item) => ({
         productId: item.id,
+        variantId: (item as any).variantId,
         quantity: item.quantity,
       })),
+      shippingAmount,
+      notes,
     };
     try {
       const newOrder = await orderService.createOrder(orderData);
@@ -283,17 +554,87 @@ export function NewOrderForm() {
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-2 space-y-6">
         <OrderItemsInput items={items} setItems={setItems} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Shipping Address</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AddressForm
+              address={shippingAddress}
+              setAddress={setShippingAddress}
+              prefix="shipping"
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Billing Address</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={billingSameAsShipping}
+                  onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+                />
+                Billing address same as shipping
+              </label>
+            </div>
+            {!billingSameAsShipping && (
+              <AddressForm
+                address={billingAddress}
+                setAddress={setBillingAddress}
+                prefix="billing"
+              />
+            )}
+          </CardContent>
+        </Card>
       </div>
       <div className="space-y-6">
-        <CustomerDetailsForm
-          customerName={customerName}
-          setCustomerName={setCustomerName}
-          customerEmail={customerEmail}
-          setCustomerEmail={setCustomerEmail}
-          shippingAddress={shippingAddress}
-          setShippingAddress={setShippingAddress}
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CustomerForm
+              firstName={customerFirstName}
+              setFirstName={setCustomerFirstName}
+              lastName={customerLastName}
+              setLastName={setCustomerLastName}
+              email={customerEmail}
+              setEmail={setCustomerEmail}
+            />
+          </CardContent>
+        </Card>
+        <div>
+          <Label htmlFor="shipping-amount">Shipping Amount</Label>
+          <Input
+            id="shipping-amount"
+            type="number"
+            value={shippingAmount ?? ""}
+            onChange={(e) =>
+              setShippingAmount(
+                e.target.value ? parseFloat(e.target.value) : undefined
+              )
+            }
+            min={0}
+            step={0.01}
+          />
+        </div>
+        <div>
+          <Label htmlFor="order-notes">Notes</Label>
+          <Input
+            id="order-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+        <OrderSummary
+          totalAmount={totalAmount}
+          formError={formError}
+          isSubmitting={isSubmitting}
         />
-        <OrderSummary totalAmount={totalAmount} formError={formError} isSubmitting={isSubmitting} />
       </div>
     </form>
   );
