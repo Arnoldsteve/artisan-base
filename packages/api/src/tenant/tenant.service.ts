@@ -4,17 +4,19 @@ import {
   ConflictException,
   BadRequestException,
   Logger,
+  Inject,
 } from '@nestjs/common';
-import { PrismaService as ManagementPrismaService } from '../prisma/prisma.service';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { ITenantRepository } from './interfaces/tenant-repository.interface';
 import { Tenant } from 'generated/management';
 
 @Injectable()
 export class TenantService {
   private readonly logger = new Logger(TenantService.name);
 
-  constructor(private readonly managementPrisma: ManagementPrismaService) {}
+  constructor(
+    @Inject('TenantRepository')
+    private readonly tenantRepository: ITenantRepository,
+  ) {}
 
   async createTenant(ownerId: string, subdomain: string, storeName: string) {
     const dbSchema = `tenant_${subdomain.replace(/-/g, '_')}`;
@@ -23,45 +25,71 @@ export class TenantService {
 
     try {
       // STEP 0: Validate owner exists
-      const owner = await this.managementPrisma.user.findUnique({ where: { id: ownerId } });
-      if (!owner) throw new BadRequestException(`Owner with ID '${ownerId}' does not exist`);
+      const owner = await this.tenantRepository.findUserById(ownerId);
+      if (!owner)
+        throw new BadRequestException(
+          `Owner with ID '${ownerId}' does not exist`,
+        );
       this.logger.log(`Step 0/4: Verified owner '${ownerId}' exists`);
 
       // STEP 1: Check if subdomain already exists
-      const existingTenant = await this.managementPrisma.tenant.findUnique({ where: { subdomain } });
-      if (existingTenant) throw new ConflictException(`Subdomain '${subdomain}' is already taken`);
-      this.logger.log(`Step 1/4: Verified subdomain '${subdomain}' is available`);
+      const existingTenant =
+        await this.tenantRepository.findTenantBySubdomain(subdomain);
+      if (existingTenant)
+        throw new ConflictException(
+          `Subdomain '${subdomain}' is already taken`,
+        );
+      this.logger.log(
+        `Step 1/4: Verified subdomain '${subdomain}' is available`,
+      );
 
       // STEP 2: Create the Tenant record
-      newTenant = await this.managementPrisma.tenant.create({
-        data: { ownerId, subdomain, name: storeName, dbSchema, status: 'ACTIVE' },
+      newTenant = await this.tenantRepository.createTenant({
+        ownerId,
+        subdomain,
+        name: storeName,
+        dbSchema,
+        status: 'ACTIVE',
       });
       this.logger.log(`Step 2/4: Created Tenant record for ${subdomain}`);
 
       // STEP 3: Create the schema
-      await this.managementPrisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${dbSchema}";`);
+      await this.tenantRepository.executeRaw(
+        `CREATE SCHEMA IF NOT EXISTS "${dbSchema}";`,
+      );
       schemaCreated = true;
       this.logger.log(`Step 3/4: Created schema "${dbSchema}"`);
 
       // STEP 4: Apply migration SQL to the schema
-      const migrationSql = await this.readTenantMigrationSql();
+      const migrationSql = await this.tenantRepository.readTenantMigrationSql();
       this.logger.log('Read tenant migration SQL file.');
 
-      const sqlStatements = migrationSql.split(';').filter((s) => s.trim() !== '');
-      await this.managementPrisma.$executeRawUnsafe(`SET search_path TO "${dbSchema}";`);
+      const sqlStatements = migrationSql
+        .split(';')
+        .filter((s) => s.trim() !== '');
+      await this.tenantRepository.executeRaw(
+        `SET search_path TO "${dbSchema}";`,
+      );
 
       for (const stmt of sqlStatements) {
-        await this.managementPrisma.$executeRawUnsafe(stmt);
+        await this.tenantRepository.executeRaw(stmt);
       }
 
-      await this.managementPrisma.$executeRawUnsafe(`SET search_path TO "public";`);
+      await this.tenantRepository.executeRaw(`SET search_path TO "public";`);
       this.logger.log(`Step 4/4: Successfully migrated schema: ${dbSchema}`);
 
       return newTenant;
     } catch (error) {
-      this.logger.error(`Failed to create tenant for subdomain ${subdomain}. Rolling back...`, error.stack);
+      this.logger.error(
+        `Failed to create tenant for subdomain ${subdomain}. Rolling back...`,
+        error.stack,
+      );
       await this.rollbackTenant(newTenant, dbSchema, subdomain, schemaCreated);
-      if (error instanceof ConflictException || error instanceof BadRequestException) throw error;
+      if (
+        error instanceof ConflictException ||
+        error instanceof BadRequestException
+      )
+        throw error;
       throw new InternalServerErrorException('Could not initialize the store.');
     }
   }
@@ -74,21 +102,27 @@ export class TenantService {
   ) {
     try {
       if (newTenant) {
-        await this.managementPrisma.tenant.delete({ where: { id: newTenant.id } });
+        await this.tenantRepository.deleteTenantById(newTenant.id);
         this.logger.warn(`Rolled back: Deleted Tenant record for ${subdomain}`);
       }
 
       if (schemaCreated) {
-        await this.managementPrisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${dbSchema}" CASCADE;`);
+        await this.tenantRepository.executeRaw(
+          `DROP SCHEMA IF EXISTS "${dbSchema}" CASCADE;`,
+        );
         this.logger.warn(`Rolled back: Dropped schema ${dbSchema}`);
       }
     } catch (rollbackError) {
-      this.logger.error(`Failed to rollback tenant ${subdomain}:`, rollbackError.stack);
+      this.logger.error(
+        `Failed to rollback tenant ${subdomain}:`,
+        rollbackError.stack,
+      );
     }
   }
 
   async isSubdomainAvailable(subdomain: string): Promise<boolean> {
-    const existing = await this.managementPrisma.tenant.findUnique({ where: { subdomain } });
+    const existing =
+      await this.tenantRepository.findTenantBySubdomain(subdomain);
     return !existing;
   }
 
@@ -96,20 +130,9 @@ export class TenantService {
     const suggestions: string[] = [];
     for (let i = 1; i <= 5; i++) {
       const suggestion = `${base}-${i}`;
-      if (await this.isSubdomainAvailable(suggestion)) suggestions.push(suggestion);
+      if (await this.isSubdomainAvailable(suggestion))
+        suggestions.push(suggestion);
     }
     return suggestions;
-  }
-
-  private async readTenantMigrationSql(): Promise<string> {
-    const migrationsDir = path.join(__dirname, '..', '..', 'prisma', 'migrations');
-    const migrationFolder = (await fs.readdir(migrationsDir)).find((dir) =>
-      dir.endsWith('_init_tenant_tables'),
-    );
-    if (!migrationFolder) {
-      throw new InternalServerErrorException('Tenant migration file not found.');
-    }
-    const filePath = path.join(migrationsDir, migrationFolder, 'migration.sql');
-    return fs.readFile(filePath, 'utf-8');
   }
 }
