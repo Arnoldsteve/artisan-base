@@ -1,11 +1,14 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, Inject } from '@nestjs/common';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ICategoryRepository } from './interfaces/category-repository.interface';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CategoryService {
-  constructor(private readonly categoryRepository: ICategoryRepository) {}
+  constructor(
+    @Inject(ICategoryRepository)
+    private readonly categoryRepository: ICategoryRepository,
+  ) {}
 
   create(createCategoryDto: CreateCategoryDto) {
     return this.categoryRepository.create(createCategoryDto);
