@@ -14,6 +14,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { ProductModule } from './dashboard/product/product.module';
 import { CategoryModule } from './dashboard/category/category.module'; // <-- IMPORT
 import { OrderModule } from './dashboard/order/order.module';
+import { CustomerModule } from './dashboard/customer/customer.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { OrderModule } from './dashboard/order/order.module';
     ProductModule,
     CategoryModule,
     OrderModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [
@@ -43,7 +45,6 @@ export class AppModule implements NestModule {
     consumer
       .apply(TenantMiddleware)
       // .forRoutes('v1/dashboard/*path')
-      .forRoutes('*'); 
-
+      .forRoutes('*');
   }
 }

@@ -8,7 +8,6 @@ export default async function ProductsPage() {
     const serverApi = await createServerApiClient();
     const response = await serverApi.get("/dashboard/products");
 
-    console.log("API response:", response.data);
     products = response.data.data;
 
     if (!products) {

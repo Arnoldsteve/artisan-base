@@ -1,66 +1,40 @@
-import { Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { Injectable, NotFoundException, Scope, Inject } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
-import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { paginate } from 'src/common/helpers/paginate.helper';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { IProductRepository } from './interfaces/product-repository.interface';
 
-@Injectable({ scope: Scope.REQUEST }) 
+@Injectable({ scope: Scope.REQUEST })
 export class ProductService {
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  constructor(
+    @Inject('ProductRepository')
+    private readonly productRepository: IProductRepository,
+  ) {}
 
   async create(createProductDto: CreateProductDto) {
-    const product = await this.tenantPrisma.product.create({
-      data: createProductDto,
-    });
-    return product;
+    return this.productRepository.create(createProductDto);
   }
 
   async findAll(paginationQuery: PaginationQueryDto) {
-    return paginate(
-      this.tenantPrisma.product,
-      {
-        page: paginationQuery.page,
-        limit: paginationQuery.limit,
-      },
-      {
-        orderBy: {
-          createdAt: 'desc',
-        },
-      },
-    );
+    return this.productRepository.findAll(paginationQuery);
   }
 
   async findOne(id: string) {
-    const product = await this.tenantPrisma.product.findUnique({
-      where: { id },
-    });
-
+    const product = await this.productRepository.findOne(id);
     if (!product) {
       throw new NotFoundException(`Product with ID '${id}' not found`);
     }
-
     return product;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     await this.findOne(id);
-
-    const updatedProduct = await this.tenantPrisma.product.update({
-      where: { id },
-      data: updateProductDto,
-    });
-
-    return updatedProduct;
+    return this.productRepository.update(id, updateProductDto);
   }
 
   async remove(id: string) {
     const product = await this.findOne(id);
-
-    await this.tenantPrisma.product.delete({
-      where: { id: product.id }, 
-    });
-    
-    return; 
+    await this.productRepository.remove(product.id);
+    return;
   }
 }
