@@ -5,4 +5,7 @@ export interface ITenantRepository {
   deleteTenantById(id: string): Promise<void>;
   executeRaw(sql: string): Promise<any>;
   readTenantMigrationSql(): Promise<string>;
+
+  getSettings(tenantId: string): Promise<any>;
+  updateSettings(tenantId: string, settings: any): Promise<any>;
 }

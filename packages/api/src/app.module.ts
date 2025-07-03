@@ -15,6 +15,9 @@ import { ProductModule } from './dashboard/product/product.module';
 import { CategoryModule } from './dashboard/category/category.module'; // <-- IMPORT
 import { OrderModule } from './dashboard/order/order.module';
 import { CustomerModule } from './dashboard/customer/customer.module';
+import { SettingsModule } from './dashboard/settings/settings.module';
+import { TenantContextService } from './common/tenant-context.service';
+import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
 
 @Module({
   imports: [
@@ -29,10 +32,12 @@ import { CustomerModule } from './dashboard/customer/customer.module';
     CategoryModule,
     OrderModule,
     CustomerModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    TenantContextService,
     // ** REMOVED **: TenantPrismaService is no longer provided here.
     // It's now neatly encapsulated within TenantPrismaModule, which
     // ProductModule imports directly.
@@ -43,7 +48,7 @@ export class AppModule implements NestModule {
     // The middleware setup remains the same, but you might need to ensure
     // TenantMiddleware is available. Since PrismaModule is global, it will be.
     consumer
-      .apply(TenantMiddleware)
+      .apply(TenantMiddleware, TenantContextMiddleware)
       // .forRoutes('v1/dashboard/*path')
       .forRoutes('*');
   }

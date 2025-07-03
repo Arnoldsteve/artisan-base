@@ -47,4 +47,19 @@ export class TenantRepository implements ITenantRepository {
     const filePath = path.join(migrationsDir, migrationFolder, 'migration.sql');
     return fs.readFile(filePath, 'utf-8');
   }
+
+  async getSettings(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+    });
+    return tenant?.settings || {};
+  }
+
+  async updateSettings(tenantId: string, settings: any) {
+    return this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { settings },
+      select: { settings: true },
+    });
+  }
 }

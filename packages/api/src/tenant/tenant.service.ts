@@ -135,4 +135,12 @@ export class TenantService {
     }
     return suggestions;
   }
+
+  async getSettings(tenantId: string) {
+    return this.tenantRepository.getSettings(tenantId);
+  }
+
+  async updateSettings(tenantId: string, settings: any) {
+    return this.tenantRepository.updateSettings(tenantId, settings);
+  }
 }
