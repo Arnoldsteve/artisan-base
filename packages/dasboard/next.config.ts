@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
       {
@@ -16,8 +15,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/api/dashboard/:path*',
+        destination: '/api/dashboard/:path*', // Keep dashboard routes local
+      },
+      {
         source: '/api/:path*',
-        destination: 'http://localhost:3001/:path*', 
+        destination: 'http://localhost:3001/:path*', // Rewrite other API routes
       },
     ];
   },

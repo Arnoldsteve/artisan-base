@@ -50,6 +50,7 @@ export class ProductRepository {
     id: string,
     productData: UpdateProductDto
   ): Promise<Product> {
+    console.log("productData from repository updateProduct", productData);
     try {
       const response = await bffApi.patch(
         `/dashboard/products/${id}`,

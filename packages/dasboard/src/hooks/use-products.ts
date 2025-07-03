@@ -43,6 +43,7 @@ export function useProducts(initialProducts: Product[]) {
     async (id: string, dto: UpdateProductDto) => {
       setLoading(true);
       setError(null);
+      console.log("dto from hooks", dto);
       try {
         const updated = await productService.updateProduct(id, dto);
         console.log("updated product response from hooks", updated);

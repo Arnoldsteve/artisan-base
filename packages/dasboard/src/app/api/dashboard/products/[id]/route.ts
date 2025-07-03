@@ -1,6 +1,11 @@
-
 import { createServerApiClient } from "@/services/server-api";
 import { NextResponse } from "next/server";
+
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  console.log("GET route called with ID:", params.id);
+  return NextResponse.json({ message: "Route is working", id: params.id });
+}
 
 // PATCH (update) a product by ID
 export async function PATCH(
@@ -31,39 +36,24 @@ export async function PATCH(
 }
 
 // DELETE a product by ID
-// export async function DELETE(
-//   request: Request,
-//   { params }: { params: { id: string } }
-// ) {
-//   try {
-//     const serverApi = await createServerApiClient();
-//     await serverApi.delete(`/dashboard/products/${params.id}`);
-//     return new NextResponse(null, { status: 204 });
-//   } catch (error: any) {
-//     const status = error.response?.status || 500;
-//     const message = error.response?.data?.message || "Failed to delete product.";
-//     return NextResponse.json({ message }, { status });
-//   }
-// }
-
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
-  ) {
-    console.log("=== DELETE route called ===");
-    console.log("ID received:", params.id);
-    console.log("Request URL:", request.url);
-    
-    try {
-      const serverApi = await createServerApiClient();
-      console.log("About to call backend DELETE");
-      await serverApi.delete(`/dashboard/products/${params.id}`);
-      console.log("Backend DELETE successful");
-      return new NextResponse(null, { status: 204 });
-    } catch (error: any) {
-      console.error("DELETE error:", error);
-      const status = error.response?.status || 500;
-      const message = error.response?.data?.message || "Failed to delete product.";
-      return NextResponse.json({ message }, { status });
-    }
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  console.log("=== DELETE route called ===");
+  console.log("ID received:", params.id);
+  console.log("Request URL:", request.url);
+  
+  try {
+    const serverApi = await createServerApiClient();
+    console.log("About to call backend DELETE");
+    await serverApi.delete(`/dashboard/products/${params.id}`);
+    console.log("Backend DELETE successful");
+    return new NextResponse(null, { status: 204 });
+  } catch (error: any) {
+    console.error("DELETE error:", error);
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || "Failed to delete product.";
+    return NextResponse.json({ message }, { status });
   }
+}
