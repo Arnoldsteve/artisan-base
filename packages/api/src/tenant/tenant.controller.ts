@@ -9,51 +9,57 @@ import {
   ValidationPipe,
   UseGuards,
   Get,
-  Query, 
+  Query,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 import { CreateTenantDto, CheckSubdomainDto } from './dto/create-tenant.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { GetUser } from '../auth/decorators/get-user.decorator'; 
+import { GetUser } from '../auth/decorators/get-user.decorator';
 import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 
-
 @Controller('tenants')
-@UseGuards(JwtAuthGuard) 
+@UseGuards(JwtAuthGuard)
 export class TenantController {
-  constructor(
-    private readonly tenantService: TenantService,
-  ) {}
+  constructor(private readonly tenantService: TenantService) {}
 
   @Get('availability')
   @HttpCode(HttpStatus.OK)
   async checkSubdomainAvailability(
-    @Query(new ValidationPipe({ transform: true, whitelist: true })) 
+    @Query(new ValidationPipe({ transform: true, whitelist: true }))
     query: CheckSubdomainDto,
   ) {
     const { subdomain } = query; // <-- Destructure the validated and transformed subdomain
 
-    const isAvailable = await this.tenantService.isSubdomainAvailable(subdomain);
+    const isAvailable =
+      await this.tenantService.isSubdomainAvailable(subdomain);
     let suggestions: string[] = [];
     if (!isAvailable) {
-      suggestions = await this.tenantService.suggestAlternativeSubdomains(subdomain);
+      suggestions =
+        await this.tenantService.suggestAlternativeSubdomains(subdomain);
     }
     return { isAvailable, suggestions };
   }
 
-  
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createTenant(
     @Body(ValidationPipe) createTenantDto: CreateTenantDto,
-    @GetUser() user: UserPayload, 
+    @GetUser() user: UserPayload,
   ) {
     const { subdomain, storeName } = createTenantDto;
-    const ownerId = user.sub; 
+    const ownerId = user.sub;
 
-  
     try {
-      const tenant = await this.tenantService.createTenant(ownerId, subdomain, storeName);
+      const tenant = await this.tenantService.createTenant(
+        ownerId,
+        subdomain,
+        storeName,
+      );
+
+      if (!tenant) {
+        throw new InternalServerErrorException('Tenant creation failed.');
+      }
 
       return {
         success: true,
@@ -70,7 +76,8 @@ export class TenantController {
       };
     } catch (error) {
       if (error instanceof ConflictException) {
-        const suggestions = await this.tenantService.suggestAlternativeSubdomains(subdomain);
+        const suggestions =
+          await this.tenantService.suggestAlternativeSubdomains(subdomain);
         throw new ConflictException({
           message: `Subdomain '${subdomain}' is already taken`,
           suggestions,
@@ -81,6 +88,4 @@ export class TenantController {
       throw error;
     }
   }
-
-
 }
