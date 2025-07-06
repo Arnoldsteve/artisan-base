@@ -101,7 +101,8 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     toast.success("Proceeding to checkout...");
-    // In a real app, this would redirect to checkout
+    // Navigate to checkout page
+    window.location.href = "/checkout";
   };
 
   if (cartItems.length === 0) {
