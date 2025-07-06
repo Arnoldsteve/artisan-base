@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
 
 export function Hero() {
   return (

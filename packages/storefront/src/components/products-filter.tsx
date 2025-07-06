@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
 
 const categories = [
   "All Categories",

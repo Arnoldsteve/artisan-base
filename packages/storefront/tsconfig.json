@@ -1,37 +1,26 @@
 {
   "extends": "../typescript-config/nextjs.json",
   "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "allowJs": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
+    "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
       ],
-      "@/components/*": [
-        "./src/components/*"
+      "@repo/ui": [
+        "../ui/src"
       ],
-      "@/lib/*": [
-        "./src/lib/*"
+      "@repo/ui/*": [
+        "../ui/src/*"
       ],
-      "@/types/*": [
-        "./src/types/*"
+      "@/lib/utils": [
+        "../ui/src/lib/utils.ts"
       ],
-      "@/hooks/*": [
-        "./src/hooks/*"
+      "@/components/ui/*": [
+        "../ui/src/components/ui/*"
       ],
-      "@/services/*": [
-        "./src/services/*"
+      "@/hooks/use-mobile": [
+        "../ui/src/hooks/use-mobile.tsx"
       ]
     },
     "lib": [
@@ -39,7 +28,12 @@
       "dom.iterable",
       "esnext"
     ],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
