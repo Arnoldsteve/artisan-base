@@ -1,0 +1,24 @@
+{
+  "extends": "../typescript-config/nextjs.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/services/*": ["./src/services/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

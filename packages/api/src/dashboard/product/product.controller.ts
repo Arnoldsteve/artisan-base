@@ -18,7 +18,6 @@ export class ProductController {
 
   @Post()
   create(@Body(ValidationPipe) createProductDto: CreateProductDto) {
-    console.log('Creating product with data:', createProductDto);
     return this.productService.create(createProductDto);
   }
 
