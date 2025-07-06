@@ -1,8 +1,8 @@
-// REFACTOR: Header component with search functionality and performance optimizations
+// REFACTOR: Header component with reactive navigation and improved accessibility
 
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
@@ -30,6 +30,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // OPTIMIZATION: Debounced search to reduce API calls
   const debouncedQuery = useDebounce(searchQuery, 300);
@@ -68,6 +69,9 @@ export function Header() {
 
   const toggleSearch = useCallback(() => {
     setIsSearchOpen((prev) => !prev);
+    if (!isSearchOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 0);
+    }
     if (isSearchOpen) {
       setSearchQuery("");
     }
@@ -78,7 +82,11 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link
+            href="/"
+            className="flex items-center space-x-2"
+            aria-label="Home"
+          >
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">
                 A
@@ -121,6 +129,7 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-4 flex-1 max-w-md mx-8">
             <form onSubmit={handleSearchSubmit} className="relative flex-1">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
@@ -169,12 +178,20 @@ export function Header() {
             >
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Cart">
-              <ShoppingCart className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Account">
-              <User className="h-5 w-5" />
-            </Button>
+            <Link href="/cart" aria-label="Cart">
+              <Button variant="ghost" size="icon" asChild>
+                <span>
+                  <ShoppingCart className="h-5 w-5" />
+                </span>
+              </Button>
+            </Link>
+            <Link href="/account" aria-label="Account">
+              <Button variant="ghost" size="icon" asChild>
+                <span>
+                  <User className="h-5 w-5" />
+                </span>
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -198,6 +215,7 @@ export function Header() {
           <div className="md:hidden py-4 border-t">
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
@@ -240,6 +258,22 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
+              </Link>
+              <Link
+                href="/cart"
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Cart"
+              >
+                Cart
+              </Link>
+              <Link
+                href="/account"
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Account"
+              >
+                Account
               </Link>
             </nav>
           </div>
