@@ -19,4 +19,5 @@ export * from "./components/ui/sonner";
 export * from "./components/ui/select";
 export * from "./components/ui/dialog";
 export * from "./components/ui/tabs";
-export * from "./components/ui/form"
+export * from "./components/ui/form";
+export * from "./components/ui/textarea";

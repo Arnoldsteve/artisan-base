@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@repo/ui/components/ui/button";
@@ -14,8 +14,7 @@ import {
 } from "@repo/ui/components/ui/select";
 
 import { Filter, Grid, List } from "lucide-react";
-import { useProducts } from "@/hooks/use-products";
-import { Product } from "@/types";
+import { useProducts, useCategories } from "@/hooks/use-products";
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -27,41 +26,27 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: productsResponse, isLoading, error } = useProducts();
+  // Fetch categories from API
+  const { data: categoriesResponse, isLoading: isLoadingCategories } =
+    useCategories();
+  const categories = categoriesResponse || [];
+
+  // Fetch products from API with filters
+  const {
+    data: productsResponse,
+    isLoading,
+    error,
+  } = useProducts({
+    search: searchQuery,
+    category: selectedCategory !== "all" ? selectedCategory : undefined,
+    minPrice: priceRange[0],
+    maxPrice: priceRange[1],
+    sortBy,
+    // You can add pagination here if needed
+  });
   const products = productsResponse?.data || [];
 
-  // Filter and sort products
-  const filteredProducts = products.filter((product: Product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      false;
-    const matchesCategory =
-      selectedCategory === "all" || product.category === selectedCategory;
-    const matchesPrice =
-      product.price >= priceRange[0] && product.price <= priceRange[1];
-
-    return matchesSearch && matchesCategory && matchesPrice;
-  });
-
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case "price-low":
-        return a.price - b.price;
-      case "price-high":
-        return b.price - a.price;
-      case "name":
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
-    }
-  });
-
-  const categories = Array.from(
-    new Set(products.map((p: Product) => p.category))
-  );
-
-  if (isLoading) {
+  if (isLoading || isLoadingCategories) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
@@ -100,8 +85,8 @@ export default function ProductsPage() {
               : "All Products"}
           </h1>
           <p className="text-muted-foreground">
-            {sortedProducts.length} product
-            {sortedProducts.length !== 1 ? "s" : ""} found
+            {products.length} product
+            {products.length !== 1 ? "s" : ""} found
           </p>
         </div>
 
@@ -151,8 +136,8 @@ export default function ProductsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                    <SelectItem key={category.id} value={category.name}>
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -204,7 +189,7 @@ export default function ProductsPage() {
       )}
 
       {/* Products Grid */}
-      {sortedProducts.length === 0 ? (
+      {products.length === 0 ? (
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-foreground mb-2">
             No products found
@@ -221,7 +206,7 @@ export default function ProductsPage() {
               : "space-y-4"
           }
         >
-          {sortedProducts.map((product: Product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

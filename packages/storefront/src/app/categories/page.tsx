@@ -1,30 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCategories } from "@/hooks/use-products";
-import { useProducts } from "@/hooks/use-products";
-import { Category, Product } from "@/types";
+import { Category } from "@/types";
 
 export default function CategoriesPage() {
   const { data: categoriesResponse, isLoading: categoriesLoading } =
     useCategories();
-  const { data: productsResponse, isLoading: productsLoading } = useProducts();
+  // The API returns an array of categories, each with _count.products
+  const categories = categoriesResponse || [];
 
-  const categories = categoriesResponse?.data || [];
-  const products = productsResponse?.data || [];
-
-  // Count products per category
-  const categoryCounts = products.reduce(
-    (acc: Record<string, number>, product: Product) => {
-      acc[product.category] = (acc[product.category] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
-
-  if (categoriesLoading || productsLoading) {
+  if (categoriesLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
@@ -59,7 +46,7 @@ export default function CategoriesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category: Category) => (
+          {categories.map((category: any) => (
             <Link
               key={category.id}
               href={`/products?category=${encodeURIComponent(category.name)}`}
@@ -95,8 +82,8 @@ export default function CategoriesPage() {
                 )}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
-                    {categoryCounts[category.name] || 0} product
-                    {categoryCounts[category.name] !== 1 ? "s" : ""}
+                    {category._count?.products || 0} product
+                    {category._count?.products !== 1 ? "s" : ""}
                   </span>
                   <span className="text-sm text-primary font-medium">
                     Browse →

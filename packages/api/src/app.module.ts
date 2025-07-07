@@ -16,6 +16,7 @@ import { CategoryModule } from './dashboard/category/category.module'; // <-- IM
 import { OrderModule } from './dashboard/order/order.module';
 import { CustomerModule } from './dashboard/customer/customer.module';
 import { SettingsModule } from './dashboard/settings/settings.module';
+import { StorefrontModule } from './storefront/storefront.module';
 import { TenantContextService } from './common/tenant-context.service';
 import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
 
@@ -33,6 +34,7 @@ import { TenantContextMiddleware } from './tenant/middleware/tenant-context.midd
     OrderModule,
     CustomerModule,
     SettingsModule,
+    StorefrontModule,
   ],
   controllers: [AppController],
   providers: [
