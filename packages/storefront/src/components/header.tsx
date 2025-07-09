@@ -8,6 +8,8 @@ import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { useProductSearch } from "@/hooks/use-products";
 import { Product } from "@/types";
+import { CartButton } from "@/components/cart/cart-button";
+import { CartDrawer } from "@/components/cart/cart-drawer";
 
 // OPTIMIZATION: Debounced search hook for better performance
 function useDebounce<T>(value: T, delay: number): T {
@@ -30,6 +32,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // OPTIMIZATION: Debounced search to reduce API calls
@@ -178,13 +181,7 @@ export function Header() {
             >
               <Search className="h-5 w-5" />
             </Button>
-            <Link href="/cart" aria-label="Cart">
-              <Button variant="ghost" size="icon" asChild>
-                <span>
-                  <ShoppingCart className="h-5 w-5" />
-                </span>
-              </Button>
-            </Link>
+            <CartButton onClick={() => setCartOpen(true)} />
             <Link href="/account" aria-label="Account">
               <Button variant="ghost" size="icon" asChild>
                 <span>
@@ -279,6 +276,7 @@ export function Header() {
           </div>
         )}
       </div>
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );
 }

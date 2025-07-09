@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useMemo } from "react";
 import { DashboardService } from "@/services/dashboard-service";
 import { DashboardData } from "@/types/dashboard";

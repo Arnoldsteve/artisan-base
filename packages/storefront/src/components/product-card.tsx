@@ -9,6 +9,7 @@ import { Star, ShoppingCart, Heart } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { Product } from "@/types";
+import { useCart } from "@/hooks/use-cart";
 
 interface ProductCardProps {
   product: Product;
@@ -22,12 +23,22 @@ export const ProductCard = memo(function ProductCard({
 }: ProductCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const { addToCart } = useCart();
 
   // OPTIMIZATION: Memoized callback to prevent unnecessary re-renders
   const handleAddToCart = useCallback(() => {
-    // In a real app, this would add the product to a cart state/context
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      slug: product.id, // fallback to id since slug does not exist
+      description: product.description || "",
+      image: product.image,
+      quantity: 1,
+      inventoryQuantity: product.inventoryQuantity,
+    });
     toast.success(`${product.name} has been added to your cart.`);
-  }, [product.name]);
+  }, [addToCart, product]);
 
   const handleToggleWishlist = useCallback(() => {
     setIsWishlisted((prev) => !prev);
@@ -65,7 +76,7 @@ export const ProductCard = memo(function ProductCard({
       {/* OPTIMIZATION: Image with lazy loading and error handling */}
       <div className="aspect-square overflow-hidden rounded-t-lg relative">
         <Image
-          src={product.image}
+          src={product.image || `https://picsum.photos/400/400?random=${product.id}`}
           alt={product.name}
           width={400}
           height={400}
