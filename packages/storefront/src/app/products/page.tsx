@@ -44,7 +44,9 @@ export default function ProductsPage() {
     sortBy,
     // You can add pagination here if needed
   });
-  const products = productsResponse?.data || [];
+  console.log("productsResponse:", productsResponse); // Add this line
+  const products = productsResponse || [];
+  console.log("productys from products page", products);
 
   if (isLoading || isLoadingCategories) {
     return (
