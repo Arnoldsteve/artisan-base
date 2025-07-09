@@ -211,7 +211,7 @@ export class ProductService {
 
       const response = await apiClient.get<
         ApiResponse<PaginatedResponse<Product>>
-      >("/storefront/products", params);
+      >("/api/v1/storefront/products", params);
 
       // OPTIMIZATION: Cache the results for better performance
       if (response.success) {
@@ -234,7 +234,7 @@ export class ProductService {
       }
 
       const response = await apiClient.get<ApiResponse<Product>>(
-        `/storefront/products/${id}`
+        `/api/v1/storefront/products/${id}`
       );
 
       if (response.success) {
@@ -260,7 +260,7 @@ export class ProductService {
       }
 
       const response = await apiClient.get<ApiResponse<Product[]>>(
-        "/storefront/products/featured",
+        "/api/v1/storefront/products/featured",
         { limit }
       );
 
@@ -285,7 +285,7 @@ export class ProductService {
       }
 
       const response = await apiClient.get<ApiResponse<Category[]>>(
-        "/storefront/categories"
+        "/api/v1/storefront/categories"
       );
 
       if (response.success) {

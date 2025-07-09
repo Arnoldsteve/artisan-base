@@ -10,7 +10,7 @@ import { StorefrontProductService } from './storefront-product.service';
 import { GetProductsDto } from './dto/get-products.dto';
 
 @Controller({
-  path: 'v1/storefront/products',
+  path: 'storefront/products',
   scope: Scope.REQUEST,
 })
 export class StorefrontProductController {
@@ -18,6 +18,7 @@ export class StorefrontProductController {
 
   @Get()
   findAll(@Query(ValidationPipe) filters: GetProductsDto) {
+    console.log('filters', filters);  
     return this.productService.findAll(filters);
   }
 

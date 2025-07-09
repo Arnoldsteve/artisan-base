@@ -10,7 +10,7 @@ import { StorefrontCategoryService } from './storefront-category.service';
 import { GetCategoriesDto } from './dto/get-categories.dto';
 
 @Controller({
-  path: 'v1/storefront/categories',
+  path: 'storefront/categories',
   scope: Scope.REQUEST,
 })
 export class StorefrontCategoryController {
