@@ -1,30 +1,25 @@
-import { HelpPageLayout } from "@/components/help/help-page-layout";
-import { Button } from "@repo/ui/components/ui/button";
+import { HelpHeader } from "@/components/help-center/HelpHeader";
+import { HelpSearch } from "@/components/help-center/HelpSearch";
+import { QuickActions } from "@/components/help-center/QuickActions";
+import { CategoryGrid } from "@/components/help-center/CategoryGrid";
+import { PopularArticles } from "@/components/help-center/PopularArticles";
+import { ContactOptions } from "@/components/help-center/ContactOptions";
+import { SelfServiceTools } from "@/components/help-center/SelfServiceTools";
+import { FooterSection } from "@/components/help-center/FooterSection";
 
 export default function HelpCenterPage() {
   return (
-    <HelpPageLayout title="Help Center">
-      <p>
-        Welcome to our Help Center. Find answers to common questions, shipping
-        info, and our return policy below.
-      </p>
-      <ul>
-        <li>
-          <a href="/shipping-info" className="text-blue-600 underline">
-            Shipping Info
-          </a>
-        </li>
-        <li>
-          <a href="/returns-exchanges" className="text-blue-600 underline">
-            Returns & Exchanges
-          </a>
-        </li>
-      </ul>
-      <div className="mt-6">
-        <Button asChild>
-          <a href="/">Back to Home</a>
-        </Button>
+    <div className="bg-[#f8fafc] min-h-screen pb-20">
+      <div className="max-w-6xl mx-auto px-4 pt-8">
+        <HelpHeader />
+        <HelpSearch />
+        <QuickActions />
+        <CategoryGrid />
+        <PopularArticles />
+        <ContactOptions />
+        <SelfServiceTools />
       </div>
-    </HelpPageLayout>
+      <FooterSection />
+    </div>
   );
 }
