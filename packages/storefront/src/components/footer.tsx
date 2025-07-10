@@ -89,19 +89,19 @@ export function Footer() {
             <h3 className="font-semibold text-foreground">Customer Service</h3>
             <nav className="space-y-2">
               <Link
-                href="/help"
+                href="/help-center"
                 className="block text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 Help Center
               </Link>
               <Link
-                href="/shipping"
+                href="/shipping-info"
                 className="block text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 Shipping Info
               </Link>
               <Link
-                href="/returns"
+                href="/returns-exchanges"
                 className="block text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 Returns & Exchanges

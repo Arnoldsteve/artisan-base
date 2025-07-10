@@ -2,30 +2,10 @@ import React, { useState } from "react";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-
-const shippingOptions = [
-  {
-    id: "standard",
-    name: "Standard Shipping",
-    price: 5.99,
-    estimatedDays: "5-7 business days",
-    description: "Standard ground shipping",
-  },
-  {
-    id: "express",
-    name: "Express Shipping",
-    price: 12.99,
-    estimatedDays: "2-3 business days",
-    description: "Expedited shipping",
-  },
-  {
-    id: "overnight",
-    name: "Overnight Shipping",
-    price: 24.99,
-    estimatedDays: "1 business day",
-    description: "Next day delivery",
-  },
-];
+import { validateAddress } from "@/lib/validate-address";
+import { shippingOptions } from "@/lib/shipping-options";
+import { Address } from "@/types/address";
+import { ShippingOption } from "@/types/shipping";
 
 export const ShippingAddressStep: React.FC = () => {
   const {
@@ -36,14 +16,14 @@ export const ShippingAddressStep: React.FC = () => {
     nextStep,
     previousStep,
   } = useCheckoutContext();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Address>({
     street: shippingAddress?.street || "",
     city: shippingAddress?.city || "",
     state: shippingAddress?.state || "",
     zipCode: shippingAddress?.zipCode || "",
     country: shippingAddress?.country || "US",
   });
-  const [selectedOption, setSelectedOption] = useState(
+  const [selectedOption, setSelectedOption] = useState<string>(
     selectedShippingOption?.id || shippingOptions[0].id
   );
   const [error, setError] = useState<string | null>(null);
@@ -53,14 +33,9 @@ export const ShippingAddressStep: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (
-      !form.street ||
-      !form.city ||
-      !form.state ||
-      !form.zipCode ||
-      !form.country
-    ) {
-      setError("Please fill in all required fields.");
+    const validationError = validateAddress(form);
+    if (validationError) {
+      setError(validationError);
       return;
     }
     setShippingAddress(form);

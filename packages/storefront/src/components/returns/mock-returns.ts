@@ -1,0 +1,50 @@
+export const mockReturns = [
+  {
+    id: "rtn-001",
+    productImage: "/mock/product1.jpg",
+    itemName: "Classic Blue Denim Jacket",
+    orderNumber: "ORD-12345",
+    returnReason: "Wrong size",
+    status: "pending", // pending, approved, rejected, in_transit, completed
+    refundAmount: 59.99,
+    expectedCompletion: "2024-07-01",
+    statusSteps: [
+      { label: "Requested", completed: true },
+      { label: "Approved", completed: false },
+      { label: "Item Received", completed: false },
+      { label: "Refund Processed", completed: false },
+    ],
+  },
+  {
+    id: "rtn-002",
+    productImage: "/mock/product2.jpg",
+    itemName: "White Cotton T-Shirt",
+    orderNumber: "ORD-12346",
+    returnReason: "Defective/Damaged",
+    status: "approved",
+    refundAmount: 19.99,
+    expectedCompletion: "2024-06-28",
+    statusSteps: [
+      { label: "Requested", completed: true },
+      { label: "Approved", completed: true },
+      { label: "Item Received", completed: false },
+      { label: "Refund Processed", completed: false },
+    ],
+  },
+  {
+    id: "rtn-003",
+    productImage: "/mock/product3.jpg",
+    itemName: "Black Running Shoes",
+    orderNumber: "ORD-12347",
+    returnReason: "Changed mind",
+    status: "in_transit",
+    refundAmount: 89.99,
+    expectedCompletion: "2024-07-03",
+    statusSteps: [
+      { label: "Requested", completed: true },
+      { label: "Approved", completed: true },
+      { label: "Item Received", completed: true },
+      { label: "Refund Processed", completed: false },
+    ],
+  },
+]; 
