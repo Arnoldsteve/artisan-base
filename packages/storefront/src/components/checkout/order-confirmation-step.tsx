@@ -22,7 +22,10 @@ export const OrderConfirmationStep: React.FC = () => {
       </h2>
       <div className="text-lg mb-2">Order #{order.id}</div>
       <div className="text-muted-foreground mb-4">
-        Estimated delivery: {order.estimatedDelivery.toLocaleDateString()}
+        Estimated delivery:{" "}
+        {order.estimatedDelivery
+          ? new Date(order.estimatedDelivery).toLocaleDateString()
+          : "N/A"}
       </div>
       <Button asChild>
         <a href="/products">Continue Shopping</a>

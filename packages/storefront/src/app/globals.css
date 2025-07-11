@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Print styles for legal documents */
+@media print {
+  /* Hide non-essential elements */
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .legal-section {
+    page-break-inside: avoid;
+  }
+
+  /* Optimize text for printing */
+  .prose {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  /* Ensure good contrast */
+  .text-muted-foreground {
+    color: #374151 !important;
+  }
+
+  /* Remove backgrounds for better printing */
+  .bg-muted\/30,
+  .bg-muted {
+    background: none !important;
+  }
+
+  /* Ensure links are visible */
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

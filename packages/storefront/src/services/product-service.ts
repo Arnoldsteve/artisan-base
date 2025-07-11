@@ -276,6 +276,20 @@ export class ProductService {
     }
   }
 
+  // OPTIMIZATION: Get new arrivals sorted by creation date
+  async getNewArrivals(limit: number = 12): Promise<Product[]> {
+    try {
+      // Get all products and sort by creation date
+      const allProducts = await this.getProducts({ limit: 100 }); // Get more products to sort from
+      const sortedProducts = this.sortProducts(allProducts.data, "createdAt", "desc");
+      
+      return sortedProducts.slice(0, limit);
+    } catch (error) {
+      console.error("Error fetching new arrivals:", error);
+      return [];
+    }
+  }
+
   async getCategories(): Promise<Category[]> {
     try {
       // OPTIMIZATION: Use cache for categories

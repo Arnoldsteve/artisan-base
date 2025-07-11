@@ -159,6 +159,12 @@ export function Footer() {
             >
               Cookie Policy
             </Link>
+            <Link
+              href="/legal-search"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Legal Search
+            </Link>
           </div>
         </div>
       </div>

@@ -22,6 +22,7 @@ export const productKeys = {
   details: () => [...productKeys.all, "detail"] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
   featured: () => [...productKeys.all, "featured"] as const,
+  newArrivals: () => [...productKeys.all, "new-arrivals"] as const,
   categories: () => [...productKeys.all, "categories"] as const,
   search: (query: string) => [...productKeys.all, "search", query] as const,
 };
@@ -77,6 +78,16 @@ export function useFeaturedProducts(limit: number = 6) {
     queryFn: () => productService.getFeaturedProducts(limit),
     staleTime: 15 * 60 * 1000, // 15 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
+  });
+}
+
+// OPTIMIZATION: New arrivals with shorter cache time for freshness
+export function useNewArrivals(limit: number = 12) {
+  return useQuery({
+    queryKey: productKeys.newArrivals(),
+    queryFn: () => productService.getNewArrivals(limit),
+    staleTime: 5 * 60 * 1000, // 5 minutes for freshness
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 }
 
