@@ -18,7 +18,7 @@ export class StorefrontProductController {
 
   @Get()
   findAll(@Query(ValidationPipe) filters: GetProductsDto) {
-    console.log('filters', filters);  
+    console.log('filters', filters);
     return this.productService.findAll(filters);
   }
 
@@ -34,6 +34,8 @@ export class StorefrontProductController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productService.findOne(id);
+    return this.productService
+      .findOne(id)
+      .then((product) => ({ success: true, data: product }));
   }
 }

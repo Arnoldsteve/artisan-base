@@ -65,6 +65,34 @@ class ProductCache {
   }
 }
 
+// Add this helper function at the top (after imports)
+function normalizeProduct(product: any): Product {
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description || "",
+    price: Number(product.price) || 0,
+    originalPrice: product.originalPrice
+      ? Number(product.originalPrice)
+      : undefined,
+    image: product.image || (product.images && product.images[0]) || "",
+    images: product.images || [],
+    category:
+      product.category ||
+      (product.categories && product.categories[0]?.name) ||
+      "",
+    categoryId: product.categoryId || "",
+    rating: product.rating ?? 0,
+    reviewCount: product.reviewCount ?? 0,
+    inventoryQuantity: product.inventoryQuantity ?? 0,
+    sku: product.sku || "",
+    tags: product.tags || [],
+    isActive: product.isActive ?? true,
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
+  };
+}
+
 // REFACTOR: ProductService with business logic separation
 export class ProductService {
   private cache: ProductCache;
@@ -238,8 +266,9 @@ export class ProductService {
       );
 
       if (response.success) {
-        this.cache.setProduct(response.data);
-        return response.data;
+        const normalized = normalizeProduct(response.data);
+        this.cache.setProduct(normalized);
+        return normalized;
       }
 
       throw new Error("Product not found");
@@ -281,8 +310,12 @@ export class ProductService {
     try {
       // Get all products and sort by creation date
       const allProducts = await this.getProducts({ limit: 100 }); // Get more products to sort from
-      const sortedProducts = this.sortProducts(allProducts.data, "createdAt", "desc");
-      
+      const sortedProducts = this.sortProducts(
+        allProducts.data,
+        "createdAt",
+        "desc"
+      );
+
       return sortedProducts.slice(0, limit);
     } catch (error) {
       console.error("Error fetching new arrivals:", error);
