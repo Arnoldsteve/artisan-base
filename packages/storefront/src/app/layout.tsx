@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/providers/query-provider";
 import { CartProvider } from "@/contexts/cart-context";
+import { WishlistProvider } from "@/contexts/wishlist-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,12 +26,14 @@ export default function RootLayout({
       <body className={inter.className}>
         <QueryProvider>
           <CartProvider>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-            <Toaster position="bottom-right" richColors closeButton />
+            <WishlistProvider>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+              <Toaster position="bottom-right" richColors closeButton />
+            </WishlistProvider>
           </CartProvider>
         </QueryProvider>
       </body>

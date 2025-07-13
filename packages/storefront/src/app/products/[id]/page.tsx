@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useProduct } from "@/hooks/use-products";
 import { Product } from "@/types";
 import { useCartContext } from "@/contexts/cart-context";
+import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
 
 export default function ProductPage() {
@@ -19,11 +20,13 @@ export default function ProductPage() {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { data: product, isLoading, error } = useProduct(productId);
   const { addToCart } = useCartContext();
+  const { isInWishlist, addToWishlist, removeFromWishlist } =
+    useWishlistContext();
 
+  const isWishlisted = product ? isInWishlist(product.id) : false;
   const handleAddToCart = () => {
     if (!product) return;
     addToCart({
@@ -40,12 +43,23 @@ export default function ProductPage() {
   };
 
   const handleToggleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    toast.success(
-      isWishlisted
-        ? `${product?.name} removed from wishlist`
-        : `${product?.name} added to wishlist`
-    );
+    if (!product) return;
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+      toast.success(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image || (product.images && product.images[0]) || "",
+        category: product.category,
+        slug: product.sku || product.id,
+        description: product.description || "",
+        inventoryQuantity: product.inventoryQuantity,
+      });
+      toast.success(`${product.name} added to wishlist`);
+    }
   };
 
   const handleShare = () => {
