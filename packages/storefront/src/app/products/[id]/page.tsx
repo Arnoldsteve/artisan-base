@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useProduct } from "@/hooks/use-products";
 import { Product } from "@/types";
 import { useCartContext } from "@/contexts/cart-context";
+import { ProductRecommendations } from "@/components/ProductRecommendations";
 
 export default function ProductPage() {
   const params = useParams();
@@ -355,16 +356,7 @@ export default function ProductPage() {
       </div>
 
       {/* Related Products Section */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-foreground mb-6">
-          You might also like
-        </h2>
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">
-            Related products will appear here
-          </p>
-        </div>
-      </div>
+      <ProductRecommendations currentProduct={product} />
     </div>
   );
 }
