@@ -10,6 +10,7 @@ import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/hooks/use-products";
 import { Product } from "@/types";
+import { useCartContext } from "@/contexts/cart-context";
 
 export default function ProductPage() {
   const params = useParams();
@@ -20,9 +21,21 @@ export default function ProductPage() {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { data: product, isLoading, error } = useProduct(productId);
+  const { addToCart } = useCartContext();
 
   const handleAddToCart = () => {
-    toast.success(`${product?.name} has been added to your cart.`);
+    if (!product) return;
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      slug: product.sku || product.id,
+      description: product.description || "",
+      image: product.image || (product.images && product.images[0]) || "",
+      quantity,
+      inventoryQuantity: product.inventoryQuantity,
+    });
+    toast.success(`${product.name} has been added to your cart.`);
   };
 
   const handleToggleWishlist = () => {
@@ -125,7 +138,10 @@ export default function ProductPage() {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg border">
             <Image
-              src={images[selectedImage]}
+              src={
+                images[selectedImage] ||
+                `https://picsum.photos/400/400?random=${product.id}`
+              }
               alt={product.name}
               width={600}
               height={600}
@@ -146,7 +162,10 @@ export default function ProductPage() {
                   }`}
                 >
                   <Image
-                    src={image}
+                    src={
+                      image ||
+                      `https://picsum.photos/400/400?random=${product.id}`
+                    }
                     alt={`${product.name} ${index + 1}`}
                     width={150}
                     height={150}
