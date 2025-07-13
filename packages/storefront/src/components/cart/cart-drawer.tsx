@@ -2,6 +2,7 @@ import React from "react";
 import { useCart } from "@/hooks/use-cart";
 import { CartItem } from "./cart-item";
 import { Button } from "@repo/ui/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface CartDrawerProps {
   open: boolean;
@@ -10,6 +11,7 @@ interface CartDrawerProps {
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
   const { items, getTotalPrice, clearCart } = useCart();
+  const router = useRouter();
 
   return (
     <div
@@ -61,6 +63,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
             variant="default"
             className="flex-1"
             disabled={items.length === 0}
+            onClick={() => {
+              router.push("/checkout");
+              onClose();
+            }}
           >
             Checkout
           </Button>
