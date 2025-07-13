@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import {
@@ -76,6 +77,8 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const validTabs = ["profile", "orders", "wishlist", "settings"];
+
 export default function AccountPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -83,6 +86,18 @@ export default function AccountPage() {
     lastName: mockUser.lastName,
     email: mockUser.email,
   });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab");
+  const activeTab = validTabs.includes(tabParam || "") ? tabParam! : "profile";
+
+  const handleTabChange = (tab: string) => {
+    if (tab === "profile") {
+      router.push("/account");
+    } else if (validTabs.includes(tab)) {
+      router.push(`/account?tab=${tab}`);
+    }
+  };
 
   const handleSaveProfile = () => {
     setIsEditing(false);
@@ -103,7 +118,7 @@ export default function AccountPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center space-x-2">
             <User className="h-4 w-4" />

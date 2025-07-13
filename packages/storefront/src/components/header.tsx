@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
@@ -10,6 +10,7 @@ import { useProductSearch } from "@/hooks/use-products";
 import { Product } from "@/types";
 import { CartButton } from "@/components/cart/cart-button";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { UserAccountDropdown } from "./UserAccountDropdown";
 
 // OPTIMIZATION: Debounced search hook for better performance
 function useDebounce<T>(value: T, delay: number): T {
@@ -33,6 +34,8 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // OPTIMIZATION: Debounced search to reduce API calls
@@ -79,6 +82,28 @@ export function Header() {
       setSearchQuery("");
     }
   }, [isSearchOpen]);
+
+  // Close dropdown on click outside or Escape
+  useEffect(() => {
+    if (!isUserDropdownOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsUserDropdownOpen(false);
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsUserDropdownOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isUserDropdownOpen]);
 
   return (
     <header className="bg-background border-b sticky top-0 z-50">
@@ -182,13 +207,22 @@ export function Header() {
               <Search className="h-5 w-5" />
             </Button>
             <CartButton onClick={() => setCartOpen(true)} />
-            <Link href="/account" aria-label="Account">
-              <Button variant="ghost" size="icon" asChild>
-                <span>
-                  <User className="h-5 w-5" />
-                </span>
+            <div className="relative" ref={userDropdownRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Account"
+                onClick={() => setIsUserDropdownOpen((open) => !open)}
+                aria-expanded={isUserDropdownOpen}
+                aria-haspopup="menu"
+              >
+                <User className="h-5 w-5" />
               </Button>
-            </Link>
+              <UserAccountDropdown
+                open={isUserDropdownOpen}
+                onClose={() => setIsUserDropdownOpen(false)}
+              />
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -256,22 +290,64 @@ export function Header() {
               >
                 Contact
               </Link>
-              <Link
-                href="/cart"
-                className="text-foreground hover:text-primary transition-colors"
+              {/* User account options for mobile */}
+              <div className="border-t my-2" />
+              <Button
+                className="w-full mb-2"
                 onClick={() => setIsMenuOpen(false)}
-                aria-label="Cart"
               >
-                Cart
-              </Link>
+                Sign In
+              </Button>
+              <Button
+                className="w-full mb-2"
+                variant="outline"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Create Account
+              </Button>
               <Link
                 href="/account"
-                className="text-foreground hover:text-primary transition-colors"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
                 onClick={() => setIsMenuOpen(false)}
-                aria-label="Account"
               >
-                Account
+                My Account
               </Link>
+              <Link
+                href="/account?tab=orders"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Orders
+              </Link>
+              <Link
+                href="/account?tab=wishlist"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Wishlist
+              </Link>
+              <Link
+                href="/account?tab=settings"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Settings
+              </Link>
+              <div className="border-t my-2" />
+              <Link
+                href="/track-order"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Track Order
+              </Link>
+              <Button
+                className="w-full mt-2"
+                variant="ghost"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Continue as Guest
+              </Button>
             </nav>
           </div>
         )}
