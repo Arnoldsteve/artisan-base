@@ -1,16 +1,14 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  Tabs,
-  TabsContent,
-} from "@repo/ui/components/ui/tabs";
+import { Tabs, TabsContent } from "@repo/ui/components/ui/tabs";
 import { Profile } from "@/components/account/profile";
 import { Orders } from "@/components/account/orders";
 import { Wishlist } from "@/components/account/wishlist";
 import { Settings as AccountSettings } from "@/components/account/settings";
 import { TabList } from "@/components/account/tablist";
-
+import { useEffect } from "react";
+import { useAuthContext } from "@/contexts/auth-context";
 
 const validTabs = ["profile", "orders", "wishlist", "settings"];
 
@@ -19,7 +17,16 @@ export default function AccountPage() {
   const router = useRouter();
   const tabParam = searchParams.get("tab");
   const activeTab = validTabs.includes(tabParam || "") ? tabParam! : "profile";
+  const { isAuthenticated, loading } = useAuthContext();
 
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  if (loading) return null;
+  if (!isAuthenticated) return null;
 
   const handleTabChange = (tab: string) => {
     if (tab === "profile") {

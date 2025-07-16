@@ -3,6 +3,7 @@ import { StorefrontAuthController } from './storefront-auth.controller';
 import { StorefrontAuthService } from './storefront-auth.service';
 import { StorefrontAuthRepository } from './storefront-auth.repository';
 import { JwtModule } from '@nestjs/jwt';
+import { StorefrontJwtStrategy } from './storefront-jwt.strategy';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
   providers: [
     StorefrontAuthService,
     { provide: 'StorefrontAuthRepository', useClass: StorefrontAuthRepository },
+    StorefrontJwtStrategy,
   ],
 })
 export class AuthModule {}

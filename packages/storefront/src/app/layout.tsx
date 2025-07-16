@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { QueryProvider } from "@/providers/query-provider";
 import { CartProvider } from "@/contexts/cart-context";
 import { WishlistProvider } from "@/contexts/wishlist-context";
+import { AuthProvider } from "@/contexts/auth-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,12 +28,14 @@ export default function RootLayout({
         <QueryProvider>
           <CartProvider>
             <WishlistProvider>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-              <Toaster position="bottom-right" richColors closeButton />
+              <AuthProvider>
+                <div className="min-h-screen flex flex-col">
+                  <Header />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+                <Toaster position="bottom-right" richColors closeButton />
+              </AuthProvider>
             </WishlistProvider>
           </CartProvider>
         </QueryProvider>
