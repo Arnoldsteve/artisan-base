@@ -29,6 +29,11 @@ import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCartContext } from "@/contexts/cart-context";
+import { Profile } from "@/components/account/profile";
+import { Orders } from "@/components/account/orders";
+import { Wishlist } from "@/components/account/wishlist";
+import { Settings as AccountSettings } from "@/components/account/settings";
+import { TabList } from "@/components/account/tablist";
 
 // Mock user data
 const mockUser = {
@@ -130,355 +135,26 @@ export default function AccountPage() {
         onValueChange={handleTabChange}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile" className="flex items-center space-x-2">
-            <User className="h-4 w-4" />
-            <span>Profile</span>
-          </TabsTrigger>
-          <TabsTrigger value="orders" className="flex items-center space-x-2">
-            <Package className="h-4 w-4" />
-            <span>Orders</span>
-          </TabsTrigger>
-          <TabsTrigger value="wishlist" className="flex items-center space-x-2">
-            <Heart className="h-4 w-4" />
-            <span>
-              Wishlist
-              {wishlistItems.length > 0 ? ` (${wishlistItems.length})` : ""}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center space-x-2">
-            <Settings className="h-4 w-4" />
-            <span>Settings</span>
-          </TabsTrigger>
-        </TabsList>
+        <TabList />
 
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>
-                    Update your personal information and preferences
-                  </CardDescription>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  {isEditing ? "Cancel" : "Edit"}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={mockUser.avatar} alt={mockUser.firstName} />
-                  <AvatarFallback>
-                    {mockUser.firstName.charAt(0)}
-                    {mockUser.lastName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    {mockUser.firstName} {mockUser.lastName}
-                  </h3>
-                  <p className="text-muted-foreground">{mockUser.email}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    First Name
-                  </label>
-                  <Input
-                    value={profileData.firstName}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        firstName: e.target.value,
-                      }))
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Last Name
-                  </label>
-                  <Input
-                    value={profileData.lastName}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        lastName: e.target.value,
-                      }))
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Email
-                  </label>
-                  <Input
-                    type="email"
-                    value={profileData.email}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              </div>
-
-              {isEditing && (
-                <div className="flex space-x-2">
-                  <Button onClick={handleSaveProfile}>Save Changes</Button>
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <Profile />
         </TabsContent>
 
         {/* Orders Tab */}
         <TabsContent value="orders" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Order History</CardTitle>
-              <CardDescription>View and track your past orders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {mockOrders.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    No orders yet
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    Start shopping to see your order history here
-                  </p>
-                  <Button>Browse Products</Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {mockOrders.map((order) => (
-                    <div key={order.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-semibold text-foreground">
-                            {order.id}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(order.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-foreground">
-                            ${order.total.toFixed(2)}
-                          </p>
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status.charAt(0).toUpperCase() +
-                              order.status.slice(1)}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        {order.items.map((item, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between text-sm"
-                          >
-                            <span className="text-muted-foreground">
-                              {item.quantity}x {item.name}
-                            </span>
-                            <span>
-                              ${(item.price * item.quantity).toFixed(2)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <Orders />
         </TabsContent>
 
         {/* Wishlist Tab */}
         <TabsContent value="wishlist" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Wishlist</CardTitle>
-              <CardDescription>Save items you love for later</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {wishlistItems.length === 0 ? (
-                <div className="text-center py-8">
-                  <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Your wishlist is empty
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    Start adding items you love to your wishlist
-                  </p>
-                  <Button asChild>
-                    <Link href="/products">Browse Products</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {wishlistItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-white rounded-lg shadow p-4 flex flex-col group border border-gray-100 hover:border-primary transition"
-                    >
-                      <Link
-                        href={`/products/${item.id}`}
-                        className="block mb-3"
-                      >
-                        <img
-                          src={
-                            item.image ||
-                            `https://picsum.photos/200/200?random=${item.id}`
-                          }
-                          alt={item.name}
-                          className="w-full h-40 object-cover rounded group-hover:scale-105 transition-transform"
-                        />
-                      </Link>
-                      <div className="flex-1 flex flex-col">
-                        <h3 className="font-semibold text-foreground mb-1 line-clamp-2">
-                          {item.name}
-                        </h3>
-                        <span className="text-primary font-bold mb-1">
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(item.price)}
-                        </span>
-                        <span className="inline-block bg-accent text-xs px-2 py-1 rounded mb-2">
-                          {item.category}
-                        </span>
-                        <div className="flex space-x-2 mt-auto">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => removeFromWishlist(item.id)}
-                            aria-label="Remove from wishlist"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() =>
-                              addToCart({
-                                id: item.id,
-                                name: item.name,
-                                price: item.price,
-                                slug: item.slug || item.id,
-                                description: item.description || "",
-                                image: item.image,
-                                quantity: 1,
-                                inventoryQuantity: item.inventoryQuantity,
-                              })
-                            }
-                            disabled={item.inventoryQuantity === 0}
-                            aria-label="Add to cart"
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-1" />
-                            {item.inventoryQuantity > 0
-                              ? "Add to Cart"
-                              : "Out of Stock"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <Wishlist />
         </TabsContent>
 
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Settings</CardTitle>
-              <CardDescription>
-                Manage your account preferences and security
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="font-semibold text-foreground mb-4">
-                  Notifications
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">
-                        Order Updates
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Get notified about order status changes
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Enable
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">
-                        New Products
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Be the first to know about new arrivals
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Enable
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t pt-6">
-                <h4 className="font-semibold text-foreground mb-4">Security</h4>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    Change Password
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Two-Factor Authentication
-                  </Button>
-                </div>
-              </div>
-
-              <div className="border-t pt-6">
-                <Button
-                  variant="destructive"
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center space-x-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <AccountSettings />
         </TabsContent>
       </Tabs>
     </div>
