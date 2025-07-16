@@ -134,7 +134,10 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         notes: undefined,
       };
       // Call backend API
-      const response = await apiClient.post<any>("/storefront/orders", payload);
+      const response = await apiClient.post<any>(
+        "/api/v1/storefront/orders",
+        payload
+      );
       setOrder({
         id: response.order.id,
         customer: state.customer!,
