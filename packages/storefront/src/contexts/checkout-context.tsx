@@ -8,6 +8,8 @@ import type {
   Order,
 } from "@/types/checkout";
 import type { CartItem } from "@/types/cart";
+import { apiClient } from "@/lib/api-client";
+import { useCart } from "@/hooks/use-cart";
 
 type State = {
   currentStep: number;
@@ -92,6 +94,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.setItem("checkout", JSON.stringify(state));
   }, [state]);
 
+  const { items, clearCart } = useCart();
+
   // Actions
   const setCustomer = (customer: Customer) =>
     dispatch({ type: "SET_CUSTOMER", payload: customer });
@@ -118,28 +122,40 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoading(true);
     setError(null);
     try {
-      // Simulate API call
-      await new Promise((res) => setTimeout(res, 1500));
-      // Generate mock order
-      const order: Order = {
-        id: Math.random().toString(36).slice(2, 10).toUpperCase(),
+      // Prepare order payload
+      const payload = {
+        customer: state.customer,
+        shippingAddress: state.shippingAddress,
+        billingAddress: state.shippingAddress, // For now, use shipping as billing
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        })),
+        notes: undefined,
+      };
+      // Call backend API
+      const response = await apiClient.post<any>("/storefront/orders", payload);
+      setOrder({
+        id: response.order.id,
         customer: state.customer!,
         shippingAddress: state.shippingAddress!,
         shippingOption: state.selectedShippingOption!,
         paymentMethod: state.selectedPaymentMethod!,
-        items: [], // Fill with cart items at integration
-        subtotal: 0,
+        items,
+        subtotal: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
         shippingCost: state.selectedShippingOption?.price || 0,
         tax: 0,
-        total: 0,
+        total:
+          items.reduce((sum, i) => sum + i.price * i.quantity, 0) +
+          (state.selectedShippingOption?.price || 0),
         status: "pending",
-        createdAt: new Date(),
+        createdAt: new Date(response.order.createdAt),
         estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      };
-      setOrder(order);
+      });
+      clearCart();
       nextStep();
-    } catch (e) {
-      setError("Failed to submit order. Please try again.");
+    } catch (e: any) {
+      setError(e.message || "Failed to submit order. Please try again.");
     } finally {
       setLoading(false);
     }
