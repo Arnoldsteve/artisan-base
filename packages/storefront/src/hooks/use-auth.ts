@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiClient } from "@/lib/api-client";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -9,17 +10,11 @@ export function useAuth() {
     async function fetchUser() {
       setLoading(true);
       try {
-        const res = await fetch("/api/v1/storefront/auth/me", {
-          credentials: "include",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+        const data = await apiClient.get<any>(
+          "/api/v1/storefront/auth/profile"
+        );
+        setUser(data);
+        setIsAuthenticated(true);
       } catch {
         setUser(null);
         setIsAuthenticated(false);

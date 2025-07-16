@@ -18,6 +18,7 @@ export class StorefrontJwtStrategy extends PassportStrategy(
     @Inject(REQUEST) private readonly request: any,
     private readonly prisma: TenantPrismaService,
   ) {
+    console.log('StorefrontJwtStrategy registered');
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       throw new Error(

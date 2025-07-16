@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAuthForm } from "@/hooks/use-auth-form";
+import { signup } from "@/services/auth-service";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -8,37 +9,17 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/v1/storefront/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password, firstName, lastName, phone }),
-      });
-      if (res.ok) {
-        router.replace("/account");
-      } else {
-        const data = await res.json();
-        setError(data.message || "Signup failed");
-      }
-    } catch {
-      setError("Signup failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { error, loading, handleSubmit } = useAuthForm(signup, "/account");
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm p-8 bg-white rounded shadow">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit({ email, password, firstName, lastName, phone });
+        }}
+        className="w-full max-w-sm p-8 bg-white rounded shadow"
+      >
         <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
         {error && <div className="mb-4 text-red-500">{error}</div>}
         <div className="mb-4">
@@ -47,7 +28,7 @@ export default function SignupPage() {
             type="text"
             className="w-full border rounded px-3 py-2"
             value={firstName}
-            onChange={e => setFirstName(e.target.value)}
+            onChange={(e) => setFirstName(e.target.value)}
             required
             autoFocus
           />
@@ -58,7 +39,7 @@ export default function SignupPage() {
             type="text"
             className="w-full border rounded px-3 py-2"
             value={lastName}
-            onChange={e => setLastName(e.target.value)}
+            onChange={(e) => setLastName(e.target.value)}
             required
           />
         </div>
@@ -68,7 +49,7 @@ export default function SignupPage() {
             type="email"
             className="w-full border rounded px-3 py-2"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -78,7 +59,7 @@ export default function SignupPage() {
             type="tel"
             className="w-full border rounded px-3 py-2"
             value={phone}
-            onChange={e => setPhone(e.target.value)}
+            onChange={(e) => setPhone(e.target.value)}
           />
         </div>
         <div className="mb-6">
@@ -87,7 +68,7 @@ export default function SignupPage() {
             type="password"
             className="w-full border rounded px-3 py-2"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
@@ -101,4 +82,4 @@ export default function SignupPage() {
       </form>
     </div>
   );
-} 
+}
