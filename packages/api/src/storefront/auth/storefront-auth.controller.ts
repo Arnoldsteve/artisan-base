@@ -26,10 +26,11 @@ export class StorefrontAuthController {
     const { accessToken, ...rest } = result;
     res.cookie('storefront_jwt', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // for local dev
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
+      // domain: undefined, // do not set domain for localhost
     });
     return res.status(HttpStatus.CREATED).json(rest);
   }
@@ -41,10 +42,11 @@ export class StorefrontAuthController {
     const { accessToken, ...rest } = result;
     res.cookie('storefront_jwt', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // for local dev
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
+      // domain: undefined, // do not set domain for localhost
     });
     return res.status(HttpStatus.OK).json(rest);
   }
@@ -58,10 +60,11 @@ export class StorefrontAuthController {
     const { accessToken, ...rest } = result;
     res.cookie('storefront_jwt', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // for local dev
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
+      // domain: undefined, // do not set domain for localhost
     });
     return res.status(HttpStatus.OK).json(rest);
   }

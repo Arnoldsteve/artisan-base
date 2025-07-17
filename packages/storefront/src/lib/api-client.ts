@@ -69,6 +69,7 @@ export class ApiClient {
       headers: {
         "Content-Type": "application/json",
       },
+      withCredentials: true, // <-- Ensure cookies are sent/received
     });
 
     // Always send x-tenant-id header for local dev

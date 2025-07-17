@@ -16,23 +16,30 @@ import {
 } from "@repo/ui/components/ui/avatar";
 import { Edit } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthContext } from "@/contexts/auth-context";
 
-const mockUser = {
-  id: "1",
-  email: "john.doe@example.com",
-  firstName: "John",
-  lastName: "Doe",
-  avatar:
-    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-};
+const avatarUrl =
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face";
 
 export const Profile: React.FC = () => {
+  const { user } = useAuthContext();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    firstName: mockUser.firstName,
-    lastName: mockUser.lastName,
-    email: mockUser.email,
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
   });
+
+  // Keep profileData in sync with user if user changes (e.g. after login)
+  // This is a simple effect to update local state if user changes
+  // (optional, but helps with SPA navigation)
+  // useEffect(() => {
+  //   setProfileData({
+  //     firstName: user?.firstName || "",
+  //     lastName: user?.lastName || "",
+  //     email: user?.email || "",
+  //   });
+  // }, [user]);
 
   const handleSaveProfile = () => {
     setIsEditing(false);
@@ -62,67 +69,65 @@ export const Profile: React.FC = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={mockUser.avatar} alt={mockUser.firstName} />
+            <AvatarImage src={avatarUrl} alt={profileData.firstName} />
             <AvatarFallback>
-              {mockUser.firstName.charAt(0)}
-              {mockUser.lastName.charAt(0)}
+              {(profileData.firstName?.charAt(0) || "").toUpperCase()}
+              {(profileData.lastName?.charAt(0) || "").toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
             <h3 className="text-lg font-semibold">
-              {mockUser.firstName} {mockUser.lastName}
+              {profileData.firstName} {profileData.lastName}
             </h3>
-            <p className="text-muted-foreground">{mockUser.email}</p>
+            <p className="text-muted-foreground">{profileData.email}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              First Name
-            </label>
-            <Input
-              value={profileData.firstName}
-              onChange={(e) =>
-                setProfileData((prev) => ({
-                  ...prev,
-                  firstName: e.target.value,
-                }))
-              }
-              disabled={!isEditing}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Last Name
-            </label>
-            <Input
-              value={profileData.lastName}
-              onChange={(e) =>
-                setProfileData((prev) => ({
-                  ...prev,
-                  lastName: e.target.value,
-                }))
-              }
-              disabled={!isEditing}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Email
-            </label>
-            <Input
-              type="email"
-              value={profileData.email}
-              onChange={(e) =>
-                setProfileData((prev) => ({
-                  ...prev,
-                  email: e.target.value,
-                }))
-              }
-              disabled={!isEditing}
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            First Name
+          </label>
+          <Input
+            value={profileData.firstName}
+            onChange={(e) =>
+              setProfileData((prev) => ({
+                ...prev,
+                firstName: e.target.value,
+              }))
+            }
+            disabled={!isEditing}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Last Name
+          </label>
+          <Input
+            value={profileData.lastName}
+            onChange={(e) =>
+              setProfileData((prev) => ({
+                ...prev,
+                lastName: e.target.value,
+              }))
+            }
+            disabled={!isEditing}
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Email
+          </label>
+          <Input
+            type="email"
+            value={profileData.email}
+            onChange={(e) =>
+              setProfileData((prev) => ({
+                ...prev,
+                email: e.target.value,
+              }))
+            }
+            disabled={!isEditing}
+          />
         </div>
 
         {isEditing && (

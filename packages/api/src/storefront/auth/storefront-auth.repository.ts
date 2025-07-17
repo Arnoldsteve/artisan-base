@@ -1,13 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
+// src/storefront/auth/storefront-auth.repository.ts
+import { Injectable, Inject, Scope } from '@nestjs/common';
+import { TenantClientFactory } from 'src/prisma/tenant-client-factory.service';
 import { IStorefrontAuthRepository } from './interfaces/storefront-auth-repository.interface';
+import { REQUEST } from '@nestjs/core';
+import { RequestWithTenant } from 'src/common/interfaces/request-with-tenant.interface';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class StorefrontAuthRepository implements IStorefrontAuthRepository {
-  constructor(private readonly prisma: TenantPrismaService) {}
+  constructor(
+    @Inject(REQUEST) private readonly request: RequestWithTenant,
+    private readonly tenantClientFactory: TenantClientFactory,
+  ) {}
+
+  private getPrismaClient() {
+    const tenant = this.request.tenant;
+    if (!tenant) {
+      throw new Error('Tenant information is not available on the request.');
+    }
+    return this.tenantClientFactory.getTenantClient(tenant.dbSchema);
+  }
 
   async findCustomerByEmail(email: string) {
-    return this.prisma.customer.findUnique({ where: { email } });
+    const prisma = this.getPrismaClient();
+    return prisma.customer.findUnique({ where: { email } });
   }
 
   async createCustomer(data: {
@@ -17,11 +32,13 @@ export class StorefrontAuthRepository implements IStorefrontAuthRepository {
     lastName: string;
     phone?: string;
   }) {
-    return this.prisma.customer.create({ data });
+    const prisma = this.getPrismaClient();
+    return prisma.customer.create({ data });
   }
 
   async updateCustomerPassword(email: string, hashedPassword: string) {
-    return this.prisma.customer.update({
+    const prisma = this.getPrismaClient();
+    return prisma.customer.update({
       where: { email },
       data: { hashedPassword },
     });
@@ -31,6 +48,7 @@ export class StorefrontAuthRepository implements IStorefrontAuthRepository {
     email: string,
     data: Partial<{ firstName: string; lastName: string; phone: string }>,
   ) {
-    return this.prisma.customer.update({ where: { email }, data });
+    const prisma = this.getPrismaClient();
+    return prisma.customer.update({ where: { email }, data });
   }
 }

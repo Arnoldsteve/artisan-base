@@ -1,3 +1,4 @@
+// src/storefront/auth/storefront-auth.module.ts
 import { Global, Module } from '@nestjs/common';
 import { StorefrontAuthController } from './storefront-auth.controller';
 import { StorefrontAuthService } from './storefront-auth.service';
@@ -6,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { StorefrontJwtStrategy } from './storefront-jwt.strategy';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { PassportModule } from '@nestjs/passport';
+import { TenantClientFactory } from '../../prisma/tenant-client-factory.service';
 
 @Global()
 @Module({
@@ -21,7 +23,9 @@ import { PassportModule } from '@nestjs/passport';
   providers: [
     StorefrontAuthService,
     { provide: 'StorefrontAuthRepository', useClass: StorefrontAuthRepository },
-    { provide: 'STORE_FRONT_JWT_STRATEGY', useClass: StorefrontJwtStrategy },
+    StorefrontJwtStrategy,
+    TenantClientFactory, // Proper import, not require
   ],
+  exports: [TenantClientFactory], // Export if needed elsewhere
 })
 export class StorefrontAuthModule {}

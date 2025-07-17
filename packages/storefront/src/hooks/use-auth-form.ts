@@ -14,7 +14,7 @@ export function useAuthForm(submitFn: SubmitFn, onSuccessRedirect: string) {
     try {
       const res = await submitFn(data);
       if (res && res.customer) {
-        router.replace(onSuccessRedirect);
+        window.location.href = onSuccessRedirect; // Hard reload to ensure cookie is used
       } else {
         setError(res.message || "Authentication failed");
       }
