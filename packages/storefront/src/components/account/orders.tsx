@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -11,6 +11,15 @@ import { Package } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { useOrders } from "@/hooks/use-orders";
 import { useAuthContext } from "@/contexts/auth-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@repo/ui/components/ui/dialog";
+import { useOrder } from "@/hooks/use-order";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -29,6 +38,11 @@ export const Orders: React.FC = () => {
   const { user } = useAuthContext();
   const email = user?.email;
   const { data: orders = [], isLoading, error } = useOrders(email);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const { data: selectedOrder, isLoading: loadingOrder } = useOrder(
+    selectedOrderId,
+    email
+  );
 
   return (
     <Card>
@@ -59,7 +73,12 @@ export const Orders: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {orders.map((order: any) => (
-              <div key={order.id} className="border rounded-lg p-4">
+              <button
+                key={order.id}
+                className="w-full text-left border rounded-lg p-4 hover:bg-accent transition cursor-pointer"
+                onClick={() => setSelectedOrderId(order.id)}
+                aria-label={`View details for order ${order.orderNumber || order.id}`}
+              >
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h4 className="font-semibold text-foreground">
@@ -93,11 +112,91 @@ export const Orders: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
       </CardContent>
+      <Dialog
+        open={!!selectedOrderId}
+        onOpenChange={(open) => !open && setSelectedOrderId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>
+              {selectedOrder?.orderNumber || selectedOrder?.id}
+            </DialogDescription>
+          </DialogHeader>
+          {loadingOrder ? (
+            <div className="py-8 text-center text-muted-foreground">
+              Loading order details...
+            </div>
+          ) : selectedOrder ? (
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="font-medium">Order Date:</span>
+                <span>
+                  {selectedOrder.createdAt
+                    ? new Date(selectedOrder.createdAt).toLocaleString()
+                    : ""}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Status:</span>
+                <Badge className={getStatusColor(selectedOrder.status)}>
+                  {selectedOrder.status?.charAt(0).toUpperCase() +
+                    selectedOrder.status?.slice(1)}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Total:</span>
+                <span>
+                  ${Number(selectedOrder.totalAmount || 0).toFixed(2)}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">Items:</span>
+                <div className="mt-2 space-y-2">
+                  {selectedOrder.items?.map((item: any, idx: number) => (
+                    <div key={idx} className="flex justify-between text-sm">
+                      <span>
+                        {item.quantity}x {item.productName}
+                      </span>
+                      <span>
+                        ${(item.unitPrice * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {selectedOrder.shippingAddress && (
+                <div>
+                  <span className="font-medium">Shipping Address:</span>
+                  <div className="text-sm mt-1">
+                    {Object.values(selectedOrder.shippingAddress).join(", ")}
+                  </div>
+                </div>
+              )}
+              {selectedOrder.billingAddress && (
+                <div>
+                  <span className="font-medium">Billing Address:</span>
+                  <div className="text-sm mt-1">
+                    {Object.values(selectedOrder.billingAddress).join(", ")}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-muted-foreground">
+              Order not found.
+            </div>
+          )}
+          <DialogClose asChild>
+            <Button className="mt-4 w-full">Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
