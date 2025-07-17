@@ -1,6 +1,16 @@
 import React, { useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
+import {
+  LogIn,
+  UserPlus,
+  User,
+  Package,
+  Heart,
+  Settings,
+  Search,
+  UserCheck,
+} from "lucide-react";
 
 interface UserAccountDropdownProps {
   open: boolean;
@@ -24,50 +34,69 @@ export const UserAccountDropdown: React.FC<UserAccountDropdownProps> = ({
       aria-hidden={!open}
     >
       <div className="py-2 px-2">
-        <Button className="w-full mb-2" onClick={handleNav}>
+        <Button
+          className="w-full mb-2 flex items-center gap-3 justify-start"
+          onClick={handleNav}
+        >
+          <LogIn className="w-4 h-4" />
           Sign In
         </Button>
-        <Button className="w-full mb-2" variant="outline" onClick={handleNav}>
+        <Button
+          className="w-full mb-2 flex items-center gap-3 justify-start"
+          variant="outline"
+          onClick={handleNav}
+        >
+          <UserPlus className="w-4 h-4" />
           Create Account
         </Button>
         <div className="border-t my-2" />
         <Link
           href="/account"
-          className="block px-4 py-2 rounded hover:bg-accent text-foreground"
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-accent text-foreground transition-colors"
           onClick={handleNav}
         >
+          <User className="w-4 h-4" />
           My Account
         </Link>
         <Link
           href="/account?tab=orders"
-          className="block px-4 py-2 rounded hover:bg-accent text-foreground"
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-accent text-foreground transition-colors"
           onClick={handleNav}
         >
+          <Package className="w-4 h-4" />
           My Orders
         </Link>
         <Link
           href="/account?tab=wishlist"
-          className="block px-4 py-2 rounded hover:bg-accent text-foreground"
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-accent text-foreground transition-colors"
           onClick={handleNav}
         >
+          <Heart className="w-4 h-4" />
           My Wishlist
         </Link>
         <Link
           href="/account?tab=settings"
-          className="block px-4 py-2 rounded hover:bg-accent text-foreground"
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-accent text-foreground transition-colors"
           onClick={handleNav}
         >
+          <Settings className="w-4 h-4" />
           Settings
         </Link>
         <div className="border-t my-2" />
         <Link
-          href="/track-order"
-          className="block px-4 py-2 rounded hover:bg-accent text-foreground"
+          href="/shipping-info"
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-accent text-foreground transition-colors"
           onClick={handleNav}
         >
+          <Search className="w-4 h-4" />
           Track Order
         </Link>
-        <Button className="w-full mt-2" variant="ghost" onClick={handleNav}>
+        <Button
+          className="w-full mt-2 flex items-center gap-3 justify-start"
+          variant="ghost"
+          onClick={handleNav}
+        >
+          <UserCheck className="w-4 h-4" />
           Continue as Guest
         </Button>
       </div>
