@@ -1,35 +1,16 @@
 import React from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@repo/ui/components/ui/card";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Package } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
-
-const mockOrders = [
-  {
-    id: "ORD-001",
-    date: "2024-01-15",
-    status: "delivered",
-    total: 149.97,
-    items: [
-      { name: "Handcrafted Ceramic Mug", quantity: 2, price: 24.99 },
-      { name: "Wooden Cutting Board", quantity: 1, price: 89.99 },
-    ],
-  },
-  {
-    id: "ORD-002",
-    date: "2024-01-10",
-    status: "shipped",
-    total: 89.99,
-    items: [{ name: "Handwoven Basket", quantity: 1, price: 89.99 }],
-  },
-  {
-    id: "ORD-003",
-    date: "2024-01-05",
-    status: "processing",
-    total: 199.98,
-    items: [{ name: "Leather Journal", quantity: 2, price: 99.99 }],
-  },
-];
+import { useOrders } from "@/hooks/use-orders";
+import { useAuthContext } from "@/contexts/auth-context";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -45,6 +26,10 @@ const getStatusColor = (status: string) => {
 };
 
 export const Orders: React.FC = () => {
+  const { user } = useAuthContext();
+  const email = user?.email;
+  const { data: orders = [], isLoading, error } = useOrders(email);
+
   return (
     <Card>
       <CardHeader>
@@ -52,7 +37,15 @@ export const Orders: React.FC = () => {
         <CardDescription>View and track your past orders</CardDescription>
       </CardHeader>
       <CardContent>
-        {mockOrders.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Loading orders...
+          </div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">
+            Failed to load orders.
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-8">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -65,38 +58,37 @@ export const Orders: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {mockOrders.map((order) => (
+            {orders.map((order: any) => (
               <div key={order.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h4 className="font-semibold text-foreground">
-                      {order.id}
+                      {order.orderNumber || order.id}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(order.date).toLocaleDateString()}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString()
+                        : ""}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-foreground">
-                      ${order.total.toFixed(2)}
+                      ${Number(order.totalAmount || 0).toFixed(2)}
                     </p>
                     <Badge className={getStatusColor(order.status)}>
-                      {order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
+                      {order.status?.charAt(0).toUpperCase() +
+                        order.status?.slice(1)}
                     </Badge>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  {order.items.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between text-sm"
-                    >
+                  {order.items?.map((item: any, index: number) => (
+                    <div key={index} className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        {item.quantity}x {item.name}
+                        {item.quantity}x {item.productName}
                       </span>
                       <span>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${(item.unitPrice * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
