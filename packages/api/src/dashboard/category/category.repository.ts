@@ -9,17 +9,16 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ICategoryRepository } from './interfaces/category-repository.interface';
 import slugify from 'slugify';
+import { ICacheService } from './interfaces/cache-service.interface';
+import { InMemoryCacheService } from './services/in-memory-cache.service';
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
 @Injectable()
 export class CategoryRepository implements ICategoryRepository {
-  private findOneCache = new Map<string, { data: any; expires: number }>();
-  private findAllCache: { data: any; expires: number } | null = null;
-
   constructor(private readonly tenantPrisma: TenantPrismaService) {}
 
-  async create(dto: CreateCategoryDto) {
+  async create(dto: CreateCategoryDto): Promise<any> {
     const slug = slugify(dto.name, { lower: true, strict: true });
     const existing = await this.tenantPrisma.category.findUnique({
       where: { slug },
@@ -32,39 +31,26 @@ export class CategoryRepository implements ICategoryRepository {
     const category = await this.tenantPrisma.category.create({
       data: { ...dto, slug },
     });
-    this.invalidateCache();
     return category;
   }
 
-  async findAll(pagination?: PaginationQueryDto) {
-    const now = Date.now();
-    if (this.findAllCache && this.findAllCache.expires > now) {
-      return this.findAllCache.data;
-    }
-    const categories = await this.tenantPrisma.category.findMany({
+  async findAll(pagination?: PaginationQueryDto): Promise<any> {
+    return this.tenantPrisma.category.findMany({
       orderBy: { name: 'asc' },
     });
-    this.findAllCache = { data: categories, expires: now + CACHE_TTL };
-    return categories;
   }
 
-  async findOne(id: string) {
-    const now = Date.now();
-    const cached = this.findOneCache.get(id);
-    if (cached && cached.expires > now) {
-      return cached.data;
-    }
+  async findOne(id: string): Promise<any> {
     const category = await this.tenantPrisma.category.findUnique({
       where: { id },
     });
     if (!category) {
       throw new NotFoundException(`Category with ID '${id}' not found.`);
     }
-    this.findOneCache.set(id, { data: category, expires: now + CACHE_TTL });
     return category;
   }
 
-  async update(id: string, dto: UpdateCategoryDto) {
+  async update(id: string, dto: UpdateCategoryDto): Promise<any> {
     await this.findOne(id);
     const data: any = { ...dto };
     if (dto.name) {
@@ -82,20 +68,12 @@ export class CategoryRepository implements ICategoryRepository {
       where: { id },
       data,
     });
-    this.invalidateCache(id);
     return category;
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<any> {
     await this.findOne(id);
     const category = await this.tenantPrisma.category.delete({ where: { id } });
-    this.invalidateCache(id);
     return category;
-  }
-
-  private invalidateCache(id?: string) {
-    if (id) this.findOneCache.delete(id);
-    else this.findOneCache.clear();
-    this.findAllCache = null;
   }
 }

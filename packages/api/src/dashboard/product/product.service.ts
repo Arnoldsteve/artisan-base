@@ -3,12 +3,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { IProductRepository } from './interfaces/product-repository.interface';
+import { ProductCategoryService } from '../product-category/product-category.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductService {
   constructor(
     @Inject('ProductRepository')
     private readonly productRepository: IProductRepository,
+    private readonly productCategoryService: ProductCategoryService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
@@ -36,5 +38,21 @@ export class ProductService {
     const product = await this.findOne(id);
     await this.productRepository.remove(product.id);
     return;
+  }
+
+  // Assign a product to a category
+  assignCategory(productId: string, categoryId: string) {
+    return this.productCategoryService.assignProductToCategory(
+      productId,
+      categoryId,
+    );
+  }
+
+  // Unassign a product from a category
+  unassignCategory(productId: string, categoryId: string) {
+    return this.productCategoryService.unassignProductFromCategory(
+      productId,
+      categoryId,
+    );
   }
 }
