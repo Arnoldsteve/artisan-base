@@ -49,13 +49,16 @@ export default function CategoriesPage() {
           {categories.map((category: any) => (
             <Link
               key={category.id}
-              href={`/products?category=${encodeURIComponent(category.name)}`}
+              href={`/categories/${category.id}`}
               className="group block bg-card rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]"
             >
               <div className="aspect-video overflow-hidden rounded-t-lg relative">
                 {category.image ? (
                   <Image
-                    src={category.image || `https://picsum.photos/400/400?random=${category.id}`}
+                    src={
+                      category.image ||
+                      `https://picsum.photos/400/400?random=${category.id}`
+                    }
                     alt={category.name}
                     width={400}
                     height={300}
