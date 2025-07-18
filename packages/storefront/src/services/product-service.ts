@@ -292,9 +292,11 @@ export class ProductService {
         "/api/v1/storefront/products/featured",
         { limit }
       );
+      console.log("Featured products invoked with response", response);
 
       if (response.success) {
         this.cache.setFeaturedProducts(response.data);
+        console.log("Featured products", response.data);
         return response.data.slice(0, limit);
       }
 
