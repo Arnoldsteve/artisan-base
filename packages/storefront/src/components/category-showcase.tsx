@@ -79,7 +79,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
               <div className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                 <div className="aspect-video relative overflow-hidden">
                   <Image
-                    src={category.image || "/placeholder-category.jpg"}
+                    src={category.image || `https://picsum.photos/400/400?random=${category.id}`}
                     alt={category.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -55,7 +55,7 @@ export default function CategoriesPage() {
               <div className="aspect-video overflow-hidden rounded-t-lg relative">
                 {category.image ? (
                   <Image
-                    src={category.image}
+                    src={category.image || `https://picsum.photos/400/400?random=${category.id}`}
                     alt={category.name}
                     width={400}
                     height={300}

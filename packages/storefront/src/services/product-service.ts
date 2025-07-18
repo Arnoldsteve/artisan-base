@@ -292,11 +292,9 @@ export class ProductService {
         "/api/v1/storefront/products/featured",
         { limit }
       );
-      console.log("Featured products invoked with response", response);
 
       if (response.success) {
         this.cache.setFeaturedProducts(response.data);
-        console.log("Featured products", response.data);
         return response.data.slice(0, limit);
       }
 
@@ -336,8 +334,11 @@ export class ProductService {
       const response = await apiClient.get<ApiResponse<Category[]>>(
         "/api/v1/storefront/categories"
       );
+      console.log('Categories had been invoked from sevices', response)
 
-      if (response.success) {
+      // FIX: Check if response has data instead of success
+      if (response && response.data && Array.isArray(response.data)) {
+        console.log('categories data response from service', response.data);
         this.cache.setCategories(response.data);
         return response.data;
       }
