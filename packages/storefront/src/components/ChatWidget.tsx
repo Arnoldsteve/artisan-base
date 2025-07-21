@@ -14,9 +14,8 @@ import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { Label } from "@repo/ui/components/ui/label";
 import { X, MessageCircle } from "lucide-react";
 
-// Extend ChatMessage to include optional timestamp
 interface ChatMessage {
-  user: string;
+  from: string;
   message: string;
   timestamp?: number;
 }
@@ -26,13 +25,25 @@ function formatTime(ts: number) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+const AGENT_ID = "admin";
+
 export default function ChatWidget() {
-  const { messages, sendMessage } = useChatSocket();
+  const { messages, sendMessage, userId, setRecipient, recipient } =
+    useChatSocket();
   const [input, setInput] = useState("");
-  const [user, setUser] = useState("User");
   const [open, setOpen] = useState(true);
+  const [targetId, setTargetId] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // On mount, set recipient for user or agent
+  useEffect(() => {
+    if (userId === AGENT_ID) {
+      setRecipient(targetId);
+    } else {
+      setRecipient(AGENT_ID);
+    }
+  }, [userId, setRecipient, targetId]);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -42,7 +53,6 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
-  // Add timestamp if not present (for demo, ideally should be set on send)
   const enhancedMessages: (ChatMessage & { timestamp: number })[] =
     messages.map((msg) =>
       msg.timestamp
@@ -77,16 +87,53 @@ export default function ChatWidget() {
             role="log"
             aria-live="polite"
           >
+            <div className="mb-2 text-xs text-muted-foreground">
+              <div>
+                Your ID: <span className="font-mono">{userId}</span>
+              </div>
+              <div>
+                Chatting with:{" "}
+                <span className="font-mono">
+                  {userId === AGENT_ID
+                    ? recipient || "(no user selected)"
+                    : AGENT_ID}
+                </span>
+              </div>
+            </div>
+            {userId === AGENT_ID && (
+              <div className="mb-2 flex gap-2 items-center">
+                <Label htmlFor="target-id" className="text-xs">
+                  User ID:
+                </Label>
+                <Input
+                  id="target-id"
+                  value={targetId}
+                  onChange={(e) => setTargetId(e.target.value)}
+                  placeholder="Enter user ID to reply"
+                  className="flex-1"
+                  autoComplete="off"
+                  aria-label="User ID to reply"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setRecipient(targetId)}
+                  disabled={!targetId}
+                >
+                  Set
+                </Button>
+              </div>
+            )}
             {enhancedMessages.map((msg, i) => (
               <div key={i} className="flex items-start gap-2 mb-2">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>
-                    {msg.user?.[0]?.toUpperCase() || "U"}
+                    {msg.from?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <span className="font-semibold text-xs text-primary block">
-                    {msg.user}
+                    {msg.from === userId ? "You" : msg.from}
                   </span>
                   <div className="text-sm text-foreground break-words">
                     {msg.message}
@@ -105,24 +152,12 @@ export default function ChatWidget() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (input.trim()) {
-                  sendMessage(user, input);
+                  sendMessage(input);
                   setInput("");
                 }
               }}
               aria-label="Send message"
             >
-              <Label htmlFor="chat-user" className="sr-only">
-                Name
-              </Label>
-              <Input
-                id="chat-user"
-                value={user}
-                onChange={(e) => setUser(e.target.value)}
-                placeholder="Your name"
-                className="w-1/3"
-                aria-label="Your name"
-                autoComplete="off"
-              />
               <Label htmlFor="chat-input" className="sr-only">
                 Message
               </Label>
@@ -137,16 +172,18 @@ export default function ChatWidget() {
                 autoComplete="off"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && input.trim()) {
-                    sendMessage(user, input);
+                    sendMessage(input);
                     setInput("");
                   }
                 }}
+                disabled={userId === AGENT_ID && !recipient}
               />
               <Button
                 type="submit"
                 size="sm"
                 className="ml-2"
                 aria-label="Send message"
+                disabled={userId === AGENT_ID && !recipient}
               >
                 Send
               </Button>

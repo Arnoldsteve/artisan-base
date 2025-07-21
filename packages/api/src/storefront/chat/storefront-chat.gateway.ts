@@ -21,21 +21,49 @@ export class StorefrontChatGateway
   @WebSocketServer()
   server: Server;
 
+  // userId -> socketId
+  private users: Record<string, string> = {};
+
   handleConnection(client: Socket) {
-    // Optionally authenticate client here
-    console.log(`Client connected: ${client.id}`);
+    const userId = client.handshake.query.userId as string;
+    if (userId) {
+      this.users[userId] = client.id;
+      console.log(`User connected: ${userId} (${client.id})`);
+    } else {
+      console.log(`Client connected without userId: ${client.id}`);
+    }
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    for (const [userId, socketId] of Object.entries(this.users)) {
+      if (socketId === client.id) {
+        delete this.users[userId];
+        console.log(`User disconnected: ${userId} (${client.id})`);
+        break;
+      }
+    }
   }
 
-  @SubscribeMessage('message')
-  handleMessage(
-    @MessageBody() data: { user: string; message: string },
+  // Private message handler
+  @SubscribeMessage('private-message')
+  handlePrivateMessage(
+    @MessageBody()
+    data: { to: string; from: string; message: string; timestamp?: number },
     @ConnectedSocket() client: Socket,
   ) {
-    // Broadcast the message to all clients
-    this.server.emit('message', data);
+    const toSocketId = this.users[data.to];
+    if (toSocketId) {
+      this.server.to(toSocketId).emit('private-message', {
+        from: data.from,
+        message: data.message,
+        timestamp: data.timestamp || Date.now(),
+      });
+    }
   }
+
+  // Optionally, keep the public broadcast for testing
+  // @SubscribeMessage('message')
+  // handleMessage(@MessageBody() data: { user: string; message: string }, @ConnectedSocket() client: Socket) {
+  //   this.server.emit('message', data);
+  // }
 }
