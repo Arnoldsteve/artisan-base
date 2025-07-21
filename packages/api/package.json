@@ -28,6 +28,8 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.5",
+    "@nestjs/websockets": "^11.1.5",
     "@prisma/client": "^6.10.1",
     "@supabase/supabase-js": "^2.50.0",
     "@types/decimal.js": "^7.4.3",
@@ -40,7 +42,8 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -56,6 +59,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
+    "@types/socket.io": "^3.0.2",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
