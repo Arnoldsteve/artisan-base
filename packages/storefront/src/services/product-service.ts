@@ -335,7 +335,8 @@ export class ProductService {
         "/api/v1/storefront/categories"
       );
 
-      if (response.success) {
+      // FIX: Check if response has data instead of success
+      if (response && response.data && Array.isArray(response.data)) {
         this.cache.setCategories(response.data);
         return response.data;
       }

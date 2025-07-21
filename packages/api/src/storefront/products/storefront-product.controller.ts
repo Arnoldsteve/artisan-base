@@ -23,19 +23,28 @@ export class StorefrontProductController {
   }
 
   @Get('featured')
-  findFeatured() {
-    return this.productService.findFeatured();
+  async findFeatured() {
+    const products = await this.productService.findFeatured();
+    return {
+      success: true,
+      data: products,
+      meta: { total: products.length },
+    };
   }
 
   @Get('categories')
-  findCategories() {
-    return this.productService.findCategories();
+  async findCategories() {
+    const categories = await this.productService.findCategories();
+    return {
+      success: true,
+      data: categories,
+      meta: { total: categories.length },
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService
-      .findOne(id)
-      .then((product) => ({ success: true, data: product }));
+  async findOne(@Param('id') id: string) {
+    const product = await this.productService.findOne(id);
+    return { success: true, data: product };
   }
 }
