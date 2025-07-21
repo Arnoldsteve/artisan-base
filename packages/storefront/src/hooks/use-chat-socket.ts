@@ -4,6 +4,7 @@ import { io, Socket } from "socket.io-client";
 interface ChatMessage {
   user: string;
   message: string;
+  timestamp?: number;
 }
 
 export function useChatSocket(url: string = "http://localhost:3001/chat") {
@@ -27,7 +28,8 @@ export function useChatSocket(url: string = "http://localhost:3001/chat") {
   }, [url]);
 
   const sendMessage = (user: string, message: string) => {
-    socketRef.current?.emit("message", { user, message });
+    const msg: ChatMessage = { user, message, timestamp: Date.now() };
+    socketRef.current?.emit("message", msg);
   };
 
   return { messages, sendMessage };
