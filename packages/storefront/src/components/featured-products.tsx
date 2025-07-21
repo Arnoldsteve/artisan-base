@@ -16,6 +16,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
     refetch,
   } = useFeaturedProducts(6);
 
+
   if (isLoading) {
     return (
       <section className="py-16">

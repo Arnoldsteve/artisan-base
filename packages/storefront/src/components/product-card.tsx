@@ -76,7 +76,10 @@ export const ProductCard = memo(function ProductCard({
       {/* OPTIMIZATION: Image with lazy loading and error handling */}
       <div className="aspect-square overflow-hidden rounded-t-lg relative">
         <Image
-          src={product.image || `https://picsum.photos/400/400?random=${product.id}`}
+          src={
+            product.image ||
+            `https://picsum.photos/400/400?random=${product.id}`
+          }
           alt={product.name}
           width={400}
           height={400}
@@ -118,7 +121,9 @@ export const ProductCard = memo(function ProductCard({
         {/* Category badge */}
         <div className="absolute top-2 left-2">
           <span className="px-2 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md">
-            {product.category || "Category: Not Set"}
+            {product.categories?.length > 0
+              ? product.categories[0].name
+              : "Category: Not Set"}
           </span>
         </div>
       </div>

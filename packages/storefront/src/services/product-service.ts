@@ -334,11 +334,9 @@ export class ProductService {
       const response = await apiClient.get<ApiResponse<Category[]>>(
         "/api/v1/storefront/categories"
       );
-      console.log('Categories had been invoked from sevices', response)
 
       // FIX: Check if response has data instead of success
       if (response && response.data && Array.isArray(response.data)) {
-        console.log('categories data response from service', response.data);
         this.cache.setCategories(response.data);
         return response.data;
       }
