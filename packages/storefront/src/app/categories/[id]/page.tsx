@@ -62,6 +62,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const category = mockCategory;
   const products = mockProducts;
 
+  console.log("Category:", category);
+  console.log("Products:", products);
+
   if (!category) {
     notFound();
   }
