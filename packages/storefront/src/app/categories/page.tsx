@@ -10,6 +10,9 @@ export default function CategoriesPage() {
     useCategories();
   // The API returns an array of categories, each with _count.products
   const categories = categoriesResponse || [];
+  
+  // Log the categories to check the structure=
+  console.log("Categories from categories apge:", categories);
 
   if (categoriesLoading) {
     return (

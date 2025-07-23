@@ -323,6 +323,7 @@ export class ProductService {
     }
   }
 
+  // This gives a list of all categories in the system
   async getCategories(): Promise<Category[]> {
     try {
       // OPTIMIZATION: Use cache for categories
@@ -336,6 +337,7 @@ export class ProductService {
       );
 
       // FIX: Check if response has data instead of success
+      console.log('categories with products from products services', response.data);
       if (response && response.data && Array.isArray(response.data)) {
         this.cache.setCategories(response.data);
         return response.data;
