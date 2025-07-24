@@ -1,88 +1,59 @@
-import { notFound } from "next/navigation";
+'use client';
+
+import { notFound, useParams } from "next/navigation";
 import CategoryCard from "@/components/category-card";
 import { ProductCard } from "@/components/product-card";
 import { Category, Product } from "@/types";
+import { useCategory } from "@/hooks/use-categories";
 
-interface CategoryPageProps {
-  params: { id: string };
-}
+export default function CategoryPage() {
+  const params = useParams();
+  const categoryId = params.id as string;
 
-// Mock data
-const mockCategory: Category = {
-  id: "mock-category-id",
-  name: "Mock Category",
-  description: "This is a mock category for testing.",
-  image: "",
-  isActive: true,
-};
+  // 1. You fetch the data. The 'categoryData' variable holds the object you logged.
+  const { data: categoryData, isLoading, error } = useCategory(categoryId);
 
-const mockProducts: Product[] = [
-  {
-    id: "mock-product-1",
-    name: "Mock Product 1",
-    description: "A sample product.",
-    price: 19.99,
-    originalPrice: 29.99,
-    image: "",
-    images: [],
-    category: "Mock Category",
-    categoryId: "mock-category-id",
-    rating: 4.5,
-    reviewCount: 10,
-    inventoryQuantity: 100,
-    sku: "SKU-001",
-    tags: ["mock", "test"],
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "mock-product-2",
-    name: "Mock Product 2",
-    description: "Another sample product.",
-    price: 9.99,
-    originalPrice: 14.99,
-    image: "",
-    images: [],
-    category: "Mock Category",
-    categoryId: "mock-category-id",
-    rating: 4.0,
-    reviewCount: 5,
-    inventoryQuantity: 50,
-    sku: "SKU-002",
-    tags: ["mock"],
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+  // --- START: This is how you prepare the data for your JSX ---
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-  // Use mock data for now
-  const category = mockCategory;
-  const products = mockProducts;
+  // 2. Handle the loading state
+  if (isLoading) {
+    return <div className="container mx-auto p-8 text-center">Loading...</div>;
+  }
 
-  console.log("Category:", category);
-  console.log("Products:", products);
-
-  if (!category) {
+  // 3. Handle the error or "not found" state
+  if (error || !categoryData) {
     notFound();
   }
 
+  // 4. Create the 'category' and 'products' variables that your JSX needs.
+  // 'category' is the main data object itself.
+  const category = categoryData; 
+  // 'products' is the array *inside* that object.
+  const products = categoryData.products || [];
+
+  // --- END: Data is ready. Now we render the JSX ---
+
+  // 5. Return your JSX, now uncommented and using the correct variables.
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* It now has the 'category' object it needs */}
       <CategoryCard category={category} />
+      
       <div className="mt-8">
+        {/* It now has the category name from 'category.name' */}
         <h2 className="text-2xl font-bold mb-4 text-foreground">
           Products in {category.name}
         </h2>
+
+        {/* It now checks the length of the 'products' array */}
         {products.length === 0 ? (
           <div className="text-muted-foreground">
             No products found in this category.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product: any) => (
+            {/* It now maps over the 'products' array */}
+            {products.map((product: Product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

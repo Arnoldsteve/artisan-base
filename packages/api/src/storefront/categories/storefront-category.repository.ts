@@ -9,12 +9,14 @@ export class StorefrontCategoryRepository
 {
   constructor(private readonly prisma: TenantPrismaService) {}
 
+  /**
+   * EFFICIENTLY finds all categories with a TRUE count of their active products.
+   */
   async findAll(filters: GetCategoriesDto) {
     const { search, page = 1, limit = 20 } = filters;
     const skip = (page - 1) * limit;
 
     const where: any = {};
-
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -22,34 +24,38 @@ export class StorefrontCategoryRepository
       ];
     }
 
-    const [categories, total] = await Promise.all([
+    // Use a transaction for consistency
+    const [categories, total] = await this.prisma.$transaction([
+      // Query 1: Get the categories for the current page
       this.prisma.category.findMany({
         where,
         orderBy: { name: 'asc' },
         skip,
         take: limit,
+        // EFFICIENTLY count related active products directly in the database
         include: {
-          products: {
-            include: {
-              product: true,
+          _count: {
+            select: {
+              products: {
+                where: {
+                  product: {
+                    isActive: true,
+                  },
+                },
+              },
             },
           },
         },
       }),
+      // Query 2: Get the total count of categories matching the filter
       this.prisma.category.count({ where }),
     ]);
 
-    // Add _count.products for each category (only active products)
-    const categoriesWithCount = categories.map((cat) => ({
-      ...cat,
-      _count: {
-        products: cat.products.filter((p) => p.product && p.product.isActive)
-          .length,
-      },
-    }));
+    // Prisma already did the counting. No manual mapping is needed.
+    // The `categories` object now has a `_count: { products: number }` property.
 
     return {
-      data: categoriesWithCount,
+      data: categories,
       meta: {
         total,
         page,
@@ -59,26 +65,52 @@ export class StorefrontCategoryRepository
     };
   }
 
+  /**
+   * CORRECTLY finds a single category, its newest 20 active products,
+   * AND the TRUE total count of all its active products.
+   */
   async findOne(id: string) {
-    const category = await this.prisma.category.findFirst({
-      where: { id },
-      include: {
-        products: {
-          include: {
-            product: true,
+    // We need two pieces of info: the paginated products and the total count.
+    // A transaction runs both queries at the same time for max efficiency.
+    const [category, activeProductCount] = await this.prisma.$transaction([
+      // Query 1: Get the category and its 20 newest products
+      this.prisma.category.findFirst({
+        where: { id },
+        include: {
+          products: {
+            include: {
+              product: true,
+            },
+            orderBy: { product: { createdAt: 'desc' } },
+            take: 20,
           },
-          orderBy: { product: { createdAt: 'desc' } },
-          take: 20,
         },
-      },
-    });
-    if (!category) return null;
-    // Flatten and filter products
+      }),
+      // Query 2: Get the TRUE total count of ALL active products in this category
+      this.prisma.product.count({
+        where: {
+          isActive: true,
+          categories: { some: { categoryId: id } },
+        },
+      }),
+    ]);
+
+    if (!category) {
+      return null;
+    }
+
+    // Flatten and filter the list of 20 products for display
+    const paginatedActiveProducts = category.products
+      .map((p) => p.product)
+      .filter((prod) => prod && prod.isActive);
+    
+    // Return a complete object with the data you need
     return {
       ...category,
-      products: category.products
-        .map((p) => p.product)
-        .filter((prod) => prod && prod.isActive),
+      products: paginatedActiveProducts,
+      _count: {
+        products: activeProductCount, // The true total count
+      },
     };
   }
 }
