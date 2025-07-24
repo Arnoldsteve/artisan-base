@@ -214,7 +214,6 @@ export class CategoryService {
         `/api/v1/storefront/categories/${id}`
       );
 
-      console.log("Category response from category service:", response.data);
       if (response && response.success && response.data) {
         this.cache.setCategory(response.data);
         return response.data || response;

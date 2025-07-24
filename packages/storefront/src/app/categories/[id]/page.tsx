@@ -1,58 +1,90 @@
 'use client';
 
+import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react"; 
+
 import CategoryCard from "@/components/category-card";
 import { ProductCard } from "@/components/product-card";
-import { Category, Product } from "@/types";
+import { Button } from "@/components/ui/button";
 import { useCategory } from "@/hooks/use-categories";
+import { Category, Product } from "@/types";
 
 export default function CategoryPage() {
   const params = useParams();
   const categoryId = params.id as string;
 
-  // 1. You fetch the data. The 'categoryData' variable holds the object you logged.
   const { data: categoryData, isLoading, error } = useCategory(categoryId);
 
-  // --- START: This is how you prepare the data for your JSX ---
-
-  // 2. Handle the loading state
   if (isLoading) {
-    return <div className="container mx-auto p-8 text-center">Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          {/* Skeleton for CategoryCard */}
+          <div className="mb-8 p-6 border rounded-lg">
+            <div className="h-64 bg-gray-200 rounded-md mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto"></div>
+          </div>
+          {/* Skeleton for Products Section */}
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Create 3 skeleton product cards */}
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="border rounded-lg p-4">
+                <div className="h-48 bg-gray-200 rounded-md mb-4"></div>
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  // 3. Handle the error or "not found" state
   if (error || !categoryData) {
-    notFound();
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            Category Not Found
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            The category you're looking for doesn't exist or has been removed.
+          </p>
+          <Link href="/categories">
+            <Button className="flex items-center space-x-2">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Categories</span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
-  // 4. Create the 'category' and 'products' variables that your JSX needs.
-  // 'category' is the main data object itself.
-  const category = categoryData; 
-  // 'products' is the array *inside* that object.
+  const category = categoryData;
   const products = categoryData.products || [];
 
-  // --- END: Data is ready. Now we render the JSX ---
-
-  // 5. Return your JSX, now uncommented and using the correct variables.
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* It now has the 'category' object it needs */}
       <CategoryCard category={category} />
       
       <div className="mt-8">
-        {/* It now has the category name from 'category.name' */}
         <h2 className="text-2xl font-bold mb-4 text-foreground">
           Products in {category.name}
         </h2>
 
-        {/* It now checks the length of the 'products' array */}
         {products.length === 0 ? (
-          <div className="text-muted-foreground">
-            No products found in this category.
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              There are currently no products in this category.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* It now maps over the 'products' array */}
             {products.map((product: Product) => (
               <ProductCard key={product.id} product={product} />
             ))}
