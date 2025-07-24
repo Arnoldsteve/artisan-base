@@ -11,9 +11,6 @@ export default function CategoriesPage() {
   // The API returns an array of categories, each with _count.products
   const categories = categoriesResponse || [];
   
-  // Log the categories to check the structure=
-  console.log("Categories from categories apge:", categories);
-
   if (categoriesLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
