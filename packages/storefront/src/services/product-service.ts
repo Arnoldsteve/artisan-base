@@ -323,6 +323,7 @@ export class ProductService {
     }
   }
 
+  // This gives a list of all categories in the system
   async getCategories(): Promise<Category[]> {
     try {
       // OPTIMIZATION: Use cache for categories
@@ -335,7 +336,6 @@ export class ProductService {
         "/api/v1/storefront/categories"
       );
 
-      // FIX: Check if response has data instead of success
       if (response && response.data && Array.isArray(response.data)) {
         this.cache.setCategories(response.data);
         return response.data;

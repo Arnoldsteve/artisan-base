@@ -20,6 +20,9 @@ interface ChatMessage {
   timestamp?: number;
 }
 
+// A type that guarantees the timestamp exists.
+type DisplayedChatMessage = ChatMessage & { timestamp: number };
+
 function formatTime(ts: number) {
   const date = new Date(ts);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -28,13 +31,20 @@ function formatTime(ts: number) {
 const AGENT_ID = "admin";
 
 export default function ChatWidget() {
-  const { messages, sendMessage, userId, setRecipient, recipient } =
-    useChatSocket();
+  const { messages, sendMessage, userId, setRecipient, recipient } = useChatSocket();
   const [input, setInput] = useState("");
   const [open, setOpen] = useState(true);
   const [targetId, setTargetId] = useState("");
+  const [displayedMessages, setDisplayedMessages] = useState<DisplayedChatMessage[]>([]);
+  const [isClient, setIsClient] = useState(false); // State to check if we are on the client
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // FIX 1: Ensure this component only renders on the client side.
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // On mount, set recipient for user or agent
   useEffect(() => {
@@ -51,14 +61,23 @@ export default function ChatWidget() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, open]);
+  }, [displayedMessages, open]);
 
-  const enhancedMessages: (ChatMessage & { timestamp: number })[] =
-    messages.map((msg) =>
+  // FIX 2: Move logic that uses Date.now() into a useEffect hook.
+  useEffect(() => {
+    const enhancedMessages = messages.map((msg) =>
       msg.timestamp
-        ? (msg as ChatMessage & { timestamp: number })
+        ? (msg as DisplayedChatMessage)
         : { ...msg, timestamp: Date.now() }
     );
+    setDisplayedMessages(enhancedMessages);
+  }, [messages]);
+
+
+  // Don't render anything on the server or during the initial client render.
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80 max-w-full sm:w-96 sm:right-8 sm:bottom-8">
@@ -124,7 +143,8 @@ export default function ChatWidget() {
                 </Button>
               </div>
             )}
-            {enhancedMessages.map((msg, i) => (
+            {/* Render the client-side processed messages */}
+            {displayedMessages.map((msg, i) => (
               <div key={i} className="flex items-start gap-2 mb-2">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>
@@ -172,6 +192,7 @@ export default function ChatWidget() {
                 autoComplete="off"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && input.trim()) {
+                    e.preventDefault(); // Prevent form submission on enter
                     sendMessage(input);
                     setInput("");
                   }

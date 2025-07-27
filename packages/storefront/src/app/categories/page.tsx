@@ -10,7 +10,7 @@ export default function CategoriesPage() {
     useCategories();
   // The API returns an array of categories, each with _count.products
   const categories = categoriesResponse || [];
-
+  
   if (categoriesLoading) {
     return (
       <div className="container mx-auto px-4 py-8">

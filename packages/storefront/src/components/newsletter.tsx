@@ -6,50 +6,17 @@ import { memo, useState, useCallback } from "react";
 import { Mail, ArrowRight } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
+import { useNewsletter } from "@/hooks/useNewsletter";
 
-// OPTIMIZATION: Memoized component to prevent unnecessary re-renders
+
 export const Newsletter = memo(function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    email,
+    isSubmitting,
+    handleEmailChange,
+    handleSubmit
+  } = useNewsletter();
 
-  // OPTIMIZATION: Memoized callback to prevent unnecessary re-renders
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!email.trim()) {
-        toast.error("Please enter your email address");
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        toast.error("Please enter a valid email address");
-        return;
-      }
-
-      setIsSubmitting(true);
-
-      try {
-        // OPTIMIZATION: Simulate API call with timeout
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        toast.success("Thank you for subscribing to our newsletter!");
-        setEmail("");
-      } catch (error) {
-        toast.error("Failed to subscribe. Please try again.");
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [email]
-  );
-
-  const handleEmailChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setEmail(e.target.value);
-    },
-    []
-  );
 
   return (
     <section className="py-16 bg-primary text-primary-foreground">
