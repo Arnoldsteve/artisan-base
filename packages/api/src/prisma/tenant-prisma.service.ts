@@ -6,6 +6,7 @@ import { RequestWithTenant } from '../common/interfaces/request-with-tenant.inte
 
 @Injectable({ scope: Scope.REQUEST })
 export class TenantPrismaService extends PrismaClient {
+    newsletterSubscription: any;
     constructor(
         @Inject(REQUEST) private readonly request: RequestWithTenant,
     ) {
