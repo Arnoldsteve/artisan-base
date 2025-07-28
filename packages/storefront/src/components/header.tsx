@@ -292,19 +292,23 @@ export function Header() {
               </Link>
               {/* User account options for mobile */}
               <div className="border-t my-2" />
-              <Button
-                className="w-full mb-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign In
-              </Button>
-              <Button
-                className="w-full mb-2"
-                variant="outline"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Create Account
-              </Button>
+              <Link href="/auth/login" passHref>
+                <Button
+                  className="w-full mb-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/auth/signup" passHref>
+                <Button
+                  className="w-full mb-2"
+                  variant="outline"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Create Account
+                </Button>
+              </Link>
               <Link
                 href="/account"
                 className="w-full text-left px-4 py-2 hover:bg-accent rounded"

@@ -8,6 +8,7 @@ import {
   Get,
   Req,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { StorefrontAuthService } from './storefront-auth.service';
