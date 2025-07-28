@@ -20,5 +20,6 @@ import { TenantContextService } from 'src/common/tenant-context.service';
       scope: Scope.REQUEST,
     },
   ],
+  exports: [StorefrontProductService],
 })
 export class StorefrontProductModule {}
