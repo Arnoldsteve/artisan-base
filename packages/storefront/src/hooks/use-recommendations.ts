@@ -1,109 +1,53 @@
-import { useMemo } from "react";
-import { useProducts } from "./use-products";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { recommendationService } from "@/services/recommendation-service";
 import { Product } from "@/types";
 
-interface RecommendationResult {
-  recommendations: Product[];
-  isLoading: boolean;
-  error: unknown;
-}
+// ===================================================================
+// STEP 1: Create structured query keys, just like in use-products.ts
+// ===================================================================
+export const recommendationKeys = {
+  all: ["recommendations"] as const,
+  lists: () => [...recommendationKeys.all, "list"] as const,
+  // Recommendations are a "list" that depends on a specific product ID.
+  list: (productId: string) => [...recommendationKeys.lists(), productId] as const,
+};
 
-function getTagSimilarity(tagsA: string[], tagsB: string[]): number {
-  if (!tagsA.length || !tagsB.length) return 0;
-  const setA = new Set(tagsA);
-  const setB = new Set(tagsB);
-  const intersection = new Set([...setA].filter((t) => setB.has(t)));
-  const union = new Set([...setA, ...setB]);
-  return intersection.size / union.size;
-}
+// ===================================================================
+// STEP 2: Create the hook using the new query keys and best practices
+// ===================================================================
+/**
+ * A hook to fetch product recommendations for a specific product ID.
+ * It follows the existing architectural pattern for data fetching in this app,
+ * using TanStack Query for caching and state management.
+ *
+ * @param productId The ID of the product to get recommendations for.
+ * @param options Optional TanStack Query options to override defaults.
+ * @returns The result of the useQuery hook.
+ */
+export function useRecommendations(
+  productId: string,
+  options?: UseQueryOptions<Product[]>
+) {
+  return useQuery({
+    // Use the structured key for type safety and consistency
+    queryKey: recommendationKeys.list(productId),
 
-function getPriceScore(priceA: number, priceB: number): number {
-  // 1 if within 50%, else 0
-  if (!priceA || !priceB) return 0;
-  const min = priceA * 0.5;
-  const max = priceA * 1.5;
-  return priceB >= min && priceB <= max ? 1 : 0;
-}
+    // The function that calls our clean service layer
+    queryFn: () => recommendationService.getRecommendations(productId),
 
-function getPopularityScore(rating: number, reviewCount: number): number {
-  // Normalize popularity (0-1) based on rating * reviewCount
-  return Math.min(1, (rating * reviewCount) / 500); // 500 is arbitrary for normalization
-}
+    // === Options (Mirroring the best practices in your other hooks) ===
 
-export function useRecommendations(productId: string): RecommendationResult {
-  const { data: productsData, isLoading, error } = useProducts();
+    // The query will not run until a productId is available
+    enabled: !!productId,
 
-  const recommendations = useMemo(() => {
-    if (!productsData || !productId) return [];
-    const allProducts = productsData.data || productsData;
-    const current = allProducts.find((p) => p.id === productId);
-    if (!current) return [];
+    // Recommendations don't change very often for a given product.
+    // We can consider them "stale" after 5 minutes.
+    staleTime: 5 * 60 * 1000, // 5 minutes
 
-    // Score all other products
-    let scored = allProducts
-      .filter((p) => p.id !== productId && p.isActive)
-      .map((p) => {
-        // Category match
-        const categoryScore = p.category === current.category ? 1 : 0;
-        // Tag similarity
-        const tagScore = getTagSimilarity(p.tags || [], current.tags || []);
-        // Price range
-        const priceScore = getPriceScore(current.price, p.price);
-        // Popularity
-        const popScore = getPopularityScore(p.rating, p.reviewCount);
-        // Weighted sum
-        const score =
-          categoryScore * 0.4 +
-          tagScore * 0.3 +
-          priceScore * 0.2 +
-          popScore * 0.1;
-        return { ...p, _score: score };
-      })
-      .filter((p) => p._score > 0.3)
-      .sort((a, b) => b._score - a._score);
+    // The data will be garbage collected from the cache after 15 minutes of inactivity.
+    gcTime: 15 * 60 * 1000, // 15 minutes
 
-    // Fallback logic
-    if (scored.length < 4) {
-      // Add more from same category
-      const sameCategory = allProducts.filter(
-        (p) =>
-          p.id !== productId &&
-          p.isActive &&
-          p.category === current.category &&
-          !scored.some((s) => s.id === p.id)
-      );
-      scored = [...scored, ...sameCategory];
-    }
-    if (scored.length < 4) {
-      // Add most popular
-      const popular = allProducts
-        .filter((p) => p.id !== productId && p.isActive)
-        .sort((a, b) => b.rating * b.reviewCount - a.rating * a.reviewCount)
-        .filter((p) => !scored.some((s) => s.id === p.id));
-      scored = [...scored, ...popular];
-    }
-    // Prioritize in-stock
-    scored = [
-      ...scored.filter((p) => p.inventoryQuantity > 0),
-      ...scored.filter((p) => p.inventoryQuantity === 0),
-    ];
-    // Mix price ranges
-    const priceSorted = [
-      ...scored.filter((p) => p.price <= current.price),
-      ...scored.filter((p) => p.price > current.price),
-    ];
-    // Remove duplicates, keep top 8
-    const unique = [];
-    const seen = new Set();
-    for (const p of priceSorted) {
-      if (!seen.has(p.id)) {
-        unique.push(p);
-        seen.add(p.id);
-      }
-      if (unique.length >= 8) break;
-    }
-    return unique;
-  }, [productsData, productId]);
-
-  return { recommendations, isLoading, error };
+    // Allow components to override these default options if needed
+    ...options,
+  });
 }
