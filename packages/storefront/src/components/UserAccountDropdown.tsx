@@ -34,21 +34,25 @@ export const UserAccountDropdown: React.FC<UserAccountDropdownProps> = ({
       aria-hidden={!open}
     >
       <div className="py-2 px-2">
-        <Button
-          className="w-full mb-2 flex items-center gap-3 justify-start"
-          onClick={handleNav}
-        >
-          <LogIn className="w-4 h-4" />
-          Sign In
-        </Button>
-        <Button
-          className="w-full mb-2 flex items-center gap-3 justify-start"
-          variant="outline"
-          onClick={handleNav}
-        >
-          <UserPlus className="w-4 h-4" />
-          Create Account
-        </Button>
+        <Link href="/auth/login" passHref>
+          <Button
+            className="w-full mb-2 flex items-center gap-3 justify-start"
+            onClick={handleNav}
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/auth/signup" passHref>
+          <Button
+            className="w-full mb-2 flex items-center gap-3 justify-start"
+            variant="outline"
+            onClick={handleNav}
+          >
+            <UserPlus className="w-4 h-4" />
+            Create Account
+          </Button>
+        </Link>
         <div className="border-t my-2" />
         <Link
           href="/account"

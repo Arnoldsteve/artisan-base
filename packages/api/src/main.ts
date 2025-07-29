@@ -13,7 +13,13 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true, // <-- Add this property
+    }),
+  );
   app.use(cookieParser());
   app.setGlobalPrefix('api/v1');
 
