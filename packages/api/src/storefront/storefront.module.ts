@@ -6,6 +6,7 @@ import { StorefrontAuthModule } from './auth/storefront-auth.module';
 import { StorefrontChatModule } from './chat/storefront-chat.module';
 import { StorefrontNewsletterModule } from './newsletter/storefront-newsletter.module';
 import { StorefontProductRecommendationsModule } from './product-recommendations/storefront-product-recommendations.module';
+import { StorefrontContactModule } from './contact/storefront-contact.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { StorefontProductRecommendationsModule } from './product-recommendations
     StorefrontChatModule,
     StorefrontNewsletterModule,
     StorefontProductRecommendationsModule,
+    StorefrontContactModule,
   ],
 })
 export class StorefrontModule {}
