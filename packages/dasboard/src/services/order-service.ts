@@ -1,72 +1,84 @@
+import { apiClient } from "@/lib/client-api"; 
 import {
   CreateOrderDto,
   Order,
   OrderStatus,
   PaymentStatus,
 } from "@/types/orders";
-import { IOrderRepository, orderRepository } from "@/services/order-repository";
 
 /**
- * OrderService encapsulates business logic for orders, using a repository for data access.
+ * OrderService directly handles API communication for dashboard order management.
  */
 export class OrderService {
-  constructor(private repo: IOrderRepository = orderRepository) {}
-
   /**
-   * Gets all orders.
+   * Gets all orders with optional pagination.
    */
-  async getAll(): Promise<Order[]> {
-    return this.repo.getAll();
+  async getAll(params?: { page?: number; limit?: number }): Promise<Order[]> {
+    return apiClient.get<Order[]>("/api/v1/dashboard/orders", params);
   }
 
   /**
-   * Gets an order by ID.
+   * Gets a single order by its ID.
    */
   async getById(orderId: string): Promise<Order> {
-    return this.repo.getById(orderId);
+    return apiClient.get<Order>(`/api/v1/dashboard/orders/${orderId}`);
   }
 
   /**
-   * Creates a new order.
+   * Creates a new manual order.
    * @param orderData - The order data to create.
-   * @returns The created order.
+   * @returns The newly created order.
    */
   async createOrder(orderData: CreateOrderDto): Promise<Order> {
-    return this.repo.create(orderData);
+    return apiClient.post<Order>("/api/v1/dashboard/orders", orderData);
   }
 
   /**
-   * Updates the status of an order.
-   * @param orderId - The order ID.
-   * @param newStatus - The new status.
+   * Updates the fulfillment status of an order.
+   * @param orderId - The ID of the order to update.
+   * @param newStatus - The new fulfillment status.
    * @returns The updated order.
    */
   async updateStatus(orderId: string, newStatus: OrderStatus): Promise<Order> {
-    return this.repo.updateStatus(orderId, newStatus);
+    // NOTE: Assumes your API endpoint is PATCH /.../orders/:id/status
+    return apiClient.patch<Order>(`/api/v1/dashboard/orders/${orderId}/status`, {
+      status: newStatus,
+    });
   }
 
   /**
    * Updates the payment status of an order.
+   * @param orderId - The ID of the order to update.
+   * @param newPaymentStatus - The new payment status.
+   * @returns The updated order.
    */
   async updatePaymentStatus(
     orderId: string,
     newPaymentStatus: PaymentStatus
   ): Promise<Order> {
-    return this.repo.updatePaymentStatus(orderId, newPaymentStatus);
+    // NOTE: Assumes your API endpoint is PATCH /.../orders/:id/payment-status
+    return apiClient.patch<Order>(
+      `/api/v1/dashboard/orders/${orderId}/payment-status`,
+      { paymentStatus: newPaymentStatus }
+    );
   }
 
   /**
-   * Deletes an order.
+   * Deletes a single order.
    */
   async deleteOrder(orderId: string): Promise<void> {
-    return this.repo.delete(orderId);
+    await apiClient.delete(`/api/v1/dashboard/orders/${orderId}`);
   }
 
   /**
-   * Batch deletes orders.
+   * Deletes multiple orders in a batch operation.
    */
   async batchDeleteOrders(orderIds: string[]): Promise<void> {
-    return this.repo.batchDelete(orderIds);
+    // NOTE: Assumes your API supports a batch delete endpoint like this.
+    // Using POST is common for batch operations with a request body.
+    await apiClient.post("/api/v1/dashboard/orders/batch-delete", {
+      ids: orderIds,
+    });
   }
 }
 
