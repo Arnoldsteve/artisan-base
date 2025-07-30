@@ -4,7 +4,6 @@ import {
   BadRequestException,
   Logger,
   Scope,
-  OnModuleInit,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import {
@@ -15,35 +14,34 @@ import {
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { paginate } from 'src/common/helpers/paginate.helper';
 import { IOrderRepository } from './interfaces/order-repository.interface';
-import { Decimal } from 'decimal.js';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { Decimal } from '@prisma/client/runtime/library';
+import { PrismaClient } from '../../../generated/tenant';
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
-// Make the repository request-scoped to ensure cache is not shared across requests/tenants
 @Injectable({ scope: Scope.REQUEST })
-export class OrderRepository implements IOrderRepository, OnModuleInit {
+export class OrderRepository implements IOrderRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  // This property will hold the ready-to-use client for this request.
-  private prisma: PrismaClient;
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our standard gateway to the prisma client factory
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This hook runs once per request, fetching the correct Prisma client for the
-   * tenant and assigning it to the local `this.prisma` property.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
 
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized.
-
   async createManualOrder(dto: CreateManualOrderDto) {
+    const prisma = await this.getPrisma();
     const {
       items,
       customer,
@@ -52,7 +50,7 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
       notes,
       shippingAmount,
     } = dto;
-    return this.prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       // 1. Find or create the customer
       const customerRecord = await tx.customer.upsert({
         where: { email: customer.email },
@@ -83,7 +81,7 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
             `Product with ID ${item.productId} not found.`,
           );
         let stock = product.inventoryQuantity;
-        let price = product.price;
+        let price = product.price; // price is already a Decimal
         let variantName: string | null = null;
         let variantSku: string | null = null;
         if (item.variantId) {
@@ -97,7 +95,7 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
               `Variant ${variant.id} does not belong to product ${product.id}.`,
             );
           stock = variant.inventoryQuantity;
-          price = variant.price ?? product.price;
+          price = variant.price ?? product.price; // price is already a Decimal
           variantName = variant.name;
           variantSku = variant.sku;
         }
@@ -106,7 +104,8 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
             `Not enough stock for ${product.name} ${variantName ? `(${variantName})` : ''}.`,
           );
         }
-        const lineItemTotal = new Decimal(price).mul(item.quantity);
+        // Use Decimal methods for precise calculation
+        const lineItemTotal = price.mul(item.quantity);
         subtotal = subtotal.plus(lineItemTotal);
         orderItemsData.push({
           productId: product.id,
@@ -170,8 +169,9 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
       `Fetching orders with pagination: ${JSON.stringify(paginationQuery)}`,
       OrderRepository.name,
     );
+    const prisma = await this.getPrisma();
     const result = await paginate(
-      this.prisma.order,
+      prisma.order,
       {
         page: paginationQuery.page,
         limit: paginationQuery.limit,
@@ -193,7 +193,8 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
     if (cached && cached.expires > now) {
       return cached.data;
     }
-    const order = await this.prisma.order.findUnique({
+    const prisma = await this.getPrisma();
+    const order = await prisma.order.findUnique({
       where: { id },
       include: { items: true },
     });
@@ -206,7 +207,8 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto) {
     const order = await this.findOne(id);
     if (!order) throw new NotFoundException(`Order with ID '${id}' not found.`);
-    const updated = await this.prisma.order.update({
+    const prisma = await this.getPrisma();
+    const updated = await prisma.order.update({
       where: { id },
       data: { status: updateOrderDto.status },
     });
@@ -220,7 +222,8 @@ export class OrderRepository implements IOrderRepository, OnModuleInit {
   ) {
     const order = await this.findOne(id);
     if (!order) throw new NotFoundException(`Order with ID '${id}' not found.`);
-    const updated = await this.prisma.order.update({
+    const prisma = await this.getPrisma();
+    const updated = await prisma.order.update({
       where: { id },
       data: { paymentStatus: updatePaymentStatusDto.paymentStatus },
     });

@@ -3,34 +3,32 @@ import {
   ConflictException,
   NotFoundException,
   Scope,
-  OnModuleInit,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { PrismaClient } from '../../../generated/tenant';
 
-// Make the repository request-scoped to ensure it uses the correct tenant client
 @Injectable({ scope: Scope.REQUEST })
-export class ProductCategoryRepository implements OnModuleInit {
-  // This property will hold the ready-to-use client for this request.
-  private prisma: PrismaClient;
+export class ProductCategoryRepository {
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our standard gateway to the prisma client factory
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This hook runs once per request, fetching the correct Prisma client for the
-   * tenant and assigning it to the local `this.prisma` property.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
 
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized.
-
   async assignProductToCategory(productId: string, categoryId: string) {
+    const prisma = await this.getPrisma();
     // Check if assignment already exists
-    const existing = await this.prisma.productCategory.findUnique({
+    const existing = await prisma.productCategory.findUnique({
       where: { productId_categoryId: { productId, categoryId } },
     });
     if (existing) {
@@ -38,33 +36,36 @@ export class ProductCategoryRepository implements OnModuleInit {
         'Product is already assigned to this category.',
       );
     }
-    return this.prisma.productCategory.create({
+    return prisma.productCategory.create({
       data: { productId, categoryId },
     });
   }
 
   async unassignProductFromCategory(productId: string, categoryId: string) {
+    const prisma = await this.getPrisma();
     // Check if assignment exists
-    const existing = await this.prisma.productCategory.findUnique({
+    const existing = await prisma.productCategory.findUnique({
       where: { productId_categoryId: { productId, categoryId } },
     });
     if (!existing) {
       throw new NotFoundException('Assignment does not exist.');
     }
-    return this.prisma.productCategory.delete({
+    return prisma.productCategory.delete({
       where: { productId_categoryId: { productId, categoryId } },
     });
   }
 
   async getCategoriesForProduct(productId: string) {
-    return this.prisma.productCategory.findMany({
+    const prisma = await this.getPrisma();
+    return prisma.productCategory.findMany({
       where: { productId },
       include: { category: true },
     });
   }
 
   async getProductsForCategory(categoryId: string) {
-    return this.prisma.productCategory.findMany({
+    const prisma = await this.getPrisma();
+    return prisma.productCategory.findMany({
       where: { categoryId },
       include: { product: true },
     });

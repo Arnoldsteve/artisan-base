@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { CreateCustomerDto, UpdateCustomerDto } from './dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { CustomerRepository } from './customer.repository'; // <-- IMPORT THE CLASS
+import { CustomerRepository } from './customer.repository'; 
 
 @Injectable({ scope: Scope.REQUEST })
 export class CustomerService {
   constructor(
-    // INJECT THE CLASS DIRECTLY. NO MORE @Inject() decorator or string token.
     private readonly customerRepository: CustomerRepository,
   ) {}
 

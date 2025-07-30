@@ -3,7 +3,6 @@ import {
   ConflictException,
   NotFoundException,
   Scope,
-  OnModuleInit,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -11,31 +10,30 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ICategoryRepository } from './interfaces/category-repository.interface';
 import slugify from 'slugify';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { PrismaClient } from '../../../generated/tenant';
 
-// Make the repository request-scoped to ensure it uses the correct tenant client
 @Injectable({ scope: Scope.REQUEST })
-export class CategoryRepository implements ICategoryRepository, OnModuleInit {
-  // This property will hold the ready-to-use client for this request.
-  private prisma: PrismaClient;
+export class CategoryRepository implements ICategoryRepository {
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our standard gateway to the prisma client factory
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This hook runs once per request, fetching the correct Prisma client for the
-   * tenant and assigning it to the local `this.prisma` property.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
 
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized.
-
   async create(dto: CreateCategoryDto): Promise<any> {
+    const prisma = await this.getPrisma();
     const slug = slugify(dto.name, { lower: true, strict: true });
-    const existing = await this.prisma.category.findUnique({
+    const existing = await prisma.category.findUnique({
       where: { slug },
     });
     if (existing) {
@@ -43,20 +41,22 @@ export class CategoryRepository implements ICategoryRepository, OnModuleInit {
         `A category with the name '${dto.name}' already exists.`,
       );
     }
-    const category = await this.prisma.category.create({
+    const category = await prisma.category.create({
       data: { ...dto, slug },
     });
     return category;
   }
 
   async findAll(pagination?: PaginationQueryDto): Promise<any> {
-    return this.prisma.category.findMany({
+    const prisma = await this.getPrisma();
+    return prisma.category.findMany({
       orderBy: { name: 'asc' },
     });
   }
 
   async findOne(id: string): Promise<any> {
-    const category = await this.prisma.category.findUnique({
+    const prisma = await this.getPrisma();
+    const category = await prisma.category.findUnique({
       where: { id },
     });
     if (!category) {
@@ -66,11 +66,12 @@ export class CategoryRepository implements ICategoryRepository, OnModuleInit {
   }
 
   async update(id: string, dto: UpdateCategoryDto): Promise<any> {
-    await this.findOne(id);
+    await this.findOne(id); // This will call getPrisma internally
+    const prisma = await this.getPrisma();
     const data: any = { ...dto };
     if (dto.name) {
       data.slug = slugify(dto.name, { lower: true, strict: true });
-      const existing = await this.prisma.category.findFirst({
+      const existing = await prisma.category.findFirst({
         where: { slug: data.slug, NOT: { id } },
       });
       if (existing) {
@@ -79,7 +80,7 @@ export class CategoryRepository implements ICategoryRepository, OnModuleInit {
         );
       }
     }
-    const category = await this.prisma.category.update({
+    const category = await prisma.category.update({
       where: { id },
       data,
     });
@@ -87,8 +88,9 @@ export class CategoryRepository implements ICategoryRepository, OnModuleInit {
   }
 
   async remove(id: string): Promise<any> {
-    await this.findOne(id);
-    const category = await this.prisma.category.delete({ where: { id } });
+    await this.findOne(id); // This will call getPrisma internally
+    const prisma = await this.getPrisma();
+    const category = await prisma.category.delete({ where: { id } });
     return category;
   }
 }
