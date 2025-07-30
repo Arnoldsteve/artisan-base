@@ -1,15 +1,16 @@
-import { Injectable, NotFoundException, Scope, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { IProductRepository } from './interfaces/product-repository.interface';
 import { ProductCategoryService } from '../product-category/product-category.service';
+import { ProductRepository } from './product.repository'; // <-- IMPORT THE CLASS
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductService {
   constructor(
-    @Inject('ProductRepository')
-    private readonly productRepository: IProductRepository,
+    // INJECT THE CLASS DIRECTLY. NO MORE @Inject() or string token.
+    private readonly productRepository: ProductRepository,
     private readonly productCategoryService: ProductCategoryService,
   ) {}
 
@@ -40,7 +41,6 @@ export class ProductService {
     return;
   }
 
-  // Assign a product to a category
   assignCategory(productId: string, categoryId: string) {
     return this.productCategoryService.assignProductToCategory(
       productId,
@@ -48,7 +48,6 @@ export class ProductService {
     );
   }
 
-  // Unassign a product from a category
   unassignCategory(productId: string, categoryId: string) {
     return this.productCategoryService.unassignProductFromCategory(
       productId,

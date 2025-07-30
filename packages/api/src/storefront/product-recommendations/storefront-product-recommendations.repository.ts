@@ -1,9 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-
-// This is the clean, correct way for modules to communicate: via a service.
-import { StorefrontProductService } from '../products/storefront-product.service';
-
-// These imports are all local to the 'product-recommendations' module.
+import { StorefrontProductService } from '../products/storefront-product.service'; // This is correct
 import { Product } from './interfaces/product.interface';
 import { IStorefrontProductRecommendationsRepository } from './interfaces/storefront-product-recommendations-repository.interface';
 import { CategoryMatchStrategy } from './strategies/category-match.strategy';
@@ -11,8 +7,8 @@ import { TagSimilarityStrategy } from './strategies/tag-similarity.strategy';
 import { PriceScoreStrategy } from './strategies/price-score.strategy';
 import { PopularityScoreStrategy } from './strategies/popularity-score.strategy';
 import * as RECOMMENDATION from './constants';
+import { Decimal } from '@prisma/client/runtime/library';
 
-// A helper type to hold a Product along with its calculated score.
 type ScoredProduct = Product & { _score: number };
 
 @Injectable()
@@ -20,24 +16,18 @@ export class StorefrontProductRecommendationsRepository
   implements IStorefrontProductRecommendationsRepository
 {
   constructor(
-    // We inject the service from the 'products' module. NestJS provides it.
+    // This is the correct dependency - the service layer.
     private readonly productsService: StorefrontProductService,
-
-    // We inject all our scoring strategies.
     private readonly categoryStrategy: CategoryMatchStrategy,
     private readonly tagStrategy: TagSimilarityStrategy,
     private readonly priceStrategy: PriceScoreStrategy,
     private readonly popularityStrategy: PopularityScoreStrategy,
   ) {}
 
-  /**
-   * Generates a list of recommended products.
-   * This method contains all the business logic for scoring, sorting, and filtering.
-   */
   async getRecommendations(productId: string): Promise<Product[]> {
-    // 1. Fetch all necessary data using the injected service.
+    // 1. Fetch all necessary data. This part of your code is already correct.
     const [allProductsResponse, currentProduct] = await Promise.all([
-      this.productsService.findAll({ limit: 1000 }), // Get a large pool of products.
+      this.productsService.findAll({ limit: 1000 }),
       this.productsService.findOne(productId),
     ]);
 
@@ -45,30 +35,30 @@ export class StorefrontProductRecommendationsRepository
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
 
-    const allProducts = allProductsResponse.data;
+    // --- IMPORTANT FIX ---
+    // The data coming from your service has Decimal prices. Your local interface expects Decimals.
+    // We just need to ensure the type assertions are correct.
+    const allProducts = allProductsResponse.data as any[];
     Logger.log(`Total products fetched: ${allProducts.length}`, StorefrontProductRecommendationsRepository.name);
-
-    // 2. Score all other products based on the current one.
+    
     let scored: ScoredProduct[] = allProducts
       .filter((p) => p.id !== productId)
       .map((p) => {
+        // Here, both currentProduct and p have Decimal prices, so it works.
         const score = this.calculateTotalScore(currentProduct, p);
-        return { ...(p as Product), _score: score };
+        return { ...p, _score: score };
       })
       .filter((p) => p._score > RECOMMENDATION.RECOMMENDATION_MINIMUM_SCORE)
       .sort((a, b) => b._score - a._score);
 
-    // 3. Apply fallback logic if we don't have enough recommendations.
     scored = this.applyFallbackLogic(scored, allProducts, currentProduct);
     Logger.log(`Scored products after fallback logic: ${scored.length}`, StorefrontProductRecommendationsRepository.name);
-
-    // 4. Finalize the list (sort by stock, ensure uniqueness, take top N).
+    
     return this.finalizeRecommendations(scored);
   }
 
-  /**
-   * Calculates a weighted score for a product based on multiple strategies.
-   */
+  // Your helper methods (calculateTotalScore, applyFallbackLogic, etc.) do not need to change
+  // as long as your Product interface correctly uses the Decimal type.
   private calculateTotalScore(current: Product, other: Product): number {
     const categoryScore = this.categoryStrategy.calculateScore(current, other);
     const tagScore = this.tagStrategy.calculateScore(current, other);
@@ -83,9 +73,6 @@ export class StorefrontProductRecommendationsRepository
     );
   }
 
-  /**
-   * Adds more products if the scored list is too small.
-   */
   private applyFallbackLogic(
     scored: ScoredProduct[],
     allProducts: Product[],
@@ -106,10 +93,7 @@ export class StorefrontProductRecommendationsRepository
     const combined = [...scored, ...sameCategory.map(p => ({...(p as Product), _score: 0}))];
     return combined;
   }
-
-  /**
-   * Sorts the final list, prioritizes stock, removes duplicates, and returns the correct amount.
-   */
+  
   private finalizeRecommendations(scored: ScoredProduct[]): Product[] {
     const sortedByStock = [
       ...scored.filter((p) => p.inventoryQuantity > 0),
@@ -122,9 +106,8 @@ export class StorefrontProductRecommendationsRepository
 
     for (const p of sortedByStock) {
       if (!uniqueIds.has(p.id)) {
-        // Strip the internal _score property before returning to the client
         const { _score, ...product } = p;
-        finalRecommendations.push(product);
+        finalRecommendations.push(product as Product);
         uniqueIds.add(p.id);
       }
       if (finalRecommendations.length >= RECOMMENDATION.RECOMMENDATION_FINAL_LIST_SIZE) {

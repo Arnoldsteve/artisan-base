@@ -1,36 +1,28 @@
-import { Injectable, Scope, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Scope, Logger } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { PrismaClient } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
-export class StorefrontProductRepository
-  implements IStorefrontProductRepository, OnModuleInit // Implement OnModuleInit
-{
-    private readonly logger = new Logger(StorefrontProductRepository.name); // <-- Add this
+export class StorefrontProductRepository implements IStorefrontProductRepository {
+  private readonly logger = new Logger(StorefrontProductRepository.name);
 
-  // This property will hold the ready-to-use client for this specific request.
-  private prisma: PrismaClient;
+  // This will hold the client once it's initialized
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our new service, which acts as a gateway to the central client factory.
-  constructor(private readonly tenantPrismaService: TenantPrismaService) {
-        this.logger.log('StorefrontProductRepository INSTANCE CREATED.'); 
-
-  }
-  
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This NestJS lifecycle hook runs once per request when this repository is created.
-   * It asynchronously fetches the correct, long-lived Prisma client for the current tenant
-   * from our factory and assigns it to the local `this.prisma` property for use in this class.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
-
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized above.
 
   async findAll(filters: GetProductsDto) {
     const {
@@ -90,8 +82,9 @@ export class StorefrontProductRepository
         orderBy.name = sortOrder;
     }
 
+    const prisma = await this.getPrisma();
     const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
+      prisma.product.findMany({
         where,
         orderBy,
         skip,
@@ -121,7 +114,7 @@ export class StorefrontProductRepository
           },
         },
       }),
-      this.prisma.product.count({ where }),
+      prisma.product.count({ where }),
     ]);
 
     // Flatten categories for each product
@@ -142,7 +135,8 @@ export class StorefrontProductRepository
   }
 
   async findOne(id: string) {
-    const product = await this.prisma.product.findFirst({
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.findFirst({
       where: {
         id,
         isActive: true,
@@ -180,7 +174,8 @@ export class StorefrontProductRepository
   }
 
   async findFeatured() {
-    const products = await this.prisma.product.findMany({
+    const prisma = await this.getPrisma();
+    const products = await prisma.product.findMany({
       where: {
         isActive: true,
         isFeatured: true,
@@ -221,8 +216,9 @@ export class StorefrontProductRepository
   }
 
   async findCategories() {
+    const prisma = await this.getPrisma();
     // Get all categories that have at least one active product
-    const categories = await this.prisma.category.findMany({
+    const categories = await prisma.category.findMany({
       where: {
         products: {
           some: {

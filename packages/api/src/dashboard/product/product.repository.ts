@@ -1,40 +1,39 @@
-import { Injectable, OnModuleInit, Scope } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { paginate } from 'src/common/helpers/paginate.helper';
 import { IProductRepository } from './interfaces/product-repository.interface';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { PrismaClient } from '../../../generated/tenant';
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
-// Make the repository request-scoped to ensure cache is not shared across requests/tenants
 @Injectable({ scope: Scope.REQUEST })
-export class ProductRepository implements IProductRepository, OnModuleInit {
+export class ProductRepository implements IProductRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  // This property will hold the ready-to-use client for this request.
-  private prisma: PrismaClient;
+  // This will hold the client once it's initialized
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our standard gateway to the prisma client factory
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This hook runs once per request, fetching the correct Prisma client for the
-   * tenant and assigning it to the local `this.prisma` property.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
-
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized.
 
   async create(dto: CreateProductDto) {
     try {
-      const product = await this.prisma.product.create({ data: dto });
+      const prisma = await this.getPrisma();
+      const product = await prisma.product.create({ data: dto });
       this.invalidateCache();
       return product;
     } catch (err) {
@@ -50,8 +49,10 @@ export class ProductRepository implements IProductRepository, OnModuleInit {
     if (this.findAllCache && this.findAllCache.expires > now) {
       return this.findAllCache.data;
     }
+    
+    const prisma = await this.getPrisma();
     const result = await paginate(
-      this.prisma.product,
+      prisma.product,
       {
         page: pagination.page,
         limit: pagination.limit,
@@ -70,7 +71,9 @@ export class ProductRepository implements IProductRepository, OnModuleInit {
     if (cached && cached.expires > now) {
       return cached.data;
     }
-    const product = await this.prisma.product.findUnique({
+    
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.findUnique({
       where: { id },
     });
     if (product) {
@@ -80,7 +83,8 @@ export class ProductRepository implements IProductRepository, OnModuleInit {
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    const product = await this.prisma.product.update({
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.update({
       where: { id },
       data: dto,
     });
@@ -89,7 +93,8 @@ export class ProductRepository implements IProductRepository, OnModuleInit {
   }
 
   async remove(id: string) {
-    const product = await this.prisma.product.delete({ where: { id } });
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.delete({ where: { id } });
     this.invalidateCache(id);
     return product;
   }

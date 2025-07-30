@@ -2,37 +2,35 @@ import {
   Injectable,
   Scope,
   BadRequestException,
-  OnModuleInit,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateStorefrontOrderDto } from './dto/create-storefront-order.dto';
 import { IStorefrontOrderRepository } from './interfaces/storefront-order-repository.interface';
 import { GetStorefrontOrdersDto } from './dto/get-storefront-orders.dto';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { PrismaClient } from '../../../generated/tenant';
+import { Decimal } from '@prisma/client/runtime/library'; // Import Decimal for calculations
 
 @Injectable({ scope: Scope.REQUEST })
-export class StorefrontOrderRepository
-  implements IStorefrontOrderRepository, OnModuleInit // Implement OnModuleInit
-{
-  // This property will hold the ready-to-use client for this specific request.
-  private prisma: PrismaClient;
+export class StorefrontOrderRepository implements IStorefrontOrderRepository {
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our new service, which acts as a gateway to the central client factory.
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This NestJS lifecycle hook runs once per request when this repository is created.
-   * It asynchronously fetches the correct, long-lived Prisma client for the current tenant
-   * from our factory and assigns it to the local `this.prisma` property for use in this class.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
 
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized above.
-
   async create(dto: CreateStorefrontOrderDto): Promise<any> {
+    const prisma = await this.getPrisma();
+
     // Validate items
     if (!dto.items || dto.items.length === 0) {
       throw new BadRequestException('Order must have at least one item.');
@@ -40,7 +38,7 @@ export class StorefrontOrderRepository
 
     // Fetch product/variant info and check inventory
     const productIds = dto.items.map((item) => item.productId);
-    const products = await this.prisma.product.findMany({
+    const products = await prisma.product.findMany({
       where: { id: { in: productIds }, isActive: true },
     });
     if (products.length !== productIds.length) {
@@ -49,8 +47,8 @@ export class StorefrontOrderRepository
       );
     }
 
-    // Calculate totals
-    let subtotal = 0;
+    // Calculate totals using Decimal for precision
+    let subtotal = new Decimal(0);
     const orderItemsData = await Promise.all(
       dto.items.map(async (item) => {
         const product = products.find((p) => p.id === item.productId);
@@ -60,8 +58,9 @@ export class StorefrontOrderRepository
             `Insufficient inventory for product: ${product.name}`,
           );
         }
-        const unitPrice = Number(product.price);
-        subtotal += unitPrice * item.quantity;
+        // product.price is already a Decimal, no need to convert
+        const unitPrice = product.price; 
+        subtotal = subtotal.plus(unitPrice.mul(item.quantity)); // Use Decimal methods
         return {
           quantity: item.quantity,
           unitPrice,
@@ -79,11 +78,11 @@ export class StorefrontOrderRepository
     // Optionally: create/find customer
     let customerId: string | undefined = undefined;
     if (dto.customer && dto.customer.email) {
-      let customer = await this.prisma.customer.findUnique({
+      let customer = await prisma.customer.findUnique({
         where: { email: dto.customer.email },
       });
       if (!customer) {
-        customer = await this.prisma.customer.create({
+        customer = await prisma.customer.create({
           data: {
             email: dto.customer.email,
             firstName: dto.customer.firstName,
@@ -96,8 +95,7 @@ export class StorefrontOrderRepository
     }
 
     // Create order and order items in a transaction
-    const order = await this.prisma.$transaction(async (tx) => {
-      // Generate order number (simple example)
+    const order = await prisma.$transaction(async (tx) => {
       const orderCount = await tx.order.count();
       const orderNumber = `ORD-${orderCount + 1}`;
       const createdOrder = await tx.order.create({
@@ -106,7 +104,7 @@ export class StorefrontOrderRepository
           orderNumber,
           status: 'PENDING',
           paymentStatus: 'PENDING',
-          totalAmount: subtotal, // Add tax/shipping if needed
+          totalAmount: subtotal,
           subtotal,
           taxAmount: 0,
           shippingAmount: 0,
@@ -130,7 +128,6 @@ export class StorefrontOrderRepository
           data: { inventoryQuantity: { decrement: item.quantity } },
         });
       }
-
       return createdOrder;
     });
 
@@ -148,18 +145,18 @@ export class StorefrontOrderRepository
   }
 
   async getOrders(query: GetStorefrontOrdersDto): Promise<any> {
-    // Find customer by email or customerId
+    const prisma = await this.getPrisma();
     let customerId = query.customerId;
     if (!customerId && query.email) {
-      const customer = await this.prisma.customer.findUnique({
+      const customer = await prisma.customer.findUnique({
         where: { email: query.email },
       });
       if (!customer) return [];
       customerId = customer.id;
     }
     if (!customerId) return [];
-    // Fetch orders for customer
-    const orders = await this.prisma.order.findMany({
+
+    const orders = await prisma.order.findMany({
       where: { customerId },
       orderBy: { createdAt: 'desc' },
       include: { items: true },
@@ -168,18 +165,18 @@ export class StorefrontOrderRepository
   }
 
   async getOrder(id: string, query: GetStorefrontOrdersDto): Promise<any> {
-    // Find customer by email or customerId
+    const prisma = await this.getPrisma();
     let customerId = query.customerId;
     if (!customerId && query.email) {
-      const customer = await this.prisma.customer.findUnique({
+      const customer = await prisma.customer.findUnique({
         where: { email: query.email },
       });
       if (!customer) return null;
       customerId = customer.id;
     }
     if (!customerId) return null;
-    // Fetch order by id and customerId
-    const order = await this.prisma.order.findFirst({
+
+    const order = await prisma.order.findFirst({
       where: { id, customerId },
       include: { items: true },
     });

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Product } from '../interfaces/product.interface';
 import { RecommendationStrategy } from './recommendation.strategy';
+import { Decimal } from '@prisma/client/runtime/library'; // <-- Import the Decimal type
 
 @Injectable()
 export class PriceScoreStrategy implements RecommendationStrategy {
@@ -16,13 +17,19 @@ export class PriceScoreStrategy implements RecommendationStrategy {
     const priceA = currentProduct.price;
     const priceB = otherProduct.price;
 
-    if (!priceA || !priceB || priceA <= 0 || priceB <= 0) {
+    // --- THIS IS THE CORRECTED LOGIC ---
+    
+    // Check if prices are valid using Decimal's comparison methods.
+    if (!priceA || !priceB || priceA.lessThanOrEqualTo(0) || priceB.lessThanOrEqualTo(0)) {
       return 0;
     }
 
-    const minPrice = priceA * 0.5;
-    const maxPrice = priceA * 1.5;
+    // Use .mul() for multiplication to get new Decimal objects.
+    const minPrice = priceA.mul(0.5);
+    const maxPrice = priceA.mul(1.5);
 
-    return priceB >= minPrice && priceB <= maxPrice ? 1 : 0;
+    // Use .isGreaterThanOrEqualTo() and .isLessThanOrEqualTo() for comparison.
+    // The && operator works because these methods return a standard boolean.
+    return priceB.greaterThanOrEqualTo(minPrice) && priceB.lessThanOrEqualTo(maxPrice) ? 1 : 0;
   }
 }

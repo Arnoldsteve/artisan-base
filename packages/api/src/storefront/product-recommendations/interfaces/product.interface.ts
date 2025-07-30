@@ -1,4 +1,4 @@
-// File: packages/api/src/storefront/product-recommendations/interfaces/product.interface.ts
+import { Decimal } from "generated/management/runtime/library";
 
 // A local definition of a Category
 export interface Category {
@@ -10,7 +10,7 @@ export interface Category {
 export interface Product {
   id: string;
   name: string;
-  price: number;
+  price: Decimal;
   inventoryQuantity: number;
   categories?: Category[];
   tags?: string[];

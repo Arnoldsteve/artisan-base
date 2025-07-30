@@ -1,30 +1,28 @@
-import { Injectable, Scope, OnModuleInit } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontCategoryRepository } from './interfaces/storefront-category-repository.interface';
 import { GetCategoriesDto } from './dto/get-categories.dto';
-import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
+import { PrismaClient } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontCategoryRepository
-  implements IStorefrontCategoryRepository, OnModuleInit // Implement OnModuleInit
+  implements IStorefrontCategoryRepository
 {
-  // This property will hold the ready-to-use client for this specific request.
-  private prisma: PrismaClient;
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
 
-  // Inject our new service, which acts as a gateway to the central client factory.
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   /**
-   * This NestJS lifecycle hook runs once per request when this repository is created.
-   * It asynchronously fetches the correct, long-lived Prisma client for the current tenant
-   * from our factory and assigns it to the local `this.prisma` property for use in this class.
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
    */
-  async onModuleInit() {
-    this.prisma = await this.tenantPrismaService.getClient();
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
   }
-
-  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
-  // It will now use the `this.prisma` property that was correctly initialized above.
 
   /**
    * EFFICIENTLY finds all categories with a TRUE count of their active products.
@@ -41,10 +39,11 @@ export class StorefrontCategoryRepository
       ];
     }
 
+    const prisma = await this.getPrisma();
     // Use a transaction for consistency
-    const [categories, total] = await this.prisma.$transaction([
+    const [categories, total] = await prisma.$transaction([
       // Query 1: Get the categories for the current page
-      this.prisma.category.findMany({
+      prisma.category.findMany({
         where,
         orderBy: { name: 'asc' },
         skip,
@@ -65,7 +64,7 @@ export class StorefrontCategoryRepository
         },
       }),
       // Query 2: Get the total count of categories matching the filter
-      this.prisma.category.count({ where }),
+      prisma.category.count({ where }),
     ]);
 
     // Prisma already did the counting. No manual mapping is needed.
@@ -87,11 +86,12 @@ export class StorefrontCategoryRepository
    * AND the TRUE total count of all its active products.
    */
   async findOne(id: string) {
+    const prisma = await this.getPrisma();
     // We need two pieces of info: the paginated products and the total count.
     // A transaction runs both queries at the same time for max efficiency.
-    const [category, activeProductCount] = await this.prisma.$transaction([
+    const [category, activeProductCount] = await prisma.$transaction([
       // Query 1: Get the category and its 20 newest products
-      this.prisma.category.findFirst({
+      prisma.category.findFirst({
         where: { id },
         include: {
           products: {
@@ -104,7 +104,7 @@ export class StorefrontCategoryRepository
         },
       }),
       // Query 2: Get the TRUE total count of ALL active products in this category
-      this.prisma.product.count({
+      prisma.product.count({
         where: {
           isActive: true,
           categories: { some: { categoryId: id } },
