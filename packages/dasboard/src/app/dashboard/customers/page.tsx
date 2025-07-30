@@ -1,29 +1,29 @@
-'use client'; 
+// REMOVE 'use client'; This is now a Server Component.
 
-import { createServerApiClient } from '@/services/server-api';
+import { createServerApiClient } from '@/lib/server-api'; // <-- Use the NEW server-api path
 import { CustomersView } from './components/customers-view';
-import { Customer } from '@/types/customers';
+import { Customer, PaginatedResponse } from '@/types/customers';
 
 export default async function CustomersPage() {
-  let customers: Customer[] = [];
+  let initialCustomers: Customer[] = [];
+
   try {
+    // This code now runs ONLY on the server during the initial render.
     const serverApi = await createServerApiClient();
-    const response = await serverApi.get("/dashboard/customers");
-    customers = response.data.data;
-    if (!customers) {
-      console.warn("API response did not contain a 'data' array for customers.");
-      customers = [];
-    }
+    const response = await serverApi.get<PaginatedResponse<Customer>>("/dashboard/customers");
+    
+    // The actual data is in the `data` property of the paginated response
+    initialCustomers = response.data; 
+
   } catch (error) {
-    console.error("Failed to fetch initial customers:", error);
+    console.error("Failed to fetch initial customers on the server:", error);
+    // You might want to render an error state here
   }
 
-  
-
-  // Once data is ready, render the main view component
+  // Pass the server-fetched data as a prop to the Client Component.
   return (
     <div className="p-4 md:p-8 lg:p-10">
-      <CustomersView initialCustomers={customers} />
+      <CustomersView initialCustomers={initialCustomers} />
     </div>
   );
 }
