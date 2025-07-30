@@ -1,13 +1,30 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, OnModuleInit } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontCategoryRepository } from './interfaces/storefront-category-repository.interface';
 import { GetCategoriesDto } from './dto/get-categories.dto';
+import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontCategoryRepository
-  implements IStorefrontCategoryRepository
+  implements IStorefrontCategoryRepository, OnModuleInit // Implement OnModuleInit
 {
-  constructor(private readonly prisma: TenantPrismaService) {}
+  // This property will hold the ready-to-use client for this specific request.
+  private prisma: PrismaClient;
+
+  // Inject our new service, which acts as a gateway to the central client factory.
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * This NestJS lifecycle hook runs once per request when this repository is created.
+   * It asynchronously fetches the correct, long-lived Prisma client for the current tenant
+   * from our factory and assigns it to the local `this.prisma` property for use in this class.
+   */
+  async onModuleInit() {
+    this.prisma = await this.tenantPrismaService.getClient();
+  }
+
+  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
+  // It will now use the `this.prisma` property that was correctly initialized above.
 
   /**
    * EFFICIENTLY finds all categories with a TRUE count of their active products.
@@ -103,7 +120,7 @@ export class StorefrontCategoryRepository
     const paginatedActiveProducts = category.products
       .map((p) => p.product)
       .filter((prod) => prod && prod.isActive);
-    
+
     // Return a complete object with the data you need
     return {
       ...category,

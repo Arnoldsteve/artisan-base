@@ -2,6 +2,8 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Scope,
+  OnModuleInit,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -9,18 +11,31 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ICategoryRepository } from './interfaces/category-repository.interface';
 import slugify from 'slugify';
-import { ICacheService } from './interfaces/cache-service.interface';
-import { InMemoryCacheService } from './services/in-memory-cache.service';
+import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
 
-const CACHE_TTL = 10 * 1000; // 10 seconds for demo
+// Make the repository request-scoped to ensure it uses the correct tenant client
+@Injectable({ scope: Scope.REQUEST })
+export class CategoryRepository implements ICategoryRepository, OnModuleInit {
+  // This property will hold the ready-to-use client for this request.
+  private prisma: PrismaClient;
 
-@Injectable()
-export class CategoryRepository implements ICategoryRepository {
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  // Inject our standard gateway to the prisma client factory
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * This hook runs once per request, fetching the correct Prisma client for the
+   * tenant and assigning it to the local `this.prisma` property.
+   */
+  async onModuleInit() {
+    this.prisma = await this.tenantPrismaService.getClient();
+  }
+
+  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
+  // It will now use the `this.prisma` property that was correctly initialized.
 
   async create(dto: CreateCategoryDto): Promise<any> {
     const slug = slugify(dto.name, { lower: true, strict: true });
-    const existing = await this.tenantPrisma.category.findUnique({
+    const existing = await this.prisma.category.findUnique({
       where: { slug },
     });
     if (existing) {
@@ -28,20 +43,20 @@ export class CategoryRepository implements ICategoryRepository {
         `A category with the name '${dto.name}' already exists.`,
       );
     }
-    const category = await this.tenantPrisma.category.create({
+    const category = await this.prisma.category.create({
       data: { ...dto, slug },
     });
     return category;
   }
 
   async findAll(pagination?: PaginationQueryDto): Promise<any> {
-    return this.tenantPrisma.category.findMany({
+    return this.prisma.category.findMany({
       orderBy: { name: 'asc' },
     });
   }
 
   async findOne(id: string): Promise<any> {
-    const category = await this.tenantPrisma.category.findUnique({
+    const category = await this.prisma.category.findUnique({
       where: { id },
     });
     if (!category) {
@@ -55,7 +70,7 @@ export class CategoryRepository implements ICategoryRepository {
     const data: any = { ...dto };
     if (dto.name) {
       data.slug = slugify(dto.name, { lower: true, strict: true });
-      const existing = await this.tenantPrisma.category.findFirst({
+      const existing = await this.prisma.category.findFirst({
         where: { slug: data.slug, NOT: { id } },
       });
       if (existing) {
@@ -64,7 +79,7 @@ export class CategoryRepository implements ICategoryRepository {
         );
       }
     }
-    const category = await this.tenantPrisma.category.update({
+    const category = await this.prisma.category.update({
       where: { id },
       data,
     });
@@ -73,7 +88,7 @@ export class CategoryRepository implements ICategoryRepository {
 
   async remove(id: string): Promise<any> {
     await this.findOne(id);
-    const category = await this.tenantPrisma.category.delete({ where: { id } });
+    const category = await this.prisma.category.delete({ where: { id } });
     return category;
   }
 }

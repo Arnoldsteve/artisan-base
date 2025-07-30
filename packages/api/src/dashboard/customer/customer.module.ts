@@ -1,12 +1,12 @@
 import { Module, Scope } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CustomerController } from './customer.controller';
-import { TenantPrismaModule } from 'src/prisma/tenant-prisma.module';
+// import { TenantPrismaModule } from 'src/prisma/tenant-prisma.module';
 import { CustomerRepository } from './customer.repository';
 import { TenantContextService } from 'src/common/tenant-context.service';
 
 @Module({
-  imports: [TenantPrismaModule],
+  imports: [],
   controllers: [CustomerController],
   providers: [
     CustomerService,

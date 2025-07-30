@@ -1,13 +1,36 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, OnModuleInit, Logger } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
+import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductRepository
-  implements IStorefrontProductRepository
+  implements IStorefrontProductRepository, OnModuleInit // Implement OnModuleInit
 {
-  constructor(private readonly prisma: TenantPrismaService) {}
+    private readonly logger = new Logger(StorefrontProductRepository.name); // <-- Add this
+
+  // This property will hold the ready-to-use client for this specific request.
+  private prisma: PrismaClient;
+
+  // Inject our new service, which acts as a gateway to the central client factory.
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {
+        this.logger.log('StorefrontProductRepository INSTANCE CREATED.'); 
+
+  }
+  
+
+  /**
+   * This NestJS lifecycle hook runs once per request when this repository is created.
+   * It asynchronously fetches the correct, long-lived Prisma client for the current tenant
+   * from our factory and assigns it to the local `this.prisma` property for use in this class.
+   */
+  async onModuleInit() {
+    this.prisma = await this.tenantPrismaService.getClient();
+  }
+
+  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
+  // It will now use the `this.prisma` property that was correctly initialized above.
 
   async findAll(filters: GetProductsDto) {
     const {

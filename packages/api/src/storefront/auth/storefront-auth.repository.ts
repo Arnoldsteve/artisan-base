@@ -1,28 +1,30 @@
-// src/storefront/auth/storefront-auth.repository.ts
-import { Injectable, Inject, Scope } from '@nestjs/common';
-import { TenantClientFactory } from 'src/prisma/tenant-client-factory.service';
+import { Injectable, Scope, OnModuleInit } from '@nestjs/common';
 import { IStorefrontAuthRepository } from './interfaces/storefront-auth-repository.interface';
-import { REQUEST } from '@nestjs/core';
-import { RequestWithTenant } from 'src/common/interfaces/request-with-tenant.interface';
+import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
+import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
 
 @Injectable({ scope: Scope.REQUEST })
-export class StorefrontAuthRepository implements IStorefrontAuthRepository {
-  constructor(
-    @Inject(REQUEST) private readonly request: RequestWithTenant,
-    private readonly tenantClientFactory: TenantClientFactory,
-  ) {}
+export class StorefrontAuthRepository
+  implements IStorefrontAuthRepository, OnModuleInit // Implement OnModuleInit
+{
+  // This property will hold the ready-to-use client for this request.
+  private prisma: PrismaClient;
 
-  private getPrismaClient() {
-    const tenant = this.request.tenant;
-    if (!tenant) {
-      throw new Error('Tenant information is not available on the request.');
-    }
-    return this.tenantClientFactory.getTenantClient(tenant.dbSchema);
+  // Inject the TenantPrismaService, which is the standard gateway for all repositories.
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * This hook runs once per request, fetching the correct Prisma client for the
+   * tenant and assigning it to the local `this.prisma` property.
+   */
+  async onModuleInit() {
+    this.prisma = await this.tenantPrismaService.getClient();
   }
 
+  // All methods below now correctly use the initialized `this.prisma`.
+
   async findCustomerByEmail(email: string) {
-    const prisma = this.getPrismaClient();
-    return prisma.customer.findUnique({ where: { email } });
+    return this.prisma.customer.findUnique({ where: { email } });
   }
 
   async createCustomer(data: {
@@ -32,13 +34,11 @@ export class StorefrontAuthRepository implements IStorefrontAuthRepository {
     lastName: string;
     phone?: string;
   }) {
-    const prisma = this.getPrismaClient();
-    return prisma.customer.create({ data });
+    return this.prisma.customer.create({ data });
   }
 
   async updateCustomerPassword(email: string, hashedPassword: string) {
-    const prisma = this.getPrismaClient();
-    return prisma.customer.update({
+    return this.prisma.customer.update({
       where: { email },
       data: { hashedPassword },
     });
@@ -48,7 +48,6 @@ export class StorefrontAuthRepository implements IStorefrontAuthRepository {
     email: string,
     data: Partial<{ firstName: string; lastName: string; phone: string }>,
   ) {
-    const prisma = this.getPrismaClient();
-    return prisma.customer.update({ where: { email }, data });
+    return this.prisma.customer.update({ where: { email }, data });
   }
 }

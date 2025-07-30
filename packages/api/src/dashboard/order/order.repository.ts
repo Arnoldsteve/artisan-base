@@ -3,6 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  Scope,
+  OnModuleInit,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import {
@@ -14,15 +16,32 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { paginate } from 'src/common/helpers/paginate.helper';
 import { IOrderRepository } from './interfaces/order-repository.interface';
 import { Decimal } from 'decimal.js';
+import { PrismaClient } from '../../../generated/tenant'; // Import the actual PrismaClient type
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
-@Injectable()
-export class OrderRepository implements IOrderRepository {
+// Make the repository request-scoped to ensure cache is not shared across requests/tenants
+@Injectable({ scope: Scope.REQUEST })
+export class OrderRepository implements IOrderRepository, OnModuleInit {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  // This property will hold the ready-to-use client for this request.
+  private prisma: PrismaClient;
+
+  // Inject our standard gateway to the prisma client factory
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * This hook runs once per request, fetching the correct Prisma client for the
+   * tenant and assigning it to the local `this.prisma` property.
+   */
+  async onModuleInit() {
+    this.prisma = await this.tenantPrismaService.getClient();
+  }
+
+  // --- ALL LOGIC BELOW REMAINS UNCHANGED ---
+  // It will now use the `this.prisma` property that was correctly initialized.
 
   async createManualOrder(dto: CreateManualOrderDto) {
     const {
@@ -33,7 +52,7 @@ export class OrderRepository implements IOrderRepository {
       notes,
       shippingAmount,
     } = dto;
-    return this.tenantPrisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       // 1. Find or create the customer
       const customerRecord = await tx.customer.upsert({
         where: { email: customer.email },
@@ -152,7 +171,7 @@ export class OrderRepository implements IOrderRepository {
       OrderRepository.name,
     );
     const result = await paginate(
-      this.tenantPrisma.order,
+      this.prisma.order,
       {
         page: paginationQuery.page,
         limit: paginationQuery.limit,
@@ -174,7 +193,7 @@ export class OrderRepository implements IOrderRepository {
     if (cached && cached.expires > now) {
       return cached.data;
     }
-    const order = await this.tenantPrisma.order.findUnique({
+    const order = await this.prisma.order.findUnique({
       where: { id },
       include: { items: true },
     });
@@ -187,7 +206,7 @@ export class OrderRepository implements IOrderRepository {
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto) {
     const order = await this.findOne(id);
     if (!order) throw new NotFoundException(`Order with ID '${id}' not found.`);
-    const updated = await this.tenantPrisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id },
       data: { status: updateOrderDto.status },
     });
@@ -201,7 +220,7 @@ export class OrderRepository implements IOrderRepository {
   ) {
     const order = await this.findOne(id);
     if (!order) throw new NotFoundException(`Order with ID '${id}' not found.`);
-    const updated = await this.tenantPrisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id },
       data: { paymentStatus: updatePaymentStatusDto.paymentStatus },
     });
