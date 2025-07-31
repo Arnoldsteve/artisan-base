@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { Order } from "@/types/orders";
-import { columns } from "./columns";
-import { PageHeader } from "@/components/shared/page-header";
-import { DataTable } from "@/components/shared/data-table";
-import { Button } from "@repo/ui";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import {
+  Order,
+  PaginatedResponse,
+} from "@/types/orders";
+import { columns } from "./columns";
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,100 +17,55 @@ import {
   ColumnFiltersState,
   VisibilityState,
 } from "@tanstack/react-table";
-import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
-import { DeleteOrderDialog } from "./delete-order-dialog";
-import { orderService, OrderService } from "@/services/order-service";
-import { useOrders } from "@/hooks/use-orders";
+import {
+  useOrders,
+  useDeleteOrder,
+  useBatchDeleteOrders,
+} from "@/hooks/use-orders";
 
-/**
- * Table view options for orders (memoized for performance).
- */
-const OrdersTableViewOptions = React.memo(function OrdersTableViewOptions() {
-  return <div className="py-4"></div>;
-});
+// UI Components
+import { PageHeader } from "@/components/shared/page-header";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
+import { DeleteOrderDialog } from "./delete-order-dialog";
+import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
+import { Button } from "@repo/ui";
+import { Trash2 } from "lucide-react";
+
+// A simple placeholder for view options, to be enhanced later.
+const OrdersTableViewOptions = ({ table }: { table: any }) => {
+    return <div className="py-4">{/* Filtering UI would go here */}</div>;
+};
 
 interface OrdersViewProps {
-  initialOrders: Order[];
-  service?: OrderService;
+  initialData: PaginatedResponse<Order>;
 }
 
-/**
- * OrdersView displays and manages the orders table.
- */
-export function OrdersView({
-  initialOrders,
-  service = orderService,
-}: OrdersViewProps) {
-  const {
-    orders,
-    loading,
-    error,
-    refreshOrders,
-    deleteOrder,
-    batchDeleteOrders,
-    setOrders,
-  } = useOrders(initialOrders);
-  const [rowSelection, setRowSelection] = useState({});
+export function OrdersView({ initialData }: OrdersViewProps) {
+  // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+
+  // --- Modal/Dialog UI State ---
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
-  const [isDeletePending, setIsDeletePending] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
-  const [isBulkDeletePending, setIsBulkDeletePending] = useState(false);
 
-  const selectedOrderIds = useMemo(() => {
-    const selectedRows = Object.keys(rowSelection).map(
-      (index) => orders[parseInt(index, 10)]
-    );
-    return selectedRows.map((row) => row.id);
-  }, [rowSelection, orders]);
-  const numSelected = selectedOrderIds.length;
+  // --- Data Fetching & Mutations with TanStack Query ---
+  // We now use the single, powerful `useOrders` hook for data.
+  const { data: paginatedResponse, isLoading, isError } = useOrders(1, 10, "", initialData);
+  // And the mutation hooks for actions.
+  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
+  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } = useBatchDeleteOrders();
 
-  const openDeleteDialog = (order: Order) => setOrderToDelete(order);
+  // --- Memoized Data ---
+  const orders = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
 
-  const handleConfirmDelete = async () => {
-    if (!orderToDelete) return;
-    setIsDeletePending(true);
-    try {
-      await service.deleteOrder(orderToDelete.id);
-      setOrders((current) => current.filter((o) => o.id !== orderToDelete.id));
-      toast.success(`Order #${orderToDelete.orderNumber} has been deleted.`);
-    } catch (error) {
-      toast.error((error as Error).message);
-    } finally {
-      setIsDeletePending(false);
-      setOrderToDelete(null);
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (numSelected === 0) return;
-    setIsBulkDeletePending(true);
-    try {
-      await service.batchDeleteOrders(selectedOrderIds);
-      setOrders((current) =>
-        current.filter((o) => !selectedOrderIds.includes(o.id))
-      );
-      toast.success(`${numSelected} order(s) deleted successfully.`);
-      setRowSelection({});
-    } catch (error) {
-      toast.error((error as Error).message);
-    } finally {
-      setIsBulkDeletePending(false);
-      setIsBulkDeleteDialogOpen(false);
-    }
-  };
-
+  // --- Table Instance Initialization ---
   const table = useReactTable({
     data: orders,
     columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-    },
+    state: { sorting, columnVisibility, rowSelection, columnFilters },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -123,9 +76,42 @@ export function OrdersView({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
-      openDeleteDialog,
+      openDeleteDialog: (order) => setOrderToDelete(order as Order),
     },
   });
+
+  const selectedOrderIds = useMemo(() => {
+    return table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
+  }, [rowSelection, table]);
+  const numSelected = selectedOrderIds.length;
+  
+  // --- Event Handlers that call mutations ---
+  const handleConfirmDelete = () => {
+    if (orderToDelete) {
+      deleteOrder(orderToDelete.id, {
+        onSuccess: () => setOrderToDelete(null), // Close dialog on success
+      });
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (numSelected > 0) {
+      batchDeleteOrders(selectedOrderIds, {
+        onSuccess: () => {
+          setRowSelection({}); // Clear selection
+          setIsBulkDeleteDialogOpen(false);
+        },
+      });
+    }
+  };
+  
+  // --- Render Logic ---
+  if (isLoading && !paginatedResponse) {
+    return <DataTableSkeleton />;
+  }
+  if (isError) {
+    return <div className="p-8 text-red-500">Failed to load order data.</div>;
+  }
 
   return (
     <div>
@@ -137,16 +123,12 @@ export function OrdersView({
           <Button>Create Order</Button>
         </Link>
       </PageHeader>
-      <OrdersTableViewOptions />
-      {loading ? (
-        <div className="py-8 text-center">Loading orders...</div>
-      ) : (
-        <DataTable table={table} />
-      )}
-      <div
-        className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? "translate-y-0" : "translate-y-24"}`}
-      >
-        {numSelected > 0 && (
+      
+      <OrdersTableViewOptions table={table} />
+      <DataTable table={table} />
+      
+      {numSelected > 0 && (
+        <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">
           <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
             <div className="text-sm font-medium">
               <span className="font-semibold">{numSelected}</span> selected
@@ -156,6 +138,7 @@ export function OrdersView({
                 variant="destructive"
                 size="sm"
                 onClick={() => setIsBulkDeleteDialogOpen(true)}
+                disabled={isBatchDeleting}
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
@@ -168,21 +151,22 @@ export function OrdersView({
               </Button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      
       <DeleteOrderDialog
         isOpen={!!orderToDelete}
         onClose={() => setOrderToDelete(null)}
         onConfirm={handleConfirmDelete}
         orderNumber={orderToDelete?.orderNumber || ""}
-        isPending={isDeletePending}
+        isPending={isDeleting}
       />
       <BulkDeleteAlertDialog
         isOpen={isBulkDeleteDialogOpen}
         onClose={() => setIsBulkDeleteDialogOpen(false)}
         onConfirm={handleBulkDelete}
         selectedCount={numSelected}
-        isPending={isBulkDeletePending}
+        isPending={isBatchDeleting}
       />
     </div>
   );

@@ -1,27 +1,36 @@
-import { createServerApiClient } from "@/services/server-api";
-import { OrdersView } from "./components/orders-view";
-import { Order } from "@/types/orders";
+// File: packages/dasboard/src/app/dashboard/orders/page.tsx
 
+import { createServerApiClient } from '@/lib/server-api';
+import { OrdersView } from './components/orders-view';
+import { Order, PaginatedResponse } from '@/types/orders';
+
+/**
+ * This is the Server Component for the Orders page.
+ * It fetches the initial data on the server for a fast page load.
+ */
 export default async function OrdersPage() {
-  let orders: Order[] = [];
+  
+  let initialData: PaginatedResponse<Order>;
+
   try {
     const serverApi = await createServerApiClient();
-    const response = await serverApi.get("/dashboard/orders");
-
-    console.log("API response:", response.data);
-    orders = response.data.data;
-
-    if (!orders) {
-      console.warn("API response did not contain a 'data' array for orders.");
-      orders = [];
-    }
+    // Fetch the full paginated response
+    initialData = await serverApi.get<PaginatedResponse<Order>>("/dashboard/orders");
+    
   } catch (error) {
-    console.error("Failed to fetch initial orders:", error);
+    console.error("Failed to fetch initial orders on the server:", error);
+    // Provide a default empty state in case of an error
+    initialData = { 
+      data: [], 
+      meta: { total: 0, page: 1, limit: 10, totalPages: 1, prev: null, next: null } 
+    };
   }
+  console.log("Initial data fetched on the server:", initialData);
 
   return (
     <div className="p-4 md:p-8 lg:p-10">
-      <OrdersView initialOrders={orders} />
+      {/* Pass the full initialData object to the client view */}
+      <OrdersView initialData={initialData} />
     </div>
   );
 }
