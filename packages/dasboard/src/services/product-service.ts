@@ -14,7 +14,7 @@ export class ProductService {
   async searchProducts(searchTerm: string): Promise<Product[]> {
     // This now leverages the centralized cache in apiClient
     const response = await apiClient.get<PaginatedResponse<Product>>(
-      "/api/v1/dashboard/products",
+      "dashboard/products",
       { page: 1, limit: 5, search: searchTerm }
     );
     return response.data; // Return just the products array for search
@@ -29,7 +29,7 @@ export class ProductService {
     search?: string
   ): Promise<PaginatedResponse<Product>> {
     return apiClient.get<PaginatedResponse<Product>>(
-      "/api/v1/dashboard/products",
+      "dashboard/products",
       { page, limit, search }
     );
   }
@@ -38,28 +38,28 @@ export class ProductService {
    * Gets a single product by its ID.
    */
   async getProductById(id: string): Promise<Product> {
-    return apiClient.get<Product>(`/api/v1/dashboard/products/${id}`);
+    return apiClient.get<Product>(`dashboard/products/${id}`);
   }
 
   /**
    * Creates a new product.
    */
   async createProduct(productData: CreateProductDto): Promise<Product> {
-    return apiClient.post<Product>("/api/v1/dashboard/products", productData);
+    return apiClient.post<Product>("dashboard/products", productData);
   }
 
   /**
    * Updates an existing product.
    */
   async updateProduct(id: string, productData: UpdateProductDto): Promise<Product> {
-    return apiClient.patch<Product>(`/api/v1/dashboard/products/${id}`, productData);
+    return apiClient.patch<Product>(`dashboard/products/${id}`, productData);
   }
 
   /**
    * Deletes a single product by its ID.
    */
   async deleteProduct(id: string): Promise<void> {
-    await apiClient.delete(`/api/v1/dashboard/products/${id}`);
+    await apiClient.delete(`dashboard/products/${id}`);
   }
 }
 

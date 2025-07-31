@@ -30,6 +30,7 @@ import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ProductFormData } from "@/validation-schemas/products";
 
 // Helper function (can be moved to a utils file)
 const slugify = (text: string) => text.toString().toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w\-]+/g, "").replace(/\-\-+/g, "-");
@@ -109,14 +110,28 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       });
     }
   };
-  const handleSaveChanges = (formData: UpdateProductDto & { id?: string }) => {
-    const dataToSave = { ...formData, slug: slugify(formData.name || '') };
-    if (dataToSave.id) {
-      updateProduct({ id: dataToSave.id, data: dataToSave }, {
+   // ... inside your ProductsView component ...
+  
+  // The form now provides a fully validated ProductFormData object
+  const handleSaveChanges = (formData: ProductFormData) => {
+    if (formData.id) {
+      // --- THIS IS THE FIX ---
+      // This is an UPDATE. We must strip the read-only properties.
+      
+      // 1. Destructure the ID from the rest of the form data.
+      const { id, ...updateData } = formData;
+      
+      // 2. The `updateData` object now ONLY contains fields defined in your
+      //    Zod schema, which match your backend's UpdateProductDto.
+      //    It no longer has `id`, `createdAt`, `images`, etc.
+      updateProduct({ id: id, data: updateData }, {
         onSuccess: () => setIsSheetOpen(false),
       });
+
     } else {
-      createProduct(dataToSave as CreateProductDto, {
+      // This is a CREATE operation.
+      // The `formData` is already in the correct shape for your CreateProductDto.
+      createProduct(formData, {
         onSuccess: () => setIsSheetOpen(false),
       });
     }

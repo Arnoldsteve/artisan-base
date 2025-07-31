@@ -1,140 +1,290 @@
-// packages/dasboard/src/components/products/edit-product-sheet.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Button, Textarea, Input, Label, Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@repo/ui';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui';
-import { Product } from '@/types/products';
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Product } from "@/types/products";
+import {
+  productFormSchema,
+  ProductFormData,
+} from "@/validation-schemas/products";
+import {
+  Button,
+  Textarea,
+  Input,
+  Label,
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui";
 
 interface EditProductSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  product: Product | null;
-  onSave: (product: Product) => void;
+  product: Partial<Product> | null;
+  onSave: (product: ProductFormData) => void;
   isPending: boolean;
 }
 
 export function EditProductSheet({ isOpen, onClose, product, onSave, isPending }: EditProductSheetProps) {
-  const [formData, setFormData] = useState<Partial<Product>>({});
+  const isNewProduct = !product?.id;
 
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    // Initialize with empty defaults; the useEffect will populate it.
+    defaultValues: {
+      name: '',
+      slug: '',
+      price: 0,
+      inventoryQuantity: 0,
+      sku: '',
+      isActive: true,
+      isFeatured: false,
+      description: '',
+    },
+  });
+
+  // --- THIS IS THE FIX ---
+  // This effect now correctly handles all cases and populates the form.
   useEffect(() => {
-    if (product) {
-      setFormData(product);
+    if (isOpen) {
+      if (product) {
+        // We are EDITING. The `product` prop is provided.
+        form.reset({
+          id: product.id,
+          name: product.name || '',
+          slug: product.slug || '',
+          // Check if price is a Decimal object before calling .toNumber()
+          price: (product.price && typeof product.price.toNumber === 'function') 
+                 ? product.price.toNumber() 
+                 : (product.price as unknown as number) || 0,
+          inventoryQuantity: product.inventoryQuantity || 0,
+          sku: product.sku || '',
+          isActive: product.isActive ?? true,
+          isFeatured: product.isFeatured ?? false,
+          description: product.description || '',
+        });
+      } else {
+        // We are CREATING. The `product` prop is null.
+        // Reset to default empty values.
+        form.reset({
+          id: undefined,
+          name: '',
+          slug: '',
+          price: 0,
+          inventoryQuantity: 0,
+          sku: '',
+          isActive: true,
+          isFeatured: false,
+          description: '',
+        });
+      }
     }
-  }, [product]);
+  }, [product, isOpen, form]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value, type } = e.target;
-    const isNumberInput = e.target instanceof HTMLInputElement && type === 'number';
-    
-    setFormData((prev) => ({
-      ...prev,
-      [id]: isNumberInput ? parseFloat(value) : value, // Keep it simple here
-    }));
-  };
-
-  const handleSelectChange = (field: 'isActive' | 'isFeatured', value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value === 'true',
-    }));
-  };
-  
-  // *** THE FIX IS HERE ***
-  const handleSaveClick = () => {
-    // Create a new payload to ensure data types are correct before saving
-    const payloadToSave = {
-      ...formData,
-      // Explicitly parse the price and inventory fields to numbers.
-      // Use String() to prevent errors if the value is already a number.
-      // Default to 0 if parsing fails.
-      price: parseFloat(String(formData.price)) || 0,
-      inventoryQuantity: parseInt(String(formData.inventoryQuantity)) || 0,
-    };
-    console.log("Saving product with payload:", payloadToSave);
-
-    // Send the clean, type-safe payload
-    onSave(payloadToSave as Product);
+  const onSubmit = (data: ProductFormData) => {
+    onSave(data);
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent>
+      <SheetContent className="sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Edit Product</SheetTitle>
+          <SheetTitle>
+            {isNewProduct ? "Add New Product" : "Edit Product"}
+          </SheetTitle>
           <SheetDescription>
-            Make changes to your product here. Click save when you're done.
+            {isNewProduct
+              ? "Fill in the details for the new product."
+              : "Make changes to your product here. Click save when you're done."}
           </SheetDescription>
         </SheetHeader>
-        {/* --- FORM JSX REMAINS THE SAME --- */}
-        <div className="grid gap-4 py-4">
-          {/* Name */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
-            <Input id="name" value={formData.name || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          {/* Slug */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="slug" className="text-right">Slug</Label>
-            <Input id="slug" value={formData.slug || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          {/* Price */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">Price</Label>
-            <Input id="price" type="number" value={formData.price || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          {/* Inventory */}
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="inventoryQuantity" className="text-right">Inventory</Label>
-            <Input id="inventoryQuantity" type="number" value={formData.inventoryQuantity || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          {/* SKU */}
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="sku" className="text-right">SKU</Label>
-            <Input id="sku" value={formData.sku || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          {/* Is Active */}
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isActive" className="text-right">Is Active</Label>
-            <Select
-              value={String(formData.isActive ?? false)}
-              onValueChange={(value) => handleSelectChange('isActive', value)}
-            >
-              <SelectTrigger id="isActive" className="col-span-3"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">True</SelectItem>
-                <SelectItem value="false">False</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {/* Is Featured */}
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isFeatured" className="text-right">Is Featured</Label>
-            <Select
-              value={String(formData.isFeatured ?? false)}
-              onValueChange={(value) => handleSelectChange('isFeatured', value)}
-            >
-              <SelectTrigger id="isFeatured" className="col-span-3"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">True</SelectItem>
-                <SelectItem value="false">False</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {/* Description */}
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">Description</Label>
-            <Textarea id="description" value={formData.description || ''} onChange={handleInputChange}   rows={15} className="col-span-3" />
-          </div>
-        </div>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-          </SheetClose>
-          <Button onClick={handleSaveClick} disabled={isPending}>
-            {isPending ? "Saving..." : "Save changes"}
-          </Button>
-        </SheetFooter>
+
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...field}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="inventoryQuantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Inventory</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>SKU</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Is Active</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === "true")}
+                    value={String(field.value)}
+                  >
+                    <FormControl>
+                      <SelectTrigger disabled={isPending}>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Draft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isFeatured"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Is Featured</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === "true")}
+                    value={String(field.value)}
+                  >
+                    <FormControl>
+                      <SelectTrigger disabled={isPending}>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">True</SelectItem>
+                      <SelectItem value="false">False</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value ?? ""}
+                      rows={10}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <SheetFooter className="pt-4">
+              <SheetClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isPending}
+                >
+                  Cancel
+                </Button>
+              </SheetClose>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </SheetFooter>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );
