@@ -1,13 +1,13 @@
-// packages/api/src/common/helpers/paginate.helper.ts
-
 import { PaginatedResult } from '../interfaces/paginated-result.interface';
 
+// Update the options to include the search term and the fields to search on
 export type PaginateOptions = {
   page?: number;
   limit?: number;
+  search?: string;
+  searchableFields?: string[]; // e.g., ['name', 'email']
 };
 
-// Define a more specific type for the query arguments passed from your service
 type QueryArgs = {
   where?: object;
   include?: object;
@@ -16,7 +16,6 @@ type QueryArgs = {
 };
 
 type ModelDelegate = {
-  // Define the expected shape of the Prisma model
   count: (args?: { where?: object }) => Promise<number>;
   findMany: (args?: any) => Promise<any[]>;
 };
@@ -30,18 +29,37 @@ export async function paginate<T>(
   const limit = Number(options.limit) || 10;
   const skip = (page - 1) * limit;
 
-  // 1. Get the total count of records, using ONLY the 'where' clause from the query.
-  // This prevents 'include' or 'select' from being passed to .count()
-  const total = await model.count({
-    where: queryArgs.where,
-  });
+  // --- THIS IS THE NEW SEARCH LOGIC ---
+  let where = queryArgs.where || {}; // Start with existing where clause
+  
+  // If a search term and searchable fields are provided, build the search query
+  if (options.search && options.searchableFields && options.searchableFields.length > 0) {
+    const searchQuery = {
+      OR: options.searchableFields.map(field => ({
+        [field]: {
+          contains: options.search,
+          mode: 'insensitive', // Case-insensitive search
+        },
+      })),
+    };
 
-  // 2. Get the actual data for the current page, using the FULL query.
-  const data = await model.findMany({
-    ...queryArgs,
-    take: limit,
-    skip: skip,
-  });
+    // Merge the search query with any existing where clause
+    where = {
+      ...where,
+      ...searchQuery,
+    };
+  }
+
+  // Use the (potentially modified) where clause for both queries
+  const [total, data] = await Promise.all([
+    model.count({ where }),
+    model.findMany({
+      ...queryArgs, // Pass original include, select, orderBy
+      where,       // Pass the new, combined where clause
+      take: limit,
+      skip,
+    }),
+  ]);
 
   const lastPage = Math.ceil(total / limit);
 
