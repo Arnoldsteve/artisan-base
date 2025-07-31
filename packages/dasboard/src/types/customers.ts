@@ -1,12 +1,10 @@
 // File: packages/dasboard/src/types/customers.ts
 
-// Import Decimal, as monetary values from the API should be handled with precision.
 import { Decimal } from 'decimal.js';
-// We can reuse the PaginatedResponse from our products types.
-// A better long-term solution is to move PaginatedResponse to a generic `types/api.ts` file.
-import { PaginatedResponse } from './products';
+import { PaginatedResponse } from './products'; // Assumes PaginatedResponse is here
+import { Order } from './orders'; // <-- 1. IMPORT THE FULL, DETAILED ORDER TYPE
 
-// Re-export this so it's available from the customer types file.
+// Re-export this for convenience in other files
 export type { PaginatedResponse };
 
 // ============================================================================
@@ -31,18 +29,6 @@ export interface CustomerAddress {
 }
 
 /**
- * A simplified Order object for a customer's order history.
- */
-export interface CustomerOrder {
-  id: string;
-  orderNumber: string;
-  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-  paymentStatus: 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
-  totalAmount: Decimal; // <-- CORRECT TYPE: Monetary values should be Decimal
-  createdAt: string;    // ISO date string
-}
-
-/**
  * The main Customer type, matching your Prisma schema for the `customers` table.
  */
 export interface Customer {
@@ -56,21 +42,26 @@ export interface Customer {
   
   // Optional relations that can be included in API responses
   addresses?: CustomerAddress[];
-  orders?: CustomerOrder[];
+  // The full `Order` type should be used for relations
+  orders?: Order[]; 
 }
 
 /**
  * A specific type for the customer detail page, ensuring all necessary data is present.
+ * This is the primary type fetched for the [customerId] page.
  */
 export interface CustomerDetails extends Customer {
   addresses: CustomerAddress[];
-  orders: CustomerOrder[];
-  // Example of aggregated stats your API might provide
+  // --- 2. THIS IS THE FIX ---
+  // The `orders` property is now an array of the full `Order` objects.
+  orders: Order[];
+  
   _stats?: {
-    totalSpent: Decimal; // <-- CORRECT TYPE: Monetary values should be Decimal
+    totalSpent: Decimal;
     orderCount: number;
   };
 }
+
 
 // ============================================================================
 // Data Transfer Objects (DTOs) (Data sent to the API)
