@@ -15,6 +15,9 @@ export const createServerApiClient = async () => {
   const token = cookieStore.get("accessToken")?.value;
   const orgSubdomain = cookieStore.get("selectedOrgSubdomain")?.value;
 
+
+  
+
   // Create a NEW, request-specific instance of the BASE client.
   // It has all the methods (get, post, delete, patch) and consistent
   // error handling that we need on the server.

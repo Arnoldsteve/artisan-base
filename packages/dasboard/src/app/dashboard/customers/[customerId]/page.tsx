@@ -7,8 +7,8 @@ import { CustomerContactCard } from "../components/customer-contact-card";
 import { Button } from "@repo/ui";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createServerApiClient } from "@/lib/server-api"; // <-- IMPORT the server client
-import { CustomerDetails } from "@/types/customers"; // <-- Use a rich type for the customer detail
+import { createServerApiClient } from "@/lib/server-api"; 
+import { CustomerDetails } from "@/types/customers"; 
 
 /**
  * This is the main Server Component for the Customer Detail page.
@@ -38,16 +38,13 @@ export default async function CustomerDetailPage({ params }: { params: { custome
   return (
     <div className="p-4 md:p-8 lg:p-10">
       <PageHeader title={`${customer.firstName} ${customer.lastName}`}>
-        {/* You can now link to a real edit page */}
         <Link href={`/dashboard/customers/${customer.id}/edit`}>
             <Button>Edit Customer</Button>
         </Link>
       </PageHeader>
       
       <div className="mt-4 grid gap-6 lg:grid-cols-3">
-        {/* Main Content Column */}
         <div className="lg:col-span-2">
-            {/* Pass the real orders to the view component */}
             <CustomerOrdersView initialOrders={customerOrders} />
         </div>
 

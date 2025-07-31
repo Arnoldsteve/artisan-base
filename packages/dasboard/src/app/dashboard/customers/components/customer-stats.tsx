@@ -3,8 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { DollarSign, Hash, ShoppingBag } from "lucide-react";
-import { CustomerOrder } from "@/types/customers"; // <-- THE FIX: Import the correct, simpler type
-import { Decimal } from "decimal.js"; // <-- Import Decimal for calculations
+import { CustomerOrder } from "@/types/customers";
+import { Decimal } from "decimal.js";
 
 interface CustomerStatsProps {
   orders: CustomerOrder[]; // <-- THE FIX: Expect an array of CustomerOrder

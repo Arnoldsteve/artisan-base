@@ -1,26 +1,35 @@
-import { createServerApiClient } from "@/services/server-api";
-import { ProductsView } from "./components/products-view";
-import { Product } from "@/types/products";
+// File: packages/dasboard/src/app/dashboard/products/page.tsx
+
+import { createServerApiClient } from '@/lib/server-api';
+import { ProductsView } from './components/products-view';
+import { Product, PaginatedResponse } from '@/types/products';
 
 export default async function ProductsPage() {
-  let products: Product[] = [];
+  
+  let initialData: PaginatedResponse<Product>;
+
   try {
+    // --- THIS IS THE FIX ---
+    // 1. First, `await` the factory function to get the resolved client instance.
     const serverApi = await createServerApiClient();
-    const response = await serverApi.get("/dashboard/products");
 
-    products = response.data.data;
+    // 2. Now, you can safely call the `.get()` method on that instance.
+    initialData = await serverApi.get<PaginatedResponse<Product>>(
+      "/dashboard/products", 
+      { page: 1, limit: 10 }
+    );
 
-    if (!products) {
-      console.warn("API response did not contain a 'data' array for products.");
-      products = [];
-    }
-  } catch (error) {
-    console.error("Failed to fetch initial products:", error);
+  } catch (err) {
+    console.error("Failed to fetch initial products on server:", err);
+    initialData = { 
+      data: [], 
+      meta: { total: 0, page: 1, limit: 10, totalPages: 1, prev: null, next: null } 
+    };
   }
 
   return (
     <div className="p-4 md:p-8 lg:p-10">
-      <ProductsView initialProducts={products} />
+      <ProductsView initialData={initialData} />
     </div>
   );
 }
