@@ -16,7 +16,7 @@ export class CustomerService {
     search?: string
   ): Promise<PaginatedResponse<Customer>> {
     return apiClient.get<PaginatedResponse<Customer>>(
-      "/api/v1/dashboard/customers",
+      "dashboard/customers",
       { page, limit, search }
     );
   }
@@ -25,28 +25,28 @@ export class CustomerService {
    * Gets a single customer by their ID.
    */
   async getById(id: string): Promise<Customer> {
-    return apiClient.get<Customer>(`/api/v1/dashboard/customers/${id}`);
+    return apiClient.get<Customer>(`dashboard/customers/${id}`);
   }
 
   /**
    * Creates a new customer.
    */
   async create(data: CreateCustomerDto): Promise<Customer> {
-    return apiClient.post<Customer>("/api/v1/dashboard/customers", data);
+    return apiClient.post<Customer>("dashboard/customers", data);
   }
 
   /**
    * Updates an existing customer.
    */
   async update(id: string, data: UpdateCustomerDto): Promise<Customer> {
-    return apiClient.patch<Customer>(`/api/v1/dashboard/customers/${id}`, data);
+    return apiClient.patch<Customer>(`dashboard/customers/${id}`, data);
   }
 
   /**
    * Deletes a single customer by their ID.
    */
   async delete(id: string): Promise<void> {
-    await apiClient.delete(`/api/v1/dashboard/customers/${id}`);
+    await apiClient.delete(`dashboard/customers/${id}`);
   }
 }
 

@@ -1,6 +1,7 @@
 // File: packages/dasboard/src/app/providers.tsx
 "use client"; // This MUST be a client component
 
+import { AuthProvider } from "@/contexts/auth-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; // Highly recommended for debugging
 import { useState } from "react";
@@ -19,12 +20,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }));
 
   return (
-    // Provide the client to your entire App
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster position="top-right" />
-      {/* The React Query Devtools are an invaluable tool for debugging */}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    // 1. WRAP everything with AuthProvider. This makes the auth context
+    //    available to all components, including the QueryClient.
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster position="top-right" />
+        {/* The React Query Devtools are an invaluable tool for debugging */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
