@@ -15,7 +15,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
-import { Customer, PaginatedResponse, UpdateCustomerDto } from "@/types/customers";
+import { Customer, PaginatedResponse, UpdateCustomerDto, CreateCustomerDto } from "@/types/customers";
 import {
   useCustomers,
   useDeleteCustomer,
@@ -26,9 +26,10 @@ import {
 // UI Components
 import { DeleteCustomerDialog } from "./delete-customer-dialog";
 import { EditCustomerSheet } from "./edit-customer-sheet";
-import { DataTableViewOptions } from "./data-table-view-options"; // <-- Correct local import
+import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
 import { Plus, Trash2 } from "lucide-react";
+import { CustomerFormData } from "@/validation-schemas/customers";
 
 interface CustomersViewProps {
   initialData: PaginatedResponse<Customer>;
@@ -38,41 +39,45 @@ export function CustomersView({ initialData }: CustomersViewProps) {
   const router = useRouter();
 
   // --- Component State ---
-  // State for the table's UI (sorting, filtering, etc.)
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ email: false });
   const [rowSelection, setRowSelection] = useState({});
 
-  // State for controlling modals and dialogs
+  // --- State for Modals/Dialogs ---
   const [customerToDelete, setCustomerToDelete] = useState<CustomerColumn | null>(null);
-  const [customerToEdit, setCustomerToEdit] = useState<Partial<CustomerColumn> | null>(null);
+  // --- THIS IS THE FIX ---
+  // The state for the customer to edit should hold the ORIGINAL Customer type.
+  const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // --- Data Fetching & Mutations with TanStack Query ---
+  // --- Data Fetching & Mutations ---
   const { data: paginatedResponse, isLoading, isError } = useCustomers(1, 10, "", initialData);
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
   const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
 
-  // --- CRITICAL: Data Transformation (The Mapper) ---
-  // This memoized function transforms the raw API data (`Customer`) into the
-  // shape that the table columns expect (`CustomerColumn`).
+  // --- Data Transformation (Mapper) ---
   const mappedCustomers = useMemo(() => {
     const apiCustomers = paginatedResponse?.data || [];
     return apiCustomers.map((customer: Customer): CustomerColumn => ({
       id: customer.id,
       name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email,
       email: customer.email,
-      orderCount: 0, // Placeholder - API doesn't provide this yet
-      totalSpent: 0, // Placeholder - API doesn't provide this yet
+      orderCount: (customer as any)._count?.orders ?? 0,
+      totalSpent: parseFloat((customer as any).totalSpent) || 0,
       createdAt: new Date(customer.createdAt).toLocaleDateString(),
     }));
   }, [paginatedResponse]);
 
+  // Helper to find the original customer object from the API response
+  const findOriginalCustomer = (id: string): Customer | undefined => {
+    return paginatedResponse?.data.find(c => c.id === id);
+  };
+
   // --- Table Instance Initialization ---
   const table = useReactTable({
-    data: mappedCustomers, // Use the correctly shaped data
+    data: mappedCustomers,
     columns,
     state: { sorting, columnVisibility, rowSelection, columnFilters },
     enableRowSelection: true,
@@ -84,54 +89,69 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    // Pass action handlers to the table meta so they can be called from columns.tsx
     meta: {
       openDeleteDialog: (customer) => setCustomerToDelete(customer as CustomerColumn),
       viewCustomerDetails: (customer) => router.push(`/dashboard/customers/${customer.id}`),
-      openEditSheet: (customer) => {
-        setCustomerToEdit(customer as CustomerColumn);
-        setIsSheetOpen(true);
+      // --- THIS IS THE FIX ---
+      // When opening the edit sheet, find the ORIGINAL customer object.
+      openEditSheet: (customerRow) => {
+        const originalCustomer = findOriginalCustomer(customerRow.id);
+        if (originalCustomer) {
+          setCustomerToEdit(originalCustomer);
+          setIsSheetOpen(true);
+        }
       },
     },
   });
   
   // --- Event Handlers ---
   const openAddSheet = () => {
-    setCustomerToEdit(null);
+    setCustomerToEdit(null); // Set to null for creation
     setIsSheetOpen(true);
   };
 
   const handleConfirmDelete = () => {
     if (customerToDelete) {
       deleteCustomer(customerToDelete.id, {
-        onSuccess: () => setCustomerToDelete(null), // Close dialog on success
+        onSuccess: () => setCustomerToDelete(null),
       });
     }
   };
 
-  const handleSaveChanges = (formData: UpdateCustomerDto & { id?: string }) => {
+ const handleSaveChanges = (formData: CustomerFormData) => {
+    // Check if an ID exists in the form data to determine if it's an update or create
     if (formData.id) {
-      updateCustomer({ id: formData.id, data: formData }, {
-        onSuccess: () => setIsSheetOpen(false), // Close sheet on success
+      // --- THIS IS THE FIX ---
+      // This is an update. We must separate the ID from the rest of the data.
+      
+      // 1. Destructure the formData: `id` goes into its own constant,
+      //    and the rest of the properties go into the `updateData` object.
+      const { id, ...updateData } = formData;
+
+      // 2. Call the mutation. The `id` is used to build the URL,
+      //    and the `updateData` (without the id) is sent as the request body.
+      updateCustomer({ id: id, data: updateData }, {
+        onSuccess: () => setIsSheetOpen(false),
       });
+
     } else {
+      // This is a create operation. The formData does not have an ID, so it can be sent as is.
       createCustomer(formData, {
-        onSuccess: () => setIsSheetOpen(false), // Close sheet on success
+        onSuccess: () => setIsSheetOpen(false),
       });
     }
   };
   
   // --- Render Logic ---
   if (isLoading && !paginatedResponse) {
-    return <DataTableSkeleton />; // Show a skeleton loader on hard reloads
+    return <DataTableSkeleton />;
   }
 
   if (isError) {
     return <div className="p-8 text-red-500">Failed to load customer data.</div>;
   }
   
-  const selectedCustomerIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
-  const numSelected = selectedCustomerIds.length;
+  const numSelected = Object.keys(rowSelection).length;
 
   return (
     <div>
@@ -148,7 +168,7 @@ export function CustomersView({ initialData }: CustomersViewProps) {
       <DataTable table={table} />
 
       <div className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? "translate-y-0" : "translate-y-24"}`}>
-        {/* Bulk Action Bar logic... */}
+        {/* Bulk action bar would go here */}
       </div>
 
       <DeleteCustomerDialog

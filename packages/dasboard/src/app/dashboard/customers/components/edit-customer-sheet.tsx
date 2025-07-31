@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Button } from '@repo/ui';
-import { Input } from '@repo/ui';
-import { Label } from '@repo/ui';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Customer } from '@/types/customers'; // <-- Import the ORIGINAL Customer type
+// import { customerFormSchema, CustomerFormData } from '@/types/customers.dto';
+import { Button, Input, Label } from '@repo/ui';
 import {
   Sheet,
   SheetClose,
@@ -13,40 +15,59 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@repo/ui';
-import { Customer } from '@/types/customers'; 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@repo/ui';
+import { CustomerFormData, customerFormSchema } from '@/validation-schemas/customers';
 
 interface EditCustomerSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  customer: Partial<Customer> | null; // Can be a partial customer for creation
-  onSave: (updatedCustomer: Partial<Customer>) => void;
+  // --- THIS IS THE FIX ---
+  // The sheet now expects the original Customer object (or null for creation).
+  customer: Partial<Customer> | null;
+  onSave: (data: CustomerFormData) => void;
   isPending: boolean;
 }
 
 export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending }: EditCustomerSheetProps) {
-  // Internal state to manage form data
-  const [formData, setFormData] = useState<Partial<Customer>>({});
-
-  // When the sheet opens with a customer, populate the form.
-  // If opening to create a new customer (customer is null), clear the form.
-  useEffect(() => {
-    setFormData(customer || {});
-  }, [customer, isOpen]); // Rerun when isOpen changes to correctly handle re-opening
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-  
-  const handleSaveClick = () => {
-    // Pass the current form data up to the parent to handle the API call
-    onSave(formData);
-  };
-
   const isNewCustomer = !customer?.id;
+
+  const form = useForm<CustomerFormData>({
+    resolver: zodResolver(customerFormSchema),
+    // Set default values for the form schema
+    defaultValues: {
+      id: customer?.id || undefined,
+      firstName: customer?.firstName || '',
+      lastName: customer?.lastName || '',
+      email: customer?.email || '',
+      phone: customer?.phone || '',
+    },
+  });
+
+  // Effect to reset the form's values when the sheet is opened or the customer data changes
+  useEffect(() => {
+    if (isOpen) {
+      // The form can now correctly access the individual name and phone fields
+      form.reset({
+        id: customer?.id || undefined,
+        firstName: customer?.firstName || '',
+        lastName: customer?.lastName || '',
+        email: customer?.email || '',
+        phone: customer?.phone || '',
+      });
+    }
+  }, [customer, isOpen, form]);
+
+  // The `handleSubmit` from the hook will first validate, then call our onSave
+  const onSubmit = (data: CustomerFormData) => {
+    onSave(data);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -54,37 +75,77 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
         <SheetHeader>
           <SheetTitle>{isNewCustomer ? 'Add New Customer' : 'Edit Customer'}</SheetTitle>
           <SheetDescription>
-            {isNewCustomer 
-              ? "Fill in the details for the new customer." 
-              : "Make changes to your customer here. Click save when you're done."}
+            {isNewCustomer
+              ? "Fill in the details to create a new customer."
+              : "Make changes to the customer here. Click save when you're done."}
           </SheetDescription>
         </SheetHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstName" className="text-right">First Name</Label>
-            <Input id="firstName" value={formData.firstName || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastName" className="text-right">Last Name</Label>
-            <Input id="lastName" value={formData.lastName || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">Email</Label>
-            <Input id="email" type="email" value={formData.email || ''} onChange={handleInputChange} className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">Phone</Label>
-            <Input id="phone" type="tel" value={formData.phone || ''} onChange={handleInputChange} className="col-span-3" placeholder="(Optional)" />
-          </div>
-        </div>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button variant="outline" onClick={onClose} disabled={isPending}>Cancel</Button>
-          </SheetClose>
-          <Button onClick={handleSaveClick} disabled={isPending}>
-            {isPending ? "Saving..." : "Save changes"}
-          </Button>
-        </SheetFooter>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John" {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="john.doe@example.com" type="email" {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="(Optional)" type="tel" {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <SheetFooter className="pt-4">
+              <SheetClose asChild>
+                <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>Cancel</Button>
+              </SheetClose>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </SheetFooter>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );
