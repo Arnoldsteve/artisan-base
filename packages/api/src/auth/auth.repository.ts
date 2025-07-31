@@ -24,4 +24,18 @@ export class AuthRepository implements IAuthRepository {
       select: { id: true, name: true, subdomain: true },
     });
   }
+
+  async getProfile(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
 }

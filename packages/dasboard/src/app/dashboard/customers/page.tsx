@@ -11,9 +11,11 @@ export default async function CustomersPage() {
     // This code now runs ONLY on the server during the initial render.
     const serverApi = await createServerApiClient();
     const response = await serverApi.get<PaginatedResponse<Customer>>("/dashboard/customers");
+    console.log("Fetched initial customers on the server:", response);
     
     // The actual data is in the `data` property of the paginated response
     initialCustomers = response.data; 
+    console.log("Initial customers data:", initialCustomers);
 
   } catch (error) {
     console.error("Failed to fetch initial customers on the server:", error);

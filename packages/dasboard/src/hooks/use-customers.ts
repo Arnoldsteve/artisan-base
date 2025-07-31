@@ -4,20 +4,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { customerService } from "@/services/customer-service";
 import { toast } from "sonner";
 import { CreateCustomerDto, Customer, PaginatedResponse, UpdateCustomerDto } from "@/types/customers";
+import { useAuthContext } from "@/contexts/auth-context"; // <-- 1. IMPORT THE AUTH CONTEXT
 
 // Define a query key to uniquely identify this data
 const CUSTOMERS_QUERY_KEY = ["dashboard-customers"];
 
 /**
  * Hook for fetching a paginated list of customers.
- * Handles caching, refetching, loading, and error states automatically.
+ * It is now "auth-aware" and will not run until the user is authenticated.
  */
-export function useCustomers(page = 1, limit = 10, search = '') {
+export function useCustomers(page = 1, limit = 10, search = '', initialData?: PaginatedResponse<Customer>) {
+  // 2. GET THE AUTHENTICATION STATE
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
   return useQuery<PaginatedResponse<Customer>>({
-    // The query key is an array that uniquely identifies this specific data fetch
     queryKey: [...CUSTOMERS_QUERY_KEY, { page, limit, search }],
     queryFn: () => customerService.getAll(page, limit, search),
-    // keepPreviousData: true, // Optional: uncomment for a smoother pagination experience
+    
+    // 3. THE CRITICAL FIX: Use the `enabled` option
+    // This query will now ONLY run if auth is not loading AND the user is authenticated.
+    enabled: !isAuthLoading && isAuthenticated,
+
+    // Provide initial data from the server to prevent a loading flicker on first visit
+    initialData: initialData, 
   });
 }
 
@@ -25,16 +34,21 @@ export function useCustomers(page = 1, limit = 10, search = '') {
  * Hook for fetching a single customer by their ID.
  */
 export function useCustomer(customerId: string | null) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
   return useQuery<Customer>({
     queryKey: [...CUSTOMERS_QUERY_KEY, customerId],
-    queryFn: () => customerService.getById(customerId!), // The '!' asserts that customerId is not null here
-    enabled: !!customerId, // The query will only run if customerId is not null
+    queryFn: () => customerService.getById(customerId!),
+    // Also protect this query
+    enabled: !isAuthLoading && isAuthenticated && !!customerId,
   });
 }
 
+// --- Your mutation hooks do not need to change ---
+// Mutations are triggered by user actions, by which time the auth state will be ready.
+
 /**
  * Hook for creating a new customer.
- * Returns a `mutate` function to trigger the creation.
  */
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
@@ -42,7 +56,6 @@ export function useCreateCustomer() {
     mutationFn: (data: CreateCustomerDto) => customerService.create(data),
     onSuccess: (newCustomer) => {
       toast.success(`Customer "${newCustomer.email}" created successfully.`);
-      // Invalidate the main customers list to trigger a refetch and show the new customer
       queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
     },
     onError: (error: Error) => {
@@ -61,7 +74,6 @@ export function useUpdateCustomer() {
       customerService.update(variables.id, variables.data),
     onSuccess: (updatedCustomer) => {
       toast.success(`Customer "${updatedCustomer.email}" updated successfully.`);
-      // Invalidate both the list and the specific customer query
       queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: [...CUSTOMERS_QUERY_KEY, updatedCustomer.id] });
     },

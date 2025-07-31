@@ -86,4 +86,12 @@ export class AuthService {
       organizations,
     };
   }
+
+  async getProfile(userId: string) {
+    const profile = await this.authRepository.getProfile(userId);
+    if (!profile) {
+      throw new UnauthorizedException('User not found');
+    }
+    return profile;
+  }
 }

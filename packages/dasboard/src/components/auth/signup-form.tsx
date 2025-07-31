@@ -22,7 +22,7 @@ export function SignupForm() {
     {
       successMessage: "Account created! Please create your first store to continue.",
       // After signup, redirect to a page to create the first tenant/store
-      onSuccessRedirect: "/tenant/create", 
+      onSuccessRedirect: "/setup-organization", 
     }
   );
 

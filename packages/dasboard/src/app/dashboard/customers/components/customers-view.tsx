@@ -26,7 +26,7 @@ import {
 // UI Components
 import { DeleteCustomerDialog } from "./delete-customer-dialog";
 import { EditCustomerSheet } from "./edit-customer-sheet";
-import { DataTableViewOptions } from "@/app/dashboard/products/components/data-table-view-options";
+import { DataTableViewOptions } from "./data-table-view-options"; // <-- Correct local import
 import { Button } from "@repo/ui";
 import { Plus, Trash2 } from "lucide-react";
 

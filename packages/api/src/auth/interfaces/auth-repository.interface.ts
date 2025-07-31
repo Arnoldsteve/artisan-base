@@ -1,4 +1,5 @@
 export interface IAuthRepository {
+  getProfile(userId: string): unknown;
   findUserByEmail(email: string): Promise<any | null>;
   createUser(data: {
     email: string;

@@ -1,4 +1,4 @@
-import { CreateCustomerDto, UpdateCustomerDto } from '../dto';
+import { CreateCustomerDto, UpdateCustomerDto } from '../dto/customer.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 export interface ICustomerRepository {

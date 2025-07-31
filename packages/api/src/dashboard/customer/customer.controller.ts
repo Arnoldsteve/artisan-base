@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
@@ -13,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CustomerService } from './customer.service';
-import { CreateCustomerDto, UpdateCustomerDto } from './dto';
+import { CreateCustomerDto, UpdateCustomerDto } from './dto/customer.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller({
@@ -31,6 +32,7 @@ export class CustomerController {
 
   @Get()
   findAll(@Query(ValidationPipe) paginationQuery: PaginationQueryDto) {
+    Logger.log('Fetching all customers with pagination', paginationQuery);
     return this.customerService.findAll(paginationQuery);
   }
 

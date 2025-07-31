@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Logger,
@@ -25,5 +26,13 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto) {
     Logger.log('Received login request', loginDto);
     return this.authService.login(loginDto);
+  }
+
+  @Get('profile')
+  @HttpCode(HttpStatus.OK)
+  async getProfile() {
+    Logger.log('Received profile request');
+    // Implement your logic here, e.g., return user profile
+    return { message: 'Profile endpoint' };
   }
 }

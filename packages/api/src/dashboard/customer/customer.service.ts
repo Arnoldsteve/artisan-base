@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException, Scope } from '@nestjs/common';
-import { CreateCustomerDto, UpdateCustomerDto } from './dto';
+import { Injectable, Logger, NotFoundException, Scope } from '@nestjs/common';
+import { CreateCustomerDto, UpdateCustomerDto } from './dto/customer.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { CustomerRepository } from './customer.repository'; 
 
@@ -14,6 +14,7 @@ export class CustomerService {
   }
 
   async findAll(paginationQuery: PaginationQueryDto) {
+    Logger.log('Fetching all customers with pagination', paginationQuery);
     return this.customerRepository.findAll(paginationQuery);
   }
 
