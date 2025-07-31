@@ -160,32 +160,55 @@ export class OrderRepository implements IOrderRepository {
     });
   }
 
-  async findAll(paginationQuery: PaginationQueryDto) {
-    const now = Date.now();
-    if (this.findAllCache && this.findAllCache.expires > now) {
-      return this.findAllCache.data;
-    }
-    Logger.log(
-      `Fetching orders with pagination: ${JSON.stringify(paginationQuery)}`,
-      OrderRepository.name,
-    );
-    const prisma = await this.getPrisma();
-    const result = await paginate(
-      prisma.order,
-      {
-        page: paginationQuery.page,
-        limit: paginationQuery.limit,
-      },
-      {
-        orderBy: { orderSequence: 'desc' },
-        include: {
-          _count: { select: { items: true } },
+ // ... inside your OrderRepository class ...
+
+async findAll(paginationQuery: PaginationQueryDto) {
+  const now = Date.now();
+  if (this.findAllCache && this.findAllCache.expires > now) {
+    return this.findAllCache.data;
+  }
+  
+  Logger.log(
+    `Fetching orders with pagination: ${JSON.stringify(paginationQuery)}`,
+  );
+  
+  const prisma = await this.getPrisma();
+
+  // --- THIS IS THE FIX ---
+  // The paginate helper will now receive an enhanced `include` object.
+  const result = await paginate(
+    prisma.order,
+    {
+      page: paginationQuery.page,
+      limit: paginationQuery.limit,
+      search: paginationQuery.search,
+      // You can add searchable fields for orders here if needed
+      searchableFields: ['orderNumber'], 
+    },
+    {
+      orderBy: { orderSequence: 'desc' },
+      include: {
+        // 1. CONTINUE to include the count of items efficiently.
+        _count: { select: { items: true } },
+
+        // 2. ADD this to also fetch the related customer's data.
+        customer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
         },
       },
-    );
-    this.findAllCache = { data: result, expires: now + CACHE_TTL };
-    return result;
-  }
+    },
+  );
+
+  this.findAllCache = { data: result, expires: now + CACHE_TTL };
+  return result;
+}
+
+// ... rest of your repository
 
   async findOne(id: string) {
     const now = Date.now();

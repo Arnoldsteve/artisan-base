@@ -25,7 +25,6 @@ export default async function OrdersPage() {
       meta: { total: 0, page: 1, limit: 10, totalPages: 1, prev: null, next: null } 
     };
   }
-  console.log("Initial data fetched on the server:", initialData);
 
   return (
     <div className="p-4 md:p-8 lg:p-10">
