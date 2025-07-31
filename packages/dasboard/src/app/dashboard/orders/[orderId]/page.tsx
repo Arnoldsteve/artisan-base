@@ -1,6 +1,7 @@
+// File: packages/dasboard/src/app/dashboard/orders/[orderId]/page.tsx
 // No 'use client' - This remains a fast Server Component
 
-import { OrderService, orderService } from "@/services/order-service";
+import { createServerApiClient } from "@/lib/server-api"; // <-- 1. IMPORT THE SERVER CLIENT
 import { Order } from "@/types/orders";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
@@ -9,36 +10,36 @@ import { OrderItemsTable } from "../components/order-items-table";
 import { OrderActions } from "../components/order-actions";
 import { OrderSummaryCard } from "../components/order-summary-card";
 import { formatCurrency } from "@/utils/format-currency";
+import { notFound } from "next/navigation"; // Import notFound
 
 interface OrderDetailPageProps {
   params: { orderId: string };
-  service?: OrderService;
 }
 
 /**
  * OrderDetailPage displays the details of a single order.
+ * It fetches data on the server using a request-specific, authenticated API client.
  */
-export default async function OrderDetailPage({
-  params,
-  service = orderService,
-}: OrderDetailPageProps) {
+export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
   const { orderId } = params;
-  let order: Order | null = null;
+  
+  // 2. CREATE A NEW, AUTHENTICATED API CLIENT FOR THIS REQUEST
+  const serverApi = await createServerApiClient();
+  
+  let order: Order;
+
   try {
-    order = await service.getById(orderId);
+    // 3. USE THE NEW SERVER CLIENT TO FETCH DATA
+    order = await serverApi.get<Order>(`/dashboard/orders/${orderId}`);
   } catch (error) {
-    console.error(`Failed to fetch order ${orderId}:`, error);
+    console.error(`Failed to fetch order ${orderId} on the server:`, error);
+    // If the API call fails (e.g., returns 404), trigger Next.js's 404 page.
+    notFound();
   }
-  if (!order) {
-    return (
-      <div className="p-4 md:p-8 lg:p-10">
-        <PageHeader
-          title="Order Not Found"
-          description={`Could not find an order with the ID: ${orderId}`}
-        />
-      </div>
-    );
-  }
+  
+  // This `if` check is now redundant because the catch block handles the not found case.
+  // if (!order) { ... }
+
   return (
     <div className="p-4 md:p-8 lg:p-10">
       <PageHeader title={`Order ${order.orderNumber}`} />
@@ -52,6 +53,7 @@ export default async function OrderDetailPage({
             <CardContent className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
+                {/* Use a helper to format Decimal to currency string */}
                 <span>{formatCurrency(order.subtotal)}</span>
               </div>
               <div className="flex justify-between">
@@ -71,7 +73,7 @@ export default async function OrderDetailPage({
           </Card>
         </div>
         <div className="space-y-6">
-          <OrderActions orderId={order.id} onUpdateStatusClick={() => {}} />
+          <OrderActions orderId={order.id} initialStatus={order.status} initialPaymentStatus={order.paymentStatus} />
           <OrderSummaryCard order={order} />
         </div>
       </div>
