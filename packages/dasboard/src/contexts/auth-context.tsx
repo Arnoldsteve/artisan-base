@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { LoginDto } from '@/types/auth';
+import { LoginDto, SignUpDto } from '@/types/auth';
 import { User } from '@/types/users';
 import { Tenant } from '@/types/tenant'; // <-- IMPORT YOUR SPECIFIC TENANT TYPE
 
@@ -15,6 +15,7 @@ interface AuthContextType {
   tenantId: string | null; // This is the subdomain string
   isLoading: boolean;
   isAuthenticated: boolean;
+  signUp: (data: SignUpDto) => Promise<void>; 
   login: (data: LoginDto) => Promise<void>;
   logout: () => void;
   selectTenant: (tenantId: string) => void;

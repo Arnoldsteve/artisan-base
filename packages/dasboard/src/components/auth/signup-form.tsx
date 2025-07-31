@@ -1,29 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@repo/ui";
-import { Input } from "@repo/ui";
-import { Label } from "@repo/ui";
+import { Button, Input, Label } from "@repo/ui";
 import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { api } from "@/api";
-import { useSignup } from "@/hooks/use-signup";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useFormHandler } from "@/hooks/use-form-handler"; // <-- IMPORT GENERIC HOOK
 
 export function SignupForm() {
-  const router = useRouter();
-  const {
-    firstName,
-    setFirstName,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    error,
-    isSubmitting,
-    handleSubmit,
-  } = useSignup();
+  const { signUp } = useAuthContext();
+
+  // --- Form State ---
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState(""); // Also good to add lastName
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // --- Form Submission Logic (handled by the hook) ---
+  const { isLoading, error, handleSubmit } = useFormHandler(
+    signUp,
+    {
+      successMessage: "Account created! Please create your first store to continue.",
+      // After signup, redirect to a page to create the first tenant/store
+      onSuccessRedirect: "/tenant/create", 
+    }
+  );
+
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleSubmit({ firstName, lastName, email, password });
+  };
 
   return (
     <CardWrapper
@@ -31,28 +37,36 @@ export function SignupForm() {
       backButtonLabel="Already have an account? Login"
       backButtonHref="/"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
-          <Input
-            id="firstName"
-            type="text"
-            placeholder="John"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            disabled={isSubmitting}
-            required
-          />
+      <form onSubmit={handleFormSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">First Name</Label>
+            <Input
+              id="firstName"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
-            placeholder="john.doe@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isSubmitting}
+            disabled={isLoading}
             required
           />
         </div>
@@ -63,7 +77,7 @@ export function SignupForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isSubmitting}
+            disabled={isLoading}
             required
             minLength={8}
           />
@@ -75,8 +89,8 @@ export function SignupForm() {
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Creating Account...

@@ -9,7 +9,7 @@ import { authService } from '@/services/auth-service';
 import { apiClient } from '@/lib/client-api';
 import Cookies from 'js-cookie';
 import { User } from '@/types/users';
-import { LoginDto } from '@/types/auth';
+import { LoginDto, SignUpDto } from '@/types/auth';
 import { Tenant } from '@/types/tenant';
 
 export function useAuth() {
@@ -43,6 +43,22 @@ export function useAuth() {
       setIsLoading(false);
     }
     loadUserFromCookies();
+  }, []);
+
+   const signUp = useCallback(async (data: SignUpDto) => {
+    const response = await authService.signUp(data);
+    const { user: signedUpUser, accessToken } = response;
+    
+    // After signing up, the user is effectively logged in, but may not have a tenant yet.
+    // For now, we set the user and token.
+    setUser(signedUpUser);
+    setToken(accessToken);
+    apiClient.setAuthToken(accessToken);
+
+    Cookies.set('accessToken', accessToken, { expires: 1, secure: true, sameSite: 'lax' });
+
+    // The user will likely be redirected to a "create your first store" page.
+    // The login logic handles tenant selection.
   }, []);
 
   const login = useCallback(async (data: LoginDto) => {
@@ -101,6 +117,7 @@ export function useAuth() {
     tenantId, 
     isLoading, 
     isAuthenticated: !isLoading && !!user,
+    signUp,
     login,
     logout,
     selectTenant

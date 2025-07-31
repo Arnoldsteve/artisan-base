@@ -1,7 +1,7 @@
 // File: packages/dasboard/src/services/auth-service.ts
 
 import { apiClient } from "@/lib/client-api";
-import { LoginDto, SignUpDto, LoginResponse } from "@/types/auth";
+import { LoginDto, SignUpDto, LoginResponse, SignUpResponse } from "@/types/auth";
 import { ProfileResponse } from "@/types/users";
 
 /**
@@ -23,8 +23,8 @@ export class AuthService {
    * Signs up a new user.
    * The response for sign-up might be different, adjust if necessary.
    */
-  async signUp(signUpData: SignUpDto): Promise<any> { // Use a specific SignUpResponse if you have one
-    return apiClient.post<any>("/auth/signup", signUpData);
+  async signUp(signUpData: SignUpDto): Promise<SignUpResponse> { 
+    return apiClient.post<SignUpResponse>("/auth/signup", signUpData);
   }
 
   /**
