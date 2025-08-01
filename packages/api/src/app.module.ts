@@ -19,6 +19,7 @@ import { SettingsModule } from './dashboard/settings/settings.module';
 import { StorefrontModule } from './storefront/storefront.module';
 import { TenantContextService } from './common/tenant-context.service';
 import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
+import { AdminHomeApiModule } from './dashboard/admin-home-api/admin-home-api.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { TenantContextMiddleware } from './tenant/middleware/tenant-context.midd
     CustomerModule,
     SettingsModule,
     StorefrontModule,
+    AdminHomeApiModule,
   ],
   controllers: [AppController],
   providers: [

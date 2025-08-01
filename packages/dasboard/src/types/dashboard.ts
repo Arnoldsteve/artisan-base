@@ -1,32 +1,40 @@
+// File: packages/dasboard/src/types/dashboard.ts
+
+import { Decimal } from 'decimal.js';
+import { Order } from './orders'; // Import the full Order type for consistency
+import { Customer } from './customers'; // Import the main Customer type
+
+// ============================================================================
+// Data shapes for the main dashboard view
+// ============================================================================
+
+/**
+ * Defines the shape of the Key Performance Indicator (KPI) stats object.
+ */
 export interface DashboardKPI {
-  totalRevenue: number;
-  sales: number;
+  totalRevenue: Decimal; // <-- CORRECT TYPE for monetary values
+  sales: Decimal;        // <-- CORRECT TYPE for monetary values
   newCustomers: number;
   activeProducts: number;
   inactiveProducts: number;
 }
 
+/**
+ * Defines a single data point for a sales overview chart.
+ */
 export interface SalesDataPoint {
-  name: string;
-  total: number;
+  name: string; // e.g., "Jan", "Feb", "Mar" or a specific date
+  total: number; // The value for that point (can be sales amount or order count)
 }
 
-export interface Customer {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-export type PaymentStatus = "PAID" | "PENDING" | "REFUNDED";
-
-export interface RecentOrder {
-  customer: Customer;
-  totalAmount: number;
-  paymentStatus: PaymentStatus;
-}
-
+/**
+ * Defines the shape of the entire data payload for the main dashboard page,
+ * as returned by the GET /dashboard API endpoint.
+ */
 export interface DashboardData {
   kpis: DashboardKPI;
   sales: SalesDataPoint[];
-  recentOrders: RecentOrder[];
+  // Use the existing, full `Order` type for recent orders to maintain consistency
+  // and have access to all order details if needed.
+  recentOrders: Order[];
 }

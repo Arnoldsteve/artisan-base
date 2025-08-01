@@ -26,7 +26,6 @@ export class TenantService {
    * @param subdomain - The subdomain string to check.
    */
   async checkSubdomainAvailability(subdomain: string): Promise<AvailabilityResponse> {
-    console.log("Checking subdomain availability for:", subdomain);
     return apiClient.get<AvailabilityResponse>("/tenants/availability", { subdomain });
   }
 
