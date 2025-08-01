@@ -1,8 +1,8 @@
 // File: packages/dasboard/src/types/dashboard.ts
 
 import { Decimal } from 'decimal.js';
-import { Order } from './orders'; // Import the full Order type for consistency
-import { Customer } from './customers'; // Import the main Customer type
+import { Order } from './orders';
+import { Customer } from './customers';
 
 // ============================================================================
 // Data shapes for the main dashboard view
@@ -12,9 +12,9 @@ import { Customer } from './customers'; // Import the main Customer type
  * Defines the shape of the Key Performance Indicator (KPI) stats object.
  */
 export interface DashboardKPI {
-  totalRevenue: Decimal; // <-- CORRECT TYPE for monetary values
-  sales: Decimal;        // <-- CORRECT TYPE for monetary values
-  newCustomers: number;
+  totalRevenue: Decimal;
+  salesToday: Decimal; // Renamed from 'sales' for clarity
+  totalCustomers: number;
   activeProducts: number;
   inactiveProducts: number;
 }
@@ -23,18 +23,24 @@ export interface DashboardKPI {
  * Defines a single data point for a sales overview chart.
  */
 export interface SalesDataPoint {
-  name: string; // e.g., "Jan", "Feb", "Mar" or a specific date
-  total: number; // The value for that point (can be sales amount or order count)
+  name: string;
+  total: number;
 }
 
 /**
- * Defines the shape of the entire data payload for the main dashboard page,
- * as returned by the GET /dashboard API endpoint.
+ * --- THIS IS THE FIX ---
+ * Defines the shape of the response from the GET /dashboard/recent-orders endpoint.
+ */
+export interface RecentOrdersResponse {
+  recentOrders: Order[];
+}
+
+/**
+ * (Optional) Defines the shape of the combined data for the `useDashboardData` hook if used.
+ * Note: We are now using separate hooks, so this is less critical but good for reference.
  */
 export interface DashboardData {
   kpis: DashboardKPI;
   sales: SalesDataPoint[];
-  // Use the existing, full `Order` type for recent orders to maintain consistency
-  // and have access to all order details if needed.
   recentOrders: Order[];
 }

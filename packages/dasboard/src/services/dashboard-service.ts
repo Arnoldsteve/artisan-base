@@ -1,23 +1,30 @@
 // File: packages/dasboard/src/services/dashboard-service.ts
 
 import { apiClient } from "@/lib/client-api";
-import { DashboardData } from "@/types/dashboard"; // <-- Import our new type
+// Import the specific response types
+import { DashboardKPI, RecentOrdersResponse } from "@/types/dashboard"; 
 
 /**
- * DashboardService directly handles API communication for the main dashboard view.
+ * DashboardService handles API communication for the main dashboard,
+ * fetching different pieces of data from dedicated endpoints.
  */
 export class DashboardService {
   /**
-   * Fetches the aggregated data required for the main dashboard.
-   * This includes stats, recent orders, etc.
-   * On failure, the apiClient will throw a structured ApiError.
+   * Fetches only the Key Performance Indicators (KPIs).
+   * This is a fast query for the main stats cards.
    */
-  async getDashboardData(): Promise<DashboardData> {
-    // This assumes you will create a single, efficient endpoint on your backend
-    // that gathers all this data in one go.
-    return apiClient.get<DashboardData>("/dashboard");
+  async getKpis(): Promise<DashboardKPI> {
+    return apiClient.get<DashboardKPI>("/dashboard/admin-home/kpis");
+  }
+
+  /**
+   * Fetches only the most recent orders.
+   * This can be called separately to populate the recent orders table.
+   */
+  async getRecentOrders(): Promise<RecentOrdersResponse> {
+    return apiClient.get<RecentOrdersResponse>("/dashboard/admin-home/recent-orders");
   }
 }
 
-// Export a singleton instance of the service for use in hooks and components
+// Export a singleton instance
 export const dashboardService = new DashboardService();
