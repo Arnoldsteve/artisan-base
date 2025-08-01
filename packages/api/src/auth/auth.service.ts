@@ -9,6 +9,7 @@ import { SignUpDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { UserProfileResponseDto } from './dto/user-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -87,11 +88,8 @@ export class AuthService {
     };
   }
 
-  async getProfile(userId: string) {
+   async getProfile(userId: string): Promise<UserProfileResponseDto> {
     const profile = await this.authRepository.getProfile(userId);
-    if (!profile) {
-      throw new UnauthorizedException('User not found');
-    }
     return profile;
   }
 }

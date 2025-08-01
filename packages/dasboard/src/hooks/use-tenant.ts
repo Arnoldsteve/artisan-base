@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { CreateTenantDto, CreateTenantResponse, AvailabilityResponse } from "@/types/tenant";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useDebounce } from "./use-debounce";
+import { useRef } from "react";
 
 const AVAILABILITY_QUERY_KEY = ["tenant-subdomain-availability"];
 
@@ -18,10 +19,30 @@ const AVAILABILITY_QUERY_KEY = ["tenant-subdomain-availability"];
 export function useSubdomainAvailability(subdomain: string) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
   const debouncedSubdomain = useDebounce(subdomain, 500);
+    const lastLoggedRef = useRef<string>('');
+
 
   // Determine the validity of the subdomain string itself.
   const isSubdomainValidLength = debouncedSubdomain.length > 2;
-  const isSubdomainValidFormat = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(debouncedSubdomain);
+  const isSubdomainValidFormat = /^[a-z0-9-]+$/.test(debouncedSubdomain);
+
+
+ if (debouncedSubdomain !== lastLoggedRef.current) {
+    console.log("Subdomain Validity:", {
+      subdomain: debouncedSubdomain,
+      isSubdomainValidLength,
+      isSubdomainValidFormat
+    });
+    lastLoggedRef.current = debouncedSubdomain;
+  }
+  console.log("Query enabled check:", {
+    isAuthLoading,
+    isAuthenticated,
+    isSubdomainValidLength,
+    isSubdomainValidFormat,
+    debouncedSubdomain,
+    enabled: !isAuthLoading && isAuthenticated && isSubdomainValidLength && isSubdomainValidFormat
+  });
 
   const query = useQuery<AvailabilityResponse>({
     queryKey: [...AVAILABILITY_QUERY_KEY, debouncedSubdomain],
