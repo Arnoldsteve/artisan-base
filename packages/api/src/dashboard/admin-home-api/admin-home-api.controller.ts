@@ -21,4 +21,9 @@ export class AdminHomeApiController {
   async getRecentOrders() {
     return this.adminHomeApiService.getRecentOrders();
   }
+
+  @Get('sales-overview')
+  async getSalesOverview() {
+    return this.adminHomeApiService.getSalesOverview();
+  }
 }

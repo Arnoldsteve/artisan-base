@@ -15,6 +15,10 @@ export class AdminHomeApiService {
   }
 
   async getRecentOrders() {
-    return this.repository.getRecentOrders(5); // Default to 5 recent orders
+    return this.repository.getRecentOrders(5); 
+  }
+
+  async getSalesOverview() {
+    return this.repository.getSalesOverview();
   }
 }

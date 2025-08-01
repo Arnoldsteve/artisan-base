@@ -1,15 +1,18 @@
 // File: packages/api/src/dashboard/admin-home-api/admin-home-api.repository.ts
 
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Logger, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IAdminHomeApiRepository } from './interfaces/admin-home-api-repository.interface';
-import { PrismaClient } from '../../../generated/tenant';
+import { Prisma, PrismaClient } from '../../../generated/tenant';
 import { Decimal } from '@prisma/client/runtime/library';
-import { DashboardKpisResponseDto, DashboardRecentOrdersResponseDto } from './dto/dashboard-response.dto';
+import {
+  DashboardKpisResponseDto,
+  DashboardRecentOrdersResponseDto,
+  SalesOverviewResponseDto,
+} from './dto/dashboard-response.dto';
 
 @Injectable({ scope: Scope.REQUEST }) // <-- 1. MAKE IT REQUEST-SCOPED
 export class AdminHomeApiRepository implements IAdminHomeApiRepository {
-  
   // This will hold the client once it's initialized for the request
   private prismaClient: PrismaClient | null = null;
 
@@ -57,8 +60,12 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
     ]);
 
     return {
-      totalRevenue: (totalRevenueResult._sum.totalAmount || new Decimal(0)).toString(),
-      salesToday: (salesTodayResult._sum.totalAmount || new Decimal(0)).toString(),
+      totalRevenue: (
+        totalRevenueResult._sum.totalAmount || new Decimal(0)
+      ).toString(),
+      salesToday: (
+        salesTodayResult._sum.totalAmount || new Decimal(0)
+      ).toString(),
       totalCustomers,
       activeProducts,
       inactiveProducts,
@@ -70,7 +77,7 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
    */
   async getRecentOrders(limit = 5): Promise<DashboardRecentOrdersResponseDto> {
     const prisma = await this.getPrisma();
-    
+
     const orders = await prisma.order.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -87,16 +94,58 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
     });
 
     // Map to DTO to ensure consistency and convert Decimal to string
-    const recentOrders = orders.map(order => ({
-        ...order,
-        // Ensure all Decimal fields are converted to strings for the DTO
-        totalAmount: order.totalAmount.toString(),
-        subtotal: order.subtotal.toString(),
-        taxAmount: order.taxAmount.toString(),
-        shippingAmount: order.shippingAmount.toString(),
-        items: [], // Assuming DTO doesn't need full items list for this view
+    const recentOrders = orders.map((order) => ({
+      ...order,
+      // Ensure all Decimal fields are converted to strings for the DTO
+      totalAmount: order.totalAmount.toString(),
+      subtotal: order.subtotal.toString(),
+      taxAmount: order.taxAmount.toString(),
+      shippingAmount: order.shippingAmount.toString(),
+      items: [], // Assuming DTO doesn't need full items list for this view
     }));
 
     return { recentOrders };
+  }
+
+  async getSalesOverview(): Promise<SalesOverviewResponseDto> {
+    const prisma = await this.getPrisma();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    // Use Prisma's aggregation instead of raw SQL
+    const salesData = await prisma.order.groupBy({
+      by: ['createdAt'],
+      where: {
+        createdAt: {
+          gte: sixMonthsAgo,
+        },
+        paymentStatus: 'PAID',
+      },
+      _sum: {
+        totalAmount: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    // Process the data to group by month
+    const monthlyTotals = new Map<string, Decimal>();
+
+    salesData.forEach((item) => {
+      const month = item.createdAt.toLocaleDateString('en-US', {
+        month: 'short',
+      });
+      const current = monthlyTotals.get(month) || new Decimal(0);
+      monthlyTotals.set(month, current.plus(item._sum.totalAmount || 0));
+    });
+
+    const sales = Array.from(monthlyTotals.entries()).map(([month, total]) => ({
+      name: month,
+      total: total.toString(),
+    }));
+
+    return { sales };
   }
 }

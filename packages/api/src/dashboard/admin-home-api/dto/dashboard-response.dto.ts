@@ -27,3 +27,12 @@ export class DashboardKpisResponseDto {
 export class DashboardRecentOrdersResponseDto {
     recentOrders: RecentOrderDto[];
 }
+
+class SalesDataPointDto {
+  name: string; // e.g., "Jan", "Feb"
+  total: string; // The total sales for that month (as a string)
+}
+
+export class SalesOverviewResponseDto {
+  sales: SalesDataPointDto[];
+}
