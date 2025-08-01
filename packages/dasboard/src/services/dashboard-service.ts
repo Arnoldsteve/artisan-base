@@ -2,7 +2,7 @@
 
 import { apiClient } from "@/lib/client-api";
 // Import the specific response types
-import { DashboardKPI, RecentOrdersResponse } from "@/types/dashboard"; 
+import { DashboardKPI, RecentOrdersResponse, SalesOverviewResponse } from "@/types/dashboard"; 
 
 /**
  * DashboardService handles API communication for the main dashboard,
@@ -24,7 +24,15 @@ export class DashboardService {
   async getRecentOrders(): Promise<RecentOrdersResponse> {
     return apiClient.get<RecentOrdersResponse>("/dashboard/admin-home/recent-orders");
   }
+
+  /**
+   * Fetches the aggregated sales data for the last 6 months.
+   * This is used to populate the main sales overview chart.
+   */
+  async getSalesOverview(): Promise<SalesOverviewResponse> {
+    return apiClient.get<SalesOverviewResponse>("/dashboard/admin-home/sales-overview");
+  }
+
 }
 
-// Export a singleton instance
 export const dashboardService = new DashboardService();

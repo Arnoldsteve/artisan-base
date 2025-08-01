@@ -109,41 +109,61 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
 
   async getSalesOverview(): Promise<SalesOverviewResponseDto> {
     const prisma = await this.getPrisma();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setDate(1);
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    // Use Prisma's aggregation instead of raw SQL
-    const salesData = await prisma.order.groupBy({
-      by: ['createdAt'],
+    // 1. Define the 12-month date range
+    const now = new Date();
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+    twelveMonthsAgo.setHours(0, 0, 0, 0); // Normalize to the start of the day
+
+    Logger.debug(`Fetching PENDING sales data from ${twelveMonthsAgo.toISOString()}`);
+
+    // 2. Initialize a map with all 12 months to guarantee they exist in the output
+    const monthlyTotals = new Map<string, Decimal>();
+    const monthOrder: string[] = []; // To ensure correct chronological sorting
+
+    for (let i = 11; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+        
+        // Pre-fill the map and the sorting array
+        if (!monthlyTotals.has(monthName)) {
+            monthlyTotals.set(monthName, new Decimal(0));
+            monthOrder.push(monthName);
+        }
+    }
+
+    // 3. Fetch all relevant orders from the database using a more efficient query
+    const orders = await prisma.order.findMany({
       where: {
         createdAt: {
-          gte: sixMonthsAgo,
+          gte: twelveMonthsAgo,
         },
-        paymentStatus: 'PAID',
+        // NOTE: This is still filtering for only PENDING orders as per your last code.
+        // Remove this line if you want to see totals for all statuses.
+        paymentStatus: 'PENDING', 
       },
-      _sum: {
+      select: {
         totalAmount: true,
-      },
-      orderBy: {
-        createdAt: 'asc',
+        createdAt: true,
       },
     });
 
-    // Process the data to group by month
-    const monthlyTotals = new Map<string, Decimal>();
+    Logger.debug(`Found ${orders.length} PENDING orders to process.`);
 
-    salesData.forEach((item) => {
-      const month = item.createdAt.toLocaleDateString('en-US', {
-        month: 'short',
-      });
-      const current = monthlyTotals.get(month) || new Decimal(0);
-      monthlyTotals.set(month, current.plus(item._sum.totalAmount || 0));
+    // 4. Populate the map with the actual sales data from the database
+    orders.forEach((order) => {
+      const monthName = order.createdAt.toLocaleDateString('en-US', { month: 'short' });
+      
+      // We know the month exists in the map because we pre-filled it
+      const currentTotal = monthlyTotals.get(monthName)!;
+      const orderAmount = order.totalAmount || new Decimal(0);
+      monthlyTotals.set(monthName, currentTotal.plus(orderAmount));
     });
 
-    const sales = Array.from(monthlyTotals.entries()).map(([month, total]) => ({
-      name: month,
-      total: total.toString(),
+    // 5. Convert the map to the final array, using our sort order to guarantee chronology
+    const sales = monthOrder.map(monthName => ({
+      name: monthName,
+      total: monthlyTotals.get(monthName)!.toString(),
     }));
 
     return { sales };

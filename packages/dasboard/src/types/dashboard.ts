@@ -44,3 +44,12 @@ export interface DashboardData {
   sales: SalesDataPoint[];
   recentOrders: Order[];
 }
+
+export interface SalesOverviewItem {
+  name: string;   // e.g., "Jun"
+  total: string;  // e.g., "47.94"
+}
+
+export interface SalesOverviewResponse {
+  sales: SalesOverviewItem[];
+}
