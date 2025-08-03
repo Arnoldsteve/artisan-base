@@ -7,7 +7,7 @@ import { CreateProductDto, Product, PaginatedResponse, UpdateProductDto } from "
 import { useAuthContext } from "@/contexts/auth-context";
 
 // Define a query key to uniquely identify product data
-const PRODUCTS_QUERY_KEY = ["dashboard-products"];
+export const PRODUCTS_QUERY_KEY = ["dashboard-products"];
 
 /**
  * Hook for fetching a paginated list of products.

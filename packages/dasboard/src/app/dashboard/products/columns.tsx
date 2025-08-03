@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Trash, Upload, Copy, Pencil } from "lucide-react";
 import { Button } from "@repo/ui";
 import { Badge } from "@repo/ui";
 import { Checkbox } from "@repo/ui";
@@ -21,6 +21,7 @@ declare module "@tanstack/react-table" {
     openDeleteDialog: (product: TData) => void;
     openEditSheet: (product: TData) => void;
     handleDuplicateProduct: (product: TData) => void;
+    handleImageUpload: (product: TData) => void;
   }
 }
 
@@ -182,23 +183,48 @@ export const columns: ColumnDef<Product>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => table.options.meta?.openEditSheet(product)}
               >
-                Edit
+                <Button
+                  variant="outline"
+                className="w-full flex items-center justify-start"
+                onClick={() => table.options.meta?.openEditSheet(product)}
+                >
+                  <Pencil className="w-5 h-5 text-blue-600" />
+                  Edit
+                </Button>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() =>
-                  table.options.meta?.handleDuplicateProduct(product)
-                }
               >
-                Duplicate
+                <Button
+                  variant="outline"
+                className="w-full flex items-center justify-start"
+                onClick={() => table.options.meta?.handleDuplicateProduct(product)}
+                >
+                  <Copy className="w-5 h-5 text-green-600" />
+                  Duplicate
+                </Button>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Button
+                  variant="outline"
+                className="w-full flex items-center justify-start"
+                  onClick={() => table.options.meta?.handleImageUpload(product)}
+                >
+                  <Upload className="w-5 h-5" />
+                  Upload Images
+                </Button>
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                // Call the function from our table's meta options!
+                >
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-start"
                 onClick={() => table.options.meta?.openDeleteDialog(product)}
-              >
-                Delete
+                >
+                  <Trash className="w-5 h-5 text-red-600" />
+                  Delete
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

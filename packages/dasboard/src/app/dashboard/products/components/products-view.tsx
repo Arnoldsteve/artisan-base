@@ -31,6 +31,7 @@ import { Button } from "@repo/ui";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
+import { ImageUploadDialog } from "./image-upload-dialog";
 
 // Helper function (can be moved to a utils file)
 const slugify = (text: string) => text.toString().toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w\-]+/g, "").replace(/\-\-+/g, "-");
@@ -51,6 +52,8 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  const [productForImageUpload, setProductForImageUpload] = useState<Product | null>(null);
+  const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
   // --- Data Fetching & Mutations with TanStack Query ---
   const { data: paginatedResponse, isLoading, isError } = useProducts(1, 10, "", initialData);
@@ -66,14 +69,17 @@ export function ProductsView({ initialData }: ProductsViewProps) {
 
   // --- Action Handlers ---
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
+
   const openEditSheet = (product: Product) => {
     setProductToEdit(product);
     setIsSheetOpen(true);
   };
+
   const openAddSheet = () => {
     setProductToEdit(null); // Set to null for creation
     setIsSheetOpen(true);
   };
+
   const handleDuplicateProduct = (productToDuplicate: Product) => {
     const newName = `${productToDuplicate.name} (Copy)`;
     createProduct({
@@ -83,6 +89,11 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       inventoryQuantity: productToDuplicate.inventoryQuantity,
       isFeatured: false,
     });
+  };
+
+   const handleImageUpload = (product: Product) => {
+    setProductForImageUpload(product);
+    setIsImageUploadOpen(true);
   };
 
   // --- Table Instance Initialization ---
@@ -99,7 +110,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: { openDeleteDialog, openEditSheet, handleDuplicateProduct },
+    meta: { openDeleteDialog, openEditSheet, handleDuplicateProduct, handleImageUpload },
   });
 
   // --- Mutation Handlers ---
@@ -193,6 +204,11 @@ export function ProductsView({ initialData }: ProductsViewProps) {
         onConfirm={handleBulkDelete}
         selectedCount={numSelected}
         isPending={isDeleting} // Can reuse isDeleting for bulk as well
+      />
+      <ImageUploadDialog
+        isOpen={isImageUploadOpen}
+        onClose={() => setIsImageUploadOpen(false)}
+        product={productForImageUpload}
       />
     </div>
   );
