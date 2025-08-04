@@ -2,19 +2,19 @@
 
 import React, { useState, useMemo } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
-import { columns } from "../columns"; // Corrected path
+import { columns } from "../columns";
 import {
   useReactTable,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  PaginationState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
-import { Product, PaginatedResponse, UpdateProductDto, CreateProductDto } from "@/types/products";
+import { Product, PaginatedResponse } from "@/types/products";
 import {
   useProducts,
   useDeleteProduct,
@@ -28,13 +28,19 @@ import { DeleteProductDialog } from "./delete-product-dialog";
 import { BulkDeleteAlertDialog } from "./bulk-delete-alert-dialog";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
-import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
 
-// Helper function (can be moved to a utils file)
-const slugify = (text: string) => text.toString().toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w\-]+/g, "").replace(/\-\-+/g, "-");
+// Helper function
+const slugify = (text: string) =>
+  text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
 
 interface ProductsViewProps {
   initialData: PaginatedResponse<Product>;
@@ -46,6 +52,10 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   // --- UI State for Modals/Sheets ---
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -55,62 +65,69 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [productForImageUpload, setProductForImageUpload] = useState<Product | null>(null);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
-  // --- Data Fetching & Mutations with TanStack Query ---
-  const { data: paginatedResponse, isLoading, isError } = useProducts(1, 10, "", initialData);
+  // --- Data Fetching & Mutations ---
+  const { data: paginatedResponse, isLoading, isError } = useProducts(
+    pageIndex + 1,
+    pageSize,
+    "",
+    initialData
+  );
+  
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
   // --- Memoized Data ---
-  // The raw `products` array from the API response
   const products = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
+  const totalProducts = paginatedResponse?.meta?.total ?? 0;
   const selectedProductIds = useMemo(() => Object.keys(rowSelection), [rowSelection]);
   const numSelected = selectedProductIds.length;
 
   // --- Action Handlers ---
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
-
-  const openEditSheet = (product: Product) => {
-    setProductToEdit(product);
-    setIsSheetOpen(true);
-  };
-
-  const openAddSheet = () => {
-    setProductToEdit(null); // Set to null for creation
-    setIsSheetOpen(true);
-  };
+  const openEditSheet = (product: Product) => { setProductToEdit(product); setIsSheetOpen(true); };
+  const openAddSheet = () => { setProductToEdit(null); setIsSheetOpen(true); };
+  const handleImageUpload = (product: Product) => { setProductForImageUpload(product); setIsImageUploadOpen(true); };
 
   const handleDuplicateProduct = (productToDuplicate: Product) => {
     const newName = `${productToDuplicate.name} (Copy)`;
     createProduct({
       name: newName,
       slug: slugify(newName),
-      price: productToDuplicate.price.toNumber(), // Convert Decimal to number for DTO
+      price: productToDuplicate.price.toNumber(),
       inventoryQuantity: productToDuplicate.inventoryQuantity,
       isFeatured: false,
     });
   };
 
-   const handleImageUpload = (product: Product) => {
-    setProductForImageUpload(product);
-    setIsImageUploadOpen(true);
-  };
-
   // --- Table Instance Initialization ---
   const table = useReactTable({
-    data: products, // Use the raw products array
+    data: products,
     columns,
-    state: { sorting, columnVisibility, rowSelection, columnFilters },
+    pageCount: paginatedResponse?.meta?.totalPages ?? -1,
+    manualPagination: true,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+      pagination: { pageIndex, pageSize },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: { openDeleteDialog, openEditSheet, handleDuplicateProduct, handleImageUpload },
+    meta: {
+      openDeleteDialog,
+      openEditSheet,
+      handleDuplicateProduct,
+      handleImageUpload,
+    },
   });
 
   // --- Mutation Handlers ---
@@ -121,48 +138,35 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       });
     }
   };
-   // ... inside your ProductsView component ...
-  
-  // The form now provides a fully validated ProductFormData object
+
   const handleSaveChanges = (formData: ProductFormData) => {
     if (formData.id) {
-      // --- THIS IS THE FIX ---
-      // This is an UPDATE. We must strip the read-only properties.
-      
-      // 1. Destructure the ID from the rest of the form data.
       const { id, ...updateData } = formData;
-      
-      // 2. The `updateData` object now ONLY contains fields defined in your
-      //    Zod schema, which match your backend's UpdateProductDto.
-      //    It no longer has `id`, `createdAt`, `images`, etc.
       updateProduct({ id: id, data: updateData }, {
         onSuccess: () => setIsSheetOpen(false),
       });
-
     } else {
-      // This is a CREATE operation.
-      // The `formData` is already in the correct shape for your CreateProductDto.
       createProduct(formData, {
         onSuccess: () => setIsSheetOpen(false),
       });
     }
   };
+
   const handleBulkDelete = () => {
-    // Note: This would be better as a single API call, but for now we loop.
     const promises = selectedProductIds.map(id => deleteProduct(id));
     toast.promise(Promise.all(promises), {
-        loading: `Deleting ${numSelected} products...`,
-        success: () => {
-            setRowSelection({}); // Clear selection on success
-            setIsBulkDeleteDialogOpen(false);
-            return `${numSelected} products deleted.`;
-        },
-        error: "Failed to delete one or more products."
+      loading: `Deleting ${numSelected} products...`,
+      success: () => {
+        setRowSelection({});
+        setIsBulkDeleteDialogOpen(false);
+        return `${numSelected} products deleted.`;
+      },
+      error: "Failed to delete one or more products."
     });
   };
 
   // --- Render Logic ---
-  if (isLoading && !paginatedResponse) {
+  if (isLoading && !initialData) {
     return <DataTableSkeleton />;
   }
   if (isError) {
@@ -176,11 +180,23 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       </PageHeader>
       
       <DataTableViewOptions table={table} />
-      <DataTable table={table} />
+      
+      <DataTable table={table} totalCount={totalProducts} />
       
       {numSelected > 0 && (
-        <div className="fixed inset-x-4 bottom-4 z-50 ...">
-            {/* Bulk Action Bar JSX */}
+        <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">
+          {/* Implement Bulk Action Bar JSX here */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              {numSelected} product(s) selected.
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => setIsBulkDeleteDialogOpen(true)}
+            >
+              Delete Selected
+            </Button>
+          </div>
         </div>
       )}
 
@@ -203,7 +219,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
         onClose={() => setIsBulkDeleteDialogOpen(false)}
         onConfirm={handleBulkDelete}
         selectedCount={numSelected}
-        isPending={isDeleting} // Can reuse isDeleting for bulk as well
+        isPending={isDeleting}
       />
       <ImageUploadDialog
         isOpen={isImageUploadOpen}
