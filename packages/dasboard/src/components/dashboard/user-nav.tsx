@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Button } from '@repo/ui';
+import { Button } from "@repo/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,55 +9,97 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@repo/ui';
-import { useRouter } from 'next/navigation';
-import { ChevronDown } from 'lucide-react'; // Import the chevron icon
+} from "@repo/ui";
+import { useRouter } from "next/navigation";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@repo/ui";
+import {
+  ChevronDown,
+  User,
+  CreditCard,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { useAuthContext } from "@/contexts/auth-context";
 
 export function UserNav() {
   const router = useRouter();
+  const { user, logout } = useAuthContext();
 
-  // In a real app, this data would come from a session or user context
-  const user = {
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-  };
+  if (!user) {
+    return null;
+  }
 
-  const handleLogout = () => {
-    // Add your actual logout logic here (e.g., clear session, cookies)
-    console.log('Logging out...');
-    router.push('/'); // Redirect to login page
-  };
+  // --- THIS IS THE UPDATED LOGIC ---
+  const initials = (() => {
+    const firstName = user.firstName ?? "";
+    const lastName = user.lastName ?? "";
+
+    if (firstName && lastName) {
+      // Standard case: John Doe -> JD
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`;
+    }
+    if (firstName) {
+      // One name case: "Arnold" -> "AR", "A" -> "A"
+      return firstName.slice(0, 2);
+    }
+    // Fallback if no name is available
+    return "??";
+  })().toUpperCase();
+  // ------------------------------------
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* The trigger is now a simple button with the user's name and an icon */}
-        <Button variant="ghost" className="relative flex items-center gap-2 px-2">
-          <span>{user.firstName} {user.lastName}</span>
+        <Button
+          variant="ghost"
+          className="relative flex items-center gap-2 px-2"
+        >
+          <span>
+            {user.firstName} {user.lastName}
+          </span>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      
-      {/* The content of the dropdown remains the same */}
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
-            </p>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
+            </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem>
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <CreditCard className="mr-2 h-4 w-4" />
+            <span>Billing</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          Log out
+        <DropdownMenuItem onClick={logout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

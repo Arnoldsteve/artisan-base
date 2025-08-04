@@ -1,17 +1,30 @@
+"use client";
+
+import { useMemo } from "react";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { Input } from "@repo/ui";
+import { useAuthContext } from "@/contexts/auth-context";
 
 export function Header() {
+  const { tenants, tenantId } = useAuthContext();
+
+  const currentTenantName = useMemo(() => {
+    if (!tenantId || !tenants || tenants.length === 0) {
+      return "My Store";
+    }
+    const currentTenant = tenants.find((tenant) => tenant.subdomain === tenantId);
+
+    return currentTenant ? currentTenant.name : "My Store";
+  }, [tenants, tenantId]);
+
   return (
     <div className="border-b border-border bg-background">
       <div className="flex h-16 items-center px-4">
-        {/* You can add a TeamSwitcher or Logo here */}
         <h1 className="text-xl font-bold tracking-tight mr-6 text-primary">
-          My Store
+          {currentTenantName}
         </h1>
 
         <div className="ml-auto flex items-center space-x-4">
-          {/* Simple search input, can be its own component later */}
           <div>
             <Input
               type="search"
@@ -25,4 +38,3 @@ export function Header() {
     </div>
   );
 }
-// REFACTOR: Updated header to use blue/white/gray theme and theme tokens for all colors.

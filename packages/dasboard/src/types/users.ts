@@ -5,6 +5,7 @@ import { Tenant } from './tenant';
  * This should match the user object within your LoginResponse and ProfileResponse.
  */
 export interface User {
+  avatarUrl: string | Blob;
   id: string;
   email: string;
   firstName: string | null;
