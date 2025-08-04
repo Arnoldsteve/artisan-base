@@ -22,6 +22,7 @@ import { TenantContextMiddleware } from './tenant/middleware/tenant-context.midd
 import { AdminHomeApiModule } from './dashboard/admin-home-api/admin-home-api.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { StorageModule } from './dashboard/storage/storage.module';
+import { PaymentModule } from './dashboard/payment/payment.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { StorageModule } from './dashboard/storage/storage.module';
     StorefrontModule,
     AdminHomeApiModule,
     StorageModule,
-    SupabaseModule, // 
+    SupabaseModule, 
+    PaymentModule, 
   ],
   controllers: [AppController],
   providers: [
