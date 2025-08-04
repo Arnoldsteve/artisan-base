@@ -1,42 +1,75 @@
 // File: packages/dasboard/src/services/image-upload-service.ts
 
 import { apiClient } from "@/lib/client-api";
-import { Product } from "@/types/products"; // The API should return the updated product
+import { Product } from "@/types/products";
+
+// Define the shape of the data returned by the get-url endpoint
+interface SignedUrlResponse {
+  signedUrl: string; // The URL to upload the file to
+  path: string;      // The path of the file in Supabase storage
+  fileId: string;    // The unique ID for the image record
+}
 
 /**
- * ImageUploadService handles the API communication for uploading product images.
- * It sends files to the backend, which then processes and stores them.
+ * ImageUploadService handles the API communication for the two-step image upload process.
  */
-// ... (imports are the same)
-
 export class ImageUploadService {
-  // ... (existing uploadProductImages method is the same)
-  async uploadProductImages(
+  /**
+   * STEP 1: Asks the backend for a secure, one-time URL to upload a file to.
+   *
+   * @param productId The ID of the product to associate the image with.
+   * @param fileName The name of the file being uploaded.
+   * @param fileType The MIME type of the file (e.g., 'image/png').
+   * @returns A promise that resolves with the signed URL and necessary metadata.
+   */
+  async createSignedUploadUrl(
     productId: string,
-    images: File[]
-  ): Promise<Product> {
-    const formData = new FormData();
-    images.forEach((imageFile) => {
-      formData.append("images", imageFile);
+    fileName: string,
+    fileType: string,
+  ): Promise<SignedUrlResponse> {
+    const endpoint = '/dashboard/storage/upload-url';
+    return apiClient.post<SignedUrlResponse>(endpoint, {
+      productId,
+      fileName,
+      fileType,
     });
-    const endpoint = `/dashboard/products/${productId}/upload-images`;
-    return apiClient.post<Product>(endpoint, formData);
   }
 
-  // --- ADD THIS NEW METHOD ---
   /**
-   * Deletes a specific image from a product.
+   * STEP 2: After the client uploads the file directly to the signed URL,
+   * this method tells the backend to finalize the process and save the image record to the product.
    *
-   * @param productId - The ID of the product.
-   * @param imageId - The ID of the image to be deleted.
+   * @param productId The ID of the product.
+   * @param fileId The unique ID for the image, received from createSignedUploadUrl.
+   * @param path The storage path for the image, received from createSignedUploadUrl.
+   * @returns The updated product with the new image linked.
+   */
+  async finalizeUpload(
+    productId: string,
+    fileId: string,
+    path: string,
+  ): Promise<Product> {
+    const endpoint = '/dashboard/storage/finalize-upload';
+    return apiClient.post<Product>(endpoint, {
+      productId,
+      fileId,
+      path,
+    });
+  }
+
+  /**
+   * Deletes a specific image from a product by calling the backend endpoint.
+   *
+   * @param productId The ID of the product.
+   * @param imageId The ID of the image to be deleted.
    * @returns The updated product after the image has been removed.
    */
   async deleteProductImage(
     productId: string,
-    imageId: string
+    imageId: string,
   ): Promise<Product> {
-    // This calls an endpoint like: DELETE /api/dashboard/products/prod_123/images/img_456
-    const endpoint = `/dashboard/products/${productId}/images/${imageId}`;
+    // This endpoint now matches the new controller path
+    const endpoint = `/dashboard/storage/products/${productId}/images/${imageId}`;
     return apiClient.delete<Product>(endpoint);
   }
 }

@@ -1,6 +1,7 @@
 // REFACTOR: ProductService following Repository pattern and Single Responsibility Principle
 
 import { apiClient } from "@/lib/api-client";
+import { cleanParams } from "@/lib/clean-params";
 import {
   Product,
   Category,
@@ -223,6 +224,17 @@ export class ProductService {
     params: ProductSearchParams = {}
   ): Promise<PaginatedResponse<Product>> {
     try {
+      console.log("Original params passed to getProducts:", params);
+    
+      // Clean the params object to remove any undefined, null, or empty values
+      const cleanedParams = cleanParams(params);
+      
+      // Add logging AFTER cleanParams
+      console.log("Cleaned params after cleanParams:", cleanedParams);
+      
+      // Add logging right before the API call
+      console.log("About to make API call with params:", cleanedParams);
+
       // OPTIMIZATION: Use cache for frequently accessed data
       if (!this.cache.isStale() && !params.search && !params.category) {
         const cachedProducts = this.cache.getProducts();
@@ -237,9 +249,10 @@ export class ProductService {
         }
       }
 
+      // Use the cleaned parameters for the API call
       const response = await apiClient.get<
         ApiResponse<PaginatedResponse<Product>>
-      >("/api/v1/storefront/products", params);
+      >("/api/v1/storefront/products", cleanedParams);
 
       // OPTIMIZATION: Cache the results for better performance
       if (response.success) {
@@ -305,16 +318,18 @@ export class ProductService {
     }
   }
 
-  // OPTIMIZATION: Get new arrivals sorted by creation date
   async getNewArrivals(limit: number = 12): Promise<Product[]> {
     try {
-      // Get all products and sort by creation date
-      const allProducts = await this.getProducts({ limit: 100 }); // Get more products to sort from
+      // This method now works correctly because it calls the fixed getProducts method
+      const allProducts = await this.getProducts({ limit: 100 });
+      console.log("Full API response:", allProducts); // Add this line
+      console.log("Fetched all products for new arrivals:", allProducts.data);
       const sortedProducts = this.sortProducts(
-        allProducts.data,
+        allProducts.data || allProducts,
         "createdAt",
         "desc"
       );
+      console.log("Sorted products:", sortedProducts);
 
       return sortedProducts.slice(0, limit);
     } catch (error) {
@@ -323,7 +338,6 @@ export class ProductService {
     }
   }
 
-  // This gives a list of all categories in the system
   async getCategories(): Promise<Category[]> {
     try {
       // OPTIMIZATION: Use cache for categories
@@ -348,7 +362,6 @@ export class ProductService {
     }
   }
 
-  // OPTIMIZATION: Search products with debouncing support
   async searchProducts(query: string, limit: number = 10): Promise<Product[]> {
     if (!query.trim()) return [];
 
@@ -368,7 +381,6 @@ export class ProductService {
     }
   }
 
-  // OPTIMIZATION: Clear cache when needed
   clearCache(): void {
     this.cache.clear();
   }

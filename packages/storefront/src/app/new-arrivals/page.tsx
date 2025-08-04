@@ -7,6 +7,7 @@ import { Clock, Sparkles, TrendingUp } from "lucide-react";
 export default function NewArrivalsPage() {
   const { data: productsResponse, isLoading } = useNewArrivals(12);
   const products = productsResponse || [];
+  console.log("New Arrivals Products:", products);
 
   if (isLoading) {
     return (
