@@ -100,7 +100,7 @@ export function useAuth() {
     Cookies.remove('accessToken');
     Cookies.remove('selectedOrgSubdomain');
     
-    window.location.href = '/login'; 
+    window.location.href = '/'; 
   }, []);
   
   const selectTenant = useCallback((newTenantId: string) => {

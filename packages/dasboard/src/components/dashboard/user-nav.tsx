@@ -33,23 +33,18 @@ export function UserNav() {
     return null;
   }
 
-  // --- THIS IS THE UPDATED LOGIC ---
   const initials = (() => {
     const firstName = user.firstName ?? "";
     const lastName = user.lastName ?? "";
 
     if (firstName && lastName) {
-      // Standard case: John Doe -> JD
       return `${firstName.charAt(0)}${lastName.charAt(0)}`;
     }
     if (firstName) {
-      // One name case: "Arnold" -> "AR", "A" -> "A"
       return firstName.slice(0, 2);
     }
-    // Fallback if no name is available
     return "??";
   })().toUpperCase();
-  // ------------------------------------
 
   return (
     <DropdownMenu>
