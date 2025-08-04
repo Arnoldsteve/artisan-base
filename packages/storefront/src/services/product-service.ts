@@ -224,6 +224,8 @@ export class ProductService {
     params: ProductSearchParams = {}
   ): Promise<PaginatedResponse<Product>> {
     try {
+      const cleanedParams = cleanParams(params);
+
       // OPTIMIZATION: Use cache for frequently accessed data
       if (!this.cache.isStale() && !params.search && !params.category) {
         const cachedProducts = this.cache.getProducts();
