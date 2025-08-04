@@ -224,17 +224,6 @@ export class ProductService {
     params: ProductSearchParams = {}
   ): Promise<PaginatedResponse<Product>> {
     try {
-      console.log("Original params passed to getProducts:", params);
-    
-      // Clean the params object to remove any undefined, null, or empty values
-      const cleanedParams = cleanParams(params);
-      
-      // Add logging AFTER cleanParams
-      console.log("Cleaned params after cleanParams:", cleanedParams);
-      
-      // Add logging right before the API call
-      console.log("About to make API call with params:", cleanedParams);
-
       // OPTIMIZATION: Use cache for frequently accessed data
       if (!this.cache.isStale() && !params.search && !params.category) {
         const cachedProducts = this.cache.getProducts();
