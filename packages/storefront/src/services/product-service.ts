@@ -322,14 +322,11 @@ export class ProductService {
     try {
       // This method now works correctly because it calls the fixed getProducts method
       const allProducts = await this.getProducts({ limit: 100 });
-      console.log("Full API response:", allProducts); // Add this line
-      console.log("Fetched all products for new arrivals:", allProducts.data);
       const sortedProducts = this.sortProducts(
         allProducts.data || allProducts,
         "createdAt",
         "desc"
       );
-      console.log("Sorted products:", sortedProducts);
 
       return sortedProducts.slice(0, limit);
     } catch (error) {

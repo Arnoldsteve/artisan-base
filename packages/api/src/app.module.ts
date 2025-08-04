@@ -20,8 +20,8 @@ import { StorefrontModule } from './storefront/storefront.module';
 import { TenantContextService } from './common/tenant-context.service';
 import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
 import { AdminHomeApiModule } from './dashboard/admin-home-api/admin-home-api.module';
-import { StorageModule } from './storage/storage.module';
 import { SupabaseModule } from './supabase/supabase.module';
+import { StorageModule } from './dashboard/storage/storage.module';
 
 @Module({
   imports: [
