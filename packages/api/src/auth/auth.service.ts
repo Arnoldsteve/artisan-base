@@ -9,6 +9,7 @@ import { SignUpDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { UserProfileResponseDto } from './dto/user-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -85,5 +86,10 @@ export class AuthService {
       user: userWithoutPassword,
       organizations,
     };
+  }
+
+   async getProfile(userId: string): Promise<UserProfileResponseDto> {
+    const profile = await this.authRepository.getProfile(userId);
+    return profile;
   }
 }

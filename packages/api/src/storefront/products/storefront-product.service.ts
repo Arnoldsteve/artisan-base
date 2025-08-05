@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException, Scope, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { GetProductsDto } from './dto/get-products.dto';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
+import { StorefrontProductRepository } from './storefront-product.repository'; // <-- IMPORT THE CLASS
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductService {
   constructor(
-    @Inject('StorefrontProductRepository')
-    private readonly productRepository: IStorefrontProductRepository,
+    // INJECT THE CLASS DIRECTLY. NestJS will use the class as the token.
+    // The type can still be the interface for good practice.
+    private readonly productRepository: StorefrontProductRepository, 
   ) {}
 
   async findAll(filters: GetProductsDto) {

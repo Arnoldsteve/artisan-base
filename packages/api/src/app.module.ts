@@ -19,6 +19,10 @@ import { SettingsModule } from './dashboard/settings/settings.module';
 import { StorefrontModule } from './storefront/storefront.module';
 import { TenantContextService } from './common/tenant-context.service';
 import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
+import { AdminHomeApiModule } from './dashboard/admin-home-api/admin-home-api.module';
+import { SupabaseModule } from './supabase/supabase.module';
+import { StorageModule } from './dashboard/storage/storage.module';
+import { PaymentModule } from './dashboard/payment/payment.module';
 
 @Module({
   imports: [
@@ -35,6 +39,10 @@ import { TenantContextMiddleware } from './tenant/middleware/tenant-context.midd
     CustomerModule,
     SettingsModule,
     StorefrontModule,
+    AdminHomeApiModule,
+    StorageModule,
+    SupabaseModule, 
+    PaymentModule, 
   ],
   controllers: [AppController],
   providers: [

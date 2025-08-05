@@ -1,8 +1,11 @@
-// src/types/orders.ts
+// File: packages/dasboard/src/types/orders.ts
 
-/**
- * Possible order statuses.
- */
+import { Decimal } from 'decimal.js';
+
+// ============================================================================
+// Main Entity Types & Enums (Data received from the API)
+// ============================================================================
+
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
@@ -11,32 +14,63 @@ export type OrderStatus =
   | "DELIVERED"
   | "CANCELLED";
 
-/**
- * Possible payment statuses.
- */
 export type PaymentStatus = "PENDING" | "PAID" | "REFUNDED" | "FAILED";
 
 /**
- * DTO for a single line item in the order (matches API ManualOrderItemDto)
+ * Simplified Customer type for embedding in an Order.
  */
+export interface OrderCustomer {
+  id: string; // It's good practice to include the ID
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+}
+
+/**
+ * Detailed Order Item type for order details.
+ */
+export interface OrderItem {
+  id: string;
+  productId: string | null;
+  productName: string;
+  quantity: number;
+  unitPrice: Decimal; // <-- CORRECT TYPE: Monetary values should be Decimal
+  image: string | null;
+}
+
+/**
+ * The main Order type, representing the data structure returned from the API.
+ */
+export interface Order {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  totalAmount: Decimal; // <-- CORRECT TYPE
+  subtotal: Decimal;    // <-- CORRECT TYPE
+  shippingAmount: Decimal; // <-- CORRECT TYPE
+  taxAmount: Decimal;      // <-- CORRECT TYPE
+  createdAt: string; // ISO date string
+  customer: OrderCustomer | null;
+  items: OrderItem[];
+}
+
+// ============================================================================
+// Data Transfer Objects (DTOs) (Data sent to the API)
+// ============================================================================
+
 export interface ManualOrderItemDto {
   productId: string;
   variantId?: string;
   quantity: number;
 }
 
-/**
- * DTO for customer details (matches API CustomerDetailsDto)
- */
 export interface CustomerDetailsDto {
   email: string;
   firstName: string;
   lastName?: string;
 }
 
-/**
- * DTO for address (matches API AddressDto)
- */
 export interface AddressDto {
   firstName: string;
   lastName: string;
@@ -48,66 +82,39 @@ export interface AddressDto {
   country: string;
 }
 
-/**
- * DTO for creating an order (matches API CreateManualOrderDto)
- */
 export interface CreateOrderDto {
   customer: CustomerDetailsDto;
   shippingAddress: AddressDto;
   billingAddress?: AddressDto;
   items: ManualOrderItemDto[];
-  shippingAmount?: number;
+  shippingAmount?: number; // `number` is correct for sending JSON
   notes?: string;
 }
 
-/**
- * DTO for updating order status.
- */
 export interface UpdateOrderStatusDto {
   status: OrderStatus;
 }
 
-/**
- * DTO for updating payment status.
- */
 export interface UpdatePaymentStatusDto {
   paymentStatus: PaymentStatus;
 }
 
-/**
- * Customer type for orders.
- */
-export interface OrderCustomer {
-  firstName?: string;
-  lastName?: string;
-  email: string;
-}
+// ============================================================================
+// API Response Types
+// ============================================================================
 
 /**
- * Order item type for order details.
+ * A generic type for paginated API responses.
+ * This is what your `orderService.getAll` method will return.
  */
-export interface OrderItem {
-  id: string;
-  productId: string;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  image?: string;
-}
-
-/**
- * Main Order type for responses.
- */
-export interface Order {
-  id: string;
-  orderNumber: string;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  totalAmount: number;
-  subtotal: number;
-  shippingAmount: number;
-  taxAmount: number;
-  createdAt: string;
-  customer?: OrderCustomer;
-  items: OrderItem[];
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        prev: number | null;
+        next: number | null;
+    }
 }

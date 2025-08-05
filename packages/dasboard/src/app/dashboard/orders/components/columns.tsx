@@ -163,7 +163,7 @@ export const columns: ColumnDef<Order>[] = [
               <DropdownMenuItem asChild disabled={!customer}>
                 <Link
                   href={
-                    customer ? `/dashboard/customers/${customer.email}` : "#"
+                    customer ? `/dashboard/customers/${customer.id}` : "#"
                   }
                 >
                   View Customer

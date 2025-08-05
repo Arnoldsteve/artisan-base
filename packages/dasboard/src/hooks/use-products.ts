@@ -1,102 +1,98 @@
-import { useState, useCallback, useMemo } from "react";
+// File: packages/dasboard/src/hooks/use-products.ts
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productService } from "@/services/product-service";
-import { Product } from "@/types/products";
-import { CreateProductDto, UpdateProductDto } from "@/types/products.dto";
 import { toast } from "sonner";
+import { CreateProductDto, Product, PaginatedResponse, UpdateProductDto } from "@/types/products";
+import { useAuthContext } from "@/contexts/auth-context";
 
-export function useProducts(initialProducts: Product[]) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Define a query key to uniquely identify product data
+export const PRODUCTS_QUERY_KEY = ["dashboard-products"];
 
-  const searchProducts = useCallback(async (searchTerm: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await productService.searchProducts(searchTerm);
-      setProducts(result);
-    } catch (err) {
-      setError((err as Error).message);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+/**
+ * Hook for fetching a paginated list of products.
+ * It is "auth-aware" and will not run until the user is authenticated.
+ */
+export function useProducts(
+  page = 1,
+  limit = 10,
+  search = '',
+  initialData?: PaginatedResponse<Product>
+) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
-  const createProduct = useCallback(async (dto: CreateProductDto) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const newProduct = await productService.createProduct(dto);
-      setProducts((current) => [newProduct, ...current]);
-      toast.success(`Product "${newProduct.name}" has been created.`);
-      return newProduct;
-    } catch (err) {
-      setError((err as Error).message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const updateProduct = useCallback(
-    async (id: string, dto: UpdateProductDto) => {
-      setLoading(true);
-      setError(null);
-      console.log("dto from hooks", dto);
-      try {
-        const updated = await productService.updateProduct(id, dto);
-        console.log("updated product response from hooks", updated);
-        setProducts((current) =>
-          current.map((p) => (p.id === updated.id ? updated : p))
-        );
-        toast.success(`Product "${updated.name}" has been updated.`);
-        return updated;
-      } catch (err) {
-        setError((err as Error).message);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  const deleteProduct = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await productService.deleteProduct(id);
-      setProducts((current) => current.filter((p) => p.id !== id));
-      toast.success(`Product deleted.`);
-    } catch (err) {
-      setError((err as Error).message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return useMemo(
-    () => ({
-      products,
-      loading,
-      error,
-      searchProducts,
-      createProduct,
-      updateProduct,
-      deleteProduct,
-      setProducts,
-    }),
-    [
-      products,
-      loading,
-      error,
-      searchProducts,
-      createProduct,
-      updateProduct,
-      deleteProduct,
-    ]
-  );
+  return useQuery<PaginatedResponse<Product>>({
+    queryKey: [...PRODUCTS_QUERY_KEY, { page, limit, search }],
+    queryFn: () => productService.getProducts(page, limit, search),
+    enabled: !isAuthLoading && isAuthenticated,
+    initialData: initialData,
+  });
 }
-// REFACTOR: All product list/search/CRUD business logic and state moved to hook for SRP, DRY, and testability.
+
+/**
+ * Hook for fetching a single product by its ID.
+ */
+export function useProduct(productId: string | null) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
+  return useQuery<Product>({
+    queryKey: [...PRODUCTS_QUERY_KEY, productId],
+    queryFn: () => productService.getProductById(productId!),
+    enabled: !isAuthLoading && isAuthenticated && !!productId,
+  });
+}
+
+/**
+ * Hook for creating a new product.
+ */
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateProductDto) => productService.createProduct(data),
+    onSuccess: (newProduct) => {
+      toast.success(`Product "${newProduct.name}" created successfully.`);
+      // Invalidate the main products list to trigger a refetch
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create product.");
+    },
+  });
+}
+
+/**
+ * Hook for updating an existing product.
+ */
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { id: string; data: UpdateProductDto }) =>
+      productService.updateProduct(variables.id, variables.data),
+    onSuccess: (updatedProduct) => {
+      toast.success(`Product "${updatedProduct.name}" updated successfully.`);
+      // Invalidate both the list and the specific product's query cache
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [...PRODUCTS_QUERY_KEY, updatedProduct.id] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update product.");
+    },
+  });
+}
+
+/**
+ * Hook for deleting a product.
+ */
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => productService.deleteProduct(id),
+    onSuccess: () => {
+      toast.success("Product deleted successfully.");
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete product.");
+    },
+  });
+}

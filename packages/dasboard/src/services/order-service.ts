@@ -1,48 +1,54 @@
+// File: packages/dasboard/src/services/order-service.ts
+
+import { apiClient } from "@/lib/client-api"; 
 import {
   CreateOrderDto,
   Order,
   OrderStatus,
   PaymentStatus,
+  PaginatedResponse, // <-- 1. IMPORT PaginatedResponse
 } from "@/types/orders";
-import { IOrderRepository, orderRepository } from "@/services/order-repository";
 
 /**
- * OrderService encapsulates business logic for orders, using a repository for data access.
+ * OrderService directly handles API communication for dashboard order management.
  */
 export class OrderService {
-  constructor(private repo: IOrderRepository = orderRepository) {}
-
   /**
-   * Gets all orders.
+   * Gets all orders with optional pagination and search.
    */
-  async getAll(): Promise<Order[]> {
-    return this.repo.getAll();
+  async getAll(params?: { 
+    page?: number; 
+    limit?: number;
+    search?: string;
+  }): Promise<PaginatedResponse<Order>> { // <-- 2. UPDATE THE RETURN TYPE
+    // 3. UPDATE THE GENERIC and FIX THE PATH
+    return apiClient.get<PaginatedResponse<Order>>("/dashboard/orders", params);
   }
 
   /**
-   * Gets an order by ID.
+   * Gets a single order by its ID.
    */
   async getById(orderId: string): Promise<Order> {
-    return this.repo.getById(orderId);
+    // FIX THE PATH
+    return apiClient.get<Order>(`/dashboard/orders/${orderId}`);
   }
 
   /**
-   * Creates a new order.
-   * @param orderData - The order data to create.
-   * @returns The created order.
+   * Creates a new manual order.
    */
   async createOrder(orderData: CreateOrderDto): Promise<Order> {
-    return this.repo.create(orderData);
+    // FIX THE PATH
+    return apiClient.post<Order>("/dashboard/orders", orderData);
   }
 
   /**
-   * Updates the status of an order.
-   * @param orderId - The order ID.
-   * @param newStatus - The new status.
-   * @returns The updated order.
+   * Updates the fulfillment status of an order.
    */
   async updateStatus(orderId: string, newStatus: OrderStatus): Promise<Order> {
-    return this.repo.updateStatus(orderId, newStatus);
+    // FIX THE PATH
+    return apiClient.patch<Order>(`/dashboard/orders/${orderId}/status`, {
+      status: newStatus,
+    });
   }
 
   /**
@@ -52,21 +58,29 @@ export class OrderService {
     orderId: string,
     newPaymentStatus: PaymentStatus
   ): Promise<Order> {
-    return this.repo.updatePaymentStatus(orderId, newPaymentStatus);
+    // FIX THE PATH
+    return apiClient.patch<Order>(
+      `/dashboard/orders/${orderId}/payment-status`,
+      { paymentStatus: newPaymentStatus }
+    );
   }
 
   /**
-   * Deletes an order.
+   * Deletes a single order.
    */
   async deleteOrder(orderId: string): Promise<void> {
-    return this.repo.delete(orderId);
+    // FIX THE PATH
+    await apiClient.delete(`/dashboard/orders/${orderId}`);
   }
 
   /**
-   * Batch deletes orders.
+   * Deletes multiple orders in a batch operation.
    */
   async batchDeleteOrders(orderIds: string[]): Promise<void> {
-    return this.repo.batchDelete(orderIds);
+    // FIX THE PATH
+    await apiClient.post("/dashboard/orders/batch-delete", {
+      ids: orderIds,
+    });
   }
 }
 

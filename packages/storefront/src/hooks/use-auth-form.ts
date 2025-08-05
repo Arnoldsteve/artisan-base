@@ -9,6 +9,7 @@ export function useAuthForm(submitFn: SubmitFn, onSuccessRedirect: string) {
   const router = useRouter();
 
   const handleSubmit = async (data: any) => {
+    console.log("Submitting data:", data);
     setLoading(true);
     setError("");
     try {

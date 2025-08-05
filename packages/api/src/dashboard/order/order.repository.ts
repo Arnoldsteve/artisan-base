@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  Scope,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import {
@@ -13,18 +14,34 @@ import {
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { paginate } from 'src/common/helpers/paginate.helper';
 import { IOrderRepository } from './interfaces/order-repository.interface';
-import { Decimal } from 'decimal.js';
+import { Decimal } from '@prisma/client/runtime/library';
+import { PrismaClient } from '../../../generated/tenant';
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class OrderRepository implements IOrderRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
+
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
+   */
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
+  }
 
   async createManualOrder(dto: CreateManualOrderDto) {
+    const prisma = await this.getPrisma();
     const {
       items,
       customer,
@@ -33,7 +50,7 @@ export class OrderRepository implements IOrderRepository {
       notes,
       shippingAmount,
     } = dto;
-    return this.tenantPrisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       // 1. Find or create the customer
       const customerRecord = await tx.customer.upsert({
         where: { email: customer.email },
@@ -64,7 +81,7 @@ export class OrderRepository implements IOrderRepository {
             `Product with ID ${item.productId} not found.`,
           );
         let stock = product.inventoryQuantity;
-        let price = product.price;
+        let price = product.price; // price is already a Decimal
         let variantName: string | null = null;
         let variantSku: string | null = null;
         if (item.variantId) {
@@ -78,7 +95,7 @@ export class OrderRepository implements IOrderRepository {
               `Variant ${variant.id} does not belong to product ${product.id}.`,
             );
           stock = variant.inventoryQuantity;
-          price = variant.price ?? product.price;
+          price = variant.price ?? product.price; // price is already a Decimal
           variantName = variant.name;
           variantSku = variant.sku;
         }
@@ -87,7 +104,8 @@ export class OrderRepository implements IOrderRepository {
             `Not enough stock for ${product.name} ${variantName ? `(${variantName})` : ''}.`,
           );
         }
-        const lineItemTotal = new Decimal(price).mul(item.quantity);
+        // Use Decimal methods for precise calculation
+        const lineItemTotal = price.mul(item.quantity);
         subtotal = subtotal.plus(lineItemTotal);
         orderItemsData.push({
           productId: product.id,
@@ -142,31 +160,55 @@ export class OrderRepository implements IOrderRepository {
     });
   }
 
-  async findAll(paginationQuery: PaginationQueryDto) {
-    const now = Date.now();
-    if (this.findAllCache && this.findAllCache.expires > now) {
-      return this.findAllCache.data;
-    }
-    Logger.log(
-      `Fetching orders with pagination: ${JSON.stringify(paginationQuery)}`,
-      OrderRepository.name,
-    );
-    const result = await paginate(
-      this.tenantPrisma.order,
-      {
-        page: paginationQuery.page,
-        limit: paginationQuery.limit,
-      },
-      {
-        orderBy: { orderSequence: 'desc' },
-        include: {
-          _count: { select: { items: true } },
+ // ... inside your OrderRepository class ...
+
+async findAll(paginationQuery: PaginationQueryDto) {
+  const now = Date.now();
+  if (this.findAllCache && this.findAllCache.expires > now) {
+    return this.findAllCache.data;
+  }
+  
+  Logger.log(
+    `Fetching orders with pagination: ${JSON.stringify(paginationQuery)}`,
+  );
+  
+  const prisma = await this.getPrisma();
+
+  // --- THIS IS THE FIX ---
+  // The paginate helper will now receive an enhanced `include` object.
+  const result = await paginate(
+    prisma.order,
+    {
+      page: paginationQuery.page,
+      limit: paginationQuery.limit,
+      search: paginationQuery.search,
+      // You can add searchable fields for orders here if needed
+      searchableFields: ['orderNumber'], 
+    },
+    {
+      orderBy: { orderSequence: 'desc' },
+      include: {
+        // 1. CONTINUE to include the count of items efficiently.
+        _count: { select: { items: true } },
+
+        // 2. ADD this to also fetch the related customer's data.
+        customer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
         },
       },
-    );
-    this.findAllCache = { data: result, expires: now + CACHE_TTL };
-    return result;
-  }
+    },
+  );
+
+  this.findAllCache = { data: result, expires: now + CACHE_TTL };
+  return result;
+}
+
+// ... rest of your repository
 
   async findOne(id: string) {
     const now = Date.now();
@@ -174,7 +216,8 @@ export class OrderRepository implements IOrderRepository {
     if (cached && cached.expires > now) {
       return cached.data;
     }
-    const order = await this.tenantPrisma.order.findUnique({
+    const prisma = await this.getPrisma();
+    const order = await prisma.order.findUnique({
       where: { id },
       include: { items: true },
     });
@@ -187,7 +230,8 @@ export class OrderRepository implements IOrderRepository {
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto) {
     const order = await this.findOne(id);
     if (!order) throw new NotFoundException(`Order with ID '${id}' not found.`);
-    const updated = await this.tenantPrisma.order.update({
+    const prisma = await this.getPrisma();
+    const updated = await prisma.order.update({
       where: { id },
       data: { status: updateOrderDto.status },
     });
@@ -201,7 +245,8 @@ export class OrderRepository implements IOrderRepository {
   ) {
     const order = await this.findOne(id);
     if (!order) throw new NotFoundException(`Order with ID '${id}' not found.`);
-    const updated = await this.tenantPrisma.order.update({
+    const prisma = await this.getPrisma();
+    const updated = await prisma.order.update({
       where: { id },
       data: { paymentStatus: updatePaymentStatusDto.paymentStatus },
     });

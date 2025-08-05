@@ -33,7 +33,7 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
               <TableRow key={item.id}>
                 <TableCell>
                   <Image
-                    src={item.image || "/placeholder.svg"}
+                    src={item.image || `https://picsum.photos/400/400?random=${item.id}`}
                     alt={item.productName}
                     width={64}
                     height={64}

@@ -1,13 +1,28 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, Logger } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
+import { PrismaClient } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
-export class StorefrontProductRepository
-  implements IStorefrontProductRepository
-{
-  constructor(private readonly prisma: TenantPrismaService) {}
+export class StorefrontProductRepository implements IStorefrontProductRepository {
+  private readonly logger = new Logger(StorefrontProductRepository.name);
+
+  // This will hold the client once it's initialized
+  private prismaClient: PrismaClient | null = null;
+
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request
+   */
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
+  }
 
   async findAll(filters: GetProductsDto) {
     const {
@@ -67,8 +82,9 @@ export class StorefrontProductRepository
         orderBy.name = sortOrder;
     }
 
+    const prisma = await this.getPrisma();
     const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
+      prisma.product.findMany({
         where,
         orderBy,
         skip,
@@ -98,7 +114,7 @@ export class StorefrontProductRepository
           },
         },
       }),
-      this.prisma.product.count({ where }),
+      prisma.product.count({ where }),
     ]);
 
     // Flatten categories for each product
@@ -119,7 +135,8 @@ export class StorefrontProductRepository
   }
 
   async findOne(id: string) {
-    const product = await this.prisma.product.findFirst({
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.findFirst({
       where: {
         id,
         isActive: true,
@@ -157,7 +174,8 @@ export class StorefrontProductRepository
   }
 
   async findFeatured() {
-    const products = await this.prisma.product.findMany({
+    const prisma = await this.getPrisma();
+    const products = await prisma.product.findMany({
       where: {
         isActive: true,
         isFeatured: true,
@@ -198,8 +216,9 @@ export class StorefrontProductRepository
   }
 
   async findCategories() {
+    const prisma = await this.getPrisma();
     // Get all categories that have at least one active product
-    const categories = await this.prisma.category.findMany({
+    const categories = await prisma.category.findMany({
       where: {
         products: {
           some: {

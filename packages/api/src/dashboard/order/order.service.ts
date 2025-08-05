@@ -1,40 +1,27 @@
 import {
-  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
   Scope,
-  Inject,
 } from '@nestjs/common';
-// import { paginate } from 'src/common/helpers/paginate.helper';
-// import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import {
   CreateManualOrderDto,
   UpdateOrderDto,
   UpdatePaymentStatusDto,
 } from './dto';
-import { Decimal } from 'decimal.js';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { paginate } from 'src/common/helpers/paginate.helper';
-import { IOrderRepository } from './interfaces/order-repository.interface';
+import { OrderRepository } from './order.repository'; // <-- IMPORT THE CLASS
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   constructor(
-    @Inject('OrderRepository')
-    private readonly orderRepository: IOrderRepository,
+    // INJECT THE CLASS DIRECTLY. NO MORE @Inject() decorator or string token.
+    private readonly orderRepository: OrderRepository,
   ) {}
 
   async createManualOrder(dto: CreateManualOrderDto) {
-    const {
-      items,
-      customer,
-      shippingAddress,
-      billingAddress,
-      notes,
-      shippingAmount,
-    } = dto;
-
+    // The service's job is simply to pass the DTO along.
+    // The repository handles all the complex logic.
     return this.orderRepository.createManualOrder(dto);
   }
 
@@ -59,7 +46,6 @@ export class OrderService {
     return this.orderRepository.updateStatus(id, updateOrderDto);
   }
 
-  // A separate method for updating payment status
   async updatePaymentStatus(
     id: string,
     updatePaymentStatusDto: UpdatePaymentStatusDto,

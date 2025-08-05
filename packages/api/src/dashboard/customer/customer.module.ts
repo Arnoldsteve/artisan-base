@@ -1,16 +1,18 @@
 import { Module, Scope } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CustomerController } from './customer.controller';
-import { TenantPrismaModule } from 'src/prisma/tenant-prisma.module';
 import { CustomerRepository } from './customer.repository';
 import { TenantContextService } from 'src/common/tenant-context.service';
 
 @Module({
-  imports: [TenantPrismaModule],
+  imports: [],
   controllers: [CustomerController],
   providers: [
     CustomerService,
-    { provide: 'CustomerRepository', useClass: CustomerRepository },
+    // SIMPLY LIST THE REPOSITORY CLASS.
+    // NestJS will read its `@Injectable({ scope: Scope.REQUEST })` decorator
+    // and handle the request-scoping automatically.
+    CustomerRepository,
     {
       provide: TenantContextService,
       useClass: TenantContextService,

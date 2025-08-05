@@ -1,23 +1,24 @@
 import { Module, Scope } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
-import { TenantPrismaModule } from 'src/prisma/tenant-prisma.module';
-import { ProductRepository } from './product.repository';
+import { ProductRepository } from './product.repository'; 
 import { TenantContextService } from 'src/common/tenant-context.service';
 import { ProductCategoryModule } from '../product-category/product-category.module';
 
 @Module({
-  imports: [TenantPrismaModule, ProductCategoryModule],
+  imports: [ProductCategoryModule],
   controllers: [ProductController],
   providers: [
     ProductService,
-    { provide: 'ProductRepository', useClass: ProductRepository },
+    // SIMPLY LIST THE CLASS.
+    // Nest will see its `@Injectable({ scope: Scope.REQUEST })` decorator and do the right thing.
+    ProductRepository,
     {
       provide: TenantContextService,
       useClass: TenantContextService,
       scope: Scope.REQUEST,
     },
   ],
-  exports: [ProductService, ProductCategoryModule],
+  exports: [ProductService],
 })
 export class ProductModule {}

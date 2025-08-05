@@ -1,28 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Button } from "@repo/ui";
-import { Input } from "@repo/ui";
-import { Label } from "@repo/ui";
-import { CardWrapper } from "./card-wrapper";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useSetupOrganization } from "@/hooks/use-setup-organization";
-
-// --- Helper Functions & Types --- (No changes needed here)
-type SubdomainStatus = "idle" | "checking" | "available" | "taken" | "invalid";
-
-const useDebounce = (value: string, delay: number) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-};
+import { Button, Input, Label } from "@repo/ui";
+import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { useCreateTenant, useSubdomainAvailability } from "@/hooks/use-tenant";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useFormHandler } from "@/hooks/use-form-handler";
+import { CreateTenantDto } from "@/types/tenant";
+import { CardWrapper } from "./card-wrapper";
 
 const slugify = (text: string) =>
   text
@@ -33,80 +19,134 @@ const slugify = (text: string) =>
     .replace(/[^\w\-]+/g, "")
     .replace(/\-\-+/g, "-");
 
-// --- Main Component ---
-
 export function SetupOrganizationForm() {
-  const router = useRouter();
-  const {
-    organizationName,
-    setOrganizationName,
-    subdomain,
-    setSubdomain,
-    isSubmitting,
-    formError,
-    handleSubmit,
-    handleSubdomainChange,
-    SubdomainFeedback,
-    suggestions,
-  } = useSetupOrganization();
+  const { logout } = useAuthContext();
+  
+  const [storeName, setStoreName] = useState("");
+  const [subdomain, setSubdomain] = useState("");
+
+  const { mutateAsync: createTenant } = useCreateTenant();
+  const { 
+    data: availability, 
+    isLoading: isCheckingAvailability,
+    isValidLength,
+    isValidFormat,
+    isError,
+  } = useSubdomainAvailability(subdomain);
+
+  const { isLoading: isCreating, error: formError, handleSubmit } = useFormHandler<CreateTenantDto, any>(
+    createTenant,
+    {
+      successMessage: "Store created successfully! Redirecting...",
+      onSuccessRedirect: "/dashboard",
+    }
+  );
+
+  const handleStoreNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    setStoreName(newName);
+    setSubdomain(slugify(newName));
+  };
+
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (availability && !availability.isAvailable) {
+      return;
+    }
+    if (!isValidLength || !isValidFormat) {
+      return;
+    }
+    handleSubmit({ storeName, subdomain });
+  };
+
+  // --- THIS IS THE FIX ---
+  // Define SubdomainFeedback as a proper component (capitalized).
+  // It has implicit access to all the state and hooks from SetupOrganizationForm.
+  function SubdomainFeedback() {
+    if (subdomain.length > 0 && !isValidLength) {
+      return (
+        <p className="text-destructive flex items-center">
+          <XCircle className="mr-2 h-3 w-3" />
+          Must be at least 3 characters.
+        </p>
+      );
+    }
+    if (subdomain.length > 0 && !isValidFormat) {
+        return (
+          <p className="text-destructive flex items-center">
+            <XCircle className="mr-2 h-3 w-3" />
+            Only letters, numbers, and hyphens allowed.
+          </p>
+        );
+      }
+    if (isCheckingAvailability) {
+      return (
+        <p className="text-muted-foreground flex items-center">
+          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+          Checking availability...
+        </p>
+      );
+    }
+    if (isError) {
+      return (
+        <p className="text-destructive flex items-center">
+          <XCircle className="mr-2 h-3 w-3" />
+          Could not check availability.
+        </p>
+      );
+    }
+    if (availability && !isCheckingAvailability && isValidLength && isValidFormat) {
+      return availability.isAvailable ? (
+        <p className="text-green-600 flex items-center">
+          <CheckCircle className="mr-2 h-3 w-3" />
+          Subdomain is available!
+        </p>
+      ) : (
+        <p className="text-destructive flex items-center">
+          <XCircle className="mr-2 h-3 w-3" />
+          Subdomain is taken.
+        </p>
+      );
+    }
+    return null;
+  }
 
   return (
     <CardWrapper
-      headerLabel="Let's set up your first organization."
+      headerLabel="Let's set up your first store."
       backButtonLabel="Log out"
-      backButtonHref="/logout"
+      backButtonAction={logout}
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="organization-name">Organization Name</Label>
-          <Input
-            id="organization-name"
-            type="text"
-            placeholder="Acme Inc."
-            value={organizationName}
-            onChange={(e) => setOrganizationName(e.target.value)}
-            disabled={isSubmitting}
-            required
-          />
+          <Label htmlFor="storeName">Store Name</Label>
+          <Input id="storeName" type="text" value={storeName} onChange={handleStoreNameChange} disabled={isCreating} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="subdomain">Your Organization's URL</Label>
+          <Label htmlFor="subdomain">Your Store's URL</Label>
           <div className="flex items-center">
-            <Input
-              id="subdomain"
-              type="text"
-              placeholder="acme"
-              className="rounded-r-none focus:ring-0 focus:ring-offset-0"
-              value={subdomain}
-              onChange={handleSubdomainChange}
-              disabled={isSubmitting}
-              required
-            />
-            <span className="rounded-l-none border-l-0 bg-muted px-3 py-2 text-muted-foreground text-sm border border-input">
-              .yourdomain.com
-            </span>
+            <Input id="subdomain" type="text" value={subdomain} onChange={(e) => setSubdomain(e.target.value)} disabled={isCreating} required />
+            <span className="rounded-l-none border-l-0 bg-muted px-3 py-2 text-muted-foreground text-sm border-input">.artisanbase.com</span>
           </div>
-          {SubdomainFeedback}
-          {suggestions && suggestions.length > 0 && (
+          <div className="mt-2 text-xs h-4">
+            {/* Now we render it as a JSX component */}
+            <SubdomainFeedback />
+          </div>
+          {availability && !availability.isAvailable && availability.suggestions.length > 0 && (
             <div className="mt-2 text-xs text-muted-foreground">
-              Suggestions: {suggestions.join(", ")}
+              Suggestions: {availability.suggestions.join(", ")}
             </div>
           )}
         </div>
         {formError && (
-          <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-            {formError}
-          </p>
+          <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">{formError}</p>
         )}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <span className="loader mr-2" />
-              Creating Organization...
-            </>
-          ) : (
-            "Create Organization"
-          )}
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={isCreating || isCheckingAvailability || !isValidLength || !isValidFormat || (availability && !availability.isAvailable)}
+        >
+          {isCreating ? ( <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Store...</> ) : "Create Store"}
         </Button>
       </form>
     </CardWrapper>

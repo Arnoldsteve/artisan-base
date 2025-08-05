@@ -56,7 +56,7 @@ export const columns: ColumnDef<CustomerColumn>[] = [
   },
 
   // Column for Customer Name, Email, and Avatar
-  {
+   {
     accessorKey: 'name',
     header: 'Customer',
     cell: ({ row }) => {
@@ -73,6 +73,12 @@ export const columns: ColumnDef<CustomerColumn>[] = [
         </div>
       );
     },
+  },
+   {
+    id: 'email', // Explicitly set the ID to 'email'
+    accessorKey: 'email',
+    header: 'Email', // Header for completeness, though it will be hidden
+    // We don't need a custom 'cell' because we'll hide this column.
   },
 
   // Column for Total Orders

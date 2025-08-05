@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -8,12 +10,17 @@ import {
 } from '@repo/ui';
 import { Button } from '@repo/ui';
 import Link from 'next/link';
+import React from 'react';
 
+// --- 1. UPDATE THE PROPS INTERFACE ---
 interface CardWrapperProps {
   children: React.ReactNode;
   headerLabel: string;
   backButtonLabel: string;
-  backButtonHref: string;
+  // Make `href` optional
+  backButtonHref?: string;
+  // Add an optional `action` prop
+  backButtonAction?: () => void;
 }
 
 export function CardWrapper({
@@ -21,6 +28,7 @@ export function CardWrapper({
   headerLabel,
   backButtonLabel,
   backButtonHref,
+  backButtonAction, // Receive the new prop
 }: CardWrapperProps) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/40">
@@ -33,11 +41,24 @@ export function CardWrapper({
             {children}
         </CardContent>
         <CardFooter>
-          <Button variant="link" className="w-full font-normal" asChild>
-            <Link href={backButtonHref}>
+          {/* --- 2. ADD THE CONDITIONAL LOGIC --- */}
+          {backButtonHref ? (
+            // If an href is provided, render the Link
+            <Button variant="link" className="w-full font-normal" asChild>
+              <Link href={backButtonHref}>
                 {backButtonLabel}
-            </Link>
-          </Button>
+              </Link>
+            </Button>
+          ) : (
+            // Otherwise, render a Button with the onClick action
+            <Button 
+              variant="link" 
+              className="w-full font-normal" 
+              onClick={backButtonAction}
+            >
+              {backButtonLabel}
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

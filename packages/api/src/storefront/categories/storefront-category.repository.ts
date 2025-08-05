@@ -2,12 +2,27 @@ import { Injectable, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontCategoryRepository } from './interfaces/storefront-category-repository.interface';
 import { GetCategoriesDto } from './dto/get-categories.dto';
+import { PrismaClient } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontCategoryRepository
   implements IStorefrontCategoryRepository
 {
-  constructor(private readonly prisma: TenantPrismaService) {}
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
+
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
+   */
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
+  }
 
   /**
    * EFFICIENTLY finds all categories with a TRUE count of their active products.
@@ -24,10 +39,11 @@ export class StorefrontCategoryRepository
       ];
     }
 
+    const prisma = await this.getPrisma();
     // Use a transaction for consistency
-    const [categories, total] = await this.prisma.$transaction([
+    const [categories, total] = await prisma.$transaction([
       // Query 1: Get the categories for the current page
-      this.prisma.category.findMany({
+      prisma.category.findMany({
         where,
         orderBy: { name: 'asc' },
         skip,
@@ -48,7 +64,7 @@ export class StorefrontCategoryRepository
         },
       }),
       // Query 2: Get the total count of categories matching the filter
-      this.prisma.category.count({ where }),
+      prisma.category.count({ where }),
     ]);
 
     // Prisma already did the counting. No manual mapping is needed.
@@ -70,11 +86,12 @@ export class StorefrontCategoryRepository
    * AND the TRUE total count of all its active products.
    */
   async findOne(id: string) {
+    const prisma = await this.getPrisma();
     // We need two pieces of info: the paginated products and the total count.
     // A transaction runs both queries at the same time for max efficiency.
-    const [category, activeProductCount] = await this.prisma.$transaction([
+    const [category, activeProductCount] = await prisma.$transaction([
       // Query 1: Get the category and its 20 newest products
-      this.prisma.category.findFirst({
+      prisma.category.findFirst({
         where: { id },
         include: {
           products: {
@@ -87,7 +104,7 @@ export class StorefrontCategoryRepository
         },
       }),
       // Query 2: Get the TRUE total count of ALL active products in this category
-      this.prisma.product.count({
+      prisma.product.count({
         where: {
           isActive: true,
           categories: { some: { categoryId: id } },
@@ -103,7 +120,7 @@ export class StorefrontCategoryRepository
     const paginatedActiveProducts = category.products
       .map((p) => p.product)
       .filter((prod) => prod && prod.isActive);
-    
+
     // Return a complete object with the data you need
     return {
       ...category,

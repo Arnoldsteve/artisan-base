@@ -1,13 +1,38 @@
-import { DashboardRepository } from "./dashboard-repository";
+// File: packages/dasboard/src/services/dashboard-service.ts
 
+import { apiClient } from "@/lib/client-api";
+// Import the specific response types
+import { DashboardKPI, RecentOrdersResponse, SalesOverviewResponse } from "@/types/dashboard"; 
+
+/**
+ * DashboardService handles API communication for the main dashboard,
+ * fetching different pieces of data from dedicated endpoints.
+ */
 export class DashboardService {
-  static async getDashboardData() {
-    try {
-      const data = await DashboardRepository.fetchDashboardData();
-      return { data, error: null };
-    } catch (error) {
-      return { data: null, error: (error as Error).message };
-    }
+  /**
+   * Fetches only the Key Performance Indicators (KPIs).
+   * This is a fast query for the main stats cards.
+   */
+  async getKpis(): Promise<DashboardKPI> {
+    return apiClient.get<DashboardKPI>("/dashboard/admin-home/kpis");
   }
+
+  /**
+   * Fetches only the most recent orders.
+   * This can be called separately to populate the recent orders table.
+   */
+  async getRecentOrders(): Promise<RecentOrdersResponse> {
+    return apiClient.get<RecentOrdersResponse>("/dashboard/admin-home/recent-orders");
+  }
+
+  /**
+   * Fetches the aggregated sales data for the last 6 months.
+   * This is used to populate the main sales overview chart.
+   */
+  async getSalesOverview(): Promise<SalesOverviewResponse> {
+    return apiClient.get<SalesOverviewResponse>("/dashboard/admin-home/sales-overview");
+  }
+
 }
-// REFACTOR: Business logic separated from UI for SRP, testability, and DRY.
+
+export const dashboardService = new DashboardService();

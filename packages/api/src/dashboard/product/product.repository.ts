@@ -1,23 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { paginate } from 'src/common/helpers/paginate.helper';
 import { IProductRepository } from './interfaces/product-repository.interface';
+import { PrismaClient } from '../../../generated/tenant';
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ProductRepository implements IProductRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  // This will hold the client once it's initialized
+  private prismaClient: PrismaClient | null = null;
+
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request
+   */
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
+  }
 
   async create(dto: CreateProductDto) {
     try {
-      const product = await this.tenantPrisma.product.create({ data: dto });
+      const prisma = await this.getPrisma();
+      const product = await prisma.product.create({ data: dto });
       this.invalidateCache();
       return product;
     } catch (err) {
@@ -33,8 +49,10 @@ export class ProductRepository implements IProductRepository {
     if (this.findAllCache && this.findAllCache.expires > now) {
       return this.findAllCache.data;
     }
+    
+    const prisma = await this.getPrisma();
     const result = await paginate(
-      this.tenantPrisma.product,
+      prisma.product,
       {
         page: pagination.page,
         limit: pagination.limit,
@@ -53,7 +71,9 @@ export class ProductRepository implements IProductRepository {
     if (cached && cached.expires > now) {
       return cached.data;
     }
-    const product = await this.tenantPrisma.product.findUnique({
+    
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.findUnique({
       where: { id },
     });
     if (product) {
@@ -63,7 +83,8 @@ export class ProductRepository implements IProductRepository {
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    const product = await this.tenantPrisma.product.update({
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.update({
       where: { id },
       data: dto,
     });
@@ -72,7 +93,8 @@ export class ProductRepository implements IProductRepository {
   }
 
   async remove(id: string) {
-    const product = await this.tenantPrisma.product.delete({ where: { id } });
+    const prisma = await this.getPrisma();
+    const product = await prisma.product.delete({ where: { id } });
     this.invalidateCache(id);
     return product;
   }

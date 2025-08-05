@@ -1,12 +1,26 @@
-// The structure for a Customer Address object.
-// This matches the `customer_addresses` table and can be included in customer data.
+// File: packages/dasboard/src/types/customers.ts
+
+import { Decimal } from 'decimal.js';
+import { PaginatedResponse } from './products'; // Assumes PaginatedResponse is here
+import { Order } from './orders'; // <-- 1. IMPORT THE FULL, DETAILED ORDER TYPE
+
+// Re-export this for convenience in other files
+export type { PaginatedResponse };
+
+// ============================================================================
+// Main Entity Types (Data received from the API)
+// ============================================================================
+
+/**
+ * The structure for a Customer Address object, matching the `customer_addresses` table.
+ */
 export interface CustomerAddress {
   id: string;
   type: string; // e.g., 'shipping', 'billing'
   firstName: string;
   lastName: string;
   addressLine1: string;
-  addressLine2?: string | null;
+  addressLine2: string | null;
   city: string;
   state: string;
   postalCode: string;
@@ -14,38 +28,56 @@ export interface CustomerAddress {
   isDefault: boolean;
 }
 
-// The structure for a simplified Order object, useful for order history previews.
-export interface CustomerOrder {
-  id: string;
-  orderNumber: string;
-  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-  paymentStatus: 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
-  totalAmount: number; // Prisma's Decimal becomes number
-  createdAt: string; // Or Date
-}
-
-// The main Customer type, matching your Prisma schema for the `customers` table.
+/**
+ * The main Customer type, matching your Prisma schema for the `customers` table.
+ */
 export interface Customer {
-  id:string;
+  id: string;
   email: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  phone?: string | null;
-  createdAt: string; // Or Date, depending on serialization
-  updatedAt: string; // Or Date
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
   
   // Optional relations that can be included in API responses
   addresses?: CustomerAddress[];
-  orders?: CustomerOrder[];
+  // The full `Order` type should be used for relations
+  orders?: Order[]; 
 }
 
-// A specific type for the customer detail page, ensuring all necessary data is present.
+/**
+ * A specific type for the customer detail page, ensuring all necessary data is present.
+ * This is the primary type fetched for the [customerId] page.
+ */
 export interface CustomerDetails extends Customer {
   addresses: CustomerAddress[];
-  orders: CustomerOrder[];
-  // You could add aggregated stats here as well
+  // --- 2. THIS IS THE FIX ---
+  // The `orders` property is now an array of the full `Order` objects.
+  orders: Order[];
+  
   _stats?: {
-    totalSpent: number;
+    totalSpent: Decimal;
     orderCount: number;
   };
 }
+
+
+// ============================================================================
+// Data Transfer Objects (DTOs) (Data sent to the API)
+// ============================================================================
+
+/**
+ * Data Transfer Object for creating a new customer.
+ */
+export interface CreateCustomerDto {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}
+
+/**
+ * Data Transfer Object for updating an existing customer.
+ */
+export type UpdateCustomerDto = Partial<CreateCustomerDto>;

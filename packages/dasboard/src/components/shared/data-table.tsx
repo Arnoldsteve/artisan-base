@@ -11,15 +11,17 @@ import {
 } from "@repo/ui";
 import { Button } from "@repo/ui";
 import { Skeleton } from "@repo/ui";
+import { DataTablePagination } from "./data-table-footer";
 
 // --- The Main DataTable Component ---
 // This component is now a "dumb" renderer.
 // It receives the table instance from a parent component.
 interface DataTableProps<TData> {
   table: TanstackTable<TData>;
+  totalCount: number;
 }
 
-export function DataTable<TData>({ table }: DataTableProps<TData>) {
+export function DataTable<TData>({ table, totalCount  }: DataTableProps<TData>) {
   return (
     <div>
       {/* Table */}
@@ -74,28 +76,7 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} totalCount={totalCount} />
     </div>
   );
 }

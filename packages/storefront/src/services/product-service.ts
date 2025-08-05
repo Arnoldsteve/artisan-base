@@ -1,6 +1,7 @@
 // REFACTOR: ProductService following Repository pattern and Single Responsibility Principle
 
 import { apiClient } from "@/lib/api-client";
+import { cleanParams } from "@/lib/clean-params";
 import {
   Product,
   Category,
@@ -223,6 +224,8 @@ export class ProductService {
     params: ProductSearchParams = {}
   ): Promise<PaginatedResponse<Product>> {
     try {
+      const cleanedParams = cleanParams(params);
+
       // OPTIMIZATION: Use cache for frequently accessed data
       if (!this.cache.isStale() && !params.search && !params.category) {
         const cachedProducts = this.cache.getProducts();
@@ -237,9 +240,10 @@ export class ProductService {
         }
       }
 
+      // Use the cleaned parameters for the API call
       const response = await apiClient.get<
         ApiResponse<PaginatedResponse<Product>>
-      >("/api/v1/storefront/products", params);
+      >("/api/v1/storefront/products", cleanedParams);
 
       // OPTIMIZATION: Cache the results for better performance
       if (response.success) {
@@ -305,13 +309,12 @@ export class ProductService {
     }
   }
 
-  // OPTIMIZATION: Get new arrivals sorted by creation date
   async getNewArrivals(limit: number = 12): Promise<Product[]> {
     try {
-      // Get all products and sort by creation date
-      const allProducts = await this.getProducts({ limit: 100 }); // Get more products to sort from
+      // This method now works correctly because it calls the fixed getProducts method
+      const allProducts = await this.getProducts({ limit: 100 });
       const sortedProducts = this.sortProducts(
-        allProducts.data,
+        allProducts.data || allProducts,
         "createdAt",
         "desc"
       );
@@ -323,7 +326,6 @@ export class ProductService {
     }
   }
 
-  // This gives a list of all categories in the system
   async getCategories(): Promise<Category[]> {
     try {
       // OPTIMIZATION: Use cache for categories
@@ -348,7 +350,6 @@ export class ProductService {
     }
   }
 
-  // OPTIMIZATION: Search products with debouncing support
   async searchProducts(query: string, limit: number = 10): Promise<Product[]> {
     if (!query.trim()) return [];
 
@@ -368,7 +369,6 @@ export class ProductService {
     }
   }
 
-  // OPTIMIZATION: Clear cache when needed
   clearCache(): void {
     this.cache.clear();
   }

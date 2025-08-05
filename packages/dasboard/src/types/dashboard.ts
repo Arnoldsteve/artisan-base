@@ -1,32 +1,55 @@
+// File: packages/dasboard/src/types/dashboard.ts
+
+import { Decimal } from 'decimal.js';
+import { Order } from './orders';
+import { Customer } from './customers';
+
+// ============================================================================
+// Data shapes for the main dashboard view
+// ============================================================================
+
+/**
+ * Defines the shape of the Key Performance Indicator (KPI) stats object.
+ */
 export interface DashboardKPI {
-  totalRevenue: number;
-  sales: number;
-  newCustomers: number;
+  totalRevenue: Decimal;
+  salesToday: Decimal; // Renamed from 'sales' for clarity
+  totalCustomers: number;
   activeProducts: number;
   inactiveProducts: number;
 }
 
+/**
+ * Defines a single data point for a sales overview chart.
+ */
 export interface SalesDataPoint {
   name: string;
   total: number;
 }
 
-export interface Customer {
-  firstName: string;
-  lastName: string;
-  email: string;
+/**
+ * --- THIS IS THE FIX ---
+ * Defines the shape of the response from the GET /dashboard/recent-orders endpoint.
+ */
+export interface RecentOrdersResponse {
+  recentOrders: Order[];
 }
 
-export type PaymentStatus = "PAID" | "PENDING" | "REFUNDED";
-
-export interface RecentOrder {
-  customer: Customer;
-  totalAmount: number;
-  paymentStatus: PaymentStatus;
-}
-
+/**
+ * (Optional) Defines the shape of the combined data for the `useDashboardData` hook if used.
+ * Note: We are now using separate hooks, so this is less critical but good for reference.
+ */
 export interface DashboardData {
   kpis: DashboardKPI;
   sales: SalesDataPoint[];
-  recentOrders: RecentOrder[];
+  recentOrders: Order[];
+}
+
+export interface SalesOverviewItem {
+  name: string;   // e.g., "Jun"
+  total: string;  // e.g., "47.94"
+}
+
+export interface SalesOverviewResponse {
+  sales: SalesOverviewItem[];
 }

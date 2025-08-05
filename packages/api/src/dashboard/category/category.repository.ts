@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Scope,
 } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -9,18 +10,30 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ICategoryRepository } from './interfaces/category-repository.interface';
 import slugify from 'slugify';
-import { ICacheService } from './interfaces/cache-service.interface';
-import { InMemoryCacheService } from './services/in-memory-cache.service';
+import { PrismaClient } from '../../../generated/tenant';
 
-const CACHE_TTL = 10 * 1000; // 10 seconds for demo
-
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class CategoryRepository implements ICategoryRepository {
-  constructor(private readonly tenantPrisma: TenantPrismaService) {}
+  // This will hold the client once it's initialized for the request
+  private prismaClient: PrismaClient | null = null;
+
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+
+  /**
+   * Lazy getter that initializes the Prisma client only when first needed
+   * and reuses it for subsequent calls within the same request.
+   */
+  private async getPrisma(): Promise<PrismaClient> {
+    if (!this.prismaClient) {
+      this.prismaClient = await this.tenantPrismaService.getClient();
+    }
+    return this.prismaClient;
+  }
 
   async create(dto: CreateCategoryDto): Promise<any> {
+    const prisma = await this.getPrisma();
     const slug = slugify(dto.name, { lower: true, strict: true });
-    const existing = await this.tenantPrisma.category.findUnique({
+    const existing = await prisma.category.findUnique({
       where: { slug },
     });
     if (existing) {
@@ -28,20 +41,22 @@ export class CategoryRepository implements ICategoryRepository {
         `A category with the name '${dto.name}' already exists.`,
       );
     }
-    const category = await this.tenantPrisma.category.create({
+    const category = await prisma.category.create({
       data: { ...dto, slug },
     });
     return category;
   }
 
   async findAll(pagination?: PaginationQueryDto): Promise<any> {
-    return this.tenantPrisma.category.findMany({
+    const prisma = await this.getPrisma();
+    return prisma.category.findMany({
       orderBy: { name: 'asc' },
     });
   }
 
   async findOne(id: string): Promise<any> {
-    const category = await this.tenantPrisma.category.findUnique({
+    const prisma = await this.getPrisma();
+    const category = await prisma.category.findUnique({
       where: { id },
     });
     if (!category) {
@@ -51,11 +66,12 @@ export class CategoryRepository implements ICategoryRepository {
   }
 
   async update(id: string, dto: UpdateCategoryDto): Promise<any> {
-    await this.findOne(id);
+    await this.findOne(id); // This will call getPrisma internally
+    const prisma = await this.getPrisma();
     const data: any = { ...dto };
     if (dto.name) {
       data.slug = slugify(dto.name, { lower: true, strict: true });
-      const existing = await this.tenantPrisma.category.findFirst({
+      const existing = await prisma.category.findFirst({
         where: { slug: data.slug, NOT: { id } },
       });
       if (existing) {
@@ -64,7 +80,7 @@ export class CategoryRepository implements ICategoryRepository {
         );
       }
     }
-    const category = await this.tenantPrisma.category.update({
+    const category = await prisma.category.update({
       where: { id },
       data,
     });
@@ -72,8 +88,9 @@ export class CategoryRepository implements ICategoryRepository {
   }
 
   async remove(id: string): Promise<any> {
-    await this.findOne(id);
-    const category = await this.tenantPrisma.category.delete({ where: { id } });
+    await this.findOne(id); // This will call getPrisma internally
+    const prisma = await this.getPrisma();
+    const category = await prisma.category.delete({ where: { id } });
     return category;
   }
 }

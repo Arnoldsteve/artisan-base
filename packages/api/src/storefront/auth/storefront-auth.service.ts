@@ -1,48 +1,65 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Scope,
+  NotFoundException,
+} from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
-import { IStorefrontAuthRepository } from './interfaces/storefront-auth-repository.interface';
+import { StorefrontAuthRepository } from './storefront-auth.repository';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class StorefrontAuthService {
   constructor(
-    @Inject('StorefrontAuthRepository')
-    private readonly authRepository: IStorefrontAuthRepository,
+    private readonly authRepository: StorefrontAuthRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto) {
     const existing = await this.authRepository.findCustomerByEmail(dto.email);
+
     if (existing) {
       if (existing.hashedPassword) {
         throw new BadRequestException('User already registered. Please login.');
       }
-      // Complete registration for customer created via order
+
       const hashedPassword = await bcrypt.hash(dto.password, 10);
       await this.authRepository.updateCustomerPassword(
         dto.email,
         hashedPassword,
       );
+
+      // --- FIX 1: Nullish Coalescing ---
+      // Use `??` to handle potential `null` values from the database.
       await this.authRepository.updateCustomerDetails(dto.email, {
-        firstName: dto.firstName || existing.firstName,
-        lastName: dto.lastName || existing.lastName,
-        phone: dto.phone || existing.phone,
+        firstName: dto.firstName ?? existing.firstName ?? undefined,
+        lastName: dto.lastName ?? existing.lastName ?? undefined,
+        phone: dto.phone ?? existing.phone ?? undefined,
       });
-      // Issue JWT after completing registration
+
       const customer = await this.authRepository.findCustomerByEmail(dto.email);
+
+      // --- FIX 2: Type Guard ---
+      // Check for null before using the object.
+      if (!customer) {
+        throw new NotFoundException('Failed to retrieve customer after update.');
+      }
+
       const payload = { email: customer.email, sub: customer.id };
       const accessToken = this.jwtService.sign(payload);
       const { hashedPassword: _, ...customerWithoutPassword } = customer;
+
       return {
         message: 'Registration completed. You can now login.',
         accessToken,
         customer: customerWithoutPassword,
       };
     }
-    // New registration
+
+    // New registration logic remains the same
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const customer = await this.authRepository.createCustomer({
       email: dto.email,
@@ -89,10 +106,16 @@ export class StorefrontAuthService {
     }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     await this.authRepository.updateCustomerPassword(dto.email, hashedPassword);
-    // Optionally, update other details if needed
+
     const updatedCustomer = await this.authRepository.findCustomerByEmail(
       dto.email,
     );
+
+    // --- FIX 2 (Again): Type Guard ---
+    if (!updatedCustomer) {
+      throw new NotFoundException('Failed to retrieve customer after completing registration.');
+    }
+
     const payload = { email: updatedCustomer.email, sub: updatedCustomer.id };
     const accessToken = this.jwtService.sign(payload);
     const { hashedPassword: _, ...customerWithoutPassword } = updatedCustomer;

@@ -1,185 +1,41 @@
-'"use client";'
+// C:\Users\Admin\Documents\Arnold\Personal Work\artisan-base\packages\dasboard\src\app\dashboard\page.tsx
+"use client";
 
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@repo/ui";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@repo/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui";
-import { Badge } from "@repo/ui";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { DollarSign, Users, ShoppingBag, Package } from "lucide-react";
-import { useDashboardData } from "@/hooks/use-dashboard-data";
-
-// --- DASHBOARD COMPONENT ---
+// No UI imports are needed here anymore besides the layout
+// ---
+import { useDashboardKpis, useRecentOrders, useSalesOverview } from "@/hooks/use-dashboard";
+import { DashboardKpiCards } from "@/components/home/DashboardKpiCards";
+import { SalesOverviewChart } from "@/components/home/SalesOverviewChart";
+import { RecentOrders } from "@/components/home/RecentOrders";
 
 export default function DashboardPage() {
-  const { data, loading, error } = useDashboardData();
-  if (loading) return <div className="p-8">Loading dashboard...</div>;
-  if (error) return <div className="p-8 text-destructive">{error}</div>;
-  if (!data) return null;
+  // Fetch all data in parallel
+  const { data: kpis, isLoading: kpisLoading, isError: kpisIsError } = useDashboardKpis();
+  const { data: ordersData, isLoading: ordersLoading, isError: ordersIsError } = useRecentOrders();
+  const { data: salesData, isLoading: salesLoading, isError: salesIsError } = useSalesOverview();
+
   return (
-    // This would typically be inside a layout with a sidebar and header
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      <DashboardKpiCards
+        kpis={kpis}
+        isLoading={kpisLoading}
+        isError={kpisIsError}
+      />
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${data.kpis.totalRevenue.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sales</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+{data.kpis.sales}</div>
-            <p className="text-xs text-muted-foreground">
-              +18.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+{data.kpis.newCustomers}</div>
-            <p className="text-xs text-muted-foreground">
-              +3.2% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Products
-            </CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.kpis.activeProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              {data.kpis.inactiveProducts} Inactive
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Sales Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={data.sales}>
-                <XAxis
-                  dataKey="name"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <Bar dataKey="total" fill="#18181b" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <SalesOverviewChart
+          className="lg:col-span-4"
+          data={salesData}
+          isLoading={salesLoading}
+          isError={salesIsError}
+        />
+        <RecentOrders
+          ordersData={ordersData}
+          isLoading={ordersLoading}
+          isError={ordersIsError}
+        />
 
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-            <CardDescription>
-              You made {data.recentOrders.length} sales this week.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.recentOrders.map((order, index) => (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage
-                            src={`/avatars/${index + 1}.png`}
-                            alt="Avatar"
-                          />
-                          <AvatarFallback>
-                            {order.customer.firstName?.[0]}
-                            {order.customer.lastName?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="grid gap-0.5">
-                          <p className="font-medium">
-                            {order.customer.firstName} {order.customer.lastName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {order.customer.email}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          order.paymentStatus === "PENDING"
-                            ? "outline"
-                            : "default"
-                        }
-                      >
-                        {order.paymentStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${order.totalAmount.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { ProductCategoryRepository } from './product-category.repository';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ProductCategoryService {
   constructor(private readonly repository: ProductCategoryRepository) {}
 

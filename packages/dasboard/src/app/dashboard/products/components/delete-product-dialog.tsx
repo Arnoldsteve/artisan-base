@@ -1,5 +1,5 @@
 // src/components/dashboard/products/delete-product-dialog.tsx
-'use client';
+"use client";
 
 import {
   AlertDialog,
@@ -10,8 +10,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@repo/ui';
-import { Button } from '@repo/ui';
+} from "@repo/ui";
+import { Button } from "@repo/ui";
 
 interface DeleteProductDialogProps {
   isOpen: boolean;
@@ -34,16 +34,27 @@ export function DeleteProductDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the product
-            <span className="font-semibold text-foreground"> {productName}</span>.
+            This action cannot be undone. This will permanently delete the
+            product
+            <span className="font-semibold text-foreground">
+              {" "}
+              {productName}
+            </span>
+            .
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose} disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={onClose} disabled={isPending}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction asChild>
-             <Button onClick={onConfirm} disabled={isPending} variant="destructive">
-                {isPending ? "Deleting..." : "Yes, delete product"}
-             </Button>
+            <Button
+              onClick={onConfirm}
+              disabled={isPending}
+              variant="destructive"
+            >
+              {isPending ? "Deleting..." : "Yes, delete product"}
+            </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

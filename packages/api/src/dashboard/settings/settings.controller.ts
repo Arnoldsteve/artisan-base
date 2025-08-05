@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Body, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { SettingsService } from './settings.service';
-import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { UpdateStoreSettingsDto } from './dto/update-settings.dto';
 
 @Controller('dashboard/settings')
 @UseGuards(JwtAuthGuard)
@@ -17,7 +17,7 @@ export class SettingsController {
   @Patch()
   async updateSettings(
     @Req() req: any,
-    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })) updateSettingsDto: UpdateSettingsDto,
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })) updateSettingsDto: UpdateStoreSettingsDto,
   ) {
     return this.settingsService.updateSettings(req.tenant.id, updateSettingsDto);
   }

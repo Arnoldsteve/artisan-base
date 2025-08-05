@@ -1,5 +1,4 @@
-// src/storefront/auth/storefront-auth.module.ts
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { StorefrontAuthController } from './storefront-auth.controller';
 import { StorefrontAuthService } from './storefront-auth.service';
 import { StorefrontAuthRepository } from './storefront-auth.repository';
@@ -7,9 +6,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { StorefrontJwtStrategy } from './storefront-jwt.strategy';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { PassportModule } from '@nestjs/passport';
-import { TenantClientFactory } from '../../prisma/tenant-client-factory.service';
 
-@Global()
+// This module no longer needs to be Global
 @Module({
   imports: [
     PrismaModule,
@@ -22,10 +20,10 @@ import { TenantClientFactory } from '../../prisma/tenant-client-factory.service'
   controllers: [StorefrontAuthController],
   providers: [
     StorefrontAuthService,
-    { provide: 'StorefrontAuthRepository', useClass: StorefrontAuthRepository },
+    // SIMPLY LIST THE REPOSITORY CLASS HERE.
+    StorefrontAuthRepository,
     StorefrontJwtStrategy,
-    TenantClientFactory, // Proper import, not require
   ],
-  exports: [TenantClientFactory], // Export if needed elsewhere
+  exports: [StorefrontAuthService],
 })
 export class StorefrontAuthModule {}

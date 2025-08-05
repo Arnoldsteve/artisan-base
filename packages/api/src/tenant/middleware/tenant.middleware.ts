@@ -14,7 +14,7 @@ export class TenantMiddleware implements NestMiddleware {
     const tenantSubdomain = req.headers['x-tenant-id'] as string;
     
     // Log what we received for debugging.
-    Logger.log(`[TenantMiddleware] Received request with x-tenant-id header: "${tenantSubdomain}"`);
+    // Logger.log(`[TenantMiddleware] Received request with x-tenant-id header: "${tenantSubdomain}"`);
 
     // 2. If the header is missing for a protected route, it's a bad request.
     // We only need a tenant for dashboard routes. We can check the URL.
@@ -32,14 +32,14 @@ export class TenantMiddleware implements NestMiddleware {
     const tenant = await this.managementPrisma.tenant.findUnique({
       where: { subdomain: tenantSubdomain }, 
     });
-    Logger.log(`[TenantMiddleware] Looked up tenant for subdomain "${tenantSubdomain}". Found: ${tenant ? tenant.id : 'none'}`);
+    // Logger.log(`[TenantMiddleware] Looked up tenant for subdomain "${tenantSubdomain}". Found: ${tenant ? tenant.id : 'none'}`);
 
     if (!tenant || tenant.status !== 'ACTIVE') {
       throw new NotFoundException(`Store with subdomain '${tenantSubdomain}' not found or is inactive.`);
     }
     
     // 5. Attach the tenant to the request and continue.
-    Logger.log(`[TenantMiddleware] Successfully attached tenant ${tenant.id} to request.`);
+    // Logger.log(`[TenantMiddleware] Successfully attached tenant ${tenant.id} to request.`);
     req.tenant = tenant;
     next();
   }
