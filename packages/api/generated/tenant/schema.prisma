@@ -14,7 +14,7 @@ generator tenant_template_generator {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("TENANT_MIGRATION_URL")
 }
 
 // ===============================================

@@ -4,13 +4,14 @@ const { execSync } = require('child_process');
 const { createClient } = require('@supabase/supabase-js');
 const { createId } = require('@paralleldrive/cuid2');
 const CONFIG = require('../shared/config');
-const { 
-  getManagementClient, 
-  createTenantClient, 
-  testConnection, 
+const {
+  getManagementClient,
+  createTenantClient,
+  testConnection,
   disconnect,
-  updateTenantDatabaseUrl 
-} = require('./utils/supabase-client'); 
+  updateTenantDatabaseUrl,
+} = require('./utils/supabase-client');
+
 /**
  * Create a new tenant database and apply schema
  */
@@ -18,11 +19,11 @@ class TenantCreator {
   constructor() {
     this.managementClient = getManagementClient();
     this.supabase = null;
-    
+
     if (CONFIG.SUPABASE.URL && CONFIG.SUPABASE.SERVICE_ROLE_KEY) {
       this.supabase = createClient(
         CONFIG.SUPABASE.URL,
-        CONFIG.SUPABASE.SERVICE_ROLE_KEY
+        CONFIG.SUPABASE.SERVICE_ROLE_KEY,
       );
     }
   }
@@ -36,7 +37,7 @@ class TenantCreator {
       subdomain,
       ownerEmail,
       customDomain = null,
-      planId = null
+      planId = null,
     } = tenantData;
 
     console.log(`🚀 Starting tenant creation for: ${name} (${subdomain})`);
@@ -77,7 +78,6 @@ class TenantCreator {
       console.log(`   - Database: ${dbConfig.projectId || 'Custom'}`);
 
       return tenant;
-
     } catch (error) {
       console.error(`❌ Failed to create tenant: ${error.message}`);
       throw error;
@@ -95,7 +95,9 @@ class TenantCreator {
     }
 
     if (!subdomain || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(subdomain)) {
-      throw new Error('Subdomain must contain only lowercase letters, numbers, and hyphens');
+      throw new Error(
+        'Subdomain must contain only lowercase letters, numbers, and hyphens',
+      );
     }
 
     if (!ownerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)) {
@@ -163,23 +165,29 @@ class TenantCreator {
   async createSupabaseProject(subdomain) {
     try {
       console.log(`🔄 Creating Supabase project for ${subdomain}...`);
-      
+
       // Note: Supabase doesn't have a public API for creating projects yet
       // You'll need to either:
       // 1. Use Supabase CLI programmatically
       // 2. Create projects manually and provide the connection string
       // 3. Use a different database provider
-      
+
       // For now, this is a placeholder - you'll need to implement based on your setup
       const projectId = `${subdomain}-${createId()}`;
       const databaseUrl = `postgresql://postgres:[password]@db.${projectId}.supabase.co:5432/postgres`;
-      
-      console.log(`⚠️  Manual step required: Create Supabase project for ${subdomain}`);
+
+      console.log(
+        `⚠️  Manual step required: Create Supabase project for ${subdomain}`,
+      );
       console.log(`   Project ID: ${projectId}`);
-      
+
       return {
         projectId,
-        databaseUrl: process.env.TENANT_DATABASE_URL_TEMPLATE?.replace('{subdomain}', subdomain) || databaseUrl,
+        databaseUrl:
+          process.env.TENANT_DATABASE_URL_TEMPLATE?.replace(
+            '{subdomain}',
+            subdomain,
+          ) || databaseUrl,
       };
     } catch (error) {
       console.error(`❌ Failed to create Supabase project:`, error.message);
@@ -192,10 +200,15 @@ class TenantCreator {
    */
   async createCustomDatabase(subdomain) {
     // If you're using a different database provider or custom setup
-    const databaseUrl = process.env.TENANT_DATABASE_URL_TEMPLATE?.replace('{subdomain}', subdomain);
-    
+    const databaseUrl = process.env.TENANT_DATABASE_URL_TEMPLATE?.replace(
+      '{subdomain}',
+      subdomain,
+    );
+
     if (!databaseUrl) {
-      throw new Error('TENANT_DATABASE_URL_TEMPLATE environment variable is required for custom databases');
+      throw new Error(
+        'TENANT_DATABASE_URL_TEMPLATE environment variable is required for custom databases',
+      );
     }
 
     return {
@@ -233,24 +246,27 @@ class TenantCreator {
       console.log(`🔄 Applying tenant schema...`);
 
       // Test connection first
-      const tenantClient = createTenantClient(databaseUrl);
+      const tenantClient = createTenantClient(databaseUrl); // <-- THIS LINE IS NOW CORRECTED
       const connected = await testConnection(tenantClient, 'tenant database');
-      
+
       if (!connected) {
         throw new Error('Cannot connect to tenant database');
       }
 
-      // Apply migrations using Prisma
-      const env = { ...process.env, DATABASE_URL: databaseUrl };
-      
-      execSync(
-        `npx prisma migrate deploy --schema=prisma/tenant.prisma`,
-        { 
-          env,
-          stdio: 'inherit',
-          cwd: process.cwd()
-        }
-      );
+      // Create a new environment object for the child process.
+      // This is the correct way to pass environment variables in Node.js
+      // and it works on both Windows and Linux/macOS.
+      const childEnv = {
+        ...process.env,
+        TENANT_MIGRATION_URL: databaseUrl, // Explicitly set/override the database URL
+      };
+
+      // Execute the command, passing the modified environment in the options.
+      execSync(`npx prisma migrate deploy --schema=prisma/tenant.prisma`, {
+        env: childEnv,
+        stdio: 'inherit',
+        cwd: process.cwd(),
+      });
 
       await disconnect(tenantClient, 'tenant database');
       console.log(`✅ Tenant schema applied successfully`);
@@ -310,7 +326,7 @@ class TenantCreator {
  */
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     console.log(`
 Usage: node scripts/tenant/create.js <name> <subdomain> <owner-email> [custom-domain]

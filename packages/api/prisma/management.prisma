@@ -9,7 +9,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("MANAGEMENT_DATABASE_URL")
 }
 
 // Represents the tenant (a single store) - FIXED FOR SEPARATE DBS
