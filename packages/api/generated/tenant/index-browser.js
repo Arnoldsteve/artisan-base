@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.10.1
- * Query Engine version: 9b628578b3b7cae625e8c927178f15a170e74a9c
+ * Prisma Client JS version: 6.11.1
+ * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
  */
 Prisma.prismaVersion = {
-  client: "6.10.1",
-  engine: "9b628578b3b7cae625e8c927178f15a170e74a9c"
+  client: "6.11.1",
+  engine: "f40f79ec31188888a2e33acda0ecc8fd10a853a9"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -165,6 +165,7 @@ exports.Prisma.OrderScalarFieldEnum = {
   orderNumber: 'orderNumber',
   status: 'status',
   paymentStatus: 'paymentStatus',
+  currency: 'currency',
   totalAmount: 'totalAmount',
   subtotal: 'subtotal',
   taxAmount: 'taxAmount',
@@ -188,6 +189,19 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   orderId: 'orderId',
   productId: 'productId',
   variantId: 'variantId'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.CustomerScalarFieldEnum = {
@@ -249,6 +263,11 @@ exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -268,22 +287,75 @@ exports.OrderStatus = exports.$Enums.OrderStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
   PROCESSING: 'PROCESSING',
+  PACKED: 'PACKED',
   SHIPPED: 'SHIPPED',
+  IN_TRANSIT: 'IN_TRANSIT',
+  OUT_FOR_DELIVERY: 'OUT_FOR_DELIVERY',
   DELIVERED: 'DELIVERED',
+  PARTIALLY_DELIVERED: 'PARTIALLY_DELIVERED',
+  RETURN_REQUESTED: 'RETURN_REQUESTED',
+  RETURNED: 'RETURNED',
+  REFUNDED: 'REFUNDED',
+  FAILED_DELIVERY: 'FAILED_DELIVERY',
   CANCELLED: 'CANCELLED'
 };
 
 exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  PARTIALLY_PAID: 'PARTIALLY_PAID',
   PAID: 'PAID',
+  OVERPAID: 'OVERPAID',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
   REFUNDED: 'REFUNDED',
-  FAILED: 'FAILED'
+  PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',
+  CHARGEBACK: 'CHARGEBACK',
+  EXPIRED: 'EXPIRED'
+};
+
+exports.Currency = exports.$Enums.Currency = {
+  USD: 'USD',
+  EUR: 'EUR',
+  GBP: 'GBP',
+  JPY: 'JPY',
+  AUD: 'AUD',
+  CAD: 'CAD',
+  CHF: 'CHF',
+  CNY: 'CNY',
+  INR: 'INR',
+  KES: 'KES'
+};
+
+exports.PaymentProvider = exports.$Enums.PaymentProvider = {
+  STRIPE: 'STRIPE',
+  PAYPAL: 'PAYPAL',
+  MPESA: 'MPESA',
+  AIRTEL_MONEY: 'AIRTEL_MONEY',
+  MTN_MOMO: 'MTN_MOMO',
+  PAGA: 'PAGA',
+  CASH: 'CASH',
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CHECK: 'CHECK',
+  APPLE_PAY: 'APPLE_PAY',
+  GOOGLE_PAY: 'GOOGLE_PAY',
+  AMAZON_PAY: 'AMAZON_PAY',
+  KLARNA: 'KLARNA',
+  AFTERPAY: 'AFTERPAY',
+  ALIPAY: 'ALIPAY',
+  WECHAT_PAY: 'WECHAT_PAY',
+  CRYPTO: 'CRYPTO'
 };
 
 exports.DashboardUserRole = exports.$Enums.DashboardUserRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
-  STAFF: 'STAFF'
+  MANAGER: 'MANAGER',
+  STAFF: 'STAFF',
+  SUPPORT: 'SUPPORT',
+  ACCOUNTANT: 'ACCOUNTANT',
+  MARKETER: 'MARKETER',
+  VIEWER: 'VIEWER'
 };
 
 exports.Prisma.ModelName = {
@@ -293,6 +365,7 @@ exports.Prisma.ModelName = {
   ProductVariant: 'ProductVariant',
   Order: 'Order',
   OrderItem: 'OrderItem',
+  Payment: 'Payment',
   Customer: 'Customer',
   Address: 'Address',
   Review: 'Review',

@@ -87,15 +87,20 @@ model ProductVariant {
 }
 
 model Order {
-  id             String        @id @default(cuid())
-  orderSequence  Int
-  orderNumber    String        @unique
-  status         OrderStatus   @default(PENDING)
-  paymentStatus  PaymentStatus @default(PENDING)
-  totalAmount    Decimal       @db.Decimal(10, 2)
-  subtotal       Decimal       @db.Decimal(10, 2)
-  taxAmount      Decimal       @default(0) @db.Decimal(10, 2)
-  shippingAmount Decimal       @default(0) @db.Decimal(10, 2)
+  id            String        @id @default(cuid())
+  orderSequence Int
+  orderNumber   String        @unique
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  // --- ADDED FIELD ---
+  // The currency of the order itself, for display and reporting.
+  currency Currency
+
+  totalAmount    Decimal @db.Decimal(10, 2)
+  subtotal       Decimal @db.Decimal(10, 2)
+  taxAmount      Decimal @default(0) @db.Decimal(10, 2)
+  shippingAmount Decimal @default(0) @db.Decimal(10, 2)
   notes          String?
 
   shippingAddress Json
@@ -104,6 +109,8 @@ model Order {
   items      OrderItem[]
   customer   Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId String?
+
+  payments Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -130,6 +137,27 @@ model OrderItem {
   variantId String?
 
   @@map("order_items")
+}
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  provider              PaymentProvider
+  providerTransactionId String
+  amount                Decimal         @db.Decimal(10, 2)
+  currency              Currency
+  status                PaymentStatus   @default(PENDING)
+
+  // Provider-specific metadata
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerTransactionId])
+  @@map("payments")
 }
 
 model Customer {
@@ -202,24 +230,77 @@ model DashboardUser {
   @@map("dashboard_users")
 }
 
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  MPESA
+  AIRTEL_MONEY
+  MTN_MOMO
+  PAGA
+  CASH
+  BANK_TRANSFER
+  CHECK
+  APPLE_PAY
+  GOOGLE_PAY
+  AMAZON_PAY
+  KLARNA
+  AFTERPAY
+  ALIPAY
+  WECHAT_PAY
+  CRYPTO
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED
   PROCESSING
+  PACKED
   SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
   DELIVERED
+  PARTIALLY_DELIVERED
+  RETURN_REQUESTED
+  RETURNED
+  REFUNDED
+  FAILED_DELIVERY
   CANCELLED
 }
 
 enum PaymentStatus {
   PENDING
+  PROCESSING
+  PARTIALLY_PAID
   PAID
-  REFUNDED
+  OVERPAID
   FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CHARGEBACK
+  EXPIRED
 }
 
 enum DashboardUserRole {
   OWNER
   ADMIN
+  MANAGER
   STAFF
+  SUPPORT
+  ACCOUNTANT
+  MARKETER
+  VIEWER
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  JPY
+  AUD
+  CAD
+  CHF
+  CNY
+  INR
+  KES
 }
