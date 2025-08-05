@@ -37,6 +37,7 @@
     "@supabase/storage-js": "^2.10.4",
     "@supabase/supabase-js": "^2.53.0",
     "@types/decimal.js": "^7.4.3",
+    "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.0.1",
     "class-transformer": "^0.5.1",

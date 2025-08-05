@@ -43,4 +43,19 @@ export class PaymentController {
     // This calls the service layer to handle the business logic
     return this.paymentService.capturePayPalOrder(dto);
   }
+
+
+  // ... inside the PaymentController class ...
+
+  /**
+   * TEMPORARY endpoint to register C2B URLs with M-Pesa.
+   * Call this once from Postman to set up your callback URL.
+   */
+  @Get('setup-mpesa')
+  @UseGuards() // Unguarded for easy setup
+  setupMpesa() {
+    this.logger.log('Triggering M-Pesa C2B URL registration...');
+    return this.paymentService.registerMpesaUrls(); // We'll add this to PaymentService next
+  }
+
 }

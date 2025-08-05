@@ -151,4 +151,10 @@ export class PaymentService {
       );
     }
   }
+
+  // TEMPORARY method to expose the URL registration
+  async registerMpesaUrls() {
+    return this.mpesaService.registerC2BUrls();
+  }
+
 }
