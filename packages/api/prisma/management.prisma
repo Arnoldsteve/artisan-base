@@ -20,8 +20,8 @@ model Tenant {
   customDomain String? @unique // Optional custom domain for pro plans
 
   // SEPARATE DATABASE FIELDS (replaces dbSchema)
-  databaseUrl       String @unique    // Full Supabase connection string
-  supabaseProjectId String @unique    // Supabase project reference
+  databaseUrl       String? @unique    // Full Supabase connection string
+  supabaseProjectId String? @unique    // Supabase project reference
   
   status TenantStatus @default(PENDING)
   

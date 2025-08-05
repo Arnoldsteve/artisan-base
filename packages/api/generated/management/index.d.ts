@@ -65,6 +65,15 @@ export const SubscriptionStatus: {
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
 
+
+export const UserRole: {
+  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
+  PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
+  TENANT_OWNER: 'TENANT_OWNER'
+};
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
 }
 
 export type TenantStatus = $Enums.TenantStatus
@@ -78,6 +87,10 @@ export const BillingCycle: typeof $Enums.BillingCycle
 export type SubscriptionStatus = $Enums.SubscriptionStatus
 
 export const SubscriptionStatus: typeof $Enums.SubscriptionStatus
+
+export type UserRole = $Enums.UserRole
+
+export const UserRole: typeof $Enums.UserRole
 
 /**
  * ##  Prisma Client ʲˢ
@@ -301,8 +314,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.10.1
-   * Query Engine version: 9b628578b3b7cae625e8c927178f15a170e74a9c
+   * Prisma Client JS version: 6.11.1
+   * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
    */
   export type PrismaVersion = {
     client: string
@@ -1272,8 +1285,11 @@ export namespace Prisma {
     name: string | null
     subdomain: string | null
     customDomain: string | null
-    dbSchema: string | null
+    databaseUrl: string | null
+    supabaseProjectId: string | null
     status: $Enums.TenantStatus | null
+    suspendedAt: Date | null
+    deletedAt: Date | null
     ownerId: string | null
     planId: string | null
     createdAt: Date | null
@@ -1285,8 +1301,11 @@ export namespace Prisma {
     name: string | null
     subdomain: string | null
     customDomain: string | null
-    dbSchema: string | null
+    databaseUrl: string | null
+    supabaseProjectId: string | null
     status: $Enums.TenantStatus | null
+    suspendedAt: Date | null
+    deletedAt: Date | null
     ownerId: string | null
     planId: string | null
     createdAt: Date | null
@@ -1298,8 +1317,11 @@ export namespace Prisma {
     name: number
     subdomain: number
     customDomain: number
-    dbSchema: number
+    databaseUrl: number
+    supabaseProjectId: number
     status: number
+    suspendedAt: number
+    deletedAt: number
     ownerId: number
     planId: number
     settings: number
@@ -1314,8 +1336,11 @@ export namespace Prisma {
     name?: true
     subdomain?: true
     customDomain?: true
-    dbSchema?: true
+    databaseUrl?: true
+    supabaseProjectId?: true
     status?: true
+    suspendedAt?: true
+    deletedAt?: true
     ownerId?: true
     planId?: true
     createdAt?: true
@@ -1327,8 +1352,11 @@ export namespace Prisma {
     name?: true
     subdomain?: true
     customDomain?: true
-    dbSchema?: true
+    databaseUrl?: true
+    supabaseProjectId?: true
     status?: true
+    suspendedAt?: true
+    deletedAt?: true
     ownerId?: true
     planId?: true
     createdAt?: true
@@ -1340,8 +1368,11 @@ export namespace Prisma {
     name?: true
     subdomain?: true
     customDomain?: true
-    dbSchema?: true
+    databaseUrl?: true
+    supabaseProjectId?: true
     status?: true
+    suspendedAt?: true
+    deletedAt?: true
     ownerId?: true
     planId?: true
     settings?: true
@@ -1427,8 +1458,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain: string | null
-    dbSchema: string
+    databaseUrl: string | null
+    supabaseProjectId: string | null
     status: $Enums.TenantStatus
+    suspendedAt: Date | null
+    deletedAt: Date | null
     ownerId: string
     planId: string | null
     settings: JsonValue | null
@@ -1458,8 +1492,11 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    dbSchema?: boolean
+    databaseUrl?: boolean
+    supabaseProjectId?: boolean
     status?: boolean
+    suspendedAt?: boolean
+    deletedAt?: boolean
     ownerId?: boolean
     planId?: boolean
     settings?: boolean
@@ -1475,8 +1512,11 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    dbSchema?: boolean
+    databaseUrl?: boolean
+    supabaseProjectId?: boolean
     status?: boolean
+    suspendedAt?: boolean
+    deletedAt?: boolean
     ownerId?: boolean
     planId?: boolean
     settings?: boolean
@@ -1491,8 +1531,11 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    dbSchema?: boolean
+    databaseUrl?: boolean
+    supabaseProjectId?: boolean
     status?: boolean
+    suspendedAt?: boolean
+    deletedAt?: boolean
     ownerId?: boolean
     planId?: boolean
     settings?: boolean
@@ -1507,8 +1550,11 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    dbSchema?: boolean
+    databaseUrl?: boolean
+    supabaseProjectId?: boolean
     status?: boolean
+    suspendedAt?: boolean
+    deletedAt?: boolean
     ownerId?: boolean
     planId?: boolean
     settings?: boolean
@@ -1516,7 +1562,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "customDomain" | "dbSchema" | "status" | "ownerId" | "planId" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "customDomain" | "databaseUrl" | "supabaseProjectId" | "status" | "suspendedAt" | "deletedAt" | "ownerId" | "planId" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     plan?: boolean | Tenant$planArgs<ExtArgs>
@@ -1543,8 +1589,11 @@ export namespace Prisma {
       name: string
       subdomain: string
       customDomain: string | null
-      dbSchema: string
+      databaseUrl: string | null
+      supabaseProjectId: string | null
       status: $Enums.TenantStatus
+      suspendedAt: Date | null
+      deletedAt: Date | null
       ownerId: string
       planId: string | null
       settings: Prisma.JsonValue | null
@@ -1980,8 +2029,11 @@ export namespace Prisma {
     readonly name: FieldRef<"Tenant", 'String'>
     readonly subdomain: FieldRef<"Tenant", 'String'>
     readonly customDomain: FieldRef<"Tenant", 'String'>
-    readonly dbSchema: FieldRef<"Tenant", 'String'>
+    readonly databaseUrl: FieldRef<"Tenant", 'String'>
+    readonly supabaseProjectId: FieldRef<"Tenant", 'String'>
     readonly status: FieldRef<"Tenant", 'TenantStatus'>
+    readonly suspendedAt: FieldRef<"Tenant", 'DateTime'>
+    readonly deletedAt: FieldRef<"Tenant", 'DateTime'>
     readonly ownerId: FieldRef<"Tenant", 'String'>
     readonly planId: FieldRef<"Tenant", 'String'>
     readonly settings: FieldRef<"Tenant", 'Json'>
@@ -2455,6 +2507,7 @@ export namespace Prisma {
     hashedPassword: string | null
     firstName: string | null
     lastName: string | null
+    role: $Enums.UserRole | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2465,6 +2518,7 @@ export namespace Prisma {
     hashedPassword: string | null
     firstName: string | null
     lastName: string | null
+    role: $Enums.UserRole | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2475,6 +2529,7 @@ export namespace Prisma {
     hashedPassword: number
     firstName: number
     lastName: number
+    role: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2487,6 +2542,7 @@ export namespace Prisma {
     hashedPassword?: true
     firstName?: true
     lastName?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2497,6 +2553,7 @@ export namespace Prisma {
     hashedPassword?: true
     firstName?: true
     lastName?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2507,6 +2564,7 @@ export namespace Prisma {
     hashedPassword?: true
     firstName?: true
     lastName?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2590,6 +2648,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName: string | null
     lastName: string | null
+    role: $Enums.UserRole
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -2617,6 +2676,7 @@ export namespace Prisma {
     hashedPassword?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     ownedTenant?: boolean | User$ownedTenantArgs<ExtArgs>
@@ -2629,6 +2689,7 @@ export namespace Prisma {
     hashedPassword?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -2639,6 +2700,7 @@ export namespace Prisma {
     hashedPassword?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -2649,11 +2711,12 @@ export namespace Prisma {
     hashedPassword?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "hashedPassword" | "firstName" | "lastName" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "hashedPassword" | "firstName" | "lastName" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     ownedTenant?: boolean | User$ownedTenantArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2672,6 +2735,7 @@ export namespace Prisma {
       hashedPassword: string
       firstName: string | null
       lastName: string | null
+      role: $Enums.UserRole
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -3103,6 +3167,7 @@ export namespace Prisma {
     readonly hashedPassword: FieldRef<"User", 'String'>
     readonly firstName: FieldRef<"User", 'String'>
     readonly lastName: FieldRef<"User", 'String'>
+    readonly role: FieldRef<"User", 'UserRole'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -4691,6 +4756,8 @@ export namespace Prisma {
     tenantId: string | null
     planId: string | null
     status: $Enums.SubscriptionStatus | null
+    provider: string | null
+    providerSubscriptionId: string | null
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     stripeSubscriptionId: string | null
@@ -4703,6 +4770,8 @@ export namespace Prisma {
     tenantId: string | null
     planId: string | null
     status: $Enums.SubscriptionStatus | null
+    provider: string | null
+    providerSubscriptionId: string | null
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     stripeSubscriptionId: string | null
@@ -4715,6 +4784,8 @@ export namespace Prisma {
     tenantId: number
     planId: number
     status: number
+    provider: number
+    providerSubscriptionId: number
     currentPeriodStart: number
     currentPeriodEnd: number
     stripeSubscriptionId: number
@@ -4729,6 +4800,8 @@ export namespace Prisma {
     tenantId?: true
     planId?: true
     status?: true
+    provider?: true
+    providerSubscriptionId?: true
     currentPeriodStart?: true
     currentPeriodEnd?: true
     stripeSubscriptionId?: true
@@ -4741,6 +4814,8 @@ export namespace Prisma {
     tenantId?: true
     planId?: true
     status?: true
+    provider?: true
+    providerSubscriptionId?: true
     currentPeriodStart?: true
     currentPeriodEnd?: true
     stripeSubscriptionId?: true
@@ -4753,6 +4828,8 @@ export namespace Prisma {
     tenantId?: true
     planId?: true
     status?: true
+    provider?: true
+    providerSubscriptionId?: true
     currentPeriodStart?: true
     currentPeriodEnd?: true
     stripeSubscriptionId?: true
@@ -4838,6 +4915,8 @@ export namespace Prisma {
     tenantId: string
     planId: string
     status: $Enums.SubscriptionStatus
+    provider: string
+    providerSubscriptionId: string | null
     currentPeriodStart: Date
     currentPeriodEnd: Date
     stripeSubscriptionId: string | null
@@ -4867,6 +4946,8 @@ export namespace Prisma {
     tenantId?: boolean
     planId?: boolean
     status?: boolean
+    provider?: boolean
+    providerSubscriptionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     stripeSubscriptionId?: boolean
@@ -4881,6 +4962,8 @@ export namespace Prisma {
     tenantId?: boolean
     planId?: boolean
     status?: boolean
+    provider?: boolean
+    providerSubscriptionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     stripeSubscriptionId?: boolean
@@ -4895,6 +4978,8 @@ export namespace Prisma {
     tenantId?: boolean
     planId?: boolean
     status?: boolean
+    provider?: boolean
+    providerSubscriptionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     stripeSubscriptionId?: boolean
@@ -4909,6 +4994,8 @@ export namespace Prisma {
     tenantId?: boolean
     planId?: boolean
     status?: boolean
+    provider?: boolean
+    providerSubscriptionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     stripeSubscriptionId?: boolean
@@ -4916,7 +5003,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TenantSubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "planId" | "status" | "currentPeriodStart" | "currentPeriodEnd" | "stripeSubscriptionId" | "createdAt" | "updatedAt", ExtArgs["result"]["tenantSubscription"]>
+  export type TenantSubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "planId" | "status" | "provider" | "providerSubscriptionId" | "currentPeriodStart" | "currentPeriodEnd" | "stripeSubscriptionId" | "createdAt" | "updatedAt", ExtArgs["result"]["tenantSubscription"]>
   export type TenantSubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     plan?: boolean | SubscriptionPlanDefaultArgs<ExtArgs>
@@ -4941,6 +5028,8 @@ export namespace Prisma {
       tenantId: string
       planId: string
       status: $Enums.SubscriptionStatus
+      provider: string
+      providerSubscriptionId: string | null
       currentPeriodStart: Date
       currentPeriodEnd: Date
       stripeSubscriptionId: string | null
@@ -5375,6 +5464,8 @@ export namespace Prisma {
     readonly tenantId: FieldRef<"TenantSubscription", 'String'>
     readonly planId: FieldRef<"TenantSubscription", 'String'>
     readonly status: FieldRef<"TenantSubscription", 'SubscriptionStatus'>
+    readonly provider: FieldRef<"TenantSubscription", 'String'>
+    readonly providerSubscriptionId: FieldRef<"TenantSubscription", 'String'>
     readonly currentPeriodStart: FieldRef<"TenantSubscription", 'DateTime'>
     readonly currentPeriodEnd: FieldRef<"TenantSubscription", 'DateTime'>
     readonly stripeSubscriptionId: FieldRef<"TenantSubscription", 'String'>
@@ -5813,8 +5904,11 @@ export namespace Prisma {
     name: 'name',
     subdomain: 'subdomain',
     customDomain: 'customDomain',
-    dbSchema: 'dbSchema',
+    databaseUrl: 'databaseUrl',
+    supabaseProjectId: 'supabaseProjectId',
     status: 'status',
+    suspendedAt: 'suspendedAt',
+    deletedAt: 'deletedAt',
     ownerId: 'ownerId',
     planId: 'planId',
     settings: 'settings',
@@ -5831,6 +5925,7 @@ export namespace Prisma {
     hashedPassword: 'hashedPassword',
     firstName: 'firstName',
     lastName: 'lastName',
+    role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5855,6 +5950,8 @@ export namespace Prisma {
     tenantId: 'tenantId',
     planId: 'planId',
     status: 'status',
+    provider: 'provider',
+    providerSubscriptionId: 'providerSubscriptionId',
     currentPeriodStart: 'currentPeriodStart',
     currentPeriodEnd: 'currentPeriodEnd',
     stripeSubscriptionId: 'stripeSubscriptionId',
@@ -5947,6 +6044,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime[]'
+   */
+  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -5961,16 +6072,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'DateTime'
+   * Reference to a field of type 'UserRole'
    */
-  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+  export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
     
 
 
   /**
-   * Reference to a field of type 'DateTime[]'
+   * Reference to a field of type 'UserRole[]'
    */
-  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+  export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
     
 
 
@@ -6041,8 +6152,11 @@ export namespace Prisma {
     name?: StringFilter<"Tenant"> | string
     subdomain?: StringFilter<"Tenant"> | string
     customDomain?: StringNullableFilter<"Tenant"> | string | null
-    dbSchema?: StringFilter<"Tenant"> | string
+    databaseUrl?: StringNullableFilter<"Tenant"> | string | null
+    supabaseProjectId?: StringNullableFilter<"Tenant"> | string | null
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
+    suspendedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     ownerId?: StringFilter<"Tenant"> | string
     planId?: StringNullableFilter<"Tenant"> | string | null
     settings?: JsonNullableFilter<"Tenant">
@@ -6058,8 +6172,11 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrderInput | SortOrder
-    dbSchema?: SortOrder
+    databaseUrl?: SortOrderInput | SortOrder
+    supabaseProjectId?: SortOrderInput | SortOrder
     status?: SortOrder
+    suspendedAt?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     ownerId?: SortOrder
     planId?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
@@ -6074,12 +6191,15 @@ export namespace Prisma {
     id?: string
     subdomain?: string
     customDomain?: string
-    dbSchema?: string
+    databaseUrl?: string
+    supabaseProjectId?: string
     AND?: TenantWhereInput | TenantWhereInput[]
     OR?: TenantWhereInput[]
     NOT?: TenantWhereInput | TenantWhereInput[]
     name?: StringFilter<"Tenant"> | string
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
+    suspendedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     ownerId?: StringFilter<"Tenant"> | string
     planId?: StringNullableFilter<"Tenant"> | string | null
     settings?: JsonNullableFilter<"Tenant">
@@ -6088,15 +6208,18 @@ export namespace Prisma {
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     plan?: XOR<SubscriptionPlanNullableScalarRelationFilter, SubscriptionPlanWhereInput> | null
     subscription?: XOR<TenantSubscriptionNullableScalarRelationFilter, TenantSubscriptionWhereInput> | null
-  }, "id" | "subdomain" | "customDomain" | "dbSchema">
+  }, "id" | "subdomain" | "customDomain" | "databaseUrl" | "supabaseProjectId">
 
   export type TenantOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrderInput | SortOrder
-    dbSchema?: SortOrder
+    databaseUrl?: SortOrderInput | SortOrder
+    supabaseProjectId?: SortOrderInput | SortOrder
     status?: SortOrder
+    suspendedAt?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     ownerId?: SortOrder
     planId?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
@@ -6115,8 +6238,11 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Tenant"> | string
     subdomain?: StringWithAggregatesFilter<"Tenant"> | string
     customDomain?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
-    dbSchema?: StringWithAggregatesFilter<"Tenant"> | string
+    databaseUrl?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    supabaseProjectId?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     status?: EnumTenantStatusWithAggregatesFilter<"Tenant"> | $Enums.TenantStatus
+    suspendedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     ownerId?: StringWithAggregatesFilter<"Tenant"> | string
     planId?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     settings?: JsonNullableWithAggregatesFilter<"Tenant">
@@ -6133,6 +6259,7 @@ export namespace Prisma {
     hashedPassword?: StringFilter<"User"> | string
     firstName?: StringNullableFilter<"User"> | string | null
     lastName?: StringNullableFilter<"User"> | string | null
+    role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     ownedTenant?: TenantListRelationFilter
@@ -6144,6 +6271,7 @@ export namespace Prisma {
     hashedPassword?: SortOrder
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     ownedTenant?: TenantOrderByRelationAggregateInput
@@ -6158,6 +6286,7 @@ export namespace Prisma {
     hashedPassword?: StringFilter<"User"> | string
     firstName?: StringNullableFilter<"User"> | string | null
     lastName?: StringNullableFilter<"User"> | string | null
+    role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     ownedTenant?: TenantListRelationFilter
@@ -6169,6 +6298,7 @@ export namespace Prisma {
     hashedPassword?: SortOrder
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -6185,6 +6315,7 @@ export namespace Prisma {
     hashedPassword?: StringWithAggregatesFilter<"User"> | string
     firstName?: StringNullableWithAggregatesFilter<"User"> | string | null
     lastName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    role?: EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -6262,6 +6393,8 @@ export namespace Prisma {
     tenantId?: StringFilter<"TenantSubscription"> | string
     planId?: StringFilter<"TenantSubscription"> | string
     status?: EnumSubscriptionStatusFilter<"TenantSubscription"> | $Enums.SubscriptionStatus
+    provider?: StringFilter<"TenantSubscription"> | string
+    providerSubscriptionId?: StringNullableFilter<"TenantSubscription"> | string | null
     currentPeriodStart?: DateTimeFilter<"TenantSubscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"TenantSubscription"> | Date | string
     stripeSubscriptionId?: StringNullableFilter<"TenantSubscription"> | string | null
@@ -6276,6 +6409,8 @@ export namespace Prisma {
     tenantId?: SortOrder
     planId?: SortOrder
     status?: SortOrder
+    provider?: SortOrder
+    providerSubscriptionId?: SortOrderInput | SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     stripeSubscriptionId?: SortOrderInput | SortOrder
@@ -6289,24 +6424,29 @@ export namespace Prisma {
     id?: string
     tenantId?: string
     stripeSubscriptionId?: string
+    provider_providerSubscriptionId?: TenantSubscriptionProviderProviderSubscriptionIdCompoundUniqueInput
     AND?: TenantSubscriptionWhereInput | TenantSubscriptionWhereInput[]
     OR?: TenantSubscriptionWhereInput[]
     NOT?: TenantSubscriptionWhereInput | TenantSubscriptionWhereInput[]
     planId?: StringFilter<"TenantSubscription"> | string
     status?: EnumSubscriptionStatusFilter<"TenantSubscription"> | $Enums.SubscriptionStatus
+    provider?: StringFilter<"TenantSubscription"> | string
+    providerSubscriptionId?: StringNullableFilter<"TenantSubscription"> | string | null
     currentPeriodStart?: DateTimeFilter<"TenantSubscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"TenantSubscription"> | Date | string
     createdAt?: DateTimeFilter<"TenantSubscription"> | Date | string
     updatedAt?: DateTimeFilter<"TenantSubscription"> | Date | string
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     plan?: XOR<SubscriptionPlanScalarRelationFilter, SubscriptionPlanWhereInput>
-  }, "id" | "tenantId" | "stripeSubscriptionId">
+  }, "id" | "tenantId" | "stripeSubscriptionId" | "provider_providerSubscriptionId">
 
   export type TenantSubscriptionOrderByWithAggregationInput = {
     id?: SortOrder
     tenantId?: SortOrder
     planId?: SortOrder
     status?: SortOrder
+    provider?: SortOrder
+    providerSubscriptionId?: SortOrderInput | SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     stripeSubscriptionId?: SortOrderInput | SortOrder
@@ -6325,6 +6465,8 @@ export namespace Prisma {
     tenantId?: StringWithAggregatesFilter<"TenantSubscription"> | string
     planId?: StringWithAggregatesFilter<"TenantSubscription"> | string
     status?: EnumSubscriptionStatusWithAggregatesFilter<"TenantSubscription"> | $Enums.SubscriptionStatus
+    provider?: StringWithAggregatesFilter<"TenantSubscription"> | string
+    providerSubscriptionId?: StringNullableWithAggregatesFilter<"TenantSubscription"> | string | null
     currentPeriodStart?: DateTimeWithAggregatesFilter<"TenantSubscription"> | Date | string
     currentPeriodEnd?: DateTimeWithAggregatesFilter<"TenantSubscription"> | Date | string
     stripeSubscriptionId?: StringNullableWithAggregatesFilter<"TenantSubscription"> | string | null
@@ -6337,8 +6479,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6352,8 +6497,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     ownerId: string
     planId?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -6367,8 +6515,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6382,8 +6533,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownerId?: StringFieldUpdateOperationsInput | string
     planId?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -6397,8 +6551,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     ownerId: string
     planId?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -6411,8 +6568,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6423,8 +6583,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownerId?: StringFieldUpdateOperationsInput | string
     planId?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -6438,6 +6601,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
+    role?: $Enums.UserRole
     createdAt?: Date | string
     updatedAt?: Date | string
     ownedTenant?: TenantCreateNestedManyWithoutOwnerInput
@@ -6449,6 +6613,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
+    role?: $Enums.UserRole
     createdAt?: Date | string
     updatedAt?: Date | string
     ownedTenant?: TenantUncheckedCreateNestedManyWithoutOwnerInput
@@ -6460,6 +6625,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownedTenant?: TenantUpdateManyWithoutOwnerNestedInput
@@ -6471,6 +6637,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownedTenant?: TenantUncheckedUpdateManyWithoutOwnerNestedInput
@@ -6482,6 +6649,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
+    role?: $Enums.UserRole
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6492,6 +6660,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6502,6 +6671,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6580,6 +6750,8 @@ export namespace Prisma {
   export type TenantSubscriptionCreateInput = {
     id?: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -6594,6 +6766,8 @@ export namespace Prisma {
     tenantId: string
     planId: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -6604,6 +6778,8 @@ export namespace Prisma {
   export type TenantSubscriptionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -6618,6 +6794,8 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     planId?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -6630,6 +6808,8 @@ export namespace Prisma {
     tenantId: string
     planId: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -6640,6 +6820,8 @@ export namespace Prisma {
   export type TenantSubscriptionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -6652,6 +6834,8 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     planId?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -6694,6 +6878,17 @@ export namespace Prisma {
     in?: $Enums.TenantStatus[] | ListEnumTenantStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.TenantStatus[] | ListEnumTenantStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumTenantStatusFilter<$PrismaModel> | $Enums.TenantStatus
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -6755,8 +6950,11 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrder
-    dbSchema?: SortOrder
+    databaseUrl?: SortOrder
+    supabaseProjectId?: SortOrder
     status?: SortOrder
+    suspendedAt?: SortOrder
+    deletedAt?: SortOrder
     ownerId?: SortOrder
     planId?: SortOrder
     settings?: SortOrder
@@ -6769,8 +6967,11 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrder
-    dbSchema?: SortOrder
+    databaseUrl?: SortOrder
+    supabaseProjectId?: SortOrder
     status?: SortOrder
+    suspendedAt?: SortOrder
+    deletedAt?: SortOrder
     ownerId?: SortOrder
     planId?: SortOrder
     createdAt?: SortOrder
@@ -6782,8 +6983,11 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrder
-    dbSchema?: SortOrder
+    databaseUrl?: SortOrder
+    supabaseProjectId?: SortOrder
     status?: SortOrder
+    suspendedAt?: SortOrder
+    deletedAt?: SortOrder
     ownerId?: SortOrder
     planId?: SortOrder
     createdAt?: SortOrder
@@ -6835,6 +7039,20 @@ export namespace Prisma {
     _min?: NestedEnumTenantStatusFilter<$PrismaModel>
     _max?: NestedEnumTenantStatusFilter<$PrismaModel>
   }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
@@ -6876,6 +7094,13 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type EnumUserRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleFilter<$PrismaModel> | $Enums.UserRole
+  }
+
   export type TenantListRelationFilter = {
     every?: TenantWhereInput
     some?: TenantWhereInput
@@ -6892,6 +7117,7 @@ export namespace Prisma {
     hashedPassword?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6902,6 +7128,7 @@ export namespace Prisma {
     hashedPassword?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6912,8 +7139,19 @@ export namespace Prisma {
     hashedPassword?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type EnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleWithAggregatesFilter<$PrismaModel> | $Enums.UserRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserRoleFilter<$PrismaModel>
+    _max?: NestedEnumUserRoleFilter<$PrismaModel>
   }
 
   export type DecimalFilter<$PrismaModel = never> = {
@@ -7069,11 +7307,18 @@ export namespace Prisma {
     isNot?: SubscriptionPlanWhereInput
   }
 
+  export type TenantSubscriptionProviderProviderSubscriptionIdCompoundUniqueInput = {
+    provider: string
+    providerSubscriptionId: string
+  }
+
   export type TenantSubscriptionCountOrderByAggregateInput = {
     id?: SortOrder
     tenantId?: SortOrder
     planId?: SortOrder
     status?: SortOrder
+    provider?: SortOrder
+    providerSubscriptionId?: SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     stripeSubscriptionId?: SortOrder
@@ -7086,6 +7331,8 @@ export namespace Prisma {
     tenantId?: SortOrder
     planId?: SortOrder
     status?: SortOrder
+    provider?: SortOrder
+    providerSubscriptionId?: SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     stripeSubscriptionId?: SortOrder
@@ -7098,6 +7345,8 @@ export namespace Prisma {
     tenantId?: SortOrder
     planId?: SortOrder
     status?: SortOrder
+    provider?: SortOrder
+    providerSubscriptionId?: SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     stripeSubscriptionId?: SortOrder
@@ -7149,6 +7398,10 @@ export namespace Prisma {
 
   export type EnumTenantStatusFieldUpdateOperationsInput = {
     set?: $Enums.TenantStatus
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -7205,6 +7458,10 @@ export namespace Prisma {
     connectOrCreate?: TenantCreateOrConnectWithoutOwnerInput | TenantCreateOrConnectWithoutOwnerInput[]
     createMany?: TenantCreateManyOwnerInputEnvelope
     connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+  }
+
+  export type EnumUserRoleFieldUpdateOperationsInput = {
+    set?: $Enums.UserRole
   }
 
   export type TenantUpdateManyWithoutOwnerNestedInput = {
@@ -7398,6 +7655,17 @@ export namespace Prisma {
     not?: NestedEnumTenantStatusFilter<$PrismaModel> | $Enums.TenantStatus
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -7474,6 +7742,20 @@ export namespace Prisma {
     _min?: NestedEnumTenantStatusFilter<$PrismaModel>
     _max?: NestedEnumTenantStatusFilter<$PrismaModel>
   }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -7510,6 +7792,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleFilter<$PrismaModel> | $Enums.UserRole
+  }
+
+  export type NestedEnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleWithAggregatesFilter<$PrismaModel> | $Enums.UserRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserRoleFilter<$PrismaModel>
+    _max?: NestedEnumUserRoleFilter<$PrismaModel>
   }
 
   export type NestedDecimalFilter<$PrismaModel = never> = {
@@ -7602,6 +7901,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
+    role?: $Enums.UserRole
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7612,6 +7912,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
+    role?: $Enums.UserRole
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7649,6 +7950,8 @@ export namespace Prisma {
   export type TenantSubscriptionCreateWithoutTenantInput = {
     id?: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -7661,6 +7964,8 @@ export namespace Prisma {
     id?: string
     planId: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -7690,6 +7995,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7700,6 +8006,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7749,6 +8056,8 @@ export namespace Prisma {
   export type TenantSubscriptionUpdateWithoutTenantInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7761,6 +8070,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     planId?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7773,8 +8084,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7787,8 +8101,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     planId?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -7830,8 +8147,11 @@ export namespace Prisma {
     name?: StringFilter<"Tenant"> | string
     subdomain?: StringFilter<"Tenant"> | string
     customDomain?: StringNullableFilter<"Tenant"> | string | null
-    dbSchema?: StringFilter<"Tenant"> | string
+    databaseUrl?: StringNullableFilter<"Tenant"> | string | null
+    supabaseProjectId?: StringNullableFilter<"Tenant"> | string | null
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
+    suspendedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     ownerId?: StringFilter<"Tenant"> | string
     planId?: StringNullableFilter<"Tenant"> | string | null
     settings?: JsonNullableFilter<"Tenant">
@@ -7844,8 +8164,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7858,8 +8181,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     ownerId: string
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -7880,6 +8206,8 @@ export namespace Prisma {
   export type TenantSubscriptionCreateWithoutPlanInput = {
     id?: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -7892,6 +8220,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -7949,6 +8279,8 @@ export namespace Prisma {
     tenantId?: StringFilter<"TenantSubscription"> | string
     planId?: StringFilter<"TenantSubscription"> | string
     status?: EnumSubscriptionStatusFilter<"TenantSubscription"> | $Enums.SubscriptionStatus
+    provider?: StringFilter<"TenantSubscription"> | string
+    providerSubscriptionId?: StringNullableFilter<"TenantSubscription"> | string | null
     currentPeriodStart?: DateTimeFilter<"TenantSubscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"TenantSubscription"> | Date | string
     stripeSubscriptionId?: StringNullableFilter<"TenantSubscription"> | string | null
@@ -7961,8 +8293,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7975,8 +8310,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     ownerId: string
     planId?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -8030,8 +8368,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8044,8 +8385,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownerId?: StringFieldUpdateOperationsInput | string
     planId?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -8089,8 +8433,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     planId?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -8102,8 +8449,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8116,8 +8466,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     planId?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8130,8 +8483,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     planId?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8143,8 +8499,11 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    dbSchema: string
+    databaseUrl?: string | null
+    supabaseProjectId?: string | null
     status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
     ownerId: string
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -8155,6 +8514,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     status?: $Enums.SubscriptionStatus
+    provider?: string
+    providerSubscriptionId?: string | null
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     stripeSubscriptionId?: string | null
@@ -8167,8 +8528,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8181,8 +8545,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownerId?: StringFieldUpdateOperationsInput | string
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8195,8 +8562,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    dbSchema?: StringFieldUpdateOperationsInput | string
+    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ownerId?: StringFieldUpdateOperationsInput | string
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8206,6 +8576,8 @@ export namespace Prisma {
   export type TenantSubscriptionUpdateWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8218,6 +8590,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8229,6 +8603,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    provider?: StringFieldUpdateOperationsInput | string
+    providerSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null

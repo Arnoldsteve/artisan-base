@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.10.1
- * Query Engine version: 9b628578b3b7cae625e8c927178f15a170e74a9c
+ * Prisma Client JS version: 6.11.1
+ * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
  */
 Prisma.prismaVersion = {
-  client: "6.10.1",
-  engine: "9b628578b3b7cae625e8c927178f15a170e74a9c"
+  client: "6.11.1",
+  engine: "f40f79ec31188888a2e33acda0ecc8fd10a853a9"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -125,8 +125,11 @@ exports.Prisma.TenantScalarFieldEnum = {
   name: 'name',
   subdomain: 'subdomain',
   customDomain: 'customDomain',
-  dbSchema: 'dbSchema',
+  databaseUrl: 'databaseUrl',
+  supabaseProjectId: 'supabaseProjectId',
   status: 'status',
+  suspendedAt: 'suspendedAt',
+  deletedAt: 'deletedAt',
   ownerId: 'ownerId',
   planId: 'planId',
   settings: 'settings',
@@ -140,6 +143,7 @@ exports.Prisma.UserScalarFieldEnum = {
   hashedPassword: 'hashedPassword',
   firstName: 'firstName',
   lastName: 'lastName',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -158,6 +162,8 @@ exports.Prisma.TenantSubscriptionScalarFieldEnum = {
   tenantId: 'tenantId',
   planId: 'planId',
   status: 'status',
+  provider: 'provider',
+  providerSubscriptionId: 'providerSubscriptionId',
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
   stripeSubscriptionId: 'stripeSubscriptionId',
@@ -199,6 +205,12 @@ exports.TenantStatus = exports.$Enums.TenantStatus = {
   ACTIVE: 'ACTIVE',
   SUSPENDED: 'SUSPENDED',
   CANCELLED: 'CANCELLED'
+};
+
+exports.UserRole = exports.$Enums.UserRole = {
+  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
+  PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
+  TENANT_OWNER: 'TENANT_OWNER'
 };
 
 exports.BillingCycle = exports.$Enums.BillingCycle = {

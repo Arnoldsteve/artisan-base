@@ -18,7 +18,18 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+
+
+    "db:generate:management": "prisma generate --schema=prisma/management.prisma",
+    "db:generate:tenant": "prisma generate --schema=prisma/tenant.prisma",
+    "db:generate": "pnpm db:generate:management && pnpm db:generate:tenant",
+    "db:migrate:management:create": "prisma migrate dev --schema=prisma/management.prisma --create-only",
+    "db:migrate:tenant:create": "prisma migrate dev --schema=prisma/tenant.prisma --create-only",
+    "db:migrate:management:apply": "prisma migrate dev --schema=prisma/management.prisma",
+    "db:migrate:tenant:apply": "prisma migrate dev --schema=prisma/tenant.prisma",
+    "db:reset:management": "prisma migrate reset --schema=prisma/management.prisma --force",
+    "db:reset:tenant": "prisma migrate reset --schema=prisma/tenant.prisma --force"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
