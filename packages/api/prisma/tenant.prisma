@@ -25,8 +25,8 @@ model Product {
   id                String  @id @default(cuid())
   name              String
   slug              String  @unique
-  description       String? @db.Text 
-  price             Decimal @db.Decimal(10, 2) 
+  description       String? @db.Text
+  price             Decimal @db.Decimal(10, 2)
   sku               String? @unique
   inventoryQuantity Int     @default(0)
   isFeatured        Boolean @default(false)
@@ -77,7 +77,7 @@ model ProductVariant {
   sku               String? @unique
   inventoryQuantity Int     @default(0)
 
-  price Decimal? @db.Decimal(10, 2) 
+  price Decimal? @db.Decimal(10, 2)
 
   attributes Json @default("{}")
 
@@ -92,10 +92,15 @@ model Order {
   orderNumber    String        @unique
   status         OrderStatus   @default(PENDING)
   paymentStatus  PaymentStatus @default(PENDING)
-  totalAmount    Decimal       @db.Decimal(10, 2) 
-  subtotal       Decimal       @db.Decimal(10, 2) 
-  taxAmount      Decimal       @db.Decimal(10, 2) @default(0) 
-  shippingAmount Decimal       @db.Decimal(10, 2) @default(0) 
+
+  // --- ADDED FIELD ---
+  // The currency of the order itself, for display and reporting.
+  currency       Currency
+
+  totalAmount    Decimal       @db.Decimal(10, 2)
+  subtotal       Decimal       @db.Decimal(10, 2)
+  taxAmount      Decimal       @db.Decimal(10, 2) @default(0)
+  shippingAmount Decimal       @db.Decimal(10, 2) @default(0)
   notes          String?
 
   shippingAddress Json
@@ -104,6 +109,8 @@ model Order {
   items      OrderItem[]
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId String?
+
+  payments Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,7 +122,7 @@ model Order {
 model OrderItem {
   id          String  @id @default(cuid())
   quantity    Int
-  unitPrice   Decimal @db.Decimal(10, 2) 
+  unitPrice   Decimal @db.Decimal(10, 2)
 
   productName String
   variantName String?
@@ -130,6 +137,27 @@ model OrderItem {
   variantId String?
 
   @@map("order_items")
+}
+
+model Payment {
+  id                      String        @id @default(cuid())
+  orderId                 String
+  order                   Order         @relation(fields: [orderId], references: [id])
+  
+  provider                PaymentProvider
+  providerTransactionId   String
+  amount                  Decimal       @db.Decimal(10, 2)
+  currency                Currency
+  status                  PaymentStatus @default(PENDING)
+  
+  // Provider-specific metadata
+  metadata                Json?
+  
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  
+  @@unique([provider, providerTransactionId])
+  @@map("payments")
 }
 
 model Customer {
@@ -202,24 +230,77 @@ model DashboardUser {
   @@map("dashboard_users")
 }
 
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  MPESA
+  AIRTEL_MONEY
+  MTN_MOMO
+  PAGA
+  CASH
+  BANK_TRANSFER
+  CHECK
+  APPLE_PAY
+  GOOGLE_PAY
+  AMAZON_PAY
+  KLARNA
+  AFTERPAY
+  ALIPAY
+  WECHAT_PAY
+  CRYPTO
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED
   PROCESSING
+  PACKED
   SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
   DELIVERED
+  PARTIALLY_DELIVERED
+  RETURN_REQUESTED
+  RETURNED
+  REFUNDED
+  FAILED_DELIVERY
   CANCELLED
 }
 
 enum PaymentStatus {
   PENDING
+  PROCESSING
+  PARTIALLY_PAID
   PAID
-  REFUNDED
+  OVERPAID
   FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CHARGEBACK
+  EXPIRED
 }
 
 enum DashboardUserRole {
   OWNER
   ADMIN
+  MANAGER
   STAFF
+  SUPPORT
+  ACCOUNTANT
+  MARKETER
+  VIEWER
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  JPY
+  AUD
+  CAD
+  CHF
+  CNY
+  INR
+  KES
 }
