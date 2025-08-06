@@ -1,66 +1,28 @@
 const path = require('path');
 const { config } = require('dotenv');
 
-// Load environment variables
+// Load environment variables from .env file
 config();
 
 const CONFIG = {
-  // Database URLs
-  MANAGEMENT_DATABASE_URL: process.env.MANAGEMENT_DATABASE_URL,
-  
+  // Use DATABASE_URL from .env for the management database connection
+  MANAGEMENT_DATABASE_URL: process.env.DATABASE_URL,
+
   // Supabase Configuration
   SUPABASE: {
     URL: process.env.SUPABASE_URL,
-    ANON_KEY: process.env.SUPABASE_ANON_KEY,
     SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    PROJECT_REF: process.env.SUPABASE_PROJECT_REF,
   },
 
-  // Prisma Schema Paths
-  SCHEMAS: {
-    MANAGEMENT: path.join(__dirname, '../../prisma/management.prisma'),
-    TENANT: path.join(__dirname, '../../prisma/tenant.prisma'),
-  },
-
-  // Migration Paths
-  MIGRATIONS: {
-    TENANT: path.join(__dirname, '../../prisma/migrations-tenant'),
-  },
-
-  // Tenant Database Configuration
-  TENANT_DB: {
-    // Default settings for new tenant databases
-    DEFAULT_POOL_SIZE: 5,
-    CONNECTION_TIMEOUT: 30000,
-    IDLE_TIMEOUT: 300000,
-  },
-
-  // Script Configuration
-  SCRIPTS: {
-    MAX_CONCURRENT_OPERATIONS: 5,
-    RETRY_ATTEMPTS: 3,
-    RETRY_DELAY: 2000,
-  },
-
-  // Logging Configuration
-  LOGGING: {
-    LEVEL: process.env.LOG_LEVEL || 'info',
-    FORMAT: 'json',
-  },
+  // Other configurations can remain
+  // ...
 };
 
-// Validation
+// Validation to ensure the database URL is loaded
 function validateConfig() {
-  const required = [
-    'MANAGEMENT_DATABASE_URL',
-  ];
-
-  const missing = required.filter(key => !process.env[key]);
-  
-  if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  if (!CONFIG.MANAGEMENT_DATABASE_URL) {
+    throw new Error('Missing required environment variable: DATABASE_URL');
   }
-
   return true;
 }
 

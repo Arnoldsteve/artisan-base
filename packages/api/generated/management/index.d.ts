@@ -1285,8 +1285,7 @@ export namespace Prisma {
     name: string | null
     subdomain: string | null
     customDomain: string | null
-    databaseUrl: string | null
-    supabaseProjectId: string | null
+    dbSchema: string | null
     status: $Enums.TenantStatus | null
     suspendedAt: Date | null
     deletedAt: Date | null
@@ -1301,8 +1300,7 @@ export namespace Prisma {
     name: string | null
     subdomain: string | null
     customDomain: string | null
-    databaseUrl: string | null
-    supabaseProjectId: string | null
+    dbSchema: string | null
     status: $Enums.TenantStatus | null
     suspendedAt: Date | null
     deletedAt: Date | null
@@ -1317,8 +1315,7 @@ export namespace Prisma {
     name: number
     subdomain: number
     customDomain: number
-    databaseUrl: number
-    supabaseProjectId: number
+    dbSchema: number
     status: number
     suspendedAt: number
     deletedAt: number
@@ -1336,8 +1333,7 @@ export namespace Prisma {
     name?: true
     subdomain?: true
     customDomain?: true
-    databaseUrl?: true
-    supabaseProjectId?: true
+    dbSchema?: true
     status?: true
     suspendedAt?: true
     deletedAt?: true
@@ -1352,8 +1348,7 @@ export namespace Prisma {
     name?: true
     subdomain?: true
     customDomain?: true
-    databaseUrl?: true
-    supabaseProjectId?: true
+    dbSchema?: true
     status?: true
     suspendedAt?: true
     deletedAt?: true
@@ -1368,8 +1363,7 @@ export namespace Prisma {
     name?: true
     subdomain?: true
     customDomain?: true
-    databaseUrl?: true
-    supabaseProjectId?: true
+    dbSchema?: true
     status?: true
     suspendedAt?: true
     deletedAt?: true
@@ -1458,8 +1452,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain: string | null
-    databaseUrl: string | null
-    supabaseProjectId: string | null
+    dbSchema: string
     status: $Enums.TenantStatus
     suspendedAt: Date | null
     deletedAt: Date | null
@@ -1492,8 +1485,7 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    databaseUrl?: boolean
-    supabaseProjectId?: boolean
+    dbSchema?: boolean
     status?: boolean
     suspendedAt?: boolean
     deletedAt?: boolean
@@ -1512,8 +1504,7 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    databaseUrl?: boolean
-    supabaseProjectId?: boolean
+    dbSchema?: boolean
     status?: boolean
     suspendedAt?: boolean
     deletedAt?: boolean
@@ -1531,8 +1522,7 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    databaseUrl?: boolean
-    supabaseProjectId?: boolean
+    dbSchema?: boolean
     status?: boolean
     suspendedAt?: boolean
     deletedAt?: boolean
@@ -1550,8 +1540,7 @@ export namespace Prisma {
     name?: boolean
     subdomain?: boolean
     customDomain?: boolean
-    databaseUrl?: boolean
-    supabaseProjectId?: boolean
+    dbSchema?: boolean
     status?: boolean
     suspendedAt?: boolean
     deletedAt?: boolean
@@ -1562,7 +1551,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "customDomain" | "databaseUrl" | "supabaseProjectId" | "status" | "suspendedAt" | "deletedAt" | "ownerId" | "planId" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "customDomain" | "dbSchema" | "status" | "suspendedAt" | "deletedAt" | "ownerId" | "planId" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     plan?: boolean | Tenant$planArgs<ExtArgs>
@@ -1589,8 +1578,7 @@ export namespace Prisma {
       name: string
       subdomain: string
       customDomain: string | null
-      databaseUrl: string | null
-      supabaseProjectId: string | null
+      dbSchema: string
       status: $Enums.TenantStatus
       suspendedAt: Date | null
       deletedAt: Date | null
@@ -2029,8 +2017,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Tenant", 'String'>
     readonly subdomain: FieldRef<"Tenant", 'String'>
     readonly customDomain: FieldRef<"Tenant", 'String'>
-    readonly databaseUrl: FieldRef<"Tenant", 'String'>
-    readonly supabaseProjectId: FieldRef<"Tenant", 'String'>
+    readonly dbSchema: FieldRef<"Tenant", 'String'>
     readonly status: FieldRef<"Tenant", 'TenantStatus'>
     readonly suspendedAt: FieldRef<"Tenant", 'DateTime'>
     readonly deletedAt: FieldRef<"Tenant", 'DateTime'>
@@ -5904,8 +5891,7 @@ export namespace Prisma {
     name: 'name',
     subdomain: 'subdomain',
     customDomain: 'customDomain',
-    databaseUrl: 'databaseUrl',
-    supabaseProjectId: 'supabaseProjectId',
+    dbSchema: 'dbSchema',
     status: 'status',
     suspendedAt: 'suspendedAt',
     deletedAt: 'deletedAt',
@@ -6152,8 +6138,7 @@ export namespace Prisma {
     name?: StringFilter<"Tenant"> | string
     subdomain?: StringFilter<"Tenant"> | string
     customDomain?: StringNullableFilter<"Tenant"> | string | null
-    databaseUrl?: StringNullableFilter<"Tenant"> | string | null
-    supabaseProjectId?: StringNullableFilter<"Tenant"> | string | null
+    dbSchema?: StringFilter<"Tenant"> | string
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
     suspendedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
@@ -6172,8 +6157,7 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrderInput | SortOrder
-    databaseUrl?: SortOrderInput | SortOrder
-    supabaseProjectId?: SortOrderInput | SortOrder
+    dbSchema?: SortOrder
     status?: SortOrder
     suspendedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -6191,8 +6175,7 @@ export namespace Prisma {
     id?: string
     subdomain?: string
     customDomain?: string
-    databaseUrl?: string
-    supabaseProjectId?: string
+    dbSchema?: string
     AND?: TenantWhereInput | TenantWhereInput[]
     OR?: TenantWhereInput[]
     NOT?: TenantWhereInput | TenantWhereInput[]
@@ -6208,15 +6191,14 @@ export namespace Prisma {
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     plan?: XOR<SubscriptionPlanNullableScalarRelationFilter, SubscriptionPlanWhereInput> | null
     subscription?: XOR<TenantSubscriptionNullableScalarRelationFilter, TenantSubscriptionWhereInput> | null
-  }, "id" | "subdomain" | "customDomain" | "databaseUrl" | "supabaseProjectId">
+  }, "id" | "subdomain" | "customDomain" | "dbSchema">
 
   export type TenantOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrderInput | SortOrder
-    databaseUrl?: SortOrderInput | SortOrder
-    supabaseProjectId?: SortOrderInput | SortOrder
+    dbSchema?: SortOrder
     status?: SortOrder
     suspendedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -6238,8 +6220,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Tenant"> | string
     subdomain?: StringWithAggregatesFilter<"Tenant"> | string
     customDomain?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
-    databaseUrl?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
-    supabaseProjectId?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    dbSchema?: StringWithAggregatesFilter<"Tenant"> | string
     status?: EnumTenantStatusWithAggregatesFilter<"Tenant"> | $Enums.TenantStatus
     suspendedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
@@ -6479,8 +6460,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -6497,8 +6477,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -6515,8 +6494,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6533,8 +6511,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6551,8 +6528,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -6568,8 +6544,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6583,8 +6558,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6950,8 +6924,7 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrder
-    databaseUrl?: SortOrder
-    supabaseProjectId?: SortOrder
+    dbSchema?: SortOrder
     status?: SortOrder
     suspendedAt?: SortOrder
     deletedAt?: SortOrder
@@ -6967,8 +6940,7 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrder
-    databaseUrl?: SortOrder
-    supabaseProjectId?: SortOrder
+    dbSchema?: SortOrder
     status?: SortOrder
     suspendedAt?: SortOrder
     deletedAt?: SortOrder
@@ -6983,8 +6955,7 @@ export namespace Prisma {
     name?: SortOrder
     subdomain?: SortOrder
     customDomain?: SortOrder
-    databaseUrl?: SortOrder
-    supabaseProjectId?: SortOrder
+    dbSchema?: SortOrder
     status?: SortOrder
     suspendedAt?: SortOrder
     deletedAt?: SortOrder
@@ -8084,8 +8055,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8101,8 +8071,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8147,8 +8116,7 @@ export namespace Prisma {
     name?: StringFilter<"Tenant"> | string
     subdomain?: StringFilter<"Tenant"> | string
     customDomain?: StringNullableFilter<"Tenant"> | string | null
-    databaseUrl?: StringNullableFilter<"Tenant"> | string | null
-    supabaseProjectId?: StringNullableFilter<"Tenant"> | string | null
+    dbSchema?: StringFilter<"Tenant"> | string
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
     suspendedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
@@ -8164,8 +8132,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8181,8 +8148,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8293,8 +8259,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8310,8 +8275,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8368,8 +8332,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8385,8 +8348,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8433,8 +8395,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8449,8 +8410,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8466,8 +8426,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8483,8 +8442,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8499,8 +8457,7 @@ export namespace Prisma {
     name: string
     subdomain: string
     customDomain?: string | null
-    databaseUrl?: string | null
-    supabaseProjectId?: string | null
+    dbSchema: string
     status?: $Enums.TenantStatus
     suspendedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -8528,8 +8485,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8545,8 +8501,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8562,8 +8517,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    databaseUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    supabaseProjectId?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

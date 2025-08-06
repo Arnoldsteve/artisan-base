@@ -1,23 +1,21 @@
-// CORRECTED SCRIPT
-
-// 1. Import from the specific folders you generated, and rename the clients
+// Import the specific, generated Prisma clients from their correct folders
 const { PrismaClient: ManagementPrismaClient } = require('../../../generated/management');
 const { PrismaClient: TenantPrismaClient } = require('../../../generated/tenant');
-const CONFIG = require('../../shared/config'); // This one was correct, leave it as is.
+const CONFIG = require('../../shared/config');
 
 // Management DB connection (singleton)
 let managementClient = null;
 
 /**
- * Get management database client
+ * Get management database client.
  */
 function getManagementClient() {
   if (!managementClient) {
-    // 2. Use the specific "ManagementPrismaClient"
+    // Use the specific "ManagementPrismaClient"
     managementClient = new ManagementPrismaClient({
       datasources: {
         db: {
-          url: CONFIG.MANAGEMENT_DATABASE_URL,
+          url: `${CONFIG.MANAGEMENT_DATABASE_URL}?schema=public`,
         },
       },
     });
@@ -26,25 +24,25 @@ function getManagementClient() {
 }
 
 /**
- * Create tenant database client with dynamic URL
+ * Create a tenant-specific Prisma client with a dynamic schema URL.
  */
-function createTenantClient(databaseUrl) {
-  if (!databaseUrl) {
-    throw new Error('Database URL is required for tenant client');
+function createTenantClient(schemaUrl) {
+  if (!schemaUrl) {
+    throw new Error('Schema-specific URL is required for the tenant client');
   }
 
-  // 3. Use the specific "TenantPrismaClient"
+  // Use the specific "TenantPrismaClient"
   return new TenantPrismaClient({
     datasources: {
       db: {
-        url: databaseUrl,
+        url: schemaUrl,
       },
     },
   });
 }
 
 /**
- * Test database connection
+ * Test database connection.
  */
 async function testConnection(client, dbName = 'database') {
   try {
@@ -58,7 +56,7 @@ async function testConnection(client, dbName = 'database') {
 }
 
 /**
- * Safely disconnect from database
+ * Safely disconnect from the database.
  */
 async function disconnect(client, dbName = 'database') {
   try {
@@ -69,114 +67,10 @@ async function disconnect(client, dbName = 'database') {
   }
 }
 
-/**
- * Get all tenant database URLs from management database
- */
-async function getAllTenantDatabaseUrls() {
-  const managementClient = getManagementClient();
-  
-  try {
-    const tenants = await managementClient.tenant.findMany({
-      where: {
-        status: 'ACTIVE',
-        databaseUrl: {
-          not: null,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        subdomain: true,
-        databaseUrl: true,
-      },
-    });
-
-    return tenants.map(tenant => ({
-      tenantId: tenant.id,
-      tenantName: tenant.name,
-      subdomain: tenant.subdomain,
-      databaseUrl: tenant.databaseUrl,
-    }));
-  } catch (error) {
-    console.error('❌ Failed to fetch tenant database URLs:', error.message);
-    throw error;
-  }
-}
-
-/**
- * Get single tenant database URL
- */
-async function getTenantDatabaseUrl(tenantId) {
-  const managementClient = getManagementClient();
-  
-  try {
-    const tenant = await managementClient.tenant.findUnique({
-      where: { id: tenantId },
-      select: {
-        id: true,
-        name: true,
-        databaseUrl: true,
-        status: true,
-      },
-    });
-
-    if (!tenant) {
-      throw new Error(`Tenant with ID ${tenantId} not found`);
-    }
-
-    if (!tenant.databaseUrl) {
-      throw new Error(`Tenant ${tenant.name} does not have a database URL`);
-    }
-
-    return {
-      tenantId: tenant.id,
-      tenantName: tenant.name,
-      databaseUrl: tenant.databaseUrl,
-      status: tenant.status,
-    };
-  } catch (error) {
-    console.error(`❌ Failed to get database URL for tenant ${tenantId}:`, error.message);
-    throw error;
-  }
-}
-
-/**
- * Update tenant database URL in management database
- */
-async function updateTenantDatabaseUrl(tenantId, databaseUrl, supabaseProjectId = null) {
-  const managementClient = getManagementClient();
-  
-  try {
-    const updatedTenant = await managementClient.tenant.update({
-      where: { id: tenantId },
-      data: {
-        databaseUrl,
-        supabaseProjectId,
-        updatedAt: new Date(),
-      },
-      select: {
-        id: true,
-        name: true,
-        subdomain: true,
-        databaseUrl: true,
-        supabaseProjectId: true,
-      },
-    });
-
-    console.log(`✅ Updated database URL for tenant: ${updatedTenant.name}`);
-    return updatedTenant;
-  } catch (error) {
-    console.error(`❌ Failed to update database URL for tenant ${tenantId}:`, error.message);
-    throw error;
-  }
-}
-
+// Export only the functions that are needed by create.js
 module.exports = {
   getManagementClient,
   createTenantClient,
   testConnection,
   disconnect,
-  getAllTenantDatabaseUrls,
-  getTenantDatabaseUrl,
-  updateTenantDatabaseUrl,
 };

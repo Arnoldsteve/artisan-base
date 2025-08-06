@@ -1,35 +1,26 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process');
-const { createClient } = require('@supabase/supabase-js');
 const { createId } = require('@paralleldrive/cuid2');
+const fs = require('fs');
+const path = require('path');
 const CONFIG = require('../shared/config');
 const {
   getManagementClient,
   createTenantClient,
-  testConnection,
   disconnect,
-  updateTenantDatabaseUrl,
 } = require('./utils/supabase-client');
 
 /**
- * Create a new tenant database and apply schema
+ * Creates a new tenant schema and applies migrations.
  */
 class TenantCreator {
   constructor() {
     this.managementClient = getManagementClient();
-    this.supabase = null;
-
-    if (CONFIG.SUPABASE.URL && CONFIG.SUPABASE.SERVICE_ROLE_KEY) {
-      this.supabase = createClient(
-        CONFIG.SUPABASE.URL,
-        CONFIG.SUPABASE.SERVICE_ROLE_KEY,
-      );
-    }
   }
 
   /**
-   * Main method to create a tenant
+   * Main method to create a tenant.
    */
   async createTenant(tenantData) {
     const {
@@ -40,46 +31,64 @@ class TenantCreator {
       planId = null,
     } = tenantData;
 
+    const schemaName = `tenant_${subdomain}`;
+
     console.log(`🚀 Starting tenant creation for: ${name} (${subdomain})`);
+    console.log(`   Schema to be created: "${schemaName}"`);
 
     try {
       // Step 1: Validate input
       await this.validateInput(tenantData);
 
-      // Step 2: Check if subdomain is available
+      // Step 2: Check if subdomain and schema name are available
       await this.checkSubdomainAvailability(subdomain);
 
-      // Step 3: Find or create owner
+      // Step 3: Find or create the owner
       const owner = await this.findOrCreateOwner(ownerEmail);
 
-      // Step 4: Create Supabase project (if using Supabase)
-      const dbConfig = await this.createTenantDatabase(subdomain);
-
-      // Step 5: Create tenant record in management database
+      // Step 4: Create the tenant record
       const tenant = await this.createTenantRecord({
         name,
         subdomain,
         customDomain,
         ownerId: owner.id,
         planId,
-        databaseUrl: dbConfig.databaseUrl,
-        supabaseProjectId: dbConfig.projectId,
+        dbSchema: schemaName,
       });
 
-      // Step 6: Apply tenant schema to new database
-      await this.applyTenantSchema(dbConfig.databaseUrl);
+      // Step 5: Create the actual schema in the database
+      await this.createSchema(tenant.dbSchema);
 
-      // Step 7: Seed initial data (optional)
-      await this.seedTenantDatabase(dbConfig.databaseUrl, tenant);
+      // Step 6: Apply the tenant migrations to the new schema
+      await this.applyTenantMigrations(tenant.dbSchema);
+
+      // Step 7: Update tenant status to ACTIVE
+      await this.activateTenant(tenant.id);
+
+      // Step 8: Seed initial data into the new schema
+      await this.seedTenantDatabase(tenant.dbSchema, tenant);
 
       console.log(`✅ Tenant created successfully!`);
       console.log(`   - Tenant ID: ${tenant.id}`);
       console.log(`   - Subdomain: ${subdomain}`);
-      console.log(`   - Database: ${dbConfig.projectId || 'Custom'}`);
+      console.log(`   - Schema: ${tenant.dbSchema}`);
+      console.log(`   - Status: ACTIVE`);
 
       return tenant;
     } catch (error) {
       console.error(`❌ Failed to create tenant: ${error.message}`);
+      // Try to clean up if tenant record was created
+      try {
+        const existingTenant = await this.managementClient.tenant.findFirst({
+          where: { subdomain }
+        });
+        if (existingTenant) {
+          console.log(`🧹 Cleaning up failed tenant creation...`);
+          await this.cleanupFailedTenant(existingTenant.dbSchema, existingTenant.id);
+        }
+      } catch (cleanupError) {
+        console.error(`⚠️ Cleanup failed: ${cleanupError.message}`);
+      }
       throw error;
     }
   }
@@ -89,38 +98,46 @@ class TenantCreator {
    */
   async validateInput(data) {
     const { name, subdomain, ownerEmail } = data;
-
+    
     if (!name || name.trim().length < 2) {
       throw new Error('Tenant name must be at least 2 characters long');
     }
-
+    
     if (!subdomain || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(subdomain)) {
-      throw new Error(
-        'Subdomain must contain only lowercase letters, numbers, and hyphens',
-      );
+      throw new Error('Subdomain must contain only lowercase letters, numbers, and hyphens');
     }
-
+    
+    if (subdomain.length < 3 || subdomain.length > 30) {
+      throw new Error('Subdomain must be between 3 and 30 characters');
+    }
+    
     if (!ownerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)) {
       throw new Error('Valid owner email is required');
     }
-
+    
     console.log(`✅ Input validation passed`);
   }
 
   /**
-   * Check if subdomain is available
+   * Check if subdomain and schema name are available
    */
   async checkSubdomainAvailability(subdomain) {
-    const existingTenant = await this.managementClient.tenant.findUnique({
-      where: { subdomain },
+    const schemaName = `tenant_${subdomain}`;
+    const existingTenant = await this.managementClient.tenant.findFirst({
+      where: { 
+        OR: [
+          { subdomain }, 
+          { dbSchema: schemaName }
+        ] 
+      },
     });
-
+    
     if (existingTenant) {
       throw new Error(`Subdomain '${subdomain}' is already taken`);
     }
-
-    console.log(`✅ Subdomain '${subdomain}' is available`);
-  }
+    
+    console.log(`✅ Subdomain and schema name are available`);
+  } 
 
   /**
    * Find existing owner or create new one
@@ -129,14 +146,13 @@ class TenantCreator {
     let owner = await this.managementClient.user.findUnique({
       where: { email },
     });
-
+    
     if (!owner) {
-      // Create new user (you might want to handle password differently)
       owner = await this.managementClient.user.create({
         data: {
           id: createId(),
           email,
-          hashedPassword: 'temp_password_change_me', // TODO: Handle properly
+          hashedPassword: 'temp_password_change_me', // TODO: Generate secure password
           role: 'TENANT_OWNER',
         },
       });
@@ -144,81 +160,12 @@ class TenantCreator {
     } else {
       console.log(`✅ Found existing owner: ${email}`);
     }
-
+    
     return owner;
   }
 
   /**
-   * Create tenant database (Supabase or custom)
-   */
-  async createTenantDatabase(subdomain) {
-    if (this.supabase) {
-      return await this.createSupabaseProject(subdomain);
-    } else {
-      return await this.createCustomDatabase(subdomain);
-    }
-  }
-
-  /**
-   * Create Supabase project for tenant
-   */
-  async createSupabaseProject(subdomain) {
-    try {
-      console.log(`🔄 Creating Supabase project for ${subdomain}...`);
-
-      // Note: Supabase doesn't have a public API for creating projects yet
-      // You'll need to either:
-      // 1. Use Supabase CLI programmatically
-      // 2. Create projects manually and provide the connection string
-      // 3. Use a different database provider
-
-      // For now, this is a placeholder - you'll need to implement based on your setup
-      const projectId = `${subdomain}-${createId()}`;
-      const databaseUrl = `postgresql://postgres:[password]@db.${projectId}.supabase.co:5432/postgres`;
-
-      console.log(
-        `⚠️  Manual step required: Create Supabase project for ${subdomain}`,
-      );
-      console.log(`   Project ID: ${projectId}`);
-
-      return {
-        projectId,
-        databaseUrl:
-          process.env.TENANT_DATABASE_URL_TEMPLATE?.replace(
-            '{subdomain}',
-            subdomain,
-          ) || databaseUrl,
-      };
-    } catch (error) {
-      console.error(`❌ Failed to create Supabase project:`, error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Create custom database for tenant
-   */
-  async createCustomDatabase(subdomain) {
-    // If you're using a different database provider or custom setup
-    const databaseUrl = process.env.TENANT_DATABASE_URL_TEMPLATE?.replace(
-      '{subdomain}',
-      subdomain,
-    );
-
-    if (!databaseUrl) {
-      throw new Error(
-        'TENANT_DATABASE_URL_TEMPLATE environment variable is required for custom databases',
-      );
-    }
-
-    return {
-      projectId: null,
-      databaseUrl,
-    };
-  }
-
-  /**
-   * Create tenant record in management database
+   * Create the tenant record in the management database
    */
   async createTenantRecord(data) {
     try {
@@ -229,7 +176,6 @@ class TenantCreator {
           status: 'PENDING',
         },
       });
-
       console.log(`✅ Created tenant record: ${tenant.name}`);
       return tenant;
     } catch (error) {
@@ -239,69 +185,133 @@ class TenantCreator {
   }
 
   /**
-   * Apply tenant schema to new database
+   * Create a new schema in the database
    */
-  async applyTenantSchema(databaseUrl) {
+  async createSchema(schemaName) {
     try {
-      console.log(`🔄 Applying tenant schema...`);
-
-      // Test connection first
-      const tenantClient = createTenantClient(databaseUrl); // <-- THIS LINE IS NOW CORRECTED
-      const connected = await testConnection(tenantClient, 'tenant database');
-
-      if (!connected) {
-        throw new Error('Cannot connect to tenant database');
-      }
-
-      // Create a new environment object for the child process.
-      // This is the correct way to pass environment variables in Node.js
-      // and it works on both Windows and Linux/macOS.
-      const childEnv = {
-        ...process.env,
-        TENANT_MIGRATION_URL: databaseUrl, // Explicitly set/override the database URL
-      };
-
-      // Execute the command, passing the modified environment in the options.
-      execSync(`npx prisma migrate deploy --schema=prisma/tenant.prisma`, {
-        env: childEnv,
-        stdio: 'inherit',
-        cwd: process.cwd(),
-      });
-
-      await disconnect(tenantClient, 'tenant database');
-      console.log(`✅ Tenant schema applied successfully`);
+      console.log(`🔄 Creating schema: "${schemaName}"...`);
+      await this.managementClient.$executeRawUnsafe(
+        `CREATE SCHEMA IF NOT EXISTS "${schemaName}";`
+      );
+      console.log(`✅ Schema created successfully`);
     } catch (error) {
-      console.error(`❌ Failed to apply tenant schema:`, error.message);
+      console.error(`❌ Failed to create schema:`, error.message);
       throw error;
     }
   }
 
   /**
-   * Seed initial data in tenant database
+   * Apply tenant migrations to the specified schema
    */
-  async seedTenantDatabase(databaseUrl, tenant) {
+  async applyTenantMigrations(schemaName) {
     try {
-      console.log(`🔄 Seeding tenant database...`);
+      console.log(`🔄 Applying tenant migrations to schema: "${schemaName}"...`);
 
-      const tenantClient = createTenantClient(databaseUrl);
+      const tenantMigrationsDir = path.join(process.cwd(), 'prisma', 'migrations_tenant');
+      
+      if (!fs.existsSync(tenantMigrationsDir)) {
+        throw new Error(`Tenant migrations directory not found at: ${tenantMigrationsDir}`);
+      }
 
-      // Create default dashboard user (admin)
+      const migrationFolders = fs.readdirSync(tenantMigrationsDir)
+        .filter(f => fs.statSync(path.join(tenantMigrationsDir, f)).isDirectory())
+        .sort();
+
+      if (migrationFolders.length === 0) {
+        throw new Error('No tenant migration files found in migrations_tenant folder.');
+      }
+
+      const schemaUrl = `${CONFIG.MANAGEMENT_DATABASE_URL}?schema=${schemaName}`;
+      const tenantClient = createTenantClient(schemaUrl);
+
+      for (const folder of migrationFolders) {
+        const migrationPath = path.join(tenantMigrationsDir, folder, 'migration.sql');
+        
+        if (fs.existsSync(migrationPath)) {
+          console.log(`   - Applying tenant migration: ${folder}`);
+          const sql = fs.readFileSync(migrationPath, 'utf-8');
+          
+          const statements = sql.split(';').filter(stmt => stmt.trim().length > 0);
+          for (const statement of statements) {
+            await tenantClient.$executeRawUnsafe(statement);
+          }
+        }
+      }
+
+      await tenantClient.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
+          id VARCHAR(36) PRIMARY KEY,
+          checksum VARCHAR(64) NOT NULL,
+          finished_at TIMESTAMPTZ,
+          migration_name VARCHAR(255) NOT NULL,
+          logs TEXT,
+          rolled_back_at TIMESTAMPTZ,
+          started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          applied_steps_count INTEGER NOT NULL DEFAULT 0
+        );
+      `);
+
+      for (const folder of migrationFolders) {
+        await tenantClient.$executeRawUnsafe(
+          `INSERT INTO "_prisma_migrations" (id, checksum, migration_name, finished_at, applied_steps_count)
+           VALUES ($1, $2, $3, now(), 1) ON CONFLICT (id) DO NOTHING;`,
+          `${folder}-manual`, 'manual-apply', folder
+        );
+      }
+
+      await disconnect(tenantClient, 'tenant database');
+      console.log(`✅ Tenant migrations applied successfully`);
+
+    } catch (error) {
+      console.error(`❌ Failed to apply tenant migrations:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Update tenant status to ACTIVE
+   */
+  async activateTenant(tenantId) {
+    try {
+      await this.managementClient.tenant.update({
+        where: { id: tenantId },
+        data: { 
+          status: 'ACTIVE',
+          updatedAt: new Date()
+        },
+      });
+      console.log(`✅ Tenant activated successfully`);
+    } catch (error) {
+      console.error(`❌ Failed to activate tenant:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Seed initial data into the tenant schema
+   */
+  async seedTenantDatabase(schemaName, tenant) {
+    try {
+      console.log(`🔄 Seeding data into schema: "${schemaName}"...`);
+
+      const schemaUrl = `${CONFIG.MANAGEMENT_DATABASE_URL}?schema=${schemaName}`;
+      const tenantClient = createTenantClient(schemaUrl);
+
       await tenantClient.dashboardUser.create({
         data: {
           id: createId(),
-          email: 'admin@' + tenant.subdomain + '.com',
-          hashedPassword: 'temp_admin_password', // TODO: Generate secure password
+          email: `admin@${tenant.subdomain}.localhost`,
+          hashedPassword: 'temp_admin_password',
           firstName: 'Admin',
           lastName: 'User',
           role: 'OWNER',
         },
       });
 
-      // Create default categories
       await tenantClient.category.createMany({
         data: [
-          { id: createId(), name: 'General', slug: 'general' },
-          { id: createId(), name: 'Featured', slug: 'featured' },
+          { id: createId(), name: 'General', slug: 'general', description: 'General products category' },
+          { id: createId(), name: 'Featured', slug: 'featured', description: 'Featured products' },
         ],
       });
 
@@ -309,7 +319,19 @@ class TenantCreator {
       console.log(`✅ Tenant database seeded successfully`);
     } catch (error) {
       console.error(`❌ Failed to seed tenant database:`, error.message);
-      // Don't throw - seeding failure shouldn't break tenant creation
+    }
+  }
+
+  /**
+   * Clean up failed tenant creation
+   */
+  async cleanupFailedTenant(schemaName, tenantId) {
+    try {
+      await this.managementClient.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaName}" CASCADE;`);
+      await this.managementClient.tenant.delete({ where: { id: tenantId } });
+      console.log(`✅ Cleanup completed for failed tenant`);
+    } catch (error) {
+      console.error(`❌ Cleanup failed:`, error.message);
     }
   }
 
@@ -326,38 +348,36 @@ class TenantCreator {
  */
 async function main() {
   const args = process.argv.slice(2);
-
-  if (args.length === 0) {
+  
+  if (args.length < 3) {
     console.log(`
 Usage: node scripts/tenant/create.js <name> <subdomain> <owner-email> [custom-domain]
 
 Examples:
   node scripts/tenant/create.js "Malaika Beads" "malaikabeads" "owner@example.com"
-  node scripts/tenant/create.js "Tech Store" "techstore" "admin@techstore.com" "techstore.com"
     `);
     process.exit(1);
   }
 
   const [name, subdomain, ownerEmail, customDomain] = args;
-
   const creator = new TenantCreator();
 
   try {
     await creator.createTenant({
       name,
-      subdomain,
+      subdomain: subdomain.toLowerCase(),
       ownerEmail,
       customDomain,
     });
+    console.log(`\n🎉 SUCCESS! Tenant "${name}" is ready to use.`);
   } catch (error) {
-    console.error(`❌ Tenant creation failed:`, error.message);
+    console.error(`\n💥 FAILED! Tenant creation unsuccessful.`);
     process.exit(1);
   } finally {
     await creator.cleanup();
   }
 }
 
-// Run if called directly
 if (require.main === module) {
   main();
 }
