@@ -107,11 +107,12 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
           totalAmount: subtotal,
           subtotal,
           taxAmount: 0,
+          currency: dto.currency,
           shippingAmount: 0,
           notes: dto.notes,
           shippingAddress: dto.shippingAddress,
           billingAddress: dto.billingAddress,
-          customerId,
+          customer: customerId ? { connect: { id: customerId } } : undefined,
           items: {
             create: orderItemsData,
           },
