@@ -8,6 +8,12 @@ import * as path from 'path';
 export class TenantRepository implements ITenantRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+   async findTenantById(id: string) {
+    return this.prisma.tenant.findUnique({
+      where: { id },
+    });
+  }
+  
   async findUserById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
   }
@@ -34,10 +40,10 @@ export class TenantRepository implements ITenantRepository {
       '..',
       '..',
       'prisma',
-      'migrations',
+      'migrations_tenant',
     );
     const migrationFolder = (await fs.readdir(migrationsDir)).find((dir) =>
-      dir.endsWith('_init_tenant_tables'),
+      dir.endsWith('_init_tenant'),
     );
     if (!migrationFolder) {
       throw new InternalServerErrorException(

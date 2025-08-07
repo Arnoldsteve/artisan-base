@@ -15,6 +15,7 @@ export class AuthRepository implements IAuthRepository {
     email: string;
     hashedPassword: string;
     firstName: string;
+    lastName: string;
   }) {
     return this.prisma.user.create({ data });
   }

@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserRole } from '../../generated/management'; 
+
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string }) {
+  async validate(payload: { sub: string; email: string; role: UserRole }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
@@ -35,7 +37,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         lastName: user.lastName,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        sub: user.id, // <-- This resolves the error.
+        sub: user.id, 
+        role: user.role, 
     };
   }
 }

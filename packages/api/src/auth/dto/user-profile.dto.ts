@@ -1,4 +1,3 @@
-// File: packages/api/src/auth/dto/user-profile.dto.ts
 import { IsEmail, IsString, IsOptional, IsArray, ValidateNested, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 

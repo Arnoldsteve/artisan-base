@@ -11,6 +11,9 @@ import {
   Get,
   Query,
   InternalServerErrorException,
+  Logger,
+  Param,
+  ForbiddenException,
 } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 import { CreateTenantDto, CheckSubdomainDto } from './dto/create-tenant.dto';
@@ -23,6 +26,31 @@ import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 export class TenantController {
   constructor(private readonly tenantService: TenantService) {}
 
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getTenantMetadata(
+    @Param('id') tenantId: string,
+    @GetUser() user: UserPayload,
+  ) {
+    // 1. Fetch the tenant data
+    const tenant = await this.tenantService.getTenantMetadata(tenantId);
+
+    // 2. Authorization: Check if the user is the tenant owner OR a platform admin
+    const isOwner = tenant.ownerId === user.sub;
+    const isAdmin = user.role?.includes('PLATFORM_ADMIN'); // Assumes roles are in the JWT
+
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('You do not have permission to access this resource.');
+    }
+
+    // 3. Return the data
+    // We can create a DTO later to control which fields are returned
+    return {
+      success: true,
+      tenant,
+    };
+  }
+  
   @Get('availability')
   @HttpCode(HttpStatus.OK)
   async checkSubdomainAvailability(

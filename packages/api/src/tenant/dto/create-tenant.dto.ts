@@ -27,10 +27,6 @@ export class CreateTenantDto {
   })
   @Transform(({ value }) => value?.trim())
   storeName: string;
-
-  // This will be set from the authenticated user context
-  // Not included in the DTO validation since it comes from JWT/session
-  ownerId?: string;
 }
 
 // Optional: Create a separate DTO for checking subdomain availability
