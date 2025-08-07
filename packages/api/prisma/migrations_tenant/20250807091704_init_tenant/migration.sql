@@ -1,12 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `subscription_plans` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `tenant_subscriptions` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `tenants` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "PaymentProvider" AS ENUM ('STRIPE', 'PAYPAL', 'MPESA', 'AIRTEL_MONEY', 'MTN_MOMO', 'PAGA', 'CASH', 'BANK_TRANSFER', 'CHECK', 'APPLE_PAY', 'GOOGLE_PAY', 'AMAZON_PAY', 'KLARNA', 'AFTERPAY', 'ALIPAY', 'WECHAT_PAY', 'CRYPTO');
 
@@ -21,42 +12,6 @@ CREATE TYPE "DashboardUserRole" AS ENUM ('OWNER', 'ADMIN', 'MANAGER', 'STAFF', '
 
 -- CreateEnum
 CREATE TYPE "Currency" AS ENUM ('USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'INR', 'KES');
-
--- DropForeignKey
-ALTER TABLE "tenant_subscriptions" DROP CONSTRAINT "tenant_subscriptions_planId_fkey";
-
--- DropForeignKey
-ALTER TABLE "tenant_subscriptions" DROP CONSTRAINT "tenant_subscriptions_tenantId_fkey";
-
--- DropForeignKey
-ALTER TABLE "tenants" DROP CONSTRAINT "tenants_ownerId_fkey";
-
--- DropForeignKey
-ALTER TABLE "tenants" DROP CONSTRAINT "tenants_planId_fkey";
-
--- DropTable
-DROP TABLE "subscription_plans";
-
--- DropTable
-DROP TABLE "tenant_subscriptions";
-
--- DropTable
-DROP TABLE "tenants";
-
--- DropTable
-DROP TABLE "users";
-
--- DropEnum
-DROP TYPE "BillingCycle";
-
--- DropEnum
-DROP TYPE "SubscriptionStatus";
-
--- DropEnum
-DROP TYPE "TenantStatus";
-
--- DropEnum
-DROP TYPE "UserRole";
 
 -- CreateTable
 CREATE TABLE "products" (
