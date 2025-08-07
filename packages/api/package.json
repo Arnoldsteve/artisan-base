@@ -30,13 +30,13 @@
     "db:migrate:tenant:apply": "node scripts/tenant/migrate.js",
     "db:reset:tenant": "node scripts/tenant/migrate.js --reset",
     "tenant:create": "node scripts/tenant/create.js",
-    "tenant:migrate": "node scripts/tenant/migrate.js",
     "tenant:migrate-all": "node scripts/tenant/migrate-all.js",
     "tenant:health": "node scripts/tenant/health-check.js",
     "tenant:backup": "node scripts/tenant/backup.js",
     "tenant:backup-all": "node scripts/tenant/backup-all.js",
     "management:seed": "node scripts/management/seed.js",
-    "management:cleanup": "node scripts/management/cleanup.js"
+    "management:cleanup": "node scripts/management/cleanup.js",
+    "setup:database": "node scripts/setup-database.js"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
