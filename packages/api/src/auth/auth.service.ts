@@ -19,7 +19,7 @@ export class AuthService {
   ) {}
 
   async signUp(signUpDto: SignUpDto) {
-    const { email, password, firstName } = signUpDto;
+    const { email, password, firstName, lastName } = signUpDto;
 
     // Check if user already exists
     const existingUser = await this.authRepository.findUserByEmail(email);
@@ -35,6 +35,7 @@ export class AuthService {
       email,
       hashedPassword,
       firstName,
+      lastName,
     });
 
     const { hashedPassword: _, ...userWithoutPassword } = user;
