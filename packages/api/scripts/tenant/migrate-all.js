@@ -37,6 +37,8 @@ async function applyTenantMigrations(schemaName) {
     }
     const schemaUrl = `${CONFIG.MANAGEMENT_DATABASE_URL}?schema=${schemaName}`;
     const tenantClient = createTenantClient(schemaUrl);
+    // Set search_path to the tenant schema before running migrations
+    await tenantClient.$executeRawUnsafe(`SET search_path TO "${schemaName}";`);
     for (const folder of migrationFolders) {
       const migrationPath = path.join(
         tenantMigrationsDir,
@@ -54,6 +56,8 @@ async function applyTenantMigrations(schemaName) {
         }
       }
     }
+    // Reset search_path to public after migrations
+    await tenantClient.$executeRawUnsafe('SET search_path TO "public";');
     await disconnect(tenantClient, `tenant database (${schemaName})`);
     console.log(
       `✅ Tenant migrations applied successfully for schema: ${schemaName}`,
