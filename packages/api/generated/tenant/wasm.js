@@ -199,6 +199,7 @@ exports.Prisma.PaymentScalarFieldEnum = {
   amount: 'amount',
   currency: 'currency',
   status: 'status',
+  checkoutRequestId: 'checkoutRequestId',
   metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

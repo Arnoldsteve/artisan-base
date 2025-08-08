@@ -27,7 +27,6 @@
     "db:migrate:management:apply": "prisma migrate dev --schema=prisma/management.prisma",
     "db:reset:management": "prisma migrate reset --schema=prisma/management.prisma --force",
     "db:migrate:tenant:create": "node scripts/tenant/migrate.js --create-only",
-    "db:migrate:tenant:apply": "node scripts/tenant/migrate.js",
     "db:reset:tenant": "node scripts/tenant/migrate.js --reset",
     "tenant:create": "node scripts/tenant/create.js",
     "tenant:migrate-all": "node scripts/tenant/migrate-all.js",

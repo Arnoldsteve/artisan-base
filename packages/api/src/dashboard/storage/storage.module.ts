@@ -2,8 +2,7 @@ import { Module, Scope } from '@nestjs/common';
 import { StorageService } from './storage.service';
 import { StorageController } from './storage.controller';
 import { StorageRepository } from './storage.repository';
-// import { TenantPrismaModule } from 'src/prisma/tenant-prisma.module';
-import { TenantContextService } from 'src/common/tenant-context.service'; // <-- IMPORT CONTEXT
+import { TenantContextService } from 'src/common/tenant-context.service'; 
 
 @Module({
   imports: [],

@@ -9202,6 +9202,7 @@ export namespace Prisma {
     amount: Decimal | null
     currency: $Enums.Currency | null
     status: $Enums.PaymentStatus | null
+    checkoutRequestId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9214,6 +9215,7 @@ export namespace Prisma {
     amount: Decimal | null
     currency: $Enums.Currency | null
     status: $Enums.PaymentStatus | null
+    checkoutRequestId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9226,6 +9228,7 @@ export namespace Prisma {
     amount: number
     currency: number
     status: number
+    checkoutRequestId: number
     metadata: number
     createdAt: number
     updatedAt: number
@@ -9249,6 +9252,7 @@ export namespace Prisma {
     amount?: true
     currency?: true
     status?: true
+    checkoutRequestId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9261,6 +9265,7 @@ export namespace Prisma {
     amount?: true
     currency?: true
     status?: true
+    checkoutRequestId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9273,6 +9278,7 @@ export namespace Prisma {
     amount?: true
     currency?: true
     status?: true
+    checkoutRequestId?: true
     metadata?: true
     createdAt?: true
     updatedAt?: true
@@ -9373,6 +9379,7 @@ export namespace Prisma {
     amount: Decimal
     currency: $Enums.Currency
     status: $Enums.PaymentStatus
+    checkoutRequestId: string | null
     metadata: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -9405,6 +9412,7 @@ export namespace Prisma {
     amount?: boolean
     currency?: boolean
     status?: boolean
+    checkoutRequestId?: boolean
     metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -9419,6 +9427,7 @@ export namespace Prisma {
     amount?: boolean
     currency?: boolean
     status?: boolean
+    checkoutRequestId?: boolean
     metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -9433,6 +9442,7 @@ export namespace Prisma {
     amount?: boolean
     currency?: boolean
     status?: boolean
+    checkoutRequestId?: boolean
     metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -9447,12 +9457,13 @@ export namespace Prisma {
     amount?: boolean
     currency?: boolean
     status?: boolean
+    checkoutRequestId?: boolean
     metadata?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "provider" | "providerTransactionId" | "amount" | "currency" | "status" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "provider" | "providerTransactionId" | "amount" | "currency" | "status" | "checkoutRequestId" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
   export type PaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     order?: boolean | OrderDefaultArgs<ExtArgs>
   }
@@ -9476,6 +9487,7 @@ export namespace Prisma {
       amount: Prisma.Decimal
       currency: $Enums.Currency
       status: $Enums.PaymentStatus
+      checkoutRequestId: string | null
       metadata: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -9910,6 +9922,7 @@ export namespace Prisma {
     readonly amount: FieldRef<"Payment", 'Decimal'>
     readonly currency: FieldRef<"Payment", 'Currency'>
     readonly status: FieldRef<"Payment", 'PaymentStatus'>
+    readonly checkoutRequestId: FieldRef<"Payment", 'String'>
     readonly metadata: FieldRef<"Payment", 'Json'>
     readonly createdAt: FieldRef<"Payment", 'DateTime'>
     readonly updatedAt: FieldRef<"Payment", 'DateTime'>
@@ -14951,6 +14964,7 @@ export namespace Prisma {
     amount: 'amount',
     currency: 'currency',
     status: 'status',
+    checkoutRequestId: 'checkoutRequestId',
     metadata: 'metadata',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -15730,6 +15744,7 @@ export namespace Prisma {
     amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFilter<"Payment"> | $Enums.Currency
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
+    checkoutRequestId?: StringNullableFilter<"Payment"> | string | null
     metadata?: JsonNullableFilter<"Payment">
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
@@ -15744,6 +15759,7 @@ export namespace Prisma {
     amount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    checkoutRequestId?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -15752,6 +15768,7 @@ export namespace Prisma {
 
   export type PaymentWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    checkoutRequestId?: string
     provider_providerTransactionId?: PaymentProviderProviderTransactionIdCompoundUniqueInput
     AND?: PaymentWhereInput | PaymentWhereInput[]
     OR?: PaymentWhereInput[]
@@ -15766,7 +15783,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
     order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
-  }, "id" | "provider_providerTransactionId">
+  }, "id" | "checkoutRequestId" | "provider_providerTransactionId">
 
   export type PaymentOrderByWithAggregationInput = {
     id?: SortOrder
@@ -15776,6 +15793,7 @@ export namespace Prisma {
     amount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    checkoutRequestId?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -15797,6 +15815,7 @@ export namespace Prisma {
     amount?: DecimalWithAggregatesFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyWithAggregatesFilter<"Payment"> | $Enums.Currency
     status?: EnumPaymentStatusWithAggregatesFilter<"Payment"> | $Enums.PaymentStatus
+    checkoutRequestId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     metadata?: JsonNullableWithAggregatesFilter<"Payment">
     createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
@@ -16651,6 +16670,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     currency: $Enums.Currency
     status?: $Enums.PaymentStatus
+    checkoutRequestId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16665,6 +16685,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     currency: $Enums.Currency
     status?: $Enums.PaymentStatus
+    checkoutRequestId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16677,6 +16698,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16691,6 +16713,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16704,6 +16727,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     currency: $Enums.Currency
     status?: $Enums.PaymentStatus
+    checkoutRequestId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16716,6 +16740,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16729,6 +16754,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17762,6 +17788,7 @@ export namespace Prisma {
     amount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    checkoutRequestId?: SortOrder
     metadata?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -17779,6 +17806,7 @@ export namespace Prisma {
     amount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    checkoutRequestId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17791,6 +17819,7 @@ export namespace Prisma {
     amount?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    checkoutRequestId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -19670,6 +19699,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     currency: $Enums.Currency
     status?: $Enums.PaymentStatus
+    checkoutRequestId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19682,6 +19712,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     currency: $Enums.Currency
     status?: $Enums.PaymentStatus
+    checkoutRequestId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19777,6 +19808,7 @@ export namespace Prisma {
     amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFilter<"Payment"> | $Enums.Currency
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
+    checkoutRequestId?: StringNullableFilter<"Payment"> | string | null
     metadata?: JsonNullableFilter<"Payment">
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
@@ -20779,6 +20811,7 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     currency: $Enums.Currency
     status?: $Enums.PaymentStatus
+    checkoutRequestId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -20827,6 +20860,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20839,6 +20873,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20851,6 +20886,7 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     currency?: EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    checkoutRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

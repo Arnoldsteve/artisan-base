@@ -150,8 +150,8 @@ model Payment {
   currency              Currency
   status                PaymentStatus   @default(PENDING)
 
-  // Provider-specific metadata
-  metadata Json?
+  checkoutRequestId String? @unique
+  metadata          Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

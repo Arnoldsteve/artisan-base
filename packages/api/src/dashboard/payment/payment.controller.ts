@@ -1,8 +1,9 @@
-import { Controller, Post, Body, Scope, UseGuards, Get, Logger, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, Scope, UseGuards, Get, Logger, ValidationPipe, HttpCode, HttpStatus } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
 import { CapturePayPalOrderDto } from './dto/capture-payment.dto';
+import { MpesaStkCallbackDto } from './dto/mpesa-stk-callback.dto';
 
 @Controller({
   path: 'dashboard/payments', // The base path for all payment-related routes
@@ -37,6 +38,18 @@ export class PaymentController {
     return this.paymentService.handleWebhookEvent(event);
   }
 
+    @Post('webhook/mpesa')
+   @UseGuards() // This route must be public
+   @HttpCode(HttpStatus.OK)
+   async handleMpesaWebhook(@Body() callbackData: MpesaStkCallbackDto) {
+     this.logger.log('Received M-Pesa Webhook:', JSON.stringify(callbackData));
+     // We will create this method in the service next
+     await this.paymentService.handleMpesaStkCallback(callbackData); 
+     // Acknowledge receipt to M-Pesa
+     return { ResultCode: 0, ResultDesc: 'Accepted' };
+   }
+   
+
    @Post('capture/paypal')
   capturePayPalOrder(@Body(ValidationPipe) dto: CapturePayPalOrderDto) {
     this.logger.log(`Received request to capture PayPal order: ${dto.paypalOrderId}`);
@@ -45,12 +58,6 @@ export class PaymentController {
   }
 
 
-  // ... inside the PaymentController class ...
-
-  /**
-   * TEMPORARY endpoint to register C2B URLs with M-Pesa.
-   * Call this once from Postman to set up your callback URL.
-   */
   @Get('setup-mpesa')
   @UseGuards() // Unguarded for easy setup
   setupMpesa() {
