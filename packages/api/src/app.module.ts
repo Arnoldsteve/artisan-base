@@ -41,8 +41,8 @@ import { PaymentModule } from './dashboard/payment/payment.module';
     StorefrontModule,
     AdminHomeApiModule,
     StorageModule,
-    SupabaseModule, 
-    PaymentModule, 
+    SupabaseModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
@@ -59,7 +59,11 @@ export class AppModule implements NestModule {
     // TenantMiddleware is available. Since PrismaModule is global, it will be.
     consumer
       .apply(TenantMiddleware, TenantContextMiddleware)
-      // .forRoutes('v1/dashboard/*path')
+      .exclude(
+        'dashboard/payments/webhook/mpesa',
+        'dashboard/payments/webhook/stripe',
+        'dashboard/payments/webhook/paypal',
+      )
       .forRoutes('*');
   }
 }

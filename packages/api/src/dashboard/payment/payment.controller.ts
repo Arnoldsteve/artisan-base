@@ -38,10 +38,10 @@ export class PaymentController {
     return this.paymentService.handleWebhookEvent(event);
   }
 
-    @Post('webhook/mpesa')
-   @UseGuards() // This route must be public
-   @HttpCode(HttpStatus.OK)
-   async handleMpesaWebhook(@Body() callbackData: MpesaStkCallbackDto) {
+  @Post('webhook/mpesa')
+  @UseGuards() 
+  @HttpCode(HttpStatus.OK)
+  async handleMpesaWebhook(@Body() callbackData: MpesaStkCallbackDto) {
      this.logger.log('Received M-Pesa Webhook:', JSON.stringify(callbackData));
      // We will create this method in the service next
      await this.paymentService.handleMpesaStkCallback(callbackData); 

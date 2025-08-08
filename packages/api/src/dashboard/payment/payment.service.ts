@@ -6,7 +6,7 @@ import { PayPalService } from './paypal/paypal.service';
 import { CapturePayPalOrderDto } from './dto/capture-payment.dto';
 import { MpesaService } from './mpesa/mpesa.service';
 import { MpesaStkCallbackDto } from './dto/mpesa-stk-callback.dto';
-import { PaymentProvider, PaymentStatus } from 'generated/tenant';
+import { Currency, PaymentProvider, PaymentStatus } from 'generated/tenant';
 import { StorefrontOrderRepository } from 'src/storefront/orders/storefront-order.repository';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -88,10 +88,10 @@ export class PaymentService {
           orderId: dto.orderId,
           provider: PaymentProvider.MPESA,
           amount: dto.amount,
-          currency: 'KES', // M-Pesa is always in KES
+          currency: Currency.KES, 
           status: PaymentStatus.PENDING,
-          providerTransactionId: 'pending', // Placeholder
-          checkoutRequestId: mpesaResponse.CheckoutRequestID, // Store the link to the callback
+          providerTransactionId: mpesaResponse.CheckoutRequestID, 
+          checkoutRequestId: mpesaResponse.CheckoutRequestID, 
           metadata: {
             phoneNumber: dto.phoneNumber,
           },
