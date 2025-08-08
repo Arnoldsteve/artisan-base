@@ -14,22 +14,23 @@ datasource db {
 
 // Represents the tenant (a single store)
 model Tenant {
-  id           String              @id @default(cuid())
-  name         String
-  subdomain    String              @unique
-  customDomain String?             @unique
-  dbSchema     String              @unique
-  status       TenantStatus        @default(PENDING)
-  suspendedAt  DateTime?
-  deletedAt    DateTime?
-  owner        User                @relation(fields: [ownerId], references: [id])
-  ownerId      String
-  plan         SubscriptionPlan?   @relation(fields: [planId], references: [id])
-  planId       String?
-  subscription TenantSubscription?
-  settings     Json?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  id             String              @id @default(cuid())
+  name           String
+  subdomain      String              @unique
+  customDomain   String?             @unique
+  dbSchema       String              @unique
+  status         TenantStatus        @default(PENDING)
+  suspendedAt    DateTime?
+  deletedAt      DateTime?
+  owner          User                @relation(fields: [ownerId], references: [id])
+  ownerId        String
+  plan           SubscriptionPlan?   @relation(fields: [planId], references: [id])
+  planId         String?
+  subscription   TenantSubscription?
+  settings       Json?
+  paymentIndices PaymentIndex[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([ownerId])
   @@index([planId])
@@ -96,6 +97,18 @@ model TenantSubscription {
 
   @@unique([provider, providerSubscriptionId])
   @@map("tenant_subscriptions")
+}
+
+model PaymentIndex {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId           String // The ID of the order within the tenant's schema
+  checkoutRequestId String   @unique // The temporary ID from the payment provider
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("payment_indices")
 }
 
 // --- Enums ---

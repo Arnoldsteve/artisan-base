@@ -170,6 +170,14 @@ exports.Prisma.TenantSubscriptionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PaymentIndexScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  checkoutRequestId: 'checkoutRequestId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -228,7 +236,8 @@ exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   User: 'User',
   SubscriptionPlan: 'SubscriptionPlan',
-  TenantSubscription: 'TenantSubscription'
+  TenantSubscription: 'TenantSubscription',
+  PaymentIndex: 'PaymentIndex'
 };
 
 /**

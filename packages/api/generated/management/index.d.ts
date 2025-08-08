@@ -33,6 +33,11 @@ export type SubscriptionPlan = $Result.DefaultSelection<Prisma.$SubscriptionPlan
  * 
  */
 export type TenantSubscription = $Result.DefaultSelection<Prisma.$TenantSubscriptionPayload>
+/**
+ * Model PaymentIndex
+ * 
+ */
+export type PaymentIndex = $Result.DefaultSelection<Prisma.$PaymentIndexPayload>
 
 /**
  * Enums
@@ -256,6 +261,16 @@ export class PrismaClient<
     * ```
     */
   get tenantSubscription(): Prisma.TenantSubscriptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.paymentIndex`: Exposes CRUD operations for the **PaymentIndex** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PaymentIndices
+    * const paymentIndices = await prisma.paymentIndex.findMany()
+    * ```
+    */
+  get paymentIndex(): Prisma.PaymentIndexDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -699,7 +714,8 @@ export namespace Prisma {
     Tenant: 'Tenant',
     User: 'User',
     SubscriptionPlan: 'SubscriptionPlan',
-    TenantSubscription: 'TenantSubscription'
+    TenantSubscription: 'TenantSubscription',
+    PaymentIndex: 'PaymentIndex'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -718,7 +734,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "tenant" | "user" | "subscriptionPlan" | "tenantSubscription"
+      modelProps: "tenant" | "user" | "subscriptionPlan" | "tenantSubscription" | "paymentIndex"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1018,6 +1034,80 @@ export namespace Prisma {
           }
         }
       }
+      PaymentIndex: {
+        payload: Prisma.$PaymentIndexPayload<ExtArgs>
+        fields: Prisma.PaymentIndexFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PaymentIndexFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PaymentIndexFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>
+          }
+          findFirst: {
+            args: Prisma.PaymentIndexFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PaymentIndexFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>
+          }
+          findMany: {
+            args: Prisma.PaymentIndexFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>[]
+          }
+          create: {
+            args: Prisma.PaymentIndexCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>
+          }
+          createMany: {
+            args: Prisma.PaymentIndexCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PaymentIndexCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>[]
+          }
+          delete: {
+            args: Prisma.PaymentIndexDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>
+          }
+          update: {
+            args: Prisma.PaymentIndexUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>
+          }
+          deleteMany: {
+            args: Prisma.PaymentIndexDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PaymentIndexUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PaymentIndexUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>[]
+          }
+          upsert: {
+            args: Prisma.PaymentIndexUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentIndexPayload>
+          }
+          aggregate: {
+            args: Prisma.PaymentIndexAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePaymentIndex>
+          }
+          groupBy: {
+            args: Prisma.PaymentIndexGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PaymentIndexGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PaymentIndexCountArgs<ExtArgs>
+            result: $Utils.Optional<PaymentIndexCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1106,6 +1196,7 @@ export namespace Prisma {
     user?: UserOmit
     subscriptionPlan?: SubscriptionPlanOmit
     tenantSubscription?: TenantSubscriptionOmit
+    paymentIndex?: PaymentIndexOmit
   }
 
   /* Types for Logging */
@@ -1193,6 +1284,37 @@ export namespace Prisma {
   /**
    * Count Types
    */
+
+
+  /**
+   * Count Type TenantCountOutputType
+   */
+
+  export type TenantCountOutputType = {
+    paymentIndices: number
+  }
+
+  export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    paymentIndices?: boolean | TenantCountOutputTypeCountPaymentIndicesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantCountOutputType
+     */
+    select?: TenantCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountPaymentIndicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentIndexWhereInput
+  }
 
 
   /**
@@ -1497,6 +1619,8 @@ export namespace Prisma {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     plan?: boolean | Tenant$planArgs<ExtArgs>
     subscription?: boolean | Tenant$subscriptionArgs<ExtArgs>
+    paymentIndices?: boolean | Tenant$paymentIndicesArgs<ExtArgs>
+    _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1556,6 +1680,8 @@ export namespace Prisma {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     plan?: boolean | Tenant$planArgs<ExtArgs>
     subscription?: boolean | Tenant$subscriptionArgs<ExtArgs>
+    paymentIndices?: boolean | Tenant$paymentIndicesArgs<ExtArgs>
+    _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -1572,6 +1698,7 @@ export namespace Prisma {
       owner: Prisma.$UserPayload<ExtArgs>
       plan: Prisma.$SubscriptionPlanPayload<ExtArgs> | null
       subscription: Prisma.$TenantSubscriptionPayload<ExtArgs> | null
+      paymentIndices: Prisma.$PaymentIndexPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1984,6 +2111,7 @@ export namespace Prisma {
     owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     plan<T extends Tenant$planArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$planArgs<ExtArgs>>): Prisma__SubscriptionPlanClient<$Result.GetResult<Prisma.$SubscriptionPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     subscription<T extends Tenant$subscriptionArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$subscriptionArgs<ExtArgs>>): Prisma__TenantSubscriptionClient<$Result.GetResult<Prisma.$TenantSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    paymentIndices<T extends Tenant$paymentIndicesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$paymentIndicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2457,6 +2585,30 @@ export namespace Prisma {
      */
     include?: TenantSubscriptionInclude<ExtArgs> | null
     where?: TenantSubscriptionWhereInput
+  }
+
+  /**
+   * Tenant.paymentIndices
+   */
+  export type Tenant$paymentIndicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    where?: PaymentIndexWhereInput
+    orderBy?: PaymentIndexOrderByWithRelationInput | PaymentIndexOrderByWithRelationInput[]
+    cursor?: PaymentIndexWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentIndexScalarFieldEnum | PaymentIndexScalarFieldEnum[]
   }
 
   /**
@@ -5873,6 +6025,1064 @@ export namespace Prisma {
 
 
   /**
+   * Model PaymentIndex
+   */
+
+  export type AggregatePaymentIndex = {
+    _count: PaymentIndexCountAggregateOutputType | null
+    _min: PaymentIndexMinAggregateOutputType | null
+    _max: PaymentIndexMaxAggregateOutputType | null
+  }
+
+  export type PaymentIndexMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    orderId: string | null
+    checkoutRequestId: string | null
+    createdAt: Date | null
+  }
+
+  export type PaymentIndexMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    orderId: string | null
+    checkoutRequestId: string | null
+    createdAt: Date | null
+  }
+
+  export type PaymentIndexCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    orderId: number
+    checkoutRequestId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PaymentIndexMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    orderId?: true
+    checkoutRequestId?: true
+    createdAt?: true
+  }
+
+  export type PaymentIndexMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    orderId?: true
+    checkoutRequestId?: true
+    createdAt?: true
+  }
+
+  export type PaymentIndexCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    orderId?: true
+    checkoutRequestId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PaymentIndexAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PaymentIndex to aggregate.
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentIndices to fetch.
+     */
+    orderBy?: PaymentIndexOrderByWithRelationInput | PaymentIndexOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PaymentIndexWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentIndices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentIndices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PaymentIndices
+    **/
+    _count?: true | PaymentIndexCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PaymentIndexMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PaymentIndexMaxAggregateInputType
+  }
+
+  export type GetPaymentIndexAggregateType<T extends PaymentIndexAggregateArgs> = {
+        [P in keyof T & keyof AggregatePaymentIndex]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePaymentIndex[P]>
+      : GetScalarType<T[P], AggregatePaymentIndex[P]>
+  }
+
+
+
+
+  export type PaymentIndexGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentIndexWhereInput
+    orderBy?: PaymentIndexOrderByWithAggregationInput | PaymentIndexOrderByWithAggregationInput[]
+    by: PaymentIndexScalarFieldEnum[] | PaymentIndexScalarFieldEnum
+    having?: PaymentIndexScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PaymentIndexCountAggregateInputType | true
+    _min?: PaymentIndexMinAggregateInputType
+    _max?: PaymentIndexMaxAggregateInputType
+  }
+
+  export type PaymentIndexGroupByOutputType = {
+    id: string
+    tenantId: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt: Date
+    _count: PaymentIndexCountAggregateOutputType | null
+    _min: PaymentIndexMinAggregateOutputType | null
+    _max: PaymentIndexMaxAggregateOutputType | null
+  }
+
+  type GetPaymentIndexGroupByPayload<T extends PaymentIndexGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PaymentIndexGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PaymentIndexGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PaymentIndexGroupByOutputType[P]>
+            : GetScalarType<T[P], PaymentIndexGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PaymentIndexSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    orderId?: boolean
+    checkoutRequestId?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paymentIndex"]>
+
+  export type PaymentIndexSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    orderId?: boolean
+    checkoutRequestId?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paymentIndex"]>
+
+  export type PaymentIndexSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    orderId?: boolean
+    checkoutRequestId?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paymentIndex"]>
+
+  export type PaymentIndexSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    orderId?: boolean
+    checkoutRequestId?: boolean
+    createdAt?: boolean
+  }
+
+  export type PaymentIndexOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "orderId" | "checkoutRequestId" | "createdAt", ExtArgs["result"]["paymentIndex"]>
+  export type PaymentIndexInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type PaymentIndexIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type PaymentIndexIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $PaymentIndexPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PaymentIndex"
+    objects: {
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      orderId: string
+      checkoutRequestId: string
+      createdAt: Date
+    }, ExtArgs["result"]["paymentIndex"]>
+    composites: {}
+  }
+
+  type PaymentIndexGetPayload<S extends boolean | null | undefined | PaymentIndexDefaultArgs> = $Result.GetResult<Prisma.$PaymentIndexPayload, S>
+
+  type PaymentIndexCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PaymentIndexFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PaymentIndexCountAggregateInputType | true
+    }
+
+  export interface PaymentIndexDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PaymentIndex'], meta: { name: 'PaymentIndex' } }
+    /**
+     * Find zero or one PaymentIndex that matches the filter.
+     * @param {PaymentIndexFindUniqueArgs} args - Arguments to find a PaymentIndex
+     * @example
+     * // Get one PaymentIndex
+     * const paymentIndex = await prisma.paymentIndex.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PaymentIndexFindUniqueArgs>(args: SelectSubset<T, PaymentIndexFindUniqueArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PaymentIndex that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PaymentIndexFindUniqueOrThrowArgs} args - Arguments to find a PaymentIndex
+     * @example
+     * // Get one PaymentIndex
+     * const paymentIndex = await prisma.paymentIndex.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PaymentIndexFindUniqueOrThrowArgs>(args: SelectSubset<T, PaymentIndexFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PaymentIndex that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexFindFirstArgs} args - Arguments to find a PaymentIndex
+     * @example
+     * // Get one PaymentIndex
+     * const paymentIndex = await prisma.paymentIndex.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PaymentIndexFindFirstArgs>(args?: SelectSubset<T, PaymentIndexFindFirstArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PaymentIndex that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexFindFirstOrThrowArgs} args - Arguments to find a PaymentIndex
+     * @example
+     * // Get one PaymentIndex
+     * const paymentIndex = await prisma.paymentIndex.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PaymentIndexFindFirstOrThrowArgs>(args?: SelectSubset<T, PaymentIndexFindFirstOrThrowArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PaymentIndices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PaymentIndices
+     * const paymentIndices = await prisma.paymentIndex.findMany()
+     * 
+     * // Get first 10 PaymentIndices
+     * const paymentIndices = await prisma.paymentIndex.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const paymentIndexWithIdOnly = await prisma.paymentIndex.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PaymentIndexFindManyArgs>(args?: SelectSubset<T, PaymentIndexFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PaymentIndex.
+     * @param {PaymentIndexCreateArgs} args - Arguments to create a PaymentIndex.
+     * @example
+     * // Create one PaymentIndex
+     * const PaymentIndex = await prisma.paymentIndex.create({
+     *   data: {
+     *     // ... data to create a PaymentIndex
+     *   }
+     * })
+     * 
+     */
+    create<T extends PaymentIndexCreateArgs>(args: SelectSubset<T, PaymentIndexCreateArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PaymentIndices.
+     * @param {PaymentIndexCreateManyArgs} args - Arguments to create many PaymentIndices.
+     * @example
+     * // Create many PaymentIndices
+     * const paymentIndex = await prisma.paymentIndex.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PaymentIndexCreateManyArgs>(args?: SelectSubset<T, PaymentIndexCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PaymentIndices and returns the data saved in the database.
+     * @param {PaymentIndexCreateManyAndReturnArgs} args - Arguments to create many PaymentIndices.
+     * @example
+     * // Create many PaymentIndices
+     * const paymentIndex = await prisma.paymentIndex.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PaymentIndices and only return the `id`
+     * const paymentIndexWithIdOnly = await prisma.paymentIndex.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PaymentIndexCreateManyAndReturnArgs>(args?: SelectSubset<T, PaymentIndexCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PaymentIndex.
+     * @param {PaymentIndexDeleteArgs} args - Arguments to delete one PaymentIndex.
+     * @example
+     * // Delete one PaymentIndex
+     * const PaymentIndex = await prisma.paymentIndex.delete({
+     *   where: {
+     *     // ... filter to delete one PaymentIndex
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PaymentIndexDeleteArgs>(args: SelectSubset<T, PaymentIndexDeleteArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PaymentIndex.
+     * @param {PaymentIndexUpdateArgs} args - Arguments to update one PaymentIndex.
+     * @example
+     * // Update one PaymentIndex
+     * const paymentIndex = await prisma.paymentIndex.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PaymentIndexUpdateArgs>(args: SelectSubset<T, PaymentIndexUpdateArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PaymentIndices.
+     * @param {PaymentIndexDeleteManyArgs} args - Arguments to filter PaymentIndices to delete.
+     * @example
+     * // Delete a few PaymentIndices
+     * const { count } = await prisma.paymentIndex.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PaymentIndexDeleteManyArgs>(args?: SelectSubset<T, PaymentIndexDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PaymentIndices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PaymentIndices
+     * const paymentIndex = await prisma.paymentIndex.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PaymentIndexUpdateManyArgs>(args: SelectSubset<T, PaymentIndexUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PaymentIndices and returns the data updated in the database.
+     * @param {PaymentIndexUpdateManyAndReturnArgs} args - Arguments to update many PaymentIndices.
+     * @example
+     * // Update many PaymentIndices
+     * const paymentIndex = await prisma.paymentIndex.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PaymentIndices and only return the `id`
+     * const paymentIndexWithIdOnly = await prisma.paymentIndex.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PaymentIndexUpdateManyAndReturnArgs>(args: SelectSubset<T, PaymentIndexUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PaymentIndex.
+     * @param {PaymentIndexUpsertArgs} args - Arguments to update or create a PaymentIndex.
+     * @example
+     * // Update or create a PaymentIndex
+     * const paymentIndex = await prisma.paymentIndex.upsert({
+     *   create: {
+     *     // ... data to create a PaymentIndex
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PaymentIndex we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PaymentIndexUpsertArgs>(args: SelectSubset<T, PaymentIndexUpsertArgs<ExtArgs>>): Prisma__PaymentIndexClient<$Result.GetResult<Prisma.$PaymentIndexPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PaymentIndices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexCountArgs} args - Arguments to filter PaymentIndices to count.
+     * @example
+     * // Count the number of PaymentIndices
+     * const count = await prisma.paymentIndex.count({
+     *   where: {
+     *     // ... the filter for the PaymentIndices we want to count
+     *   }
+     * })
+    **/
+    count<T extends PaymentIndexCountArgs>(
+      args?: Subset<T, PaymentIndexCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PaymentIndexCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PaymentIndex.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PaymentIndexAggregateArgs>(args: Subset<T, PaymentIndexAggregateArgs>): Prisma.PrismaPromise<GetPaymentIndexAggregateType<T>>
+
+    /**
+     * Group by PaymentIndex.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentIndexGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PaymentIndexGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PaymentIndexGroupByArgs['orderBy'] }
+        : { orderBy?: PaymentIndexGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PaymentIndexGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPaymentIndexGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PaymentIndex model
+   */
+  readonly fields: PaymentIndexFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PaymentIndex.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PaymentIndexClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PaymentIndex model
+   */
+  interface PaymentIndexFieldRefs {
+    readonly id: FieldRef<"PaymentIndex", 'String'>
+    readonly tenantId: FieldRef<"PaymentIndex", 'String'>
+    readonly orderId: FieldRef<"PaymentIndex", 'String'>
+    readonly checkoutRequestId: FieldRef<"PaymentIndex", 'String'>
+    readonly createdAt: FieldRef<"PaymentIndex", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PaymentIndex findUnique
+   */
+  export type PaymentIndexFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentIndex to fetch.
+     */
+    where: PaymentIndexWhereUniqueInput
+  }
+
+  /**
+   * PaymentIndex findUniqueOrThrow
+   */
+  export type PaymentIndexFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentIndex to fetch.
+     */
+    where: PaymentIndexWhereUniqueInput
+  }
+
+  /**
+   * PaymentIndex findFirst
+   */
+  export type PaymentIndexFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentIndex to fetch.
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentIndices to fetch.
+     */
+    orderBy?: PaymentIndexOrderByWithRelationInput | PaymentIndexOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PaymentIndices.
+     */
+    cursor?: PaymentIndexWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentIndices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentIndices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaymentIndices.
+     */
+    distinct?: PaymentIndexScalarFieldEnum | PaymentIndexScalarFieldEnum[]
+  }
+
+  /**
+   * PaymentIndex findFirstOrThrow
+   */
+  export type PaymentIndexFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentIndex to fetch.
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentIndices to fetch.
+     */
+    orderBy?: PaymentIndexOrderByWithRelationInput | PaymentIndexOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PaymentIndices.
+     */
+    cursor?: PaymentIndexWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentIndices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentIndices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaymentIndices.
+     */
+    distinct?: PaymentIndexScalarFieldEnum | PaymentIndexScalarFieldEnum[]
+  }
+
+  /**
+   * PaymentIndex findMany
+   */
+  export type PaymentIndexFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentIndices to fetch.
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentIndices to fetch.
+     */
+    orderBy?: PaymentIndexOrderByWithRelationInput | PaymentIndexOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PaymentIndices.
+     */
+    cursor?: PaymentIndexWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentIndices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentIndices.
+     */
+    skip?: number
+    distinct?: PaymentIndexScalarFieldEnum | PaymentIndexScalarFieldEnum[]
+  }
+
+  /**
+   * PaymentIndex create
+   */
+  export type PaymentIndexCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PaymentIndex.
+     */
+    data: XOR<PaymentIndexCreateInput, PaymentIndexUncheckedCreateInput>
+  }
+
+  /**
+   * PaymentIndex createMany
+   */
+  export type PaymentIndexCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PaymentIndices.
+     */
+    data: PaymentIndexCreateManyInput | PaymentIndexCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PaymentIndex createManyAndReturn
+   */
+  export type PaymentIndexCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * The data used to create many PaymentIndices.
+     */
+    data: PaymentIndexCreateManyInput | PaymentIndexCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PaymentIndex update
+   */
+  export type PaymentIndexUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PaymentIndex.
+     */
+    data: XOR<PaymentIndexUpdateInput, PaymentIndexUncheckedUpdateInput>
+    /**
+     * Choose, which PaymentIndex to update.
+     */
+    where: PaymentIndexWhereUniqueInput
+  }
+
+  /**
+   * PaymentIndex updateMany
+   */
+  export type PaymentIndexUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PaymentIndices.
+     */
+    data: XOR<PaymentIndexUpdateManyMutationInput, PaymentIndexUncheckedUpdateManyInput>
+    /**
+     * Filter which PaymentIndices to update
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * Limit how many PaymentIndices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PaymentIndex updateManyAndReturn
+   */
+  export type PaymentIndexUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * The data used to update PaymentIndices.
+     */
+    data: XOR<PaymentIndexUpdateManyMutationInput, PaymentIndexUncheckedUpdateManyInput>
+    /**
+     * Filter which PaymentIndices to update
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * Limit how many PaymentIndices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PaymentIndex upsert
+   */
+  export type PaymentIndexUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PaymentIndex to update in case it exists.
+     */
+    where: PaymentIndexWhereUniqueInput
+    /**
+     * In case the PaymentIndex found by the `where` argument doesn't exist, create a new PaymentIndex with this data.
+     */
+    create: XOR<PaymentIndexCreateInput, PaymentIndexUncheckedCreateInput>
+    /**
+     * In case the PaymentIndex was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PaymentIndexUpdateInput, PaymentIndexUncheckedUpdateInput>
+  }
+
+  /**
+   * PaymentIndex delete
+   */
+  export type PaymentIndexDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+    /**
+     * Filter which PaymentIndex to delete.
+     */
+    where: PaymentIndexWhereUniqueInput
+  }
+
+  /**
+   * PaymentIndex deleteMany
+   */
+  export type PaymentIndexDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PaymentIndices to delete
+     */
+    where?: PaymentIndexWhereInput
+    /**
+     * Limit how many PaymentIndices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PaymentIndex without action
+   */
+  export type PaymentIndexDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentIndex
+     */
+    select?: PaymentIndexSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentIndex
+     */
+    omit?: PaymentIndexOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentIndexInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5946,6 +7156,17 @@ export namespace Prisma {
   };
 
   export type TenantSubscriptionScalarFieldEnum = (typeof TenantSubscriptionScalarFieldEnum)[keyof typeof TenantSubscriptionScalarFieldEnum]
+
+
+  export const PaymentIndexScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    orderId: 'orderId',
+    checkoutRequestId: 'checkoutRequestId',
+    createdAt: 'createdAt'
+  };
+
+  export type PaymentIndexScalarFieldEnum = (typeof PaymentIndexScalarFieldEnum)[keyof typeof PaymentIndexScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -6150,6 +7371,7 @@ export namespace Prisma {
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     plan?: XOR<SubscriptionPlanNullableScalarRelationFilter, SubscriptionPlanWhereInput> | null
     subscription?: XOR<TenantSubscriptionNullableScalarRelationFilter, TenantSubscriptionWhereInput> | null
+    paymentIndices?: PaymentIndexListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -6169,6 +7391,7 @@ export namespace Prisma {
     owner?: UserOrderByWithRelationInput
     plan?: SubscriptionPlanOrderByWithRelationInput
     subscription?: TenantSubscriptionOrderByWithRelationInput
+    paymentIndices?: PaymentIndexOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -6191,6 +7414,7 @@ export namespace Prisma {
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     plan?: XOR<SubscriptionPlanNullableScalarRelationFilter, SubscriptionPlanWhereInput> | null
     subscription?: XOR<TenantSubscriptionNullableScalarRelationFilter, TenantSubscriptionWhereInput> | null
+    paymentIndices?: PaymentIndexListRelationFilter
   }, "id" | "subdomain" | "customDomain" | "dbSchema">
 
   export type TenantOrderByWithAggregationInput = {
@@ -6455,6 +7679,61 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"TenantSubscription"> | Date | string
   }
 
+  export type PaymentIndexWhereInput = {
+    AND?: PaymentIndexWhereInput | PaymentIndexWhereInput[]
+    OR?: PaymentIndexWhereInput[]
+    NOT?: PaymentIndexWhereInput | PaymentIndexWhereInput[]
+    id?: StringFilter<"PaymentIndex"> | string
+    tenantId?: StringFilter<"PaymentIndex"> | string
+    orderId?: StringFilter<"PaymentIndex"> | string
+    checkoutRequestId?: StringFilter<"PaymentIndex"> | string
+    createdAt?: DateTimeFilter<"PaymentIndex"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type PaymentIndexOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    orderId?: SortOrder
+    checkoutRequestId?: SortOrder
+    createdAt?: SortOrder
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type PaymentIndexWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    checkoutRequestId?: string
+    AND?: PaymentIndexWhereInput | PaymentIndexWhereInput[]
+    OR?: PaymentIndexWhereInput[]
+    NOT?: PaymentIndexWhereInput | PaymentIndexWhereInput[]
+    tenantId?: StringFilter<"PaymentIndex"> | string
+    orderId?: StringFilter<"PaymentIndex"> | string
+    createdAt?: DateTimeFilter<"PaymentIndex"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id" | "checkoutRequestId">
+
+  export type PaymentIndexOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    orderId?: SortOrder
+    checkoutRequestId?: SortOrder
+    createdAt?: SortOrder
+    _count?: PaymentIndexCountOrderByAggregateInput
+    _max?: PaymentIndexMaxOrderByAggregateInput
+    _min?: PaymentIndexMinOrderByAggregateInput
+  }
+
+  export type PaymentIndexScalarWhereWithAggregatesInput = {
+    AND?: PaymentIndexScalarWhereWithAggregatesInput | PaymentIndexScalarWhereWithAggregatesInput[]
+    OR?: PaymentIndexScalarWhereWithAggregatesInput[]
+    NOT?: PaymentIndexScalarWhereWithAggregatesInput | PaymentIndexScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PaymentIndex"> | string
+    tenantId?: StringWithAggregatesFilter<"PaymentIndex"> | string
+    orderId?: StringWithAggregatesFilter<"PaymentIndex"> | string
+    checkoutRequestId?: StringWithAggregatesFilter<"PaymentIndex"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"PaymentIndex"> | Date | string
+  }
+
   export type TenantCreateInput = {
     id?: string
     name: string
@@ -6470,6 +7749,7 @@ export namespace Prisma {
     owner: UserCreateNestedOneWithoutOwnedTenantInput
     plan?: SubscriptionPlanCreateNestedOneWithoutTenantsInput
     subscription?: TenantSubscriptionCreateNestedOneWithoutTenantInput
+    paymentIndices?: PaymentIndexCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -6487,6 +7767,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     subscription?: TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    paymentIndices?: PaymentIndexUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -6504,6 +7785,7 @@ export namespace Prisma {
     owner?: UserUpdateOneRequiredWithoutOwnedTenantNestedInput
     plan?: SubscriptionPlanUpdateOneWithoutTenantsNestedInput
     subscription?: TenantSubscriptionUpdateOneWithoutTenantNestedInput
+    paymentIndices?: PaymentIndexUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -6521,6 +7803,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subscription?: TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    paymentIndices?: PaymentIndexUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -6817,6 +8100,61 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PaymentIndexCreateInput = {
+    id?: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutPaymentIndicesInput
+  }
+
+  export type PaymentIndexUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt?: Date | string
+  }
+
+  export type PaymentIndexUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutPaymentIndicesNestedInput
+  }
+
+  export type PaymentIndexUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentIndexCreateManyInput = {
+    id?: string
+    tenantId: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt?: Date | string
+  }
+
+  export type PaymentIndexUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentIndexUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -6914,9 +8252,19 @@ export namespace Prisma {
     isNot?: TenantSubscriptionWhereInput | null
   }
 
+  export type PaymentIndexListRelationFilter = {
+    every?: PaymentIndexWhereInput
+    some?: PaymentIndexWhereInput
+    none?: PaymentIndexWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type PaymentIndexOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type TenantCountOrderByAggregateInput = {
@@ -7335,6 +8683,30 @@ export namespace Prisma {
     _max?: NestedEnumSubscriptionStatusFilter<$PrismaModel>
   }
 
+  export type PaymentIndexCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    orderId?: SortOrder
+    checkoutRequestId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PaymentIndexMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    orderId?: SortOrder
+    checkoutRequestId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PaymentIndexMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    orderId?: SortOrder
+    checkoutRequestId?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type UserCreateNestedOneWithoutOwnedTenantInput = {
     create?: XOR<UserCreateWithoutOwnedTenantInput, UserUncheckedCreateWithoutOwnedTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutOwnedTenantInput
@@ -7353,10 +8725,24 @@ export namespace Prisma {
     connect?: TenantSubscriptionWhereUniqueInput
   }
 
+  export type PaymentIndexCreateNestedManyWithoutTenantInput = {
+    create?: XOR<PaymentIndexCreateWithoutTenantInput, PaymentIndexUncheckedCreateWithoutTenantInput> | PaymentIndexCreateWithoutTenantInput[] | PaymentIndexUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentIndexCreateOrConnectWithoutTenantInput | PaymentIndexCreateOrConnectWithoutTenantInput[]
+    createMany?: PaymentIndexCreateManyTenantInputEnvelope
+    connect?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+  }
+
   export type TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput = {
     create?: XOR<TenantSubscriptionCreateWithoutTenantInput, TenantSubscriptionUncheckedCreateWithoutTenantInput>
     connectOrCreate?: TenantSubscriptionCreateOrConnectWithoutTenantInput
     connect?: TenantSubscriptionWhereUniqueInput
+  }
+
+  export type PaymentIndexUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<PaymentIndexCreateWithoutTenantInput, PaymentIndexUncheckedCreateWithoutTenantInput> | PaymentIndexCreateWithoutTenantInput[] | PaymentIndexUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentIndexCreateOrConnectWithoutTenantInput | PaymentIndexCreateOrConnectWithoutTenantInput[]
+    createMany?: PaymentIndexCreateManyTenantInputEnvelope
+    connect?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -7407,6 +8793,20 @@ export namespace Prisma {
     update?: XOR<XOR<TenantSubscriptionUpdateToOneWithWhereWithoutTenantInput, TenantSubscriptionUpdateWithoutTenantInput>, TenantSubscriptionUncheckedUpdateWithoutTenantInput>
   }
 
+  export type PaymentIndexUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<PaymentIndexCreateWithoutTenantInput, PaymentIndexUncheckedCreateWithoutTenantInput> | PaymentIndexCreateWithoutTenantInput[] | PaymentIndexUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentIndexCreateOrConnectWithoutTenantInput | PaymentIndexCreateOrConnectWithoutTenantInput[]
+    upsert?: PaymentIndexUpsertWithWhereUniqueWithoutTenantInput | PaymentIndexUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: PaymentIndexCreateManyTenantInputEnvelope
+    set?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    disconnect?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    delete?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    connect?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    update?: PaymentIndexUpdateWithWhereUniqueWithoutTenantInput | PaymentIndexUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: PaymentIndexUpdateManyWithWhereWithoutTenantInput | PaymentIndexUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: PaymentIndexScalarWhereInput | PaymentIndexScalarWhereInput[]
+  }
+
   export type TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput = {
     create?: XOR<TenantSubscriptionCreateWithoutTenantInput, TenantSubscriptionUncheckedCreateWithoutTenantInput>
     connectOrCreate?: TenantSubscriptionCreateOrConnectWithoutTenantInput
@@ -7415,6 +8815,20 @@ export namespace Prisma {
     delete?: TenantSubscriptionWhereInput | boolean
     connect?: TenantSubscriptionWhereUniqueInput
     update?: XOR<XOR<TenantSubscriptionUpdateToOneWithWhereWithoutTenantInput, TenantSubscriptionUpdateWithoutTenantInput>, TenantSubscriptionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type PaymentIndexUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<PaymentIndexCreateWithoutTenantInput, PaymentIndexUncheckedCreateWithoutTenantInput> | PaymentIndexCreateWithoutTenantInput[] | PaymentIndexUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentIndexCreateOrConnectWithoutTenantInput | PaymentIndexCreateOrConnectWithoutTenantInput[]
+    upsert?: PaymentIndexUpsertWithWhereUniqueWithoutTenantInput | PaymentIndexUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: PaymentIndexCreateManyTenantInputEnvelope
+    set?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    disconnect?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    delete?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    connect?: PaymentIndexWhereUniqueInput | PaymentIndexWhereUniqueInput[]
+    update?: PaymentIndexUpdateWithWhereUniqueWithoutTenantInput | PaymentIndexUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: PaymentIndexUpdateManyWithWhereWithoutTenantInput | PaymentIndexUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: PaymentIndexScalarWhereInput | PaymentIndexScalarWhereInput[]
   }
 
   export type TenantCreateNestedManyWithoutOwnerInput = {
@@ -7589,6 +9003,20 @@ export namespace Prisma {
     upsert?: SubscriptionPlanUpsertWithoutSubscriptionsInput
     connect?: SubscriptionPlanWhereUniqueInput
     update?: XOR<XOR<SubscriptionPlanUpdateToOneWithWhereWithoutSubscriptionsInput, SubscriptionPlanUpdateWithoutSubscriptionsInput>, SubscriptionPlanUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type TenantCreateNestedOneWithoutPaymentIndicesInput = {
+    create?: XOR<TenantCreateWithoutPaymentIndicesInput, TenantUncheckedCreateWithoutPaymentIndicesInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPaymentIndicesInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type TenantUpdateOneRequiredWithoutPaymentIndicesNestedInput = {
+    create?: XOR<TenantCreateWithoutPaymentIndicesInput, TenantUncheckedCreateWithoutPaymentIndicesInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPaymentIndicesInput
+    upsert?: TenantUpsertWithoutPaymentIndicesInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutPaymentIndicesInput, TenantUpdateWithoutPaymentIndicesInput>, TenantUncheckedUpdateWithoutPaymentIndicesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -7949,6 +9377,30 @@ export namespace Prisma {
     create: XOR<TenantSubscriptionCreateWithoutTenantInput, TenantSubscriptionUncheckedCreateWithoutTenantInput>
   }
 
+  export type PaymentIndexCreateWithoutTenantInput = {
+    id?: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt?: Date | string
+  }
+
+  export type PaymentIndexUncheckedCreateWithoutTenantInput = {
+    id?: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt?: Date | string
+  }
+
+  export type PaymentIndexCreateOrConnectWithoutTenantInput = {
+    where: PaymentIndexWhereUniqueInput
+    create: XOR<PaymentIndexCreateWithoutTenantInput, PaymentIndexUncheckedCreateWithoutTenantInput>
+  }
+
+  export type PaymentIndexCreateManyTenantInputEnvelope = {
+    data: PaymentIndexCreateManyTenantInput | PaymentIndexCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutOwnedTenantInput = {
     update: XOR<UserUpdateWithoutOwnedTenantInput, UserUncheckedUpdateWithoutOwnedTenantInput>
     create: XOR<UserCreateWithoutOwnedTenantInput, UserUncheckedCreateWithoutOwnedTenantInput>
@@ -8050,6 +9502,33 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PaymentIndexUpsertWithWhereUniqueWithoutTenantInput = {
+    where: PaymentIndexWhereUniqueInput
+    update: XOR<PaymentIndexUpdateWithoutTenantInput, PaymentIndexUncheckedUpdateWithoutTenantInput>
+    create: XOR<PaymentIndexCreateWithoutTenantInput, PaymentIndexUncheckedCreateWithoutTenantInput>
+  }
+
+  export type PaymentIndexUpdateWithWhereUniqueWithoutTenantInput = {
+    where: PaymentIndexWhereUniqueInput
+    data: XOR<PaymentIndexUpdateWithoutTenantInput, PaymentIndexUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type PaymentIndexUpdateManyWithWhereWithoutTenantInput = {
+    where: PaymentIndexScalarWhereInput
+    data: XOR<PaymentIndexUpdateManyMutationInput, PaymentIndexUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type PaymentIndexScalarWhereInput = {
+    AND?: PaymentIndexScalarWhereInput | PaymentIndexScalarWhereInput[]
+    OR?: PaymentIndexScalarWhereInput[]
+    NOT?: PaymentIndexScalarWhereInput | PaymentIndexScalarWhereInput[]
+    id?: StringFilter<"PaymentIndex"> | string
+    tenantId?: StringFilter<"PaymentIndex"> | string
+    orderId?: StringFilter<"PaymentIndex"> | string
+    checkoutRequestId?: StringFilter<"PaymentIndex"> | string
+    createdAt?: DateTimeFilter<"PaymentIndex"> | Date | string
+  }
+
   export type TenantCreateWithoutOwnerInput = {
     id?: string
     name: string
@@ -8064,6 +9543,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     plan?: SubscriptionPlanCreateNestedOneWithoutTenantsInput
     subscription?: TenantSubscriptionCreateNestedOneWithoutTenantInput
+    paymentIndices?: PaymentIndexCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutOwnerInput = {
@@ -8080,6 +9560,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     subscription?: TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    paymentIndices?: PaymentIndexUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutOwnerInput = {
@@ -8141,6 +9622,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedTenantInput
     subscription?: TenantSubscriptionCreateNestedOneWithoutTenantInput
+    paymentIndices?: PaymentIndexCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutPlanInput = {
@@ -8157,6 +9639,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     subscription?: TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    paymentIndices?: PaymentIndexUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutPlanInput = {
@@ -8268,6 +9751,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedTenantInput
     plan?: SubscriptionPlanCreateNestedOneWithoutTenantsInput
+    paymentIndices?: PaymentIndexCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutSubscriptionInput = {
@@ -8284,6 +9768,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    paymentIndices?: PaymentIndexUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutSubscriptionInput = {
@@ -8341,6 +9826,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedTenantNestedInput
     plan?: SubscriptionPlanUpdateOneWithoutTenantsNestedInput
+    paymentIndices?: PaymentIndexUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutSubscriptionInput = {
@@ -8357,6 +9843,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentIndices?: PaymentIndexUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type SubscriptionPlanUpsertWithoutSubscriptionsInput = {
@@ -8390,6 +9877,118 @@ export namespace Prisma {
     tenants?: TenantUncheckedUpdateManyWithoutPlanNestedInput
   }
 
+  export type TenantCreateWithoutPaymentIndicesInput = {
+    id?: string
+    name: string
+    subdomain: string
+    customDomain?: string | null
+    dbSchema: string
+    status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    owner: UserCreateNestedOneWithoutOwnedTenantInput
+    plan?: SubscriptionPlanCreateNestedOneWithoutTenantsInput
+    subscription?: TenantSubscriptionCreateNestedOneWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutPaymentIndicesInput = {
+    id?: string
+    name: string
+    subdomain: string
+    customDomain?: string | null
+    dbSchema: string
+    status?: $Enums.TenantStatus
+    suspendedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    ownerId: string
+    planId?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subscription?: TenantSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutPaymentIndicesInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutPaymentIndicesInput, TenantUncheckedCreateWithoutPaymentIndicesInput>
+  }
+
+  export type TenantUpsertWithoutPaymentIndicesInput = {
+    update: XOR<TenantUpdateWithoutPaymentIndicesInput, TenantUncheckedUpdateWithoutPaymentIndicesInput>
+    create: XOR<TenantCreateWithoutPaymentIndicesInput, TenantUncheckedCreateWithoutPaymentIndicesInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutPaymentIndicesInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutPaymentIndicesInput, TenantUncheckedUpdateWithoutPaymentIndicesInput>
+  }
+
+  export type TenantUpdateWithoutPaymentIndicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
+    status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    owner?: UserUpdateOneRequiredWithoutOwnedTenantNestedInput
+    plan?: SubscriptionPlanUpdateOneWithoutTenantsNestedInput
+    subscription?: TenantSubscriptionUpdateOneWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutPaymentIndicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    dbSchema?: StringFieldUpdateOperationsInput | string
+    status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+    suspendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ownerId?: StringFieldUpdateOperationsInput | string
+    planId?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subscription?: TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+  }
+
+  export type PaymentIndexCreateManyTenantInput = {
+    id?: string
+    orderId: string
+    checkoutRequestId: string
+    createdAt?: Date | string
+  }
+
+  export type PaymentIndexUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentIndexUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentIndexUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    checkoutRequestId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TenantCreateManyOwnerInput = {
     id?: string
     name: string
@@ -8419,6 +10018,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     plan?: SubscriptionPlanUpdateOneWithoutTenantsNestedInput
     subscription?: TenantSubscriptionUpdateOneWithoutTenantNestedInput
+    paymentIndices?: PaymentIndexUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutOwnerInput = {
@@ -8435,6 +10035,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subscription?: TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    paymentIndices?: PaymentIndexUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateManyWithoutOwnerInput = {
@@ -8494,6 +10095,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedTenantNestedInput
     subscription?: TenantSubscriptionUpdateOneWithoutTenantNestedInput
+    paymentIndices?: PaymentIndexUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutPlanInput = {
@@ -8510,6 +10112,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subscription?: TenantSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    paymentIndices?: PaymentIndexUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateManyWithoutPlanInput = {
