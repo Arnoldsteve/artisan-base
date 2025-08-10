@@ -75,7 +75,7 @@ export class ApiClient {
     // Always send x-tenant-id header for local dev
     this.client.interceptors.request.use((config) => {
       config.headers = config.headers || {};
-      config.headers["x-tenant-id"] = "my-cool-beads"; // <-- set your dev tenant id here
+      config.headers["x-tenant-id"] = "satechs"; // <-- set your dev tenant id here
       return config;
     });
 

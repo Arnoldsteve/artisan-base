@@ -23,6 +23,8 @@ import { AdminHomeApiModule } from './dashboard/admin-home-api/admin-home-api.mo
 import { SupabaseModule } from './supabase/supabase.module';
 import { StorageModule } from './dashboard/storage/storage.module';
 import { PaymentModule } from './dashboard/payment/payment.module';
+import { PlatformPlansModule } from './platform/plans/platform-plans.module'; // 1. Import the new module
+
 
 @Module({
   imports: [
@@ -43,6 +45,7 @@ import { PaymentModule } from './dashboard/payment/payment.module';
     StorageModule,
     SupabaseModule,
     PaymentModule,
+    PlatformPlansModule, 
   ],
   controllers: [AppController],
   providers: [
