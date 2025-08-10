@@ -2,10 +2,15 @@ import {
   Injectable,
   Inject,
   ConflictException,
+  NotFoundException, // Import NotFoundException
 } from '@nestjs/common';
 import { CreatePlanDto } from './dto/create-plan.dto';
+import { UpdatePlanDto } from './dto/update-plan.dto'; // Import UpdatePlanDto
 import { SubscriptionPlan } from '@prisma/client/management';
-import { IPlatformPlansRepository, PLATFORM_PLANS_REPOSITORY } from './interfaces/platform-plans-repository.interface';
+import {
+  IPlatformPlansRepository,
+  PLATFORM_PLANS_REPOSITORY,
+} from './interfaces/platform-plans-repository.interface';
 
 @Injectable()
 export class PlatformPlansService {
@@ -22,5 +27,32 @@ export class PlatformPlansService {
       );
     }
     return this.repository.create(createPlanDto);
+  }
+
+  
+  async findAllPlans(): Promise<SubscriptionPlan[]> {
+    return this.repository.findAll();
+  }
+
+  async findPlanById(id: string): Promise<SubscriptionPlan> {
+    const plan = await this.repository.findById(id);
+    if (!plan) {
+      throw new NotFoundException(`Subscription plan with ID '${id}' not found.`);
+    }
+    return plan;
+  }
+
+  async updatePlan(
+    id: string,
+    updatePlanDto: UpdatePlanDto,
+  ): Promise<SubscriptionPlan> {
+    await this.findPlanById(id);
+    return this.repository.update(id, updatePlanDto);
+  }
+
+  
+  async deletePlan(id: string): Promise<void> {
+    await this.findPlanById(id);
+    return this.repository.delete(id);
   }
 }
