@@ -35,7 +35,8 @@
     "tenant:backup-all": "node scripts/tenant/backup-all.js",
     "management:seed": "node scripts/management/seed.js",
     "management:cleanup": "node scripts/management/cleanup.js",
-    "setup:database": "node scripts/setup-database.js"
+    "setup:database": "node scripts/setup-database.js",
+    "platform-admin:seed":"node scripts/management/seed.js"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
