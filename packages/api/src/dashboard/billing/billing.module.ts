@@ -1,14 +1,21 @@
 import { Module } from '@nestjs/common';
 import { BillingController } from './billing.controller';
-// Import the PlatformPlansModule to make its exported providers available here
 import { PlatformPlansModule } from '../../platform/plans/platform-plans.module';
+import { BillingService } from './billing.service';
+import { BillingRepository } from './billing.repository';
+import { IBillingRepository } from './interfaces/billing-repository.interface';
 
 @Module({
-  imports: [
-    // By importing this module, we gain access to the PlatformPlansService
-    // that it exports.
-    PlatformPlansModule,
-  ],
+  imports: [PlatformPlansModule],
   controllers: [BillingController],
+  providers: [
+    // The service is request-scoped
+    BillingService,
+    // Provide the repository using the injection token
+    {
+      provide: IBillingRepository,
+      useClass: BillingRepository,
+    },
+  ],
 })
 export class BillingModule {}

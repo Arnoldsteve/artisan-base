@@ -16,7 +16,7 @@ export class BillingService {
     // This endpoint should return all plans from the management DB.
     // The backend should not require any specific tenant role for this.
     // NOTE: This is different from the /platform/plans endpoint used by admins.
-    const response = await apiClient.get<{ data: Plan[] }>("/billing/plans");
+    const response = await apiClient.get<{ data: Plan[] }>("/dashboard/billing/plans");
     return response.data;
   }
 
@@ -24,7 +24,7 @@ export class BillingService {
    * Retrieves the current subscription details for the authenticated tenant.
    */
   async getSubscription(): Promise<Subscription> {
-    const response = await apiClient.get<{ data: Subscription }>("/billing/subscription");
+    const response = await apiClient.get<{ data: Subscription }>("/dashboard/billing/subscription");
     return response.data;
   }
 
@@ -32,7 +32,7 @@ export class BillingService {
    * Retrieves a list of past invoices for the authenticated tenant.
    */
   async getInvoices(): Promise<Invoice[]> {
-    const response = await apiClient.get<{ data: Invoice[] }>("/billing/invoices");
+    const response = await apiClient.get<{ data: Invoice[] }>("/dashboard/billing/invoices");
     return response.data;
   }
 
@@ -44,7 +44,7 @@ export class BillingService {
   async changePlan(planId: string): Promise<{ checkoutUrl: string }> {
     // The backend receives the new planId and returns a URL to the payment provider's
     // checkout page (e.g., Stripe Checkout).
-    return apiClient.post<{ checkoutUrl: string }>("/billing/change-plan", { planId });
+    return apiClient.post<{ checkoutUrl: string }>("/dashboard/billing/change-plan", { planId });
   }
 
   /**
@@ -56,7 +56,7 @@ export class BillingService {
   async downloadInvoice(invoiceId: string): Promise<Blob> {
     // This endpoint returns the invoice file directly.
     // The apiClient needs to be configured to handle 'blob' responseType for this call.
-    return apiClient.get<Blob>(`/billing/invoices/${invoiceId}/download`, {
+    return apiClient.get<Blob>(`/dashboard/billing/invoices/${invoiceId}/download`, {
       responseType: 'blob',
     });
   }
