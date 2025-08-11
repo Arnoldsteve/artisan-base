@@ -8,49 +8,87 @@ import {
   CardTitle,
   CardFooter,
 } from "@repo/ui";
-import { Button, Badge } from "@repo/ui";
-import { useBilling } from "@/hooks/use-billing";
+import { Button, Badge } from "@repo/ui"; // Make sure Spinner is imported
 import { Subscription } from "@/types/billing";
 
-// These types would typically be in a shared types file
-type Plan = {
-  id: string;
-  name: string;
-  price: number;
-  billingCycle: "MONTHLY" | "YEARLY";
-};
-type Subscription = {
-  status: "ACTIVE" | "CANCELLED" | "PAST_DUE";
-  currentPeriodEnd: Date;
-  plan: Plan;
-};
+// --- THIS IS THE FIX ---
+// Import the new, specific hook for fetching the subscription
+import { useBillingSubscription } from "@/hooks/use-billing";
 
 interface BillingCurrentPlanProps {
-  subscription?: Subscription;
+  subscription?: Subscription | null;
 }
 
 export function BillingCurrentPlan({
   subscription: propSubscription,
 }: BillingCurrentPlanProps) {
-  const { subscription, loading, error } = useBilling();
-  const sub = propSubscription || subscription;
-  if (loading) return <div>Loading current plan...</div>;
-  if (error) return <div className="text-destructive">{error}</div>;
-  if (!sub) return null;
+  // Call the correct hook: useBillingSubscription
+  const {
+    data: hookSubscription,
+    isLoading,
+    error,
+  } = useBillingSubscription(propSubscription);
+
+  // Prioritize the server-provided prop, then the hook's state
+  const sub = propSubscription === null ? null : (propSubscription || hookSubscription);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Plan</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-20">
+          {/* <Spinner /> */}loading ...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-destructive">Error</CardTitle>
+          <CardDescription className="text-destructive">
+            {error.message || "Could not load subscription details."}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (!sub) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Plan</CardTitle>
+          <CardDescription>You are not subscribed to any plan.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Please choose a plan to get started.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const { plan, status, currentPeriodEnd } = sub;
+
   const handleManageBilling = () => {
-    // In a real app, this would redirect to your Stripe Customer Portal
-    // window.location.href = 'https://billing.stripe.com/p/...'
+    alert("Redirecting to billing portal...");
   };
+
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   }).format(new Date(currentPeriodEnd));
+
   const price = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(plan.price);
+
   return (
     <Card>
       <CardHeader>

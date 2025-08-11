@@ -1,97 +1,103 @@
 // File: packages/dasboard/src/hooks/use-billing.ts
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { billingService } from '@/services/billing-service';
-import { Plan, Subscription, Invoice } from '@/types/billing'; // Assuming you create this type file
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { billingService } from "@/services/billing-service";
+import { toast } from "sonner";
+import { Plan, Subscription, Invoice } from "@/types/billing";
+import { useAuthContext } from "@/contexts/auth-context"; // Assuming you have this context
+
+// Define a query key to uniquely identify all billing-related data
+const BILLING_QUERY_KEY = ["dashboard-billing"];
 
 /**
- * A custom hook to manage all billing-related data and actions for a tenant.
- * It handles fetching subscription plans, the current subscription, invoices,
- * and provides functions to manage billing actions.
+ * Hook for fetching the list of all available subscription plans.
+ * It is "auth-aware" and will not run until the user is authenticated.
  */
-export function useBilling() {
-  // State for the data fetched from the API
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+export function useBillingPlans(initialData?: Plan[]) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
-  // State to manage loading and errors
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [isChangingPlan, setIsChangingPlan] = useState(false);
+  return useQuery<Plan[]>({
+    queryKey: [...BILLING_QUERY_KEY, 'plans'],
+    queryFn: () => billingService.getPlans(),
+    // This query will only run if auth is not loading AND the user is authenticated
+    enabled: !isAuthLoading && isAuthenticated,
+    // Provides server-fetched data to prevent a loading flicker on the first visit
+    initialData: initialData,
+  });
+}
 
-  // --- Data Fetching ---
-  const fetchBillingData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Fetch initial data in parallel for efficiency
-      const [plansData, subscriptionData] = await Promise.all([
-        billingService.getPlans(),
-        billingService.getSubscription(),
-      ]);
-      setPlans(plansData);
-      setSubscription(subscriptionData);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to load billing information.'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+/**
+ * Hook for fetching the tenant's current subscription.
+ */
+export function useBillingSubscription(initialData?: Subscription | null) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
-  useEffect(() => {
-    fetchBillingData();
-  }, [fetchBillingData]);
+  return useQuery<Subscription | null>({
+    queryKey: [...BILLING_QUERY_KEY, 'subscription'],
+    queryFn: () => billingService.getSubscription(),
+    enabled: !isAuthLoading && isAuthenticated,
+    initialData: initialData,
+  });
+}
 
+/**
+ * Hook for fetching the tenant's invoice history.
+ */
+export function useBillingInvoices(initialData?: Invoice[]) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
-  // --- Actions ---
-  const changePlan = useCallback(async (planId: string) => {
-    setIsChangingPlan(true);
-    setError(null);
-    try {
-      // The service call returns a checkout URL to redirect the user
-      const { checkoutUrl } = await billingService.changePlan(planId);
-      // Redirect the user to the payment provider's page
-      window.location.href = checkoutUrl;
-      // Note: We don't set isChangingPlan to false here, as the page will navigate away.
-      return checkoutUrl;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to change plan.'));
-      setIsChangingPlan(false);
-      // Re-throw the error so the calling component can handle it if needed
-      throw err;
-    }
-  }, []);
+  return useQuery<Invoice[]>({
+    queryKey: [...BILLING_QUERY_KEY, 'invoices'],
+    queryFn: () => billingService.getInvoices(),
+    enabled: !isAuthLoading && isAuthenticated,
+    initialData: initialData,
+  });
+}
 
-  const fetchInvoices = useCallback(async () => {
-    // This can be called on-demand (e.g., when a user clicks an "Invoices" tab)
-    setIsLoading(true);
-    try {
-        const invoicesData = await billingService.getInvoices();
-        setInvoices(invoicesData);
-    } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to load invoices.'));
-    } finally {
-        setIsLoading(false);
-    }
-  }, []);
+/**
+ * Hook for initiating a plan change.
+ * Returns a `mutate` function to trigger the change.
+ */
+export function useChangePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (planId: string) => billingService.changePlan(planId),
+    onSuccess: (data) => {
+      toast.info("Redirecting to the billing portal...");
+      // Redirect the user to the payment provider's checkout page
+      window.location.href = data.checkoutUrl;
 
+      // While the user is redirected, we can optimistically invalidate the subscription query.
+      // When they return to the app, their subscription status will be fresh.
+      queryClient.invalidateQueries({ queryKey: [...BILLING_QUERY_KEY, 'subscription'] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to initiate plan change.");
+    },
+  });
+}
 
-  return {
-    // Data
-    plans,
-    subscription,
-    invoices,
-    
-    // State
-    isLoading,
-    isChangingPlan,
-    error,
-
-    // Actions
-    changePlan,
-    fetchInvoices,
-    refetch: fetchBillingData, // Expose a function to manually refresh data
-  };
+/**
+ * Hook for downloading an invoice.
+ */
+export function useDownloadInvoice() {
+    return useMutation({
+        mutationFn: (invoiceId: string) => billingService.downloadInvoice(invoiceId),
+        onSuccess: (blob, invoiceId) => {
+            // Create a temporary link to trigger the browser's download dialog
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoice-${invoiceId}.pdf`; // Name the downloaded file
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url); // Clean up the temporary URL
+            toast.success("Invoice download started.");
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || "Failed to download invoice.");
+        }
+    });
 }

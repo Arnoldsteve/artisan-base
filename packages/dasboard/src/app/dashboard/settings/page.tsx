@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/app/dashboard/settings/page.tsx
-
 import { createServerApiClient } from '@/lib/server-api';
 import { PageHeader } from "@/components/shared/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
@@ -21,9 +19,7 @@ import { Tenant } from '@/types/tenant';
 import { Plan, Subscription, Invoice } from '@/types/billing';
 import { TeamMember } from '@/types/team';
 
-
-// --- Refactored, Prop-driven Container Components ---
-
+// --- Prop-driven Container Components ---
 function ProfileSettings({ user }: { user: User | null }) {
   if (!user) return <p className="text-muted-foreground">Could not load profile information.</p>;
   return (
@@ -46,19 +42,20 @@ function StoreSettings({ tenant }: { tenant: Tenant | null }) {
 }
 
 function BillingSettings({ plans, subscription, invoices }: { plans: Plan[], subscription: Subscription | null, invoices: Invoice[] }) {
-  // Pass the server-fetched data down as props. The components will prioritize these over their own hooks.
   return (
     <div className="space-y-6">
-      <BillingCurrentPlan subscription={subscription || undefined} />
+      <BillingCurrentPlan subscription={subscription} />
       <BillingPlanOptions availablePlans={plans} currentPlanId={subscription?.plan.id} />
       <BillingInvoiceHistory invoices={invoices} />
     </div>
   );
 }
 
-
 // --- Main Page Component ---
 export default async function SettingsPage() {
+  // --- THIS IS THE FIX ---
+  // Await the factory function to get the authenticated client instance,
+  // just like in ProductsPage.
   const serverApi = await createServerApiClient();
 
   // Initialize variables with default empty states for resilience
@@ -69,13 +66,11 @@ export default async function SettingsPage() {
   let teamMembers: TeamMember[] = [];
 
   try {
-    // Fetch all required data in parallel using Promise.allSettled for resilience.
-    // This ensures that if one API call fails, the others can still succeed.
     const results = await Promise.allSettled([
       serverApi.get<{ data: ProfileResponse }>('/auth/profile'),
-      serverApi.get<{ data: Plan[] }>('/billing/plans'),
-      serverApi.get<{ data: Subscription }>('/billing/subscription'),
-      serverApi.get<{ data: Invoice[] }>('/billing/invoices'),
+      serverApi.get<{ data: Plan[] }>('/dashboard/billing/plans'), // Endpoint for tenants
+      serverApi.get<{ data: Subscription }>('/dashboard/billing/subscription'),
+      serverApi.get<{ data: Invoice[] }>('/dashboard/billing/invoices'),
       serverApi.get<{ data: TeamMember[] }>('/dashboard/team'),
     ]);
 
@@ -86,19 +81,18 @@ export default async function SettingsPage() {
     if (results[3].status === 'fulfilled') invoices = results[3].value.data;
     if (results[4].status === 'fulfilled') teamMembers = results[4].value.data;
 
+    console.log("plans from servre", plans)
   } catch (error) {
     console.error("Failed to fetch settings data on server:", error);
-    // Data will remain in its default empty state, preventing page crashes.
   }
 
-  // The active tenant is typically the first one in the organizations list
   const activeTenant = profileData?.organizations?.[0] || null;
 
   return (
-    <div className="p-4 md:p-8 lg:p-10">
+    <div className="p-4 md-p-8 lg-p-10">
       <PageHeader title="Settings" description="Manage your account, store, and billing settings." />
       
-      <Tabs defaultValue="profile" className="mt-6">
+      <Tabs defaultValue="billing" className="mt-6"> {/* Default to billing for easy testing */}
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>

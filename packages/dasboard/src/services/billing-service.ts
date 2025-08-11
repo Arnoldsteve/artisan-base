@@ -16,7 +16,9 @@ export class BillingService {
     // This endpoint should return all plans from the management DB.
     // The backend should not require any specific tenant role for this.
     // NOTE: This is different from the /platform/plans endpoint used by admins.
+    console.log("About to call plan list")
     const response = await apiClient.get<{ data: Plan[] }>("/dashboard/billing/plans");
+    console.log("Plan list response", response)
     return response.data;
   }
 

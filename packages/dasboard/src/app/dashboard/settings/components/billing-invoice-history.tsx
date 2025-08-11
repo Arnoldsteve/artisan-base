@@ -15,11 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { Button } from "@repo/ui";
+import { Button } from "@repo/ui"; // Import Spinner
 import { Download } from "lucide-react";
-import { toast } from "sonner";
-import { useBilling } from "@/hooks/use-billing";
 import { Invoice } from "@/types/billing";
+
+// --- THIS IS THE FIX ---
+// Import the new, specific hooks for invoices
+import { useBillingInvoices, useDownloadInvoice } from "@/hooks/use-billing";
 
 interface BillingInvoiceHistoryProps {
   invoices?: Invoice[];
@@ -28,10 +30,29 @@ interface BillingInvoiceHistoryProps {
 export function BillingInvoiceHistory({
   invoices: propInvoices,
 }: BillingInvoiceHistoryProps) {
-  const { invoices, downloadInvoice, loading, error } = useBilling();
-  const allInvoices = propInvoices || invoices;
-  if (loading) return <div>Loading invoices...</div>;
-  if (error) return <div className="text-destructive">{error}</div>;
+  // Call the specific hook to get invoice data, hydrated by server props
+  const {
+    data: invoices,
+    isLoading,
+    error,
+  } = useBillingInvoices(propInvoices);
+
+  // Call the specific hook to get the download mutation function and its state
+  const { mutate: downloadInvoice, isPending: isDownloading } = useDownloadInvoice();
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-destructive">Error</CardTitle>
+          <CardDescription className="text-destructive">
+            {error.message || "Could not load invoice history."}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -39,43 +60,58 @@ export function BillingInvoiceHistory({
         <CardDescription>View and download your past invoices.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {allInvoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell>
-                  {new Intl.DateTimeFormat("en-US").format(
-                    new Date(invoice.date)
-                  )}
-                </TableCell>
-                <TableCell>{invoice.status}</TableCell>
-                <TableCell className="text-right">
-                  {new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }).format(invoice.amount)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => downloadInvoice(invoice.id)}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </TableCell>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-24">
+            {/* <Spinner /> */}loading
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {invoices && invoices.length > 0 ? (
+                invoices.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    <TableCell>
+                      {new Intl.DateTimeFormat("en-US").format(
+                        new Date(invoice.date)
+                      )}
+                    </TableCell>
+                    <TableCell>{invoice.status}</TableCell>
+                    <TableCell className="text-right">
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(invoice.amount)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => downloadInvoice(invoice.id)}
+                        disabled={isDownloading}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    No invoice history found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );
