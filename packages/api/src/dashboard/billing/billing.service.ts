@@ -1,4 +1,4 @@
-import { Injectable, Inject, Scope } from '@nestjs/common';
+import { Injectable, Inject, Scope, Logger } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { RequestWithTenant } from '../../common/interfaces/request-with-tenant.interface';
 import { IBillingRepository } from './interfaces/billing-repository.interface';
@@ -28,6 +28,8 @@ export class BillingService {
   }
 
   async changePlanForCurrentTenant(planId: string): Promise<{ checkoutUrl: string }> {
+        Logger.log(`Initiating plan change for plan ID: ${planId}`);
+
     // Placeholder for payment provider logic
     return { checkoutUrl: 'https://example.com/checkout' };
   }

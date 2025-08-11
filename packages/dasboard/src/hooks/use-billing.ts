@@ -63,18 +63,21 @@ export function useChangePlan() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (planId: string) => billingService.changePlan(planId),
-    onSuccess: (data) => {
-      toast.info("Redirecting to the billing portal...");
-      // Redirect the user to the payment provider's checkout page
-      window.location.href = data.checkoutUrl;
+    onSuccess: (response) => { 
+        toast.info("Redirecting to the billing portal...");
+        const checkoutUrl = response.checkoutUrl;
+        console.log("Full response from server:", response);
 
-      // While the user is redirected, we can optimistically invalidate the subscription query.
-      // When they return to the app, their subscription status will be fresh.
-      queryClient.invalidateQueries({ queryKey: [...BILLING_QUERY_KEY, 'subscription'] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to initiate plan change.");
-    },
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+        } else {
+          toast.error("Could not get checkout URL from the server.");
+          console.error("Checkout URL was not found in the response:", response);
+        }
+
+        // Invalidate the query as before
+        queryClient.invalidateQueries({ queryKey: [...BILLING_QUERY_KEY, 'subscription'] });
+      },
   });
 }
 
