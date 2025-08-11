@@ -24,27 +24,19 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { StorageModule } from './dashboard/storage/storage.module';
 import { PaymentModule } from './dashboard/payment/payment.module';
 import { PlatformPlansModule } from './platform/plans/platform-plans.module'; // 1. Import the new module
+import { DashboardModule } from './dashboard/dashboard.module';
 
 
 @Module({
   imports: [
-    // --- CORE CONFIGURATION ---
     ConfigModule.forRoot({ isGlobal: true }),
-    PrismaModule, // Provides the global Management client
+    PrismaModule, 
 
-    // --- FEATURE MODULES ---
     AuthModule,
     TenantModule,
-    ProductModule,
-    CategoryModule,
-    OrderModule,
-    CustomerModule,
-    SettingsModule,
+    DashboardModule,
     StorefrontModule,
-    AdminHomeApiModule,
-    StorageModule,
     SupabaseModule,
-    PaymentModule,
     PlatformPlansModule, 
   ],
   controllers: [AppController],

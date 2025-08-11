@@ -1,86 +1,97 @@
-import { useState, useCallback, useMemo } from "react";
-import { BillingService } from "@/services/billing-service";
-import { Plan, Subscription, Invoice } from "@/types/billing";
-import { toast } from "sonner";
+// File: packages/dasboard/src/hooks/use-billing.ts
+"use client";
 
+import { useState, useEffect, useCallback } from 'react';
+import { billingService } from '@/services/billing-service';
+import { Plan, Subscription, Invoice } from '@/types/billing'; // Assuming you create this type file
+
+/**
+ * A custom hook to manage all billing-related data and actions for a tenant.
+ * It handles fetching subscription plans, the current subscription, invoices,
+ * and provides functions to manage billing actions.
+ */
 export function useBilling() {
+  // State for the data fetched from the API
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
+  // State to manage loading and errors
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [isChangingPlan, setIsChangingPlan] = useState(false);
+
+  // --- Data Fetching ---
   const fetchBillingData = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     try {
-      const [plans, subscription, invoices] = await Promise.all([
-        BillingService.getPlans(),
-        BillingService.getSubscription(),
-        BillingService.getInvoices(),
+      // Fetch initial data in parallel for efficiency
+      const [plansData, subscriptionData] = await Promise.all([
+        billingService.getPlans(),
+        billingService.getSubscription(),
       ]);
-      setPlans(plans);
-      setSubscription(subscription);
-      setInvoices(invoices);
+      setPlans(plansData);
+      setSubscription(subscriptionData);
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err : new Error('Failed to load billing information.'));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
+  useEffect(() => {
+    fetchBillingData();
+  }, [fetchBillingData]);
+
+
+  // --- Actions ---
   const changePlan = useCallback(async (planId: string) => {
-    setLoading(true);
+    setIsChangingPlan(true);
     setError(null);
     try {
-      const updated = await BillingService.changePlan(planId);
-      setSubscription(updated);
-      toast.success("Your plan has been updated successfully!");
+      // The service call returns a checkout URL to redirect the user
+      const { checkoutUrl } = await billingService.changePlan(planId);
+      // Redirect the user to the payment provider's page
+      window.location.href = checkoutUrl;
+      // Note: We don't set isChangingPlan to false here, as the page will navigate away.
+      return checkoutUrl;
     } catch (err) {
-      setError((err as Error).message);
-      toast.error("Failed to update plan.");
+      setError(err instanceof Error ? err : new Error('Failed to change plan.'));
+      setIsChangingPlan(false);
+      // Re-throw the error so the calling component can handle it if needed
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
-  const downloadInvoice = useCallback(async (invoiceId: string) => {
-    setLoading(true);
-    setError(null);
+  const fetchInvoices = useCallback(async () => {
+    // This can be called on-demand (e.g., when a user clicks an "Invoices" tab)
+    setIsLoading(true);
     try {
-      await BillingService.downloadInvoice(invoiceId);
-      toast.info("Downloading invoice...");
+        const invoicesData = await billingService.getInvoices();
+        setInvoices(invoicesData);
     } catch (err) {
-      setError((err as Error).message);
-      toast.error("Failed to download invoice.");
-      throw err;
+        setError(err instanceof Error ? err : new Error('Failed to load invoices.'));
     } finally {
-      setLoading(false);
+        setIsLoading(false);
     }
   }, []);
 
-  return useMemo(
-    () => ({
-      plans,
-      subscription,
-      invoices,
-      loading,
-      error,
-      fetchBillingData,
-      changePlan,
-      downloadInvoice,
-    }),
-    [
-      plans,
-      subscription,
-      invoices,
-      loading,
-      error,
-      fetchBillingData,
-      changePlan,
-      downloadInvoice,
-    ]
-  );
+
+  return {
+    // Data
+    plans,
+    subscription,
+    invoices,
+    
+    // State
+    isLoading,
+    isChangingPlan,
+    error,
+
+    // Actions
+    changePlan,
+    fetchInvoices,
+    refetch: fetchBillingData, // Expose a function to manually refresh data
+  };
 }
-// REFACTOR: All billing business logic and state moved to hook for SRP, DRY, and testability.

@@ -8,12 +8,11 @@ import { PLATFORM_PLANS_REPOSITORY } from './interfaces/platform-plans-repositor
   controllers: [PlatformPlansController],
   providers: [
     PlatformPlansService,
-    // This tells NestJS: "When someone asks for PLATFORM_PLANS_REPOSITORY,
-    // provide them with an instance of PlatformPlansRepository."
     {
       provide: PLATFORM_PLANS_REPOSITORY,
       useClass: PlatformPlansRepository,
     },
   ],
+  exports: [PlatformPlansService],
 })
 export class PlatformPlansModule {}

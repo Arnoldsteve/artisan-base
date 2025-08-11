@@ -5,15 +5,15 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  Get,         // Import GET
-  Param,       // Import Param
-  Patch,       // Import PATCH
+  Get,         
+  Param,      
+  Patch,       
   Delete,
-  UseInterceptors,      // Import DELETE
+  UseInterceptors,      
 } from '@nestjs/common';
 import { PlatformPlansService } from './platform-plans.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
-import { UpdatePlanDto } from './dto/update-plan.dto'; // Import UpdatePlanDto
+import { UpdatePlanDto } from './dto/update-plan.dto'; 
 import { Roles, RolesGuard } from '../../auth/guards/roles.guard';
 import { UserRole } from '@prisma/client/management';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -53,7 +53,7 @@ export class PlatformPlansController {
 
   @Delete(':id')
   @Roles([UserRole.PLATFORM_ADMIN])
-  @HttpCode(HttpStatus.NO_CONTENT) // Return 204 No Content on successful deletion
+  @HttpCode(HttpStatus.NO_CONTENT) 
   remove(@Param('id') id: string) {
     return this.plansService.deletePlan(id);
   }

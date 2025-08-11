@@ -7,8 +7,6 @@ import { IPlatformPlansRepository } from './interfaces/platform-plans-repository
 
 @Injectable()
 export class PlatformPlansRepository implements IPlatformPlansRepository {
-  // This injection is correct. You are injecting the singleton PrismaService
-  // which is your management client.
   constructor(private prisma: PrismaService) {}
 
   private get db() {
@@ -16,7 +14,6 @@ export class PlatformPlansRepository implements IPlatformPlansRepository {
   }
 
   async create(dto: CreatePlanDto): Promise<SubscriptionPlan> {
-    // This will now work correctly: this.db refers to the management client.
     return this.db.subscriptionPlan.create({
       data: dto,
     });
