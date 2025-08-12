@@ -1,10 +1,19 @@
-import { Injectable, Inject, Scope, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Scope,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { RequestWithTenant } from '../../common/interfaces/request-with-tenant.interface';
+import { RequestWithTenant } from '../common/interfaces/request-with-tenant.interface';
 import { IBillingRepository } from './interfaces/billing-repository.interface';
-import { SubscriptionStatus, TenantSubscription } from '@prisma/client/management';
+import {
+  SubscriptionStatus,
+  TenantSubscription,
+} from '@prisma/client/management';
 // We still need the plans service to validate the plan ID
-import { PlatformPlansService } from '../../platform/plans/platform-plans.service';
+import { PlatformPlansService } from '../platform/plans/platform-plans.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class BillingService {
@@ -28,13 +37,17 @@ export class BillingService {
   /**
    * Simulates a successful payment by creating/updating the subscription in the database via the repository.
    */
-  async changePlanForCurrentTenant(planId: string): Promise<{ success: boolean; message: string }> {
+  async changePlanForCurrentTenant(
+    planId: string,
+  ): Promise<{ success: boolean; message: string }> {
     const { id: tenantId } = this.request.tenant;
 
     // 1. Service logic: Validate that the plan exists before doing anything.
     const planToSubscribe = await this.plansService.findPlanById(planId);
     if (!planToSubscribe) {
-      throw new NotFoundException(`Plan with ID '${planId}' could not be found.`);
+      throw new NotFoundException(
+        `Plan with ID '${planId}' could not be found.`,
+      );
     }
 
     // 2. Service logic: Prepare the data object for the repository.
@@ -53,15 +66,24 @@ export class BillingService {
 
     try {
       // 3. Delegate the actual database transaction to the repository.
-      await this.billingRepository.upsertSubscription(tenantId, subscriptionData);
+      await this.billingRepository.upsertSubscription(
+        tenantId,
+        subscriptionData,
+      );
 
       this.logger.log(
         `SUCCESS: Simulated plan change for Tenant '${tenantId}' to Plan '${planToSubscribe.name}'.`,
       );
 
-      return { success: true, message: 'Your plan has been updated successfully!' };
+      return {
+        success: true,
+        message: 'Your plan has been updated successfully!',
+      };
     } catch (error) {
-      this.logger.error(`Failed to simulate plan change for Tenant '${tenantId}'.`, error.stack);
+      this.logger.error(
+        `Failed to simulate plan change for Tenant '${tenantId}'.`,
+        error.stack,
+      );
       throw new Error('An unexpected error occurred while updating your plan.');
     }
   }
@@ -71,5 +93,4 @@ export class BillingService {
     // In a real app, you would fetch this from Stripe or another provider.
     return []; // Return an empty array for now
   }
-  
 }

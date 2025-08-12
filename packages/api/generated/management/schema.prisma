@@ -14,23 +14,32 @@ datasource db {
 
 // Represents the tenant (a single store)
 model Tenant {
-  id             String              @id @default(cuid())
-  name           String
-  subdomain      String              @unique
-  customDomain   String?             @unique
-  dbSchema       String              @unique
-  status         TenantStatus        @default(PENDING)
-  suspendedAt    DateTime?
-  deletedAt      DateTime?
-  owner          User                @relation(fields: [ownerId], references: [id])
-  ownerId        String
-  plan           SubscriptionPlan?   @relation(fields: [planId], references: [id])
-  planId         String?
-  subscription   TenantSubscription?
-  settings       Json?
-  paymentIndices PaymentIndex[]
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+  id           String            @id @default(cuid())
+  name         String
+  subdomain    String            @unique
+  customDomain String?           @unique
+  dbSchema     String            @unique
+  status       TenantStatus      @default(PENDING)
+  suspendedAt  DateTime?
+  deletedAt    DateTime?
+  owner        User              @relation(fields: [ownerId], references: [id])
+  ownerId      String
+  plan         SubscriptionPlan? @relation(fields: [planId], references: [id])
+  planId       String?
+
+  // --- FIELD ADDED ---
+  // Stores the Stripe Customer ID (cus_...) associated with this tenant.
+  stripeCustomerId String? @unique
+
+  subscription TenantSubscription?
+  settings     Json?
+
+  // Back-relations added by `prisma format`
+  paymentIndices      PaymentIndex[]
+  SubscriptionPayment SubscriptionPayment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([ownerId])
   @@index([planId])
@@ -63,6 +72,10 @@ model SubscriptionPlan {
   price        Decimal      @db.Decimal(10, 2)
   billingCycle BillingCycle
 
+  // --- FIELD ADDED ---
+  // Stores the Stripe/PayPal Price ID (e.g., 'price_...').
+  providerPlanId String? @unique
+
   // A JSONB field to control features and limits.
   features Json
 
@@ -89,14 +102,38 @@ model TenantSubscription {
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
 
-  // Legacy Stripe field (keep for backward compatibility)
-  stripeSubscriptionId String? @unique
+  // Back-relation added by `prisma format`
+  SubscriptionPayment SubscriptionPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([provider, providerSubscriptionId])
   @@map("tenant_subscriptions")
+}
+
+// Tenant payment for the platform
+model SubscriptionPayment {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  amount   Decimal @db.Decimal(10, 2)
+  currency String // e.g., "USD", "KES"
+  status   String // Standardized: "COMPLETED", "FAILED", "REFUNDED"
+
+  provider              String // "STRIPE", "PAYPAL", "MPESA"
+  providerTransactionId String // The unique Invoice/Transaction ID from the provider
+
+  // Link to the subscription this payment is for
+  subscriptionId String
+  subscription   TenantSubscription @relation(fields: [subscriptionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([provider, providerTransactionId])
+  @@index([tenantId])
+  @@map("subscription_payments")
 }
 
 model PaymentIndex {
@@ -136,5 +173,3 @@ enum UserRole {
   PLATFORM_SUPPORT // Customer support access
   TENANT_OWNER // Owns tenant stores
 }
-
-// REMOVED: PaymentProvider enum (exists in tenant.prisma)

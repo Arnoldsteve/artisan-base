@@ -6,10 +6,10 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { TransformResponseInterceptor } from '../../common/interceptors/transform-response.interceptor';
-import { PlatformPlansService } from '../../platform/plans/platform-plans.service';
-import { BillingService } from './billing.service'; 
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TransformResponseInterceptor } from '../common/interceptors/transform-response.interceptor';
+import { PlatformPlansService } from '../platform/plans/platform-plans.service';
+import { BillingService } from './billing.service';
 
 @Controller('dashboard/billing')
 @UseGuards(JwtAuthGuard)

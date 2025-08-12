@@ -131,6 +131,7 @@ exports.Prisma.TenantScalarFieldEnum = {
   deletedAt: 'deletedAt',
   ownerId: 'ownerId',
   planId: 'planId',
+  stripeCustomerId: 'stripeCustomerId',
   settings: 'settings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -152,6 +153,7 @@ exports.Prisma.SubscriptionPlanScalarFieldEnum = {
   name: 'name',
   price: 'price',
   billingCycle: 'billingCycle',
+  providerPlanId: 'providerPlanId',
   features: 'features',
   createdAt: 'createdAt'
 };
@@ -165,9 +167,20 @@ exports.Prisma.TenantSubscriptionScalarFieldEnum = {
   providerSubscriptionId: 'providerSubscriptionId',
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
-  stripeSubscriptionId: 'stripeSubscriptionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionPaymentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  subscriptionId: 'subscriptionId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.PaymentIndexScalarFieldEnum = {
@@ -237,6 +250,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   SubscriptionPlan: 'SubscriptionPlan',
   TenantSubscription: 'TenantSubscription',
+  SubscriptionPayment: 'SubscriptionPayment',
   PaymentIndex: 'PaymentIndex'
 };
 

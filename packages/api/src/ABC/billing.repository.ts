@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service'; // Inject the management Prisma service
-import { IBillingRepository, SubscriptionUpsertData } from './interfaces/billing-repository.interface';
+import { PrismaService } from '../prisma/prisma.service'; // Inject the management Prisma service
+import {
+  IBillingRepository,
+  SubscriptionUpsertData,
+} from './interfaces/billing-repository.interface';
 import { TenantSubscription } from '@prisma/client/management';
 
 // NOTE: This is now a singleton, not request-scoped, because it only
@@ -18,7 +21,10 @@ export class BillingRepository implements IBillingRepository {
     });
   }
 
-  async upsertSubscription(tenantId: string, data: SubscriptionUpsertData): Promise<void> {
+  async upsertSubscription(
+    tenantId: string,
+    data: SubscriptionUpsertData,
+  ): Promise<void> {
     // This transaction ensures both the subscription and the tenant status are updated together.
     await this.prisma.$transaction([
       // Operation 1: Create or update the subscription record.
