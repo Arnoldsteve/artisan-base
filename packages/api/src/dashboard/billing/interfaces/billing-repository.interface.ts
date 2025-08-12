@@ -1,14 +1,28 @@
-// NOTE: For now, this interface is a placeholder for the structure.
-// As we determined, most billing logic (fetching subscriptions from the management DB,
-// or invoices from Stripe) lives in the service layer, not the tenant repository.
-// However, creating this interface maintains the architectural pattern.
+import { TenantSubscription } from '@prisma/client/management';
 
-export interface IBillingRepository {
-  // We can define methods here later if we need to store billing-related
-  // information within the tenant's own database schema.
-  // Example:
-  // findBillingSettings(): Promise<any>;
+// Define the shape of the data needed for the upsert operation for type safety
+export interface SubscriptionUpsertData {
+  planId: string;
+  status: 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'UNPAID';
+  provider: string;
+  providerSubscriptionId: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
 }
 
-// Define the injection token, just like in your category example
+export interface IBillingRepository {
+  /**
+   * Finds a subscription by the tenant's ID.
+   * @param tenantId The ID of the tenant.
+   */
+  getSubscription(tenantId: string): Promise<TenantSubscription | null>;
+
+  /**
+   * Creates or updates a tenant's subscription in a single transaction.
+   * @param tenantId The ID of the tenant to update.
+   * @param data The data for the new or updated subscription.
+   */
+  upsertSubscription(tenantId: string, data: SubscriptionUpsertData): Promise<void>;
+}
+
 export const IBillingRepository = Symbol('IBillingRepository');

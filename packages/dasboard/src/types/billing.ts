@@ -74,4 +74,4 @@ export interface ApiResponse<T> {
 export type GetPlansResponse = ApiResponse<Plan[]>;
 export type GetSubscriptionResponse = ApiResponse<Subscription>;
 export type GetInvoicesResponse = ApiResponse<Invoice[]>;
-export type ChangePlanResponse = ApiResponse<{ checkoutUrl: string }>;
+export type ChangePlanResponse = ApiResponse<{ success: boolean; message: string; }>;

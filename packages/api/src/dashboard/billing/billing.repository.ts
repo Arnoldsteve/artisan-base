@@ -1,26 +1,40 @@
-import { Injectable, Scope } from '@nestjs/common';
-import { TenantPrismaService } from '../../prisma/tenant-prisma.service';
-import { IBillingRepository } from './interfaces/billing-repository.interface';
-import { PrismaClient } from '../../../generated/tenant';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service'; // Inject the management Prisma service
+import { IBillingRepository, SubscriptionUpsertData } from './interfaces/billing-repository.interface';
+import { TenantSubscription } from '@prisma/client/management';
 
-@Injectable({ scope: Scope.REQUEST })
+// NOTE: This is now a singleton, not request-scoped, because it only
+// interacts with the global management database.
+@Injectable()
 export class BillingRepository implements IBillingRepository {
-  // This will hold the client once it's initialized for the request
-  private prismaClient: PrismaClient | null = null;
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
-
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request.
-   */
-  private async getPrisma(): Promise<PrismaClient> {
-    if (!this.prismaClient) {
-      this.prismaClient = await this.tenantPrismaService.getClient();
-    }
-    return this.prismaClient;
+  async getSubscription(tenantId: string): Promise<TenantSubscription | null> {
+    return this.prisma.tenantSubscription.findUnique({
+      where: { tenantId },
+      include: {
+        plan: true, // Include the plan details for the UI
+      },
+    });
   }
 
-  // As discussed, this class is a placeholder to fit the architecture.
-  // Tenant-specific billing DB methods would go here in the future.
+  async upsertSubscription(tenantId: string, data: SubscriptionUpsertData): Promise<void> {
+    // This transaction ensures both the subscription and the tenant status are updated together.
+    await this.prisma.$transaction([
+      // Operation 1: Create or update the subscription record.
+      this.prisma.tenantSubscription.upsert({
+        where: { tenantId: tenantId },
+        create: {
+          tenantId: tenantId,
+          ...data,
+        },
+        update: data,
+      }),
+      // Operation 2: Ensure the tenant's main status is active.
+      this.prisma.tenant.update({
+        where: { id: tenantId },
+        data: { status: 'ACTIVE' },
+      }),
+    ]);
+  }
 }

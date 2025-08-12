@@ -8,11 +8,10 @@ import {
   CardTitle,
   CardFooter,
 } from "@repo/ui";
-import { Button, Badge } from "@repo/ui"; // Make sure Spinner is imported
+import { Button, Badge } from "@repo/ui";
 import { Subscription } from "@/types/billing";
 
-// --- THIS IS THE FIX ---
-// Import the new, specific hook for fetching the subscription
+// Import the specific hook for fetching the subscription
 import { useBillingSubscription } from "@/hooks/use-billing";
 
 interface BillingCurrentPlanProps {
@@ -20,17 +19,21 @@ interface BillingCurrentPlanProps {
 }
 
 export function BillingCurrentPlan({
-  subscription: propSubscription,
+  subscription: initialSubscriptionData, // Rename for clarity
 }: BillingCurrentPlanProps) {
-  // Call the correct hook: useBillingSubscription
+  
+  // --- THIS IS THE FIX ---
+  // The hook becomes the single source of truth for the component's data.
+  // - On initial render, `subscription` will be `initialSubscriptionData`.
+  // - After a successful refetch (triggered by invalidateQueries),
+  //   this hook will re-render the component and `subscription` will be the NEW data.
   const {
-    data: hookSubscription,
+    data: subscription,
     isLoading,
+    isError,
     error,
-  } = useBillingSubscription(propSubscription);
+  } = useBillingSubscription(initialSubscriptionData);
 
-  // Prioritize the server-provided prop, then the hook's state
-  const sub = propSubscription === null ? null : (propSubscription || hookSubscription);
 
   if (isLoading) {
     return (
@@ -38,27 +41,28 @@ export function BillingCurrentPlan({
         <CardHeader>
           <CardTitle>Current Plan</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-20">
-          {/* <Spinner /> */}loading ...
+        <CardContent className="h-20 pt-4 text-muted-foreground">
+          Loading subscription details...
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="text-destructive">Error</CardTitle>
           <CardDescription className="text-destructive">
-            {error.message || "Could not load subscription details."}
+            {error?.message || "Could not load subscription details."}
           </CardDescription>
         </CardHeader>
       </Card>
     );
   }
 
-  if (!sub) {
+  // This `if` block now handles the state where there is definitively no subscription
+  if (!subscription) {
     return (
       <Card>
         <CardHeader>
@@ -72,10 +76,11 @@ export function BillingCurrentPlan({
     );
   }
 
-  const { plan, status, currentPeriodEnd } = sub;
+  // If we get past the checks above, we know we have a valid subscription object.
+  const { plan, status, currentPeriodEnd } = subscription;
 
   const handleManageBilling = () => {
-    alert("Redirecting to billing portal...");
+    alert("This will redirect to the Stripe Customer Portal in a real application.");
   };
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
@@ -84,10 +89,11 @@ export function BillingCurrentPlan({
     day: "numeric",
   }).format(new Date(currentPeriodEnd));
 
+  // NOTE: Prisma Decimal is a string, so we must parse it to a number for formatting.
   const price = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(plan.price);
+  }).format(parseFloat(plan.price));
 
   return (
     <Card>
@@ -105,7 +111,7 @@ export function BillingCurrentPlan({
             variant={status === "ACTIVE" ? "default" : "destructive"}
             className="capitalize"
           >
-            {status.toLowerCase()}
+            {status.toLowerCase().replace('_', ' ')}
           </Badge>
         </div>
       </CardHeader>

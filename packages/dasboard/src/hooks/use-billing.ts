@@ -63,23 +63,26 @@ export function useChangePlan() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (planId: string) => billingService.changePlan(planId),
-    onSuccess: (response) => { 
-        toast.info("Redirecting to the billing portal...");
-        const checkoutUrl = response.checkoutUrl;
-        console.log("Full response from server:", response);
+    onSuccess: (response) => {
+      // The `response` object is now { success: boolean, message: string }
+      
+      // 1. Show the success message from the backend in a toast.
+      toast.success(response.message || "Plan updated successfully!");
 
-        if (checkoutUrl) {
-          window.location.href = checkoutUrl;
-        } else {
-          toast.error("Could not get checkout URL from the server.");
-          console.error("Checkout URL was not found in the response:", response);
-        }
+      // 2. REMOVED: The redirect logic (window.open) is no longer needed.
 
-        // Invalidate the query as before
-        queryClient.invalidateQueries({ queryKey: [...BILLING_QUERY_KEY, 'subscription'] });
-      },
+      // 3. This is now the most important step. It tells React Query that the
+      // subscription data is out of date, forcing a refetch. This will
+      // automatically update the "Current Plan" section of your UI.
+      queryClient.invalidateQueries({ queryKey: [...BILLING_QUERY_KEY, 'subscription'] });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to initiate plan change.");
+    },
   });
 }
+
 
 /**
  * Hook for downloading an invoice.

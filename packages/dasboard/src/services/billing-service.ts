@@ -4,7 +4,8 @@ import {
   Plan, 
   Subscription, 
   Invoice, 
-  ApiResponse 
+  ApiResponse, 
+  ChangePlanResponse
 } from "@/types/billing";
 
 /**
@@ -41,8 +42,9 @@ export class BillingService {
    * Sends a request to change the tenant's current subscription plan.
    * This returns the direct payload needed for the redirect.
    */
-  async changePlan(planId: string): Promise<{ checkoutUrl: string }> {
-    const response = await apiClient.post<ApiResponse<{ checkoutUrl: string }>>("/dashboard/billing/change-plan", { planId });
+  async changePlan(planId: string): Promise<{ success: boolean; message: string }> {
+    const response = await apiClient.post<ChangePlanResponse>("/dashboard/billing/change-plan", { planId });
+    // The service still unwraps the 'data' property as intended.
     return response.data;
   }
 
