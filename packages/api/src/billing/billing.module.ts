@@ -5,13 +5,14 @@ import { SharedModule } from '../shared/shared.module';
 // --- Add these imports ---
 import { BillingRepository } from './billing.repository';
 import { IBillingRepository } from './interfaces/billing-repository.interface';
+import { PlatformPlansModule } from '../platform/plans/platform-plans.module';
+
 
 @Module({
-  imports: [SharedModule],
+  imports: [SharedModule, PlatformPlansModule],
   controllers: [BillingController],
   providers: [
     BillingService,
-    // --- Add this provider configuration ---
     {
       provide: IBillingRepository,
       useClass: BillingRepository,

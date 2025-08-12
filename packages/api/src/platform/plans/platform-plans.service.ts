@@ -2,7 +2,8 @@ import {
   Injectable,
   Inject,
   ConflictException,
-  NotFoundException, // Import NotFoundException
+  NotFoundException,
+  Logger, // Import NotFoundException
 } from '@nestjs/common';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto'; // Import UpdatePlanDto
@@ -35,6 +36,7 @@ export class PlatformPlansService {
   }
 
   async findPlanById(id: string): Promise<SubscriptionPlan> {
+    Logger.debug("Platform plans id", id)
     const plan = await this.repository.findById(id);
     if (!plan) {
       throw new NotFoundException(`Subscription plan with ID '${id}' not found.`);

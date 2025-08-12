@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IBillingRepository, FulfillSubscriptionData } from './interfaces/billing-repository.interface';
 import { TenantSubscription, SubscriptionStatus } from '@prisma/client/management';
@@ -22,6 +22,7 @@ export class BillingRepository implements IBillingRepository {
    * This contains the critical database transaction.
    */
   async fulfillSubscription(tenantId: string, data: FulfillSubscriptionData): Promise<void> {
+    Logger.debug("data from seson checkout", data)
     const subscriptionData = {
       planId: data.planId,
       status: SubscriptionStatus.ACTIVE,

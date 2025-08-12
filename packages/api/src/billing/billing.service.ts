@@ -46,14 +46,17 @@ export class BillingService {
     
     // The service is responsible for validating the plan
     const planToSubscribe = await this.plansService.findPlanById(dto.planId);
+    Logger.log("planToSubscribe from billing service", planToSubscribe)
     if (!planToSubscribe || !planToSubscribe.providerPlanId) {
       throw new NotFoundException(`Plan with ID '${dto.planId}' not found or not configured for payment.`);
     }
 
+    Logger.debug("log before finding tenant")
     let tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       include: { owner: true },
     });
+    Logger.log("tenant from billing service", tenant)
     
     if (!tenant) {
       throw new NotFoundException(`Authenticated tenant could not be found.`);
@@ -125,8 +128,8 @@ export class BillingService {
       planId: plan.id,
       provider: 'STRIPE',
       providerSubscriptionId: subscriptionDetails.id,
-      currentPeriodStart: new Date(subscriptionDetails.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscriptionDetails.current_period_end * 1000),
+      currentPeriodStart: new Date((subscriptionDetails as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscriptionDetails as any).current_period_end * 1000),
       payment: {
         amount: plan.price.toString(), 
         currency: (session.currency || 'usd').toUpperCase(),
@@ -140,3 +143,4 @@ export class BillingService {
     this.logger.log(`Successfully fulfilled subscription for tenant: ${tenantId}`);
   }
 }
+

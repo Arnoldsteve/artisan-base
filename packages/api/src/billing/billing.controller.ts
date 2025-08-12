@@ -5,6 +5,7 @@ import {
   Body,
   UseGuards,
   UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TransformResponseInterceptor } from '../common/interceptors/transform-response.interceptor';
