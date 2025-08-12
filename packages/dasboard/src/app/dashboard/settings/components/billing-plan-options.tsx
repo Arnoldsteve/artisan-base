@@ -9,7 +9,8 @@ import {
   CardFooter,
 } from "@repo/ui";
 import { Button } from "@repo/ui";
-import { CheckCircle2 } from "lucide-react";
+// Import the spinner icon
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { Plan } from "@/types/billing";
 
 import {
@@ -23,7 +24,7 @@ interface BillingPlanOptionsProps {
   currentPlanId?: string | null;
 }
 
-// A helper function to generate the feature list from the features object
+// Helper function to generate feature text from the features object
 const getFeatureText = (features: any): string[] => {
   if (!features) return [];
   const text = [];
@@ -37,23 +38,14 @@ const getFeatureText = (features: any): string[] => {
       `${features.teamMemberLimit === "unlimited" ? "Unlimited" : features.teamMemberLimit} Team Members`
     );
   }
-  if (features.hasAnalytics) {
-    text.push("Advanced Analytics");
-  }
-  if (features.hasCustomDomain) {
-    text.push("Custom Domain");
-  }
-  if (features.prioritySupport) {
-    text.push("Priority Support");
-  }
-  if (features.advancedReporting) {
-    text.push("Advanced Reporting");
-  }
-  if (features.dedicatedAccountManager) {
-    text.push("Dedicated Account Manager");
-  }
+  if (features.hasAnalytics) text.push("Advanced Analytics");
+  if (features.hasCustomDomain) text.push("Custom Domain");
+  if (features.prioritySupport) text.push("Priority Support");
+  if (features.advancedReporting) text.push("Advanced Reporting");
+  if (features.dedicatedAccountManager) text.push("Dedicated Account Manager");
   return text;
 };
+
 
 export function BillingPlanOptions({
   availablePlans: propPlans,
@@ -66,7 +58,7 @@ export function BillingPlanOptions({
   } = useBillingPlans(propPlans);
 
   const { data: subscription } = useBillingSubscription();
-  const { mutate: changePlan, isPending: isChangingPlan } = useChangePlan();
+  const { mutate: changePlan, isPending, variables } = useChangePlan();
 
   const currentPlanId =
     propCurrentPlanId === null
@@ -79,8 +71,8 @@ export function BillingPlanOptions({
         <CardHeader>
           <CardTitle>Upgrade Your Plan</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40">
-          {/* <Spinner /> */} loading ...
+        <CardContent className="h-40 pt-4 text-muted-foreground">
+          Loading available plans...
         </CardContent>
       </Card>
     );
@@ -109,8 +101,8 @@ export function BillingPlanOptions({
       </CardHeader>
       <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {(plans || []).map((plan) => {
-          // Generate the feature list for this specific plan
           const featureList = getFeatureText(plan.features);
+          const isThisPlanPending = isPending && variables === plan.id;
 
           return (
             <Card key={plan.id} className="flex flex-col">
@@ -121,15 +113,13 @@ export function BillingPlanOptions({
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: "USD",
-                    }).format(plan.price)}
+                    }).format(parseFloat(plan.price))}
                   </span>
                   <span className="text-muted-foreground">/ mo</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 space-y-3">
-                {/* --- THIS IS THE FIX --- */}
-                {/* Map over the newly generated featureList array */}
-                {featureList.map((feature: string, i: number) => (
+                {featureList.map((feature, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
                     <span>{feature}</span>
@@ -138,16 +128,19 @@ export function BillingPlanOptions({
               </CardContent>
               <CardFooter>
                 {currentPlanId === plan.id ? (
-                  <Button disabled className="w-full">
+                  <Button disabled variant="outline" className="w-full">
                     Current Plan
                   </Button>
                 ) : (
                   <Button
                     onClick={() => changePlan(plan.id)}
                     className="w-full"
-                    disabled={isChangingPlan}
+                    disabled={isPending}
                   >
-                    {isChangingPlan ? "Redirecting..." : "Switch Plan"}
+                    {isThisPlanPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {isThisPlanPending ? "Switching..." : "Switch Plan"}
                   </Button>
                 )}
               </CardFooter>

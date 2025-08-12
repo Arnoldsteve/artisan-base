@@ -99,6 +99,30 @@ model TenantSubscription {
   @@map("tenant_subscriptions")
 }
 
+// Tenant payment fro the platform
+model SubscriptionPayment {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  tenant               Tenant   @relation(fields: [tenantId], references: [id])
+  
+  amount               Decimal  @db.Decimal(10, 2)
+  currency             String   // e.g., "USD", "KES"
+  status               String   // Standardized: "COMPLETED", "FAILED", "REFUNDED"
+  
+  provider             String   // "STRIPE", "PAYPAL", "MPESA"
+  providerTransactionId String  // The unique Invoice/Transaction ID from the provider
+
+  // Link to the subscription this payment is for
+  subscriptionId       String
+  subscription         TenantSubscription @relation(fields: [subscriptionId], references: [id])
+
+  createdAt            DateTime @default(now())
+
+  @@unique([provider, providerTransactionId])
+  @@index([tenantId])
+  @@map("subscription_payments") // Use a clear table name
+}
+
 model PaymentIndex {
   id                String   @id @default(cuid())
   tenantId          String

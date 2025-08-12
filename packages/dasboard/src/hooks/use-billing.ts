@@ -61,29 +61,26 @@ export function useBillingInvoices(initialData?: Invoice[]) {
  */
 export function useChangePlan() {
   const queryClient = useQueryClient();
+  
+  // We use the `useMutation` hook's own state management
   return useMutation({
+    // The mutation function now accepts the planId
     mutationFn: (planId: string) => billingService.changePlan(planId),
-    onSuccess: (response) => {
-      // The `response` object is now { success: boolean, message: string }
-      
-      // 1. Show the success message from the backend in a toast.
+
+    // --- The onSuccess and onError handlers are the key to resetting the state ---
+    onSuccess: (response, planId) => {
       toast.success(response.message || "Plan updated successfully!");
-
-      // 2. REMOVED: The redirect logic (window.open) is no longer needed.
-
-      // 3. This is now the most important step. It tells React Query that the
-      // subscription data is out of date, forcing a refetch. This will
-      // automatically update the "Current Plan" section of your UI.
+      
+      // After success, invalidate the subscription query to trigger a UI update.
+      // Using 'await' ensures we wait for the refetch before the mutation is fully settled.
       queryClient.invalidateQueries({ queryKey: [...BILLING_QUERY_KEY, 'subscription'] });
     },
 
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to initiate plan change.");
+    onError: (error: Error, planId) => {
+      toast.error(error.message || `Failed to switch to plan ${planId}.`);
     },
   });
 }
-
-
 /**
  * Hook for downloading an invoice.
  */
