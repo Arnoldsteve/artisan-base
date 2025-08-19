@@ -10,13 +10,21 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+
+    "baseUrl": "./",
+    "paths": {
+      // This line maps the alias directly to the generated Prisma client folder
+      "@prisma/client/management": ["./generated/management"],
+
+      // (Optional but Recommended) Add this for cleaner imports from your 'src' folder
+      "@/*": ["src/*"]
+    }
   }
 }

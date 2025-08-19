@@ -12,42 +12,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Represents the tenant (a single store) - FIXED FOR SEPARATE DBS
+// Represents the tenant (a single store)
 model Tenant {
-  id           String @id @default(cuid())
-  name         String // The human-friendly store name, e.g., "Malaika Beads"
-  subdomain    String @unique // The unique subdomain for routing, e.g., "malaikabeads"
-  customDomain String? @unique // Optional custom domain for pro plans
+  id              String  @id @default(cuid())
+  name            String
+  subdomain       String  @unique
+  customDomain    String? @unique
+  dbSchema        String @unique
+  status          TenantStatus @default(PENDING)
+  suspendedAt     DateTime?
+  deletedAt       DateTime?
+  owner           User   @relation(fields: [ownerId], references: [id])
+  ownerId         String 
+  plan            SubscriptionPlan? @relation(fields: [planId], references: [id])
+  planId          String?
 
-  // SEPARATE DATABASE FIELDS (replaces dbSchema)
-  databaseUrl       String @unique    // Full Supabase connection string
-  supabaseProjectId String @unique    // Supabase project reference
+  // --- FIELD ADDED ---
+  // Stores the Stripe Customer ID (cus_...) associated with this tenant.
+  stripeCustomerId String? @unique
+
+  subscription    TenantSubscription?
+  settings        Json?
   
-  status TenantStatus @default(PENDING)
-  
-  // Audit fields for better tracking
-  suspendedAt DateTime?
-  deletedAt   DateTime? // Soft delete support
-  
-  // A tenant must be owned by one user.
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String 
+  // Back-relations added by `prisma format`
+  paymentIndices  PaymentIndex[]
+  SubscriptionPayment SubscriptionPayment[]
 
-  // The subscription plan the tenant is on.
-  plan   SubscriptionPlan? @relation(fields: [planId], references: [id])
-  planId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  // The live subscription details from the payment provider.
-  subscription TenantSubscription?
-
-  // A JSONB field for tenant-wide settings that don't need a full table.
-  // e.g., { "logoUrl": "...", "themeColor": "#ff0000" }
-  settings Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Performance indexes
   @@index([ownerId])
   @@index([planId])
   @@index([status])
@@ -64,28 +57,32 @@ model User {
   role           UserRole @default(TENANT_OWNER) // Platform-level roles
 
   // The tenant that this user owns (if any).
-  ownedTenant Tenant[]
+  ownedTenant   Tenant[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("users")
 }
 
 // Defines the available subscription plans you offer (e.g., Basic, Pro).
 model SubscriptionPlan {
-  id           String       @id @default(cuid())
-  name         String       // "Basic", "Pro", "Enterprise"
-  price        Decimal      @db.Decimal(10, 2)
-  billingCycle BillingCycle
+  id            String       @id @default(cuid())
+  name          String       // "Basic", "Pro", "Enterprise"
+  price         Decimal      @db.Decimal(10, 2)
+  billingCycle  BillingCycle
+
+  // --- FIELD ADDED ---
+  // Stores the Stripe/PayPal Price ID (e.g., 'price_...').
+  providerPlanId String? @unique
 
   // A JSONB field to control features and limits.
-  features Json
+  features      Json
 
   tenants       Tenant[]
   subscriptions TenantSubscription[]
 
-  createdAt DateTime @default(now())
+  createdAt     DateTime @default(now())
 
   @@map("subscription_plans")
 }
@@ -98,23 +95,57 @@ model TenantSubscription {
   planId    String
   plan      SubscriptionPlan @relation(fields: [planId], references: [id])
   status    SubscriptionStatus @default(ACTIVE)
-
-  // Multi-provider support (using String instead of enum to avoid duplicates)
-  provider               String @default("STRIPE")  // "STRIPE", "PAYPAL", "MPESA", etc.
+  provider               String @default("STRIPE")  
   providerSubscriptionId String?
   
   // Timestamps managed by the payment provider (e.g., Stripe)
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
 
-  // Legacy Stripe field (keep for backward compatibility)
-  stripeSubscriptionId String? @unique
+  // Back-relation added by `prisma format`
+  SubscriptionPayment SubscriptionPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([provider, providerSubscriptionId])
   @@map("tenant_subscriptions")
+}
+
+// Tenant payment for the platform
+model SubscriptionPayment {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  tenant               Tenant   @relation(fields: [tenantId], references: [id])
+  
+  amount               Decimal  @db.Decimal(10, 2)
+  currency             String   // e.g., "USD", "KES"
+  status               String   // Standardized: "COMPLETED", "FAILED", "REFUNDED"
+  
+  provider             String   // "STRIPE", "PAYPAL", "MPESA"
+  providerTransactionId String  // The unique Invoice/Transaction ID from the provider
+
+  // Link to the subscription this payment is for
+  subscriptionId       String
+  subscription         TenantSubscription @relation(fields: [subscriptionId], references: [id])
+
+  createdAt            DateTime @default(now())
+
+  @@unique([provider, providerTransactionId])
+  @@index([tenantId])
+  @@map("subscription_payments")
+}
+
+model PaymentIndex {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId           String   // The ID of the order within the tenant's schema
+  checkoutRequestId String   @unique // The temporary ID from the payment provider
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("payment_indices")
 }
 
 // --- Enums ---
@@ -142,5 +173,3 @@ enum UserRole {
   PLATFORM_SUPPORT  // Customer support access
   TENANT_OWNER      // Owns tenant stores
 }
-
-// REMOVED: PaymentProvider enum (exists in tenant.prisma)

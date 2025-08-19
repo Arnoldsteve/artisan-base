@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.10.1
- * Query Engine version: 9b628578b3b7cae625e8c927178f15a170e74a9c
+ * Prisma Client JS version: 6.11.1
+ * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
  */
 Prisma.prismaVersion = {
-  client: "6.10.1",
-  engine: "9b628578b3b7cae625e8c927178f15a170e74a9c"
+  client: "6.11.1",
+  engine: "f40f79ec31188888a2e33acda0ecc8fd10a853a9"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -127,8 +127,11 @@ exports.Prisma.TenantScalarFieldEnum = {
   customDomain: 'customDomain',
   dbSchema: 'dbSchema',
   status: 'status',
+  suspendedAt: 'suspendedAt',
+  deletedAt: 'deletedAt',
   ownerId: 'ownerId',
   planId: 'planId',
+  stripeCustomerId: 'stripeCustomerId',
   settings: 'settings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -140,6 +143,7 @@ exports.Prisma.UserScalarFieldEnum = {
   hashedPassword: 'hashedPassword',
   firstName: 'firstName',
   lastName: 'lastName',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -149,6 +153,7 @@ exports.Prisma.SubscriptionPlanScalarFieldEnum = {
   name: 'name',
   price: 'price',
   billingCycle: 'billingCycle',
+  providerPlanId: 'providerPlanId',
   features: 'features',
   createdAt: 'createdAt'
 };
@@ -158,11 +163,32 @@ exports.Prisma.TenantSubscriptionScalarFieldEnum = {
   tenantId: 'tenantId',
   planId: 'planId',
   status: 'status',
+  provider: 'provider',
+  providerSubscriptionId: 'providerSubscriptionId',
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
-  stripeSubscriptionId: 'stripeSubscriptionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionPaymentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  subscriptionId: 'subscriptionId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PaymentIndexScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  checkoutRequestId: 'checkoutRequestId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -201,6 +227,12 @@ exports.TenantStatus = exports.$Enums.TenantStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.UserRole = exports.$Enums.UserRole = {
+  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
+  PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
+  TENANT_OWNER: 'TENANT_OWNER'
+};
+
 exports.BillingCycle = exports.$Enums.BillingCycle = {
   MONTHLY: 'MONTHLY',
   YEARLY: 'YEARLY'
@@ -217,7 +249,9 @@ exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   User: 'User',
   SubscriptionPlan: 'SubscriptionPlan',
-  TenantSubscription: 'TenantSubscription'
+  TenantSubscription: 'TenantSubscription',
+  SubscriptionPayment: 'SubscriptionPayment',
+  PaymentIndex: 'PaymentIndex'
 };
 
 /**

@@ -11,38 +11,28 @@ import { TenantMiddleware } from './tenant/middleware/tenant.middleware';
 // --- FEATURE MODULES ---
 import { AuthModule } from './auth/auth.module';
 import { TenantModule } from './tenant/tenant.module';
-import { ProductModule } from './dashboard/product/product.module';
-import { CategoryModule } from './dashboard/category/category.module'; // <-- IMPORT
-import { OrderModule } from './dashboard/order/order.module';
-import { CustomerModule } from './dashboard/customer/customer.module';
-import { SettingsModule } from './dashboard/settings/settings.module';
 import { StorefrontModule } from './storefront/storefront.module';
 import { TenantContextService } from './common/tenant-context.service';
 import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
-import { AdminHomeApiModule } from './dashboard/admin-home-api/admin-home-api.module';
 import { SupabaseModule } from './supabase/supabase.module';
-import { StorageModule } from './dashboard/storage/storage.module';
-import { PaymentModule } from './dashboard/payment/payment.module';
+import { PlatformPlansModule } from './platform/plans/platform-plans.module'; // 1. Import the new module
+import { DashboardModule } from './dashboard/dashboard.module';
+import { BillingModule } from './billing/billing.module';
+
 
 @Module({
   imports: [
-    // --- CORE CONFIGURATION ---
     ConfigModule.forRoot({ isGlobal: true }),
-    PrismaModule, // Provides the global Management client
+    PrismaModule, 
 
-    // --- FEATURE MODULES ---
     AuthModule,
     TenantModule,
-    ProductModule,
-    CategoryModule,
-    OrderModule,
-    CustomerModule,
-    SettingsModule,
+    DashboardModule,
     StorefrontModule,
-    AdminHomeApiModule,
-    StorageModule,
-    SupabaseModule, 
-    PaymentModule, 
+    SupabaseModule,
+    PlatformPlansModule, 
+    // Billing
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [
@@ -59,7 +49,11 @@ export class AppModule implements NestModule {
     // TenantMiddleware is available. Since PrismaModule is global, it will be.
     consumer
       .apply(TenantMiddleware, TenantContextMiddleware)
-      // .forRoutes('v1/dashboard/*path')
+      .exclude(
+        'dashboard/payments/webhook/mpesa',
+        'dashboard/payments/webhook/stripe',
+        'dashboard/payments/webhook/paypal',
+      )
       .forRoutes('*');
   }
 }

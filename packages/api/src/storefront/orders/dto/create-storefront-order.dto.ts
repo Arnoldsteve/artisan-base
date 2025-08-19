@@ -1,3 +1,14 @@
+import { Currency } from '../../../../generated/tenant';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  IsPositive,
+  IsString,
+  ValidateNested,
+  IsEnum,
+} from 'class-validator';
 export class CreateStorefrontOrderDto {
   customer?: {
     email: string;
@@ -12,5 +23,9 @@ export class CreateStorefrontOrderDto {
     variantId?: string;
     quantity: number;
   }>;
+
+  @IsEnum(Currency) 
+  currency: Currency; 
+  
   notes?: string;
 }

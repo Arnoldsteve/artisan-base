@@ -7,7 +7,7 @@ import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateStorefrontOrderDto } from './dto/create-storefront-order.dto';
 import { IStorefrontOrderRepository } from './interfaces/storefront-order-repository.interface';
 import { GetStorefrontOrdersDto } from './dto/get-storefront-orders.dto';
-import { PrismaClient } from '../../../generated/tenant';
+import { Order, Payment, PrismaClient } from '../../../generated/tenant';
 import { Decimal } from '@prisma/client/runtime/library'; // Import Decimal for calculations
 
 @Injectable({ scope: Scope.REQUEST })
@@ -107,11 +107,12 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
           totalAmount: subtotal,
           subtotal,
           taxAmount: 0,
+          currency: dto.currency,
           shippingAmount: 0,
           notes: dto.notes,
           shippingAddress: dto.shippingAddress,
           billingAddress: dto.billingAddress,
-          customerId,
+          customer: customerId ? { connect: { id: customerId } } : undefined,
           items: {
             create: orderItemsData,
           },
@@ -181,5 +182,34 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
       include: { items: true },
     });
     return order;
+  }
+
+    // --- THIS METHOD IS NOW UPDATED ---
+  async findOrderByCheckoutRequestId(checkoutRequestId: string): Promise<Order | null> {
+    const prisma = await this.getPrisma();
+    const payment = await prisma.payment.findUnique({
+      where: { checkoutRequestId },
+      include: {
+        order: true, // Include the full Order object
+      },
+    });
+    return payment?.order ?? null;
+  }
+
+  // --- NEW METHOD ---
+  async createPayment(paymentData: any): Promise<Payment> {
+    const prisma = await this.getPrisma();
+    return prisma.payment.create({
+      data: paymentData,
+    });
+  }
+
+  // --- NEW METHOD ---
+  async updateOrderStatus(orderId: string, data: { status?: any; paymentStatus?: any }): Promise<Order> {
+    const prisma = await this.getPrisma();
+    return prisma.order.update({
+      where: { id: orderId },
+      data: data,
+    });
   }
 }

@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEmail,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -11,6 +12,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { Currency } from '../../../../generated/tenant';
 
 // A DTO for a single line item in the order
 class ManualOrderItemDto {
@@ -102,6 +104,9 @@ export class CreateManualOrderDto {
   @IsNumber()
   @IsOptional() // Manually entered shipping cost
   shippingAmount?: number;
+
+  @IsEnum(Currency) 
+  currency: Currency; 
   
   @IsString()
   @IsOptional()

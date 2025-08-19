@@ -1,12 +1,62 @@
+/*
+  Warnings:
+
+  - You are about to drop the `subscription_plans` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `tenant_subscriptions` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `tenants` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
+
+*/
+-- CreateEnum
+CREATE TYPE "PaymentProvider" AS ENUM ('STRIPE', 'PAYPAL', 'MPESA', 'AIRTEL_MONEY', 'MTN_MOMO', 'PAGA', 'CASH', 'BANK_TRANSFER', 'CHECK', 'APPLE_PAY', 'GOOGLE_PAY', 'AMAZON_PAY', 'KLARNA', 'AFTERPAY', 'ALIPAY', 'WECHAT_PAY', 'CRYPTO');
 
 -- CreateEnum
-CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED');
+CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PARTIALLY_DELIVERED', 'RETURN_REQUESTED', 'RETURNED', 'REFUNDED', 'FAILED_DELIVERY', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'REFUNDED', 'FAILED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PROCESSING', 'PARTIALLY_PAID', 'PAID', 'OVERPAID', 'FAILED', 'CANCELLED', 'REFUNDED', 'PARTIALLY_REFUNDED', 'CHARGEBACK', 'EXPIRED');
 
 -- CreateEnum
-CREATE TYPE "DashboardUserRole" AS ENUM ('OWNER', 'ADMIN', 'STAFF');
+CREATE TYPE "DashboardUserRole" AS ENUM ('OWNER', 'ADMIN', 'MANAGER', 'STAFF', 'SUPPORT', 'ACCOUNTANT', 'MARKETER', 'VIEWER');
+
+-- CreateEnum
+CREATE TYPE "Currency" AS ENUM ('USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'INR', 'KES');
+
+-- -- DropForeignKey
+-- ALTER TABLE "tenant_subscriptions" DROP CONSTRAINT "tenant_subscriptions_planId_fkey";
+
+-- -- DropForeignKey
+-- ALTER TABLE "tenant_subscriptions" DROP CONSTRAINT "tenant_subscriptions_tenantId_fkey";
+
+-- -- DropForeignKey
+-- ALTER TABLE "tenants" DROP CONSTRAINT "tenants_ownerId_fkey";
+
+-- -- DropForeignKey
+-- ALTER TABLE "tenants" DROP CONSTRAINT "tenants_planId_fkey";
+
+-- -- DropTable
+-- DROP TABLE "subscription_plans";
+
+-- -- DropTable
+-- DROP TABLE "tenant_subscriptions";
+
+-- -- DropTable
+-- DROP TABLE "tenants";
+
+-- -- DropTable
+-- DROP TABLE "users";
+
+-- -- DropEnum
+-- DROP TYPE "BillingCycle";
+
+-- -- DropEnum
+-- DROP TYPE "SubscriptionStatus";
+
+-- -- DropEnum
+-- DROP TYPE "TenantStatus";
+
+-- -- DropEnum
+-- DROP TYPE "UserRole";
 
 -- CreateTable
 CREATE TABLE "products" (
@@ -66,6 +116,7 @@ CREATE TABLE "orders" (
     "orderNumber" TEXT NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
     "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "currency" "Currency" NOT NULL,
     "totalAmount" DECIMAL(10,2) NOT NULL,
     "subtotal" DECIMAL(10,2) NOT NULL,
     "taxAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -94,6 +145,23 @@ CREATE TABLE "order_items" (
     "variantId" TEXT,
 
     CONSTRAINT "order_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "payments" (
+    "id" TEXT NOT NULL,
+    "orderId" TEXT NOT NULL,
+    "provider" "PaymentProvider" NOT NULL,
+    "providerTransactionId" TEXT NOT NULL,
+    "amount" DECIMAL(10,2) NOT NULL,
+    "currency" "Currency" NOT NULL,
+    "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "checkoutRequestId" TEXT,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -177,6 +245,12 @@ CREATE UNIQUE INDEX "orders_orderNumber_key" ON "orders"("orderNumber");
 CREATE INDEX "orders_orderSequence_idx" ON "orders"("orderSequence");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "payments_checkoutRequestId_key" ON "payments"("checkoutRequestId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_provider_providerTransactionId_key" ON "payments"("provider", "providerTransactionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "customers_email_key" ON "customers"("email");
 
 -- CreateIndex
@@ -205,6 +279,9 @@ ALTER TABLE "order_items" ADD CONSTRAINT "order_items_productId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_variantId_fkey" FOREIGN KEY ("variantId") REFERENCES "product_variants"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payments" ADD CONSTRAINT "payments_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "customer_addresses" ADD CONSTRAINT "customer_addresses_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE CASCADE ON UPDATE CASCADE;

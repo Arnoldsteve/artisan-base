@@ -139,6 +139,7 @@ export class OrderRepository implements IOrderRepository {
           shippingAddress: shippingAddress as any,
           billingAddress: (billingAddress ?? shippingAddress) as any,
           items: { create: orderItemsData },
+          currency: dto.currency,
         },
         include: { items: true, customer: true },
       });

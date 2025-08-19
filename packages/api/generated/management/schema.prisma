@@ -1,12 +1,9 @@
 // =================================================================
-// ||                MANAGEMENT PRISMA SCHEMA                     ||
+// ||                COMPLETE MANAGEMENT SCHEMA                   ||
 // =================================================================
-// This schema defines the "public" tables for the entire SaaS platform.
-// It manages tenants, platform users (owners), and subscriptions.
 
 generator client {
   provider = "prisma-client-js"
-  // This will be your primary, always-available Prisma Client
   output   = "../generated/management"
 }
 
@@ -15,53 +12,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ===============================================
-// Models for the "public" schema
-// ===============================================
-
-// Represents the tenant (a single store).
-// This is the central record for each customer's store.
+// Represents the tenant (a single store)
 model Tenant {
-  id           String  @id @default(cuid())
-  name         String // The human-friendly store name, e.g., "Malaika Beads"
-  subdomain    String  @unique // The unique subdomain for routing, e.g., "malaikabeads"
-  customDomain String? @unique // Optional custom domain for pro plans
+  id           String            @id @default(cuid())
+  name         String
+  subdomain    String            @unique
+  customDomain String?           @unique
+  dbSchema     String            @unique
+  status       TenantStatus      @default(PENDING)
+  suspendedAt  DateTime?
+  deletedAt    DateTime?
+  owner        User              @relation(fields: [ownerId], references: [id])
+  ownerId      String
+  plan         SubscriptionPlan? @relation(fields: [planId], references: [id])
+  planId       String?
 
-  // The unique name of the PostgreSQL schema for this tenant's data.
-  // This is the key to the schema-per-tenant architecture.
-  dbSchema String @unique
+  // --- FIELD ADDED ---
+  // Stores the Stripe Customer ID (cus_...) associated with this tenant.
+  stripeCustomerId String? @unique
 
-  status TenantStatus @default(PENDING)
-
-  // A tenant must be owned by one user.
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
-
-  // The subscription plan the tenant is on.
-  plan   SubscriptionPlan? @relation(fields: [planId], references: [id])
-  planId String?
-
-  // The live subscription details from the payment provider.
   subscription TenantSubscription?
+  settings     Json?
 
-  // A JSONB field for tenant-wide settings that don't need a full table.
-  // e.g., { "logoUrl": "...", "themeColor": "#ff0000" }
-  settings Json?
+  // Back-relations added by `prisma format`
+  paymentIndices      PaymentIndex[]
+  SubscriptionPayment SubscriptionPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([ownerId])
+  @@index([planId])
+  @@index([status])
   @@map("tenants")
 }
 
 // Represents a user of the SAAS PLATFORM itself, not a tenant's customer.
-// This user can own a tenant.
 model User {
-  id             String  @id @default(cuid())
-  email          String  @unique
+  id             String   @id @default(cuid())
+  email          String   @unique
   hashedPassword String
   firstName      String?
   lastName       String?
+  role           UserRole @default(TENANT_OWNER) // Platform-level roles
 
   // The tenant that this user owns (if any).
   ownedTenant Tenant[]
@@ -79,9 +72,11 @@ model SubscriptionPlan {
   price        Decimal      @db.Decimal(10, 2)
   billingCycle BillingCycle
 
+  // --- FIELD ADDED ---
+  // Stores the Stripe/PayPal Price ID (e.g., 'price_...').
+  providerPlanId String? @unique
+
   // A JSONB field to control features and limits.
-  // This is key for the Open/Closed Principle.
-  // e.g., { "maxProducts": 100, "customDomain": true, "analytics": false }
   features Json
 
   tenants       Tenant[]
@@ -94,28 +89,66 @@ model SubscriptionPlan {
 
 // Represents a tenant's active subscription instance.
 model TenantSubscription {
-  id       String             @id @default(cuid())
-  tenantId String             @unique
-  tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  planId   String
-  plan     SubscriptionPlan   @relation(fields: [planId], references: [id])
-  status   SubscriptionStatus @default(ACTIVE)
+  id                     String             @id @default(cuid())
+  tenantId               String             @unique
+  tenant                 Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId                 String
+  plan                   SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status                 SubscriptionStatus @default(ACTIVE)
+  provider               String             @default("STRIPE")
+  providerSubscriptionId String?
 
   // Timestamps managed by the payment provider (e.g., Stripe)
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
 
-  // The unique ID from the payment provider's system.
-  stripeSubscriptionId String? @unique
+  // Back-relation added by `prisma format`
+  SubscriptionPayment SubscriptionPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([provider, providerSubscriptionId])
   @@map("tenant_subscriptions")
 }
 
-// --- Enums ---
+// Tenant payment for the platform
+model SubscriptionPayment {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
+  amount   Decimal @db.Decimal(10, 2)
+  currency String // e.g., "USD", "KES"
+  status   String // Standardized: "COMPLETED", "FAILED", "REFUNDED"
+
+  provider              String // "STRIPE", "PAYPAL", "MPESA"
+  providerTransactionId String // The unique Invoice/Transaction ID from the provider
+
+  // Link to the subscription this payment is for
+  subscriptionId String
+  subscription   TenantSubscription @relation(fields: [subscriptionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([provider, providerTransactionId])
+  @@index([tenantId])
+  @@map("subscription_payments")
+}
+
+model PaymentIndex {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId           String // The ID of the order within the tenant's schema
+  checkoutRequestId String   @unique // The temporary ID from the payment provider
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("payment_indices")
+}
+
+// --- Enums ---
 enum TenantStatus {
   PENDING
   ACTIVE
@@ -133,4 +166,10 @@ enum SubscriptionStatus {
   CANCELLED
   PAST_DUE
   UNPAID
+}
+
+enum UserRole {
+  PLATFORM_ADMIN // Full platform access
+  PLATFORM_SUPPORT // Customer support access
+  TENANT_OWNER // Owns tenant stores
 }

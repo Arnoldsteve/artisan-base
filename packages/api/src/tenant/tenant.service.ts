@@ -5,6 +5,7 @@ import {
   BadRequestException,
   Logger,
   Inject,
+  NotFoundException
 } from '@nestjs/common';
 import { ITenantRepository } from './interfaces/tenant-repository.interface';
 import { Tenant } from 'generated/management';
@@ -17,6 +18,18 @@ export class TenantService {
     @Inject('TenantRepository')
     private readonly tenantRepository: ITenantRepository,
   ) {}
+
+  async getTenantMetadata(tenantId: string) {
+    const tenant = await this.tenantRepository.findTenantById(tenantId);
+
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID '${tenantId}' not found.`);
+    }
+
+    // We can customize the returned object later if needed
+    return tenant;
+  }
+
 
   async createTenant(ownerId: string, subdomain: string, storeName: string) {
     const dbSchema = `tenant_${subdomain.replace(/-/g, '_')}`;

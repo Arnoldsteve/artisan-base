@@ -7,6 +7,9 @@ CREATE TYPE "BillingCycle" AS ENUM ('MONTHLY', 'YEARLY');
 -- CreateEnum
 CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELLED', 'PAST_DUE', 'UNPAID');
 
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('PLATFORM_ADMIN', 'PLATFORM_SUPPORT', 'TENANT_OWNER');
+
 -- CreateTable
 CREATE TABLE "tenants" (
     "id" TEXT NOT NULL,
@@ -15,6 +18,8 @@ CREATE TABLE "tenants" (
     "customDomain" TEXT,
     "dbSchema" TEXT NOT NULL,
     "status" "TenantStatus" NOT NULL DEFAULT 'PENDING',
+    "suspendedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
     "ownerId" TEXT NOT NULL,
     "planId" TEXT,
     "settings" JSONB,
@@ -31,6 +36,7 @@ CREATE TABLE "users" (
     "hashedPassword" TEXT NOT NULL,
     "firstName" TEXT,
     "lastName" TEXT,
+    "role" "UserRole" NOT NULL DEFAULT 'TENANT_OWNER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -55,6 +61,8 @@ CREATE TABLE "tenant_subscriptions" (
     "tenantId" TEXT NOT NULL,
     "planId" TEXT NOT NULL,
     "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE',
+    "provider" TEXT NOT NULL DEFAULT 'STRIPE',
+    "providerSubscriptionId" TEXT,
     "currentPeriodStart" TIMESTAMP(3) NOT NULL,
     "currentPeriodEnd" TIMESTAMP(3) NOT NULL,
     "stripeSubscriptionId" TEXT,
@@ -74,6 +82,15 @@ CREATE UNIQUE INDEX "tenants_customDomain_key" ON "tenants"("customDomain");
 CREATE UNIQUE INDEX "tenants_dbSchema_key" ON "tenants"("dbSchema");
 
 -- CreateIndex
+CREATE INDEX "tenants_ownerId_idx" ON "tenants"("ownerId");
+
+-- CreateIndex
+CREATE INDEX "tenants_planId_idx" ON "tenants"("planId");
+
+-- CreateIndex
+CREATE INDEX "tenants_status_idx" ON "tenants"("status");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
@@ -81,6 +98,9 @@ CREATE UNIQUE INDEX "tenant_subscriptions_tenantId_key" ON "tenant_subscriptions
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tenant_subscriptions_stripeSubscriptionId_key" ON "tenant_subscriptions"("stripeSubscriptionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tenant_subscriptions_provider_providerSubscriptionId_key" ON "tenant_subscriptions"("provider", "providerSubscriptionId");
 
 -- AddForeignKey
 ALTER TABLE "tenants" ADD CONSTRAINT "tenants_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

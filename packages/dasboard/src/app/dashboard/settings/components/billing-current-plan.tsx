@@ -9,48 +9,92 @@ import {
   CardFooter,
 } from "@repo/ui";
 import { Button, Badge } from "@repo/ui";
-import { useBilling } from "@/hooks/use-billing";
 import { Subscription } from "@/types/billing";
 
-// These types would typically be in a shared types file
-type Plan = {
-  id: string;
-  name: string;
-  price: number;
-  billingCycle: "MONTHLY" | "YEARLY";
-};
-type Subscription = {
-  status: "ACTIVE" | "CANCELLED" | "PAST_DUE";
-  currentPeriodEnd: Date;
-  plan: Plan;
-};
+// Import the specific hook for fetching the subscription
+import { useBillingSubscription } from "@/hooks/use-billing";
 
 interface BillingCurrentPlanProps {
-  subscription?: Subscription;
+  subscription?: Subscription | null;
 }
 
 export function BillingCurrentPlan({
-  subscription: propSubscription,
+  subscription: initialSubscriptionData, // Rename for clarity
 }: BillingCurrentPlanProps) {
-  const { subscription, loading, error } = useBilling();
-  const sub = propSubscription || subscription;
-  if (loading) return <div>Loading current plan...</div>;
-  if (error) return <div className="text-destructive">{error}</div>;
-  if (!sub) return null;
-  const { plan, status, currentPeriodEnd } = sub;
+  
+  // --- THIS IS THE FIX ---
+  // The hook becomes the single source of truth for the component's data.
+  // - On initial render, `subscription` will be `initialSubscriptionData`.
+  // - After a successful refetch (triggered by invalidateQueries),
+  //   this hook will re-render the component and `subscription` will be the NEW data.
+  const {
+    data: subscription,
+    isLoading,
+    isError,
+    error,
+  } = useBillingSubscription(initialSubscriptionData);
+
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Plan</CardTitle>
+        </CardHeader>
+        <CardContent className="h-20 pt-4 text-muted-foreground">
+          Loading subscription details...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-destructive">Error</CardTitle>
+          <CardDescription className="text-destructive">
+            {error?.message || "Could not load subscription details."}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // This `if` block now handles the state where there is definitively no subscription
+  if (!subscription) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Plan</CardTitle>
+          <CardDescription>You are not subscribed to any plan.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Please choose a plan to get started.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If we get past the checks above, we know we have a valid subscription object.
+  const { plan, status, currentPeriodEnd } = subscription;
+
   const handleManageBilling = () => {
-    // In a real app, this would redirect to your Stripe Customer Portal
-    // window.location.href = 'https://billing.stripe.com/p/...'
+    alert("This will redirect to the Stripe Customer Portal in a real application.");
   };
+
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   }).format(new Date(currentPeriodEnd));
+
+  // NOTE: Prisma Decimal is a string, so we must parse it to a number for formatting.
   const price = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(plan.price);
+  }).format(parseFloat(plan.price));
+
   return (
     <Card>
       <CardHeader>
@@ -67,7 +111,7 @@ export function BillingCurrentPlan({
             variant={status === "ACTIVE" ? "default" : "destructive"}
             className="capitalize"
           >
-            {status.toLowerCase()}
+            {status.toLowerCase().replace('_', ' ')}
           </Badge>
         </div>
       </CardHeader>
