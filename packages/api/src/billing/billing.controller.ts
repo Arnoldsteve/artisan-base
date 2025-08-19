@@ -18,17 +18,11 @@ import { CreateCheckoutDto } from './dto/create-checkout.dto';
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
-  /**
-   * Endpoint for the tenant dashboard to fetch the tenant's current subscription.
-   */
   @Get('subscription')
   getSubscription() {
     return this.billingService.getSubscription();
   }
 
-  /**
-   * Endpoint for the tenant dashboard to initiate a plan change.
-   */
   @Post('create-checkout-session')
   createCheckoutSession(@Body() createCheckoutDto: CreateCheckoutDto) {
     return this.billingService.createCheckoutSession(createCheckoutDto);
