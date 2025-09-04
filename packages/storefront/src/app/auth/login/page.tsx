@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useAuthForm } from "@/hooks/use-auth-form";
 import { login } from "@/services/auth-service";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -9,7 +11,17 @@ export default function LoginPage() {
   const { error, loading, handleSubmit } = useAuthForm(login, "/account");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen relative">
+       <div className="absolute top-6 left-6">
+        <Link
+          href="/"
+          className="flex items-center text-gray-600 hover:text-black text-sm font-medium"
+        >
+          <ArrowLeft className="w-5 h-5 mr-1" />
+          Back to Home
+        </Link>
+      </div>
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -47,6 +59,12 @@ export default function LoginPage() {
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
+        <p className="mt-4 text-center text-sm">
+          Don’t have an account?{" "}
+          <Link href="/auth/signup" className="text-blue-600 hover:underline">
+            Sign Up
+          </Link>
+        </p>
       </form>
     </div>
   );
