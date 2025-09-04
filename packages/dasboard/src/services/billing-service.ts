@@ -26,7 +26,7 @@ export class BillingService {
    * Retrieves the current subscription details for the authenticated tenant.
    */
   async getSubscription(): Promise<Subscription> {
-    const response = await apiClient.get<ApiResponse<Subscription>>("/dashboard/billing/subscription");
+    const response = await apiClient.get<ApiResponse<Subscription>>("/billing/subscription");
     return response.data;
   }
 
