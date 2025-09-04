@@ -15,13 +15,14 @@ import {
 
 import { Filter, Grid, List } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/use-products";
+import { ProductFilters } from "@/types";
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState<NonNullable<ProductFilters["sortBy"]>>("name");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
@@ -39,12 +40,12 @@ export default function ProductsPage() {
   } = useProducts({
     search: searchQuery,
     category: selectedCategory !== "all" ? selectedCategory : undefined,
-    minPrice: priceRange[0],
-    maxPrice: priceRange[1],
+    priceRange: [priceRange[0], priceRange[1]],
     sortBy,
     // You can add pagination here if needed
   });
-  const products = productsResponse || [];
+  const products = productsResponse?.data ?? [];
+
 
   if (isLoading || isLoadingCategories) {
     return (
@@ -146,7 +147,8 @@ export default function ProductsPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Sort By</label>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              {/* <Select value={sortBy} onValueChange={setSortBy}> */}
+              <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

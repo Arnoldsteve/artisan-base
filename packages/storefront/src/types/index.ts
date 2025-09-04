@@ -37,6 +37,10 @@ export interface Category {
   image?: string;
   parentId?: string;
   isActive: boolean;
+  products?: Product[];
+  _count?: {
+    products: number;
+  };
 }
 
 export interface CartItem {
@@ -91,7 +95,7 @@ export interface ProductFilters {
   rating?: number;
   tags?: string[];
   search?: string;
-  sortBy?: "name" | "price" | "rating" | "createdAt";
+  sortBy?: "name" | "price" | "rating" | "createdAt" | "price-low" | "price-high";
   sortOrder?: "asc" | "desc";
 }
 
