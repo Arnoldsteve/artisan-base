@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@repo/ui/components/ui/button";
@@ -15,13 +15,31 @@ import {
 
 import { Filter, Grid, List } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/use-products";
+import { ProductFilters } from "@/types";
 
-export default function ProductsPage() {
+// Loading component
+function ProductsLoading() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-64 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Products content component
+function ProductsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState<NonNullable<ProductFilters["sortBy"]>>("name");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
@@ -39,26 +57,14 @@ export default function ProductsPage() {
   } = useProducts({
     search: searchQuery,
     category: selectedCategory !== "all" ? selectedCategory : undefined,
-    minPrice: priceRange[0],
-    maxPrice: priceRange[1],
+    priceRange: [priceRange[0], priceRange[1]],
     sortBy,
     // You can add pagination here if needed
   });
-  const products = productsResponse || [];
+  const products = productsResponse?.data ?? [];
 
   if (isLoading || isLoadingCategories) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <ProductsLoading />;
   }
 
   if (error) {
@@ -146,7 +152,7 @@ export default function ProductsPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Sort By</label>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -212,5 +218,14 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// Main page component with Suspense
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsLoading />}>
+      <ProductsContent />
+    </Suspense>
   );
 }

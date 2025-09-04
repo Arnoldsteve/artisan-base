@@ -33,7 +33,7 @@ export default function RootLayout({
                 <div className="min-h-screen flex flex-col">
                   <Header />
                   <main className="flex-1">{children}</main>
-                  <ChatWidget />
+                  {/* <ChatWidget /> */}
                   <Footer />
                 </div>
                 <Toaster position="bottom-right" richColors closeButton />
