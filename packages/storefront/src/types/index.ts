@@ -8,7 +8,7 @@ export interface Product {
   originalPrice?: number;
   image: string;
   images?: string[];
-  category: string;
+  category: Category;
   categoryId: string;
   rating: number;
   reviewCount: number;
@@ -102,6 +102,8 @@ export interface ProductFilters {
 export interface ProductSearchParams extends ProductFilters {
   page?: number;
   limit?: number;
+  sortBy?: ProductFilters["sortBy"];
+  sortOrder?: "asc" | "desc";
 }
 
 // OPTIMIZATION: Union types for better type safety and performance

@@ -21,7 +21,11 @@ const mockCartItems: CartItem[] = [
       price: 24.99,
       image:
         "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-      category: "Kitchenware",
+      category: {
+        id: "kitchen",
+        name: "Kitchenware",
+        isActive: true,
+      },
       categoryId: "kitchen",
       rating: 4.8,
       reviewCount: 127,
@@ -45,7 +49,11 @@ const mockCartItems: CartItem[] = [
       originalPrice: 119.99,
       image:
         "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=400&fit=crop",
-      category: "Kitchenware",
+      category: {
+        id: "kitchen",
+        name: "Kitchenware",
+        isActive: true,
+      },
       categoryId: "kitchen",
       rating: 4.9,
       reviewCount: 89,

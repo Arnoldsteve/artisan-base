@@ -36,7 +36,7 @@ export function ReturnHistoryTab() {
                 <div className="font-bold text-xl">
                   ${ret.refundAmount.toFixed(2)}
                 </div>
-                <Badge variant="success">Completed</Badge>
+                <Badge variant="secondary" className="bg-green-500 text-white">Completed</Badge>
               </div>
             </div>
           ))}

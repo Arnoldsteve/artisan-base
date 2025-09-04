@@ -121,9 +121,9 @@ export const ProductCard = memo(function ProductCard({
         {/* Category badge */}
         <div className="absolute top-2 left-2">
           <span className="px-2 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md">
-            {product.categories?.length > 0
-              ? product.categories[0].name
-              : "Category: Not Set"}
+           {product.category
+            ? product.category.name
+            : "Category: Not Set"}
           </span>
         </div>
       </div>

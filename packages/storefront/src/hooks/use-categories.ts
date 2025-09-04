@@ -10,6 +10,7 @@ import {
   Product,
   Category,
   ProductFilters,
+  ProductSearchParams,
   PaginatedResponse,
 } from "@/types";
 
@@ -20,9 +21,9 @@ export const categoryKeys = {
   details: () => [...categoryKeys.all, "detail"] as const,
   detail: (id: string) => [...categoryKeys.details(), id] as const,
   products: () => [...categoryKeys.all, "products"] as const,
-  categoryProducts: (id: string, filters?: ProductFilters) =>
+  categoryProducts: (id: string, filters?: ProductSearchParams) =>
     [...categoryKeys.products(), id, filters] as const,
-  categoryWithProducts: (id: string, filters?: ProductFilters) =>
+  categoryWithProducts: (id: string, filters?: ProductSearchParams) =>
     [...categoryKeys.all, "with-products", id, filters] as const,
   search: (categoryId: string, query: string) =>
     [...categoryKeys.all, "search", categoryId, query] as const,
@@ -45,7 +46,7 @@ export function useCategoryProducts(
   categoryId: string,
   options: {
     filters?: ProductFilters;
-    sortBy?: string;
+    sortBy?: ProductFilters["sortBy"];
     sortOrder?: "asc" | "desc";
     page?: number;
     limit?: number;
@@ -82,7 +83,7 @@ export function useInfiniteCategoryProducts(
   categoryId: string,
   options: {
     filters?: ProductFilters;
-    sortBy?: string;
+    sortBy?: ProductFilters["sortBy"];
     sortOrder?: "asc" | "desc";
     limit?: number;
   } = {}
@@ -135,7 +136,7 @@ export function useCategoryWithProducts(
   categoryId: string,
   options: {
     filters?: ProductFilters;
-    sortBy?: string;
+    sortBy?: ProductFilters["sortBy"];
     sortOrder?: "asc" | "desc";
     page?: number;
     limit?: number;
@@ -193,7 +194,7 @@ export function useFilteredCategoryProducts(
   categoryId: string,
   filters: ProductFilters,
   options: {
-    sortBy?: string;
+    ssortBy?: ProductFilters["sortBy"];
     sortOrder?: "asc" | "desc";
     page?: number;
     limit?: number;
