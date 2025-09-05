@@ -107,9 +107,9 @@ export function useInfiniteCategoryProducts(
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage: PaginatedResponse<Product>) =>
-      lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined,
+      lastPage.meta.hasNext ? lastPage.meta.page + 1 : undefined,
     getPreviousPageParam: (firstPage: PaginatedResponse<Product>) =>
-      firstPage.pagination.hasPrev ? firstPage.pagination.page - 1 : undefined,
+      firstPage.meta.hasPrev ? firstPage.meta.page - 1 : undefined,
     enabled: !!categoryId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

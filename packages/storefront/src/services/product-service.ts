@@ -121,6 +121,7 @@ export class ProductService {
         return false;
       }
 
+
       // Rating filter
       if (filters.rating && product.rating < filters.rating) {
         return false;
@@ -209,7 +210,7 @@ export class ProductService {
 
     return {
       data: products.slice(startIndex, endIndex),
-      pagination: {
+      meta: {
         page,
         limit,
         total,
@@ -249,6 +250,9 @@ export class ProductService {
       if (response.success) {
         this.cache.setProducts(response.data.data);
       }
+
+      console.log("Service returning:", response.data);
+      console.log("Service return type check:", Array.isArray(response.data));
 
       return response.data;
     } catch (error) {

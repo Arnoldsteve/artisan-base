@@ -193,7 +193,7 @@ export class CategoryService {
 
     return {
       data: products.slice(startIndex, endIndex),
-      pagination: {
+      meta: {
         page,
         limit,
         total,
@@ -281,7 +281,7 @@ export class CategoryService {
       // Return empty result if no data
       return {
         data: [],
-        pagination: {
+        meta: {
           page,
           limit,
           total: 0,
@@ -295,7 +295,7 @@ export class CategoryService {
       // Return empty result on error
       return {
         data: [],
-        pagination: {
+        meta: {
           page: options.page || 1,
           limit: options.limit || 12,
           total: 0,
@@ -343,7 +343,7 @@ export class CategoryService {
         category: null,
         products: {
           data: [],
-          pagination: {
+          meta: {
             page: options.page || 1,
             limit: options.limit || 12,
             total: 0,

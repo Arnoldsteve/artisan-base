@@ -23,7 +23,7 @@ export const ProductsGrid = memo(function ProductsGrid({
   } = useProducts(filters);
 
   const products = productsData?.data || [];
-  const pagination = productsData?.pagination;
+  const pagination = productsData?.meta;
 
   if (isLoading) {
     return (
