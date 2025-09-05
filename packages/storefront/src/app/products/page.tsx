@@ -1,5 +1,6 @@
 "use client";
 
+//@ts-ignore
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
@@ -15,7 +16,7 @@ import {
 
 import { Filter, Grid, List } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/use-products";
-import { ProductFilters } from "@/types";
+import { Product, ProductFilters } from "@/types";
 
 // Loading component
 function ProductsLoading() {
@@ -62,8 +63,10 @@ function ProductsContent() {
     sortBy,
     // You can add pagination here if needed
   });
+  
   // const products = productsResponse ?? []; 
-  const products = productsResponse?.data ?? [];
+  const products = (productsResponse as any) ?? [];
+
   console.log("productsResponse:", productsResponse);
   console.log("Products response:", products);
 
@@ -217,7 +220,7 @@ function ProductsContent() {
               : "space-y-4"
           }
         >
-          {products.map((product) => (
+          {products.map((product : Product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
