@@ -28,7 +28,8 @@ export class StorefrontProductRepository implements IStorefrontProductRepository
     const {
       search,
       category,
-      priceRange,
+      minPrice,
+      maxPrice,
       page = 1,
       limit = 20,
       sortBy = 'name',
@@ -59,8 +60,7 @@ export class StorefrontProductRepository implements IStorefrontProductRepository
       };
     }
 
-    if (priceRange && priceRange.length === 2) {
-      const [minPrice, maxPrice] = priceRange;
+    if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined) where.price.gte = minPrice;
       if (maxPrice !== undefined) where.price.lte = maxPrice;

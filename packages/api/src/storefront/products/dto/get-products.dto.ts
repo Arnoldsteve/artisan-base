@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, Min, IsIn, IsArray, ArrayMinSize, ArrayMaxSize } from 'class-validator';
+import { IsOptional, IsString, IsNumber, Min, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GetProductsDto {
@@ -11,11 +11,16 @@ export class GetProductsDto {
   category?: string;
 
   @IsOptional()
-  // @IsArray()
-  // @ArrayMinSize(2)
-  // @ArrayMaxSize(2)
   @Type(() => Number)
-  priceRange?: [number, number];
+  @IsNumber()
+  @Min(0)
+  minPrice?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  maxPrice?: number;
 
   @IsOptional()
   @Type(() => Number)
