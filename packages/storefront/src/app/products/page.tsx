@@ -62,7 +62,7 @@ function ProductsContent() {
     sortBy,
     // You can add pagination here if needed
   });
-  const products = productsResponse?.data ?? [];
+  const products = productsResponse;
 
   if (isLoading || isLoadingCategories) {
     return <ProductsLoading />;
