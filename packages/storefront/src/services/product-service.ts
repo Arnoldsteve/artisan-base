@@ -113,12 +113,12 @@ export class ProductService {
         return false;
       }
 
-      // Price range filter
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange;
-        if (product.price < min || product.price > max) {
-          return false;
-        }
+      // Price range filter (min / max)
+      if (filters.minPrice !== undefined && product.price < filters.minPrice) {
+        return false;
+      }
+      if (filters.maxPrice !== undefined && product.price > filters.maxPrice) {
+        return false;
       }
 
       // Rating filter

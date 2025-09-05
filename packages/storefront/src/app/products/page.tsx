@@ -57,7 +57,8 @@ function ProductsContent() {
   } = useProducts({
     search: searchQuery,
     category: selectedCategory !== "all" ? selectedCategory : undefined,
-    priceRange: [priceRange[0], priceRange[1]],
+    minPrice: priceRange[0],
+    maxPrice: priceRange[1],
     sortBy,
     // You can add pagination here if needed
   });

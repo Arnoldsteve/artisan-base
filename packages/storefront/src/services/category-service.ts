@@ -90,10 +90,12 @@ export class CategoryService {
     filters: ProductFilters = {}
   ): Product[] {
     return products.filter((product) => {
-      // Price range filter
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange;
-        if (product.price < min || product.price > max) {
+     // Price range filter
+      if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+        if (filters.minPrice !== undefined && product.price < filters.minPrice) {
+          return false;
+        }
+        if (filters.maxPrice !== undefined && product.price > filters.maxPrice) {
           return false;
         }
       }

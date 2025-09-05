@@ -91,7 +91,8 @@ export interface PaginatedResponse<T> {
 
 export interface ProductFilters {
   category?: string;
-  priceRange?: [number, number];
+  minPrice?: number;
+  maxPrice?: number;
   rating?: number;
   tags?: string[];
   search?: string;
