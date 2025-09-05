@@ -62,6 +62,10 @@ function ProductsContent() {
     // You can add pagination here if needed
   });
   const products = productsResponse?.data ?? [];
+  // console.log("Products response at the page level:", productsResponse);
+  console.log("Raw productsResponse:", productsResponse);
+console.log("Products data:", productsResponse?.data);
+console.log("Products length:", productsResponse?.data?.length);
 
   if (isLoading || isLoadingCategories) {
     return <ProductsLoading />;

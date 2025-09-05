@@ -17,7 +17,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true, // <-- Add this property
+      transform: true, 
     }),
   );
   app.use(cookieParser());

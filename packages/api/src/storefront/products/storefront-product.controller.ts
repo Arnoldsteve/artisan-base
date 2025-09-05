@@ -18,7 +18,6 @@ export class StorefrontProductController {
 
   @Get()
   findAll(@Query(ValidationPipe) filters: GetProductsDto) {
-    console.log('filters', filters);
     return this.productService.findAll(filters);
   }
 

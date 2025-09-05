@@ -224,7 +224,15 @@ export class ProductService {
     params: ProductSearchParams = {}
   ): Promise<PaginatedResponse<Product>> {
     try {
-      const cleanedParams = cleanParams(params);
+      let cleanedParams = cleanParams(params);
+
+       if (cleanedParams.priceRange && Array.isArray(cleanedParams.priceRange)) {
+          const [min, max] = cleanedParams.priceRange;
+          cleanedParams = {
+            ...cleanedParams,
+            priceRange: [min, max] // Ensure it's properly formatted
+          };
+        }
 
       // OPTIMIZATION: Use cache for frequently accessed data
       if (!this.cache.isStale() && !params.search && !params.category) {
@@ -249,6 +257,7 @@ export class ProductService {
       if (response.success) {
         this.cache.setProducts(response.data.data);
       }
+      console.log("Fetched products:", response.data);
 
       return response.data;
     } catch (error) {
