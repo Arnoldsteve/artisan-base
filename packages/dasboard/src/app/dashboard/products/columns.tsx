@@ -82,6 +82,28 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
 
+  // Column for Category
+  {
+    accessorKey: "category",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Category
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const category = row.getValue("category") as string;
+      return (
+        <Badge variant="outline" className="capitalize">
+          {category || "Uncategorized"}
+        </Badge>
+      );
+    },
+  },
+
   // Column for Status (isActive)
   {
     accessorKey: "isActive",
