@@ -4,14 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui
 import { Loader2, ShoppingBag } from "lucide-react";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { Button } from "@repo/ui/components/ui/button";
+import { useCheckoutContext } from "@/contexts/checkout-context";
 
-
-const submitOrder = () => console.log("Submit order");  
-const previousStep = () => console.log("Previous step");
 
 export const OrderSummary: React.FC = () => {
-
-  const isLoading = false;
+  const { submitOrder, previousStep, isLoading } = useCheckoutContext();
 
   const { items, getTotalPrice } = useCart();
   // For now, mock shipping and tax
