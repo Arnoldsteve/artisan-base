@@ -10,6 +10,7 @@ export class OrderService {
   }
 
   async getOrder(orderId: string, email?: string): Promise<any> {
+    console.log("Fetching order with ID:", orderId, "for email:", email);
     if (!orderId) return null;
     const response = await apiClient.get<any>(
       `/api/v1/storefront/orders/${orderId}`,

@@ -63,8 +63,10 @@ export class StorefrontAuthController {
     const { accessToken, ...rest } = result;
     res.cookie('storefront_jwt', accessToken, {
       httpOnly: true,
-      secure: false, // for local dev
-      sameSite: 'lax',
+      // secure: false, // for local dev
+      // sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production' && !process.env.ALLOW_HTTP_COOKIES, // true for production/HTTPS
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
       // domain: undefined, // do not set domain for localhost

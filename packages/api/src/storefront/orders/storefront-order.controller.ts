@@ -7,6 +7,7 @@ import {
   Get,
   Query,
   Param,
+  Logger,
 } from '@nestjs/common';
 import { StorefrontOrderService } from './storefront-order.service';
 import { CreateStorefrontOrderDto } from './dto/create-storefront-order.dto';
@@ -21,6 +22,7 @@ export class StorefrontOrderController {
 
   @Post()
   async create(@Body(ValidationPipe) dto: CreateStorefrontOrderDto) {
+    Logger.log('Creating order with data:', JSON.stringify(dto));
     return this.orderService.create(dto);
   }
 

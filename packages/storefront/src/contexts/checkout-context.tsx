@@ -126,11 +126,12 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       const payload = {
         customer: state.customer,
         shippingAddress: state.shippingAddress,
-        billingAddress: state.shippingAddress, // For now, use shipping as billing
+        billingAddress: state.shippingAddress,
         items: items.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
         })),
+        currency: 'USD',
         notes: undefined,
       };
       // Call backend API
