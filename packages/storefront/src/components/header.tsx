@@ -4,7 +4,7 @@
 
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Package, Grid3X3, Info, Phone, Truck, UserX, Settings, Heart, UserPlus, LogIn } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { useProductSearch } from "@/hooks/use-products";
 import { Product } from "@/types";
@@ -259,98 +259,122 @@ export function Header() {
         )}
 
         {/* Mobile Menu */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <nav className="flex flex-col space-y-4">
               <Link
                 href="/products"
-                className="text-foreground hover:text-primary transition-colors"
+                className="flex items-center space-x-3 text-foreground hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Products
+                <Package className="h-5 w-5" />
+                <span>Products</span>
               </Link>
               <Link
                 href="/categories"
-                className="text-foreground hover:text-primary transition-colors"
+                className="flex items-center space-x-3 text-foreground hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Categories
+                <Grid3X3 className="h-5 w-5" />
+                <span>Categories</span>
               </Link>
               <Link
                 href="/about"
-                className="text-foreground hover:text-primary transition-colors"
+                className="flex items-center space-x-3 text-foreground hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                <Info className="h-5 w-5" />
+                <span>About</span>
               </Link>
               <Link
                 href="/contact"
-                className="text-foreground hover:text-primary transition-colors"
+                className="flex items-center space-x-3 text-foreground hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact
+                <Phone className="h-5 w-5" />
+                <span>Contact</span>
               </Link>
+              
+              {/* ADD CART BUTTON HERE */}
+              <div className="border-t pt-4" />
+              <div className="flex items-center justify-start space-x-3">
+                <CartButton onClick={() => {
+                  setCartOpen(true);
+                  setIsMenuOpen(false);
+                }} />
+                <span className="text-foreground">Cart</span>
+              </div>
+              
               {/* User account options for mobile */}
               <div className="border-t my-2" />
               <Link href="/auth/login" passHref>
                 <Button
-                  className="w-full mb-2"
+                  className="w-full mb-2 flex items-center justify-center space-x-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign In
+                  <LogIn className="h-4 w-4" />
+                  <span>Sign In</span>
                 </Button>
               </Link>
               <Link href="/auth/signup" passHref>
                 <Button
-                  className="w-full mb-2"
+                  className="w-full mb-2 flex items-center justify-center space-x-2"
                   variant="outline"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Create Account
+                  <UserPlus className="h-4 w-4" />
+                  <span>Create Account</span>
                 </Button>
               </Link>
               <Link
                 href="/account"
-                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded flex items-center space-x-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                My Account
+                <User className="h-4 w-4" />
+                <span>My Account</span>
               </Link>
               <Link
                 href="/account?tab=orders"
-                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded flex items-center space-x-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                My Orders
+                <Package className="h-4 w-4" />
+                <span>My Orders</span>
               </Link>
               <Link
                 href="/account?tab=wishlist"
-                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded flex items-center space-x-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                My Wishlist
+                <Heart className="h-4 w-4" />
+                <span>My Wishlist</span>
               </Link>
               <Link
                 href="/account?tab=settings"
-                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded flex items-center space-x-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Settings
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
               </Link>
               <div className="border-t my-2" />
               <Link
                 href="/track-order"
-                className="w-full text-left px-4 py-2 hover:bg-accent rounded"
+                className="w-full text-left px-4 py-2 hover:bg-accent rounded flex items-center space-x-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Track Order
+                <Truck className="h-4 w-4" />
+                <span>Track Order</span>
               </Link>
               <Button
-                className="w-full mt-2"
+                className="w-full mt-2 flex items-center justify-center space-x-2"
                 variant="ghost"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Continue as Guest
+                <UserX className="h-4 w-4" />
+                <span>Continue as Guest</span>
               </Button>
             </nav>
           </div>
