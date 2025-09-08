@@ -11,6 +11,8 @@ import { Button } from "@repo/ui";
 import { Checkbox } from "@repo/ui";
 import { Badge } from "@repo/ui";
 import { toast } from "sonner";
+import { createServerApiClient } from "@/lib/server-api";
+import { apiClient } from "@/lib/client-api";
 
 interface Category {
   id: string;
@@ -53,15 +55,17 @@ export function CategoryAssignmentModal({
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/categories');
-      const data = await response.json();
-      setCategories(data);
+      const serverApi = await createServerApiClient();
+      const data = await serverApi.get<Category[]>("/dashboard/categories");
+      console.log("Fetched categories:", data);
+      setCategories(data || []);
     } catch (error) {
-      toast.error('Failed to load categories');
+      toast.error("Failed to load categories");
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleCategoryToggle = (categoryId: string) => {
     setSelectedCategoryIds(prev =>
@@ -72,30 +76,22 @@ export function CategoryAssignmentModal({
   };
 
   const handleSave = async () => {
-    if (!product) return;
+      if (!product) return;
 
-    setIsSaving(true);
-    // try {
-    //   const response = await fetch(`/api/products/${product.id}/categories`, {
-    //     method: 'PUT',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ categoryIds: selectedCategoryIds }),
-    //   });
+      setIsSaving(true);
+      try {
+        await apiClient.patch(`/dashboard/products/${product.id}/categories`, {
+          categoryIds: selectedCategoryIds,
+        });
 
-    //   if (!response.ok) throw new Error('Failed to update categories');
-
-    //   toast.success('Product categories updated successfully');
-    //   onClose();
-      
-    //   // You might want to refetch the products data here
-    //   // or use a mutation that invalidates the query
-    // } catch (error) {
-    //   toast.error('Failed to update categories');
-    // } finally {
-    //   setIsSaving(false);
-    // }
-
-    console.log('Selected Category IDs:', selectedCategoryIds);
+        toast.success("Product categories updated successfully");
+        onClose();
+      apiClient.invalidateCache("products"); // optional, if you’re caching
+    } catch (error) {
+      toast.error("Failed to update categories");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const currentCategories = product?.categories?.map(pc => pc.category) || [];
