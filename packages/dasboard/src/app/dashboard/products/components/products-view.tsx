@@ -31,6 +31,7 @@ import { Button } from "@repo/ui";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
+import { CategoryAssignmentModal } from "./category-assignment-modal";
 
 // Helper function
 const slugify = (text: string) =>
@@ -65,6 +66,10 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [productForImageUpload, setProductForImageUpload] = useState<Product | null>(null);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
+  // Add these lines for category modal
+  const [productForCategory, setProductForCategory] = useState<Product | null>(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
   // --- Data Fetching & Mutations ---
   const { data: paginatedResponse, isLoading, isError } = useProducts(
     pageIndex + 1,
@@ -88,6 +93,13 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const openEditSheet = (product: Product) => { setProductToEdit(product); setIsSheetOpen(true); };
   const openAddSheet = () => { setProductToEdit(null); setIsSheetOpen(true); };
   const handleImageUpload = (product: Product) => { setProductForImageUpload(product); setIsImageUploadOpen(true); };
+  const openCategoryModal = (productId: string, categories: Array<{category: {id: string, name: string}}>) => {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      setProductForCategory(product);
+      setIsCategoryModalOpen(true);
+    }
+  };
 
   const handleDuplicateProduct = (productToDuplicate: Product) => {
     const newName = `${productToDuplicate.name} (Copy)`;
@@ -127,6 +139,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       openEditSheet,
       handleDuplicateProduct,
       handleImageUpload,
+      openCategoryModal,
     },
   });
 
@@ -225,6 +238,13 @@ export function ProductsView({ initialData }: ProductsViewProps) {
         isOpen={isImageUploadOpen}
         onClose={() => setIsImageUploadOpen(false)}
         product={productForImageUpload}
+      />
+
+      {/* Add this with your other modals */}
+      <CategoryAssignmentModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        product={productForCategory}
       />
     </div>
   );
