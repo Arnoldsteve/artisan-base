@@ -58,8 +58,8 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Home",
+          url: "/home",
         },
       ],
     },
@@ -69,7 +69,19 @@ const data = {
       icon: ShoppingCart ,
       items: [
         {
-          title: "Genesis",
+          title: "All Orders",
+          url: "/orders",
+        },
+        {
+          title: "Paid Orders",
+          url: "paid-orders",
+        },
+        {
+          title: "Parially Paid Orders",
+          url: "partially-paid-orders",
+        },
+        {
+          title: "Unpaid Orders",
           url: "#",
         },
       ],
@@ -80,8 +92,20 @@ const data = {
       icon: Package ,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "All Products",
+          url: "/products",
+        },
+        {
+          title: "Active Products",
+          url: "acitve-products",
+        },
+        {
+          title: "Inactive Products",
+          url: "inactive-products",
+        },
+        {
+          title: "Products Categories",
+          url: "product-categories",
         },
       ],
     },
@@ -91,8 +115,8 @@ const data = {
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "General", // contain the storename, address, currency, etc
+          url: "/settings",
         },
         {
           title: "Team",

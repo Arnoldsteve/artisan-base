@@ -27,9 +27,10 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { DeleteOrderDialog } from "./delete-order-dialog";
-import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
+// import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
 import { Button } from "@repo/ui";
 import { Trash2 } from "lucide-react";
+import { BulkDeleteAlertDialog } from "../../products/components/bulk-delete-alert-dialog";
 
 // A simple placeholder for view options, to be enhanced later.
 const OrdersTableViewOptions = ({ table }: { table: any }) => {
