@@ -96,16 +96,16 @@ const data = {
           url: "/products",
         },
         {
+          title: "Products Categories",
+          url: "/product-categories",
+        },
+        {
           title: "Active Products",
-          url: "acitve-products",
+          url: "/acitve-products",
         },
         {
           title: "Inactive Products",
-          url: "inactive-products",
-        },
-        {
-          title: "Products Categories",
-          url: "product-categories",
+          url: "/inactive-products",
         },
       ],
     },
