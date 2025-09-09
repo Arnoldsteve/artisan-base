@@ -8,7 +8,7 @@ import {
   Command,
   Users,
   GalleryVerticalEnd,
-  Map,
+  BarChart3,
   PieChart,
   Settings2,
   LayoutDashboard ,
@@ -110,7 +110,7 @@ const data = {
       ],
     },
     {
-      title: "Customers",
+      title: "Customers", // use recency, frequency, and monetary value (RFM model)
       url: "#",
       icon: Users,
       items: [
@@ -165,9 +165,9 @@ const data = {
       icon: PieChart,
     },
     {
-      name: "Travel",
+      name: "Reports",
       url: "#",
-      icon: Map,
+      icon: BarChart3,
     },
   ],
 }
