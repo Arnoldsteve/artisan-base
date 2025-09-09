@@ -50,7 +50,7 @@ export default function CustomersDashboardPage() {
             <TableCell>{customer.totalOrders}</TableCell>
             <TableCell>{customer.totalSpent}</TableCell>
             <TableCell>
-              <Badge variant={customer.status === "Loyal" ? "success" : "destructive"}>
+              <Badge variant={customer.status === "Loyal" ? "default" : "destructive"}>
                 {customer.status}
               </Badge>
             </TableCell>
