@@ -38,7 +38,7 @@ export function SetupOrganizationForm() {
     createTenant,
     {
       successMessage: "Store created successfully! Redirecting...",
-      onSuccessRedirect: "/dashboard",
+      onSuccessRedirect: "/home",
     }
   );
 

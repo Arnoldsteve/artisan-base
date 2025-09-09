@@ -21,7 +21,7 @@ export function LoginForm() {
     // 2. Pass the options for what to do on success
     {
       successMessage: "Login successful! Redirecting...",
-      onSuccessRedirect: "/dashboard",
+      onSuccessRedirect: "/home",
     }
   );
 
