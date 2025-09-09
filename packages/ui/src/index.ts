@@ -21,3 +21,4 @@ export * from "./components/ui/dialog";
 export * from "./components/ui/tabs";
 export * from "./components/ui/form";
 export * from "./components/ui/textarea";
+export * from "./components/ui/collapsible"
