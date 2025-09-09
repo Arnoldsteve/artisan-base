@@ -6,7 +6,7 @@ import {
   Package ,
   ShoppingCart ,
   Command,
-  Frame,
+  Users,
   GalleryVerticalEnd,
   Map,
   PieChart,
@@ -110,6 +110,26 @@ const data = {
       ],
     },
     {
+      title: "Customers",
+      url: "#",
+      icon: Users,
+      items: [
+        {
+          title: "All Customers",
+          url: "/customers",
+        },
+        { title: "Loyal Customers", 
+          url: "#" 
+        },
+        { title: "Big Spenders", 
+          url: "#" 
+        },
+        { title: "At Risk", 
+          url: "#" 
+        },
+      ],
+    },
+    {
       title: "Settings",
       url: "#",
       icon: Settings2,
@@ -135,9 +155,9 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
+      name: "Users",
       url: "#",
-      icon: Frame,
+      icon: Users,
     },
     {
       name: "Sales & Marketing",
