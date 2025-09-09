@@ -1,33 +1,57 @@
-// File: packages/dasboard/src/app/providers.tsx
-"use client"; // This MUST be a client component
+"use client";
 
 import { AuthProvider } from "@/contexts/auth-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; // Highly recommended for debugging
-import { useState } from "react";
-import { Toaster } from 'sonner';
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "sonner";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  // Use useState to ensure the QueryClient is only created once per component lifecycle.
-  // This prevents re-creating the client on every render.
-  const [queryClient] = useState(() => new QueryClient({
+// ---- Centralized QueryClient factory ----
+function makeQueryClient() {
+  return new QueryClient({
     defaultOptions: {
       queries: {
-        // Optional: Default staleTime to prevent instant refetches
-        staleTime: 1000 * 20, // 20 seconds
+        // Prevent excessive refetches
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+        retry: (failureCount, error: any) => {
+          // Do not retry client errors
+          if (error?.status >= 400 && error?.status < 500) return false;
+          return failureCount < 3;
+        },
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+      },
+      mutations: {
+        retry: 1,
       },
     },
-  }));
+  });
+}
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+function getQueryClient() {
+  if (typeof window === "undefined") {
+    // Always new on server
+    return makeQueryClient();
+  }
+  // Singleton in browser
+  if (!browserQueryClient) browserQueryClient = makeQueryClient();
+  return browserQueryClient;
+}
+
+// ---- Main Providers Wrapper ----
+export default function Providers({ children }: { children: React.ReactNode }) {
+  const queryClient = getQueryClient();
 
   return (
-    // 1. WRAP everything with AuthProvider. This makes the auth context
-    //    available to all components, including the QueryClient.
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         {children}
         <Toaster position="top-right" />
-        {/* The React Query Devtools are an invaluable tool for debugging */}
-        <ReactQueryDevtools initialIsOpen={false} />
+        {process.env.NODE_ENV === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
       </QueryClientProvider>
     </AuthProvider>
   );

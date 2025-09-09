@@ -1,77 +1,191 @@
-"use client";
-import { usePathname } from "next/navigation";
-import { Home, Package, ShoppingCart, Users, Settings } from "lucide-react";
+"use client"
 
+import * as React from "react"
+import {
+  AudioWaveform,
+  Package ,
+  ShoppingCart ,
+  Command,
+  Users,
+  GalleryVerticalEnd,
+  BarChart3,
+  PieChart,
+  Settings2,
+  LayoutDashboard ,
+} from "lucide-react"
+
+import { NavMain } from "./nav-main"
+import { NavProjects } from "./nav-projects"
+import { NavUser } from "./nav-user"
+import { TeamSwitcher } from "./team-switcher"
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@repo/ui";
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "@repo/ui"
 
-// Menu items.
+// This is sample data.
+const data = {
+  user: {
+    name: "Steve Arnold",
+    email: "stevearnold@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  teams: [
+    {
+      name: "Satechs Solutions",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Syparn Inc.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Safaricom LLC.",
+      logo: Command,
+      plan: "Free",
+    },
+  ],
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "#",
+      icon: LayoutDashboard ,
+      isActive: true,
+      items: [
+        {
+          title: "Home",
+          url: "/home",
+        },
+      ],
+    },
+    {
+      title: "Orders",
+      url: "#",
+      icon: ShoppingCart ,
+      items: [
+        {
+          title: "All Orders",
+          url: "/orders",
+        },
+        {
+          title: "Paid Orders",
+          url: "paid-orders",
+        },
+        {
+          title: "Parially Paid Orders",
+          url: "partially-paid-orders",
+        },
+        {
+          title: "Unpaid Orders",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Products",
+      url: "#",
+      icon: Package ,
+      items: [
+        {
+          title: "All Products",
+          url: "/products",
+        },
+        {
+          title: "Products Categories",
+          url: "/product-categories",
+        },
+        {
+          title: "Active Products",
+          url: "/acitve-products",
+        },
+        {
+          title: "Inactive Products",
+          url: "/inactive-products",
+        },
+      ],
+    },
+    {
+      title: "Customers", // use recency, frequency, and monetary value (RFM model)
+      url: "#",
+      icon: Users,
+      items: [
+        {
+          title: "All Customers",
+          url: "/customers",
+        },
+        { title: "Loyal Customers", 
+          url: "/loyal-customers" 
+        },
+        { title: "Big Spenders", 
+          url: "big-spenders" 
+        },
+        { title: "At Risk", 
+          url: "at-risk" 
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings2,
+      items: [
+        {
+          title: "General", // contain the storename, address, currency, etc
+          url: "/settings",
+        },
+        {
+          title: "Team",
+          url: "#",
+        },
+        {
+          title: "Billing",
+          url: "#",
+        },
+        {
+          title: "Limits",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  projects: [
+    {
+      name: "Users",
+      url: "#",
+      icon: Users,
+    },
+    {
+      name: "Sales & Marketing",
+      url: "#",
+      icon: PieChart,
+    },
+    {
+      name: "Reports",
+      url: "#",
+      icon: BarChart3,
+    },
+  ],
+}
 
-const items = [
-  {
-    title: "Home",
-    url: "dashboard",
-    icon: Home,
-  },
-  {
-    title: "Orders",
-    url: "dashboard/orders",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Products",
-    url: "dashboard/products",
-    icon: Package,
-  },
-  {
-    title: "Customers",
-    url: "dashboard/customers",
-    icon: Users,
-  },
-  {
-    title: "Settings",
-    url: "dashboard/settings",
-    icon: Settings,
-  },
-];
-
-export function AppSidebar() {
-  const pathname = usePathname();
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <TeamSwitcher teams={data.teams} />
+      </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="group flex items-center gap-3 text-sidebar-foreground hover:text-sidebar-primary [&>svg]:transition-colors [&>svg]:text-sidebar-foreground group-hover:[&>svg]:text-sidebar-primary"
-                      aria-current={
-                        pathname === `/${item.url}` ? "page" : undefined
-                      }
-                    >
-                      <item.icon className="size-5 mr-2" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavMain items={data.navMain} />
+        <NavProjects projects={data.projects} />
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser/>
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
-  );
+  )
 }

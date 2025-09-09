@@ -59,6 +59,13 @@ export class ProductRepository implements IProductRepository {
       },
       {
         orderBy: { createdAt: 'desc' },
+        include: {
+          categories: {
+            include: {
+              category: true
+            }
+          }
+        }
       },
     );
     this.findAllCache = { data: result, expires: now + CACHE_TTL };
@@ -75,6 +82,13 @@ export class ProductRepository implements IProductRepository {
     const prisma = await this.getPrisma();
     const product = await prisma.product.findUnique({
       where: { id },
+      include: {
+        categories: {
+          include: {
+            category: true
+          }
+        }
+      }
     });
     if (product) {
       this.findOneCache.set(id, { data: product, expires: now + CACHE_TTL });
@@ -104,4 +118,26 @@ export class ProductRepository implements IProductRepository {
     else this.findOneCache.clear();
     this.findAllCache = null;
   }
+
+  async assignCategories(productId: string, categoryIds: string[]) {
+  const prisma = await this.getPrisma();
+  
+  // Remove existing categories
+  await prisma.productCategory.deleteMany({
+    where: { productId }
+  });
+  
+  // Add new categories
+  if (categoryIds.length > 0) {
+    await prisma.productCategory.createMany({
+      data: categoryIds.map(categoryId => ({
+        productId,
+        categoryId
+      }))
+    });
+  }
+  
+  this.invalidateCache(productId);
+  return this.findOne(productId);
+}
 }

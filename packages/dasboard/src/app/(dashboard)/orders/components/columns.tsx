@@ -156,14 +156,14 @@ export const columns: ColumnDef<Order>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/orders/${order.id}`}>
+                <Link href={`/orders/${order.id}`}>
                   View Order Details
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild disabled={!customer}>
                 <Link
                   href={
-                    customer ? `/dashboard/customers/${customer.id}` : "#"
+                    customer ? `/customers/${customer.id}` : "#"
                   }
                 >
                   View Customer

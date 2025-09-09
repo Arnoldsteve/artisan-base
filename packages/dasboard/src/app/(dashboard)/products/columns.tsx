@@ -22,6 +22,7 @@ declare module "@tanstack/react-table" {
     openEditSheet: (product: TData) => void;
     handleDuplicateProduct: (product: TData) => void;
     handleImageUpload: (product: TData) => void;
+    openCategoryModal: (productId: string, categories: Array<{category: {id: string, name: string}}>) => void; 
   }
 }
 
@@ -77,6 +78,45 @@ export const columns: ColumnDef<Product>[] = [
           >
             {product.name}
           </span>
+        </div>
+      );
+    },
+  },
+
+  // Column for Category
+  {
+    accessorKey: "categories",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Category
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row, table }) => {
+      const categories = row.getValue("categories") as Array<{category: {id: string, name: string}}>;
+      const categoryNames = categories?.map(pc => pc.category.name) || [];
+      
+      return (
+        <div 
+          className="cursor-pointer"
+          onClick={() => table.options.meta?.openCategoryModal(row.original.id, categories)} 
+        >
+          {categoryNames.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {categoryNames.map((name, index) => (
+                <Badge key={index} variant="outline" className="capitalize">
+                  {name}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <Badge variant="outline" className="capitalize text-muted-foreground">
+              Uncategorized
+            </Badge>
+          )}
         </div>
       );
     },

@@ -1,5 +1,3 @@
-// REFACTOR: React Query provider with optimized configuration for better performance
-
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

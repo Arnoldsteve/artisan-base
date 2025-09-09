@@ -91,7 +91,7 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
       openDeleteDialog: (customer) => setCustomerToDelete(customer as CustomerColumn),
-      viewCustomerDetails: (customer) => router.push(`/dashboard/customers/${customer.id}`),
+      viewCustomerDetails: (customer) => router.push(`/customers/${customer.id}`),
       // --- THIS IS THE FIX ---
       // When opening the edit sheet, find the ORIGINAL customer object.
       openEditSheet: (customerRow) => {
