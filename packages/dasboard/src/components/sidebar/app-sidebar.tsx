@@ -119,13 +119,13 @@ const data = {
           url: "/customers",
         },
         { title: "Loyal Customers", 
-          url: "#" 
+          url: "/loyal-customers" 
         },
         { title: "Big Spenders", 
-          url: "#" 
+          url: "big-spenders" 
         },
         { title: "At Risk", 
-          url: "#" 
+          url: "at-risk" 
         },
       ],
     },

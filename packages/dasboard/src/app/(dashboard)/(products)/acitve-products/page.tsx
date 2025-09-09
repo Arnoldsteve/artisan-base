@@ -46,7 +46,7 @@ export default function ActiveProductsPage() {
                   <TableCell>{product.price}</TableCell>
                   <TableCell>{product.inventoryQuantity}</TableCell>
                   <TableCell>
-                    <Badge variant="success">{product.status}</Badge>
+                    <Badge variant="default">{product.status}</Badge>
                   </TableCell>
                 </TableRow>
               ))}
