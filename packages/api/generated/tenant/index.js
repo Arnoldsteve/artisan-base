@@ -356,7 +356,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Admin\\Documents\\Arnold\\Personal Work\\artisan-base\\packages\\api\\generated\\tenant",
+      "value": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\generated\\tenant",
       "fromEnvVar": null
     },
     "config": {
@@ -370,7 +370,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Admin\\Documents\\Arnold\\Personal Work\\artisan-base\\packages\\api\\prisma\\tenant.prisma",
+    "sourceFilePath": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\prisma\\tenant.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

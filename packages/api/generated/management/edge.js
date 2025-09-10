@@ -236,7 +236,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Admin\\Documents\\Arnold\\Personal Work\\artisan-base\\packages\\api\\generated\\management",
+      "value": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\generated\\management",
       "fromEnvVar": null
     },
     "config": {
@@ -250,7 +250,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Admin\\Documents\\Arnold\\Personal Work\\artisan-base\\packages\\api\\prisma\\management.prisma",
+    "sourceFilePath": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\prisma\\management.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

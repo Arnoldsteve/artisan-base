@@ -31,7 +31,7 @@ import { Button } from "@repo/ui";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
-import { CategoryAssignmentModal } from "./category-assignment-modal";
+import { CategoryAssignmentModal } from "./category-assignment-sheet";
 
 // Helper function
 const slugify = (text: string) =>

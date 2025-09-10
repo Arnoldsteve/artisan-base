@@ -3,8 +3,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productService } from "@/services/product-service";
 import { toast } from "sonner";
-import { CreateProductDto, Product, PaginatedResponse, UpdateProductDto } from "@/types/products";
+import { CreateProductDto, Product, UpdateProductDto } from "@/types/products";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types/shared";
 
 // Define a query key to uniquely identify product data
 export const PRODUCTS_QUERY_KEY = ["dashboard-products"];
@@ -93,6 +94,29 @@ export function useDeleteProduct() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to delete product.");
+    },
+  });
+}
+
+/**
+ * Hook for assigning categories to a product.
+ */
+export function useAssignCategories() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ productId, categoryIds }: { productId: string; categoryIds: string[] }) => {
+      // Loop through each selected category and call POST
+      for (const categoryId of categoryIds) {
+        await productService.assignCategory(productId, categoryId); 
+      }
+    },
+    onSuccess: () => {
+      toast.success("Product categories updated successfully");
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update product categories");
     },
   });
 }
