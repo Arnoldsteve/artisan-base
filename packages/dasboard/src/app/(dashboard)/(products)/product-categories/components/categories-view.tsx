@@ -134,7 +134,6 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
   const handleSaveChanges = (formData: { id?: string; name: string; description?: string }) => {
     const categoryData = {
       name: formData.name,
-      slug: slugify(formData.name),
       description: formData.description || "",
     };
 

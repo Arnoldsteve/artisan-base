@@ -28,7 +28,6 @@ export interface Category {
  */
 export interface CreateCategoryDto {
   name: string;
-  slug: string;
   description?: string;
   isActive?: boolean;
   isFeatured?: boolean;
@@ -47,14 +46,14 @@ export type UpdateCategoryDto = Partial<CreateCategoryDto>;
  * A generic type for paginated API responses.
  * Example: PaginatedResponse<Category>
  */
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-    prev: number | null;
-    next: number | null;
-  };
-}
+// export interface PaginatedResponse<T> {
+//   data: T[];
+//   meta: {
+//     total: number;
+//     page: number;
+//     limit: number;
+//     totalPages: number;
+//     prev: number | null;
+//     next: number | null;
+//   };
+// }

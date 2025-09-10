@@ -24,15 +24,10 @@ import {
 import { Input } from "@repo/ui";
 import { Textarea } from "@repo/ui";
 import { Button } from "@repo/ui";
-import { Category } from "@/types/category";
+import { Category } from "@/types/categories";
+import { CategoryFormData, categoryFormSchema } from "@/validation-schemas/categories";
+import { on } from "events";
 
-// Validation schema
-const categoryFormSchema = z.object({
-  name: z.string().min(1, "Category name is required").max(255, "Name too long"),
-  description: z.string().optional(),
-});
-
-type CategoryFormData = z.infer<typeof categoryFormSchema> & { id?: string };
 
 interface EditCategorySheetProps {
   isOpen: boolean;
@@ -76,21 +71,13 @@ export function EditCategorySheet({
     }
   }, [category, isOpen, form]);
 
-  const handleSubmit = (data: CategoryFormData) => {
-    const submitData = {
-      ...data,
-      ...(category && { id: category.id }),
-    };
-    onSave(submitData);
+  const onSubmit = (data: CategoryFormData) => {
+    onSave(data);
   };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleClose}>
+    <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
           <SheetTitle>
@@ -104,7 +91,7 @@ export function EditCategorySheet({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               {/* Category Name */}
               <FormField
@@ -171,7 +158,7 @@ export function EditCategorySheet({
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleClose}
+                onClick={onClose}
                 disabled={isPending}
               >
                 Cancel

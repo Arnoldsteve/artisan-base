@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/client-api";
-import { Category, PaginatedResponse, CreateCategoryDto, UpdateCategoryDto } from "@/types/categories";
+import { Category, CreateCategoryDto, UpdateCategoryDto } from "@/types/categories";
+import { PaginatedResponse } from "@/types/shared";
 
 /**
  * CategoryService directly handles API communication for dashboard category management.
@@ -44,6 +45,7 @@ export class CategoryService {
    * Creates a new category.
    */
   async createCategory(categoryData: CreateCategoryDto): Promise<Category> {
+    console.log("Creating category with data:", categoryData);
     return apiClient.post<Category>("dashboard/categories", categoryData);
   }
 
