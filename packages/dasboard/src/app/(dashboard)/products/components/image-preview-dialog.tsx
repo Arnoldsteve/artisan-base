@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@repo/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui";
 import { Button } from "@repo/ui";
 import { Product } from "@/types/products";
 import Image from "next/image";
@@ -24,20 +29,28 @@ export function ImagePreviewDialog({ isOpen, onClose, product }: ImagePreviewDia
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent
+        className="
+          w-[90vw] max-w-[800px] 
+          h-[80vh] max-h-[600px] 
+          flex flex-col
+        "
+      >
         <DialogHeader>
-          <DialogTitle>{product.name} - Images</DialogTitle>
+          <DialogTitle className="truncate">{product.name} - Images</DialogTitle>
         </DialogHeader>
 
         {images.length > 0 ? (
-          <div className="relative flex items-center justify-center">
-            <Image
-              src={images[currentIndex].url}
-              alt={`${product.name} image`}
-              width={500}
-              height={500}
-              className="rounded-lg object-contain max-h-[70vh]"
-            />
+          <div className="relative flex-1 flex items-center justify-center">
+            {/* Fixed-size container (scales with screen size) */}
+            <div className="w-full h-full flex items-center justify-center bg-black/5 rounded-lg">
+              <Image
+                src={images[currentIndex].url}
+                alt={`${product.name} image`}
+                fill
+                className="object-contain rounded-lg"
+              />
+            </div>
 
             {/* Navigation arrows */}
             {images.length > 1 && (
@@ -58,17 +71,17 @@ export function ImagePreviewDialog({ isOpen, onClose, product }: ImagePreviewDia
             )}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center py-10">No images available</p>
+          <p className="text-muted-foreground text-center py-10">
+            No images available
+          </p>
         )}
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">
-              <X className="mr-2 h-4 w-4" />
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={onClose}>
+            <X className="mr-2 h-4 w-4" />
+            Close
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
