@@ -8,12 +8,18 @@ import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { paginate } from 'src/common/helpers/paginate.helper';
 import { ICategoryRepository } from './interfaces/category-repository.interface';
 import slugify from 'slugify';
 import { PrismaClient } from '../../../generated/tenant';
 
+const CACHE_TTL = 10 * 1000; // 10 seconds for demo
+
 @Injectable({ scope: Scope.REQUEST })
 export class CategoryRepository implements ICategoryRepository {
+  private findOneCache = new Map<string, { data: any; expires: number }>();
+  private findAllCache: { data: any; expires: number } | null = null;
+
   // This will hold the client once it's initialized for the request
   private prismaClient: PrismaClient | null = null;
 
@@ -48,10 +54,30 @@ export class CategoryRepository implements ICategoryRepository {
   }
 
   async findAll(pagination?: PaginationQueryDto): Promise<any> {
+    const now = Date.now();
+    if (this.findAllCache && this.findAllCache.expires > now) {
+      return this.findAllCache.data;
+    }
+
     const prisma = await this.getPrisma();
-    return prisma.category.findMany({
-      orderBy: { name: 'asc' },
-    });
+    const result = await paginate(
+      prisma.category,
+      {
+      page: pagination?.page,
+      limit: pagination?.limit
+      },
+      {
+        orderBy: { createdAt: 'asc' },
+          include: { 
+            _count: { 
+              select: { products: true
+            }, 
+          }, 
+        } 
+      }
+    )
+    this.findAllCache = { data: result, expires: now + CACHE_TTL };
+    return result;
   }
 
   async findOne(id: string): Promise<any> {

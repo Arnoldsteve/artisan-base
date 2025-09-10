@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@repo/ui";
-import { Category } from "@/types/category";
+import { Category } from "@/types/categories";
 
 // Extend the TableMeta interface to include our custom functions
 declare module "@tanstack/react-table" {
@@ -102,16 +102,9 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
 
   // Column for Product Count
   {
-    accessorKey: "_count.products",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Products
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    id: "productsCount",
+    header: "Products",
+    accessorFn: (row) => row._count?.products ?? 0,
     cell: ({ row }) => {
       const count = row.original._count?.products || 0;
       return (

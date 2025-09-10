@@ -1,13 +1,11 @@
-// File: packages/dasboard/src/app/(dashboard)/(products)/product-categories/page.tsx
-
 import { createServerApiClient } from '@/lib/server-api';
 import { CategoriesView } from './components/categories-view';
-import { Category } from '@/types/category';
-import { PaginatedResponse } from '@/types/products';
+import { Category } from '@/types/categories';
+import { PaginatedResponse } from '@/types/shared';
 
 export default async function ProductCategoriesPage() {
   
-  let initialData: PaginatedResponse<Category & { _count?: { products: number } }>;
+  let initialData: PaginatedResponse<Category>;
 
   try {
     // Create server API client
