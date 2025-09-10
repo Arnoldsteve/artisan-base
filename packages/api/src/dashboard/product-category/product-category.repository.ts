@@ -67,7 +67,10 @@ export class ProductCategoryRepository {
     const prisma = await this.getPrisma();
     return prisma.productCategory.findMany({
       where: { categoryId },
-      include: { product: true },
+      include: { 
+        product: true, 
+        category: true
+      },
     });
   }
 }

@@ -11,7 +11,7 @@ import {
 } from "@repo/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { createServerApiClient } from "@/lib/server-api";
-import { Category } from "@/types/category";
+import { Category } from "@/types/categories";
 import { Product } from "@/types/products";
 
 export default async function CategoryProductsPage({
@@ -58,6 +58,7 @@ export default async function CategoryProductsPage({
           `/dashboard/product-categories/${params["category-id"]}`
         );
         category = categoryRes;
+        console.log("Fetched category details:", categoryRes);
       } catch (categoryError) {
         console.error("Failed to fetch category details:", categoryError);
         category = {
@@ -87,7 +88,7 @@ export default async function CategoryProductsPage({
           </CardHeader>
           <CardContent>
             <p className="text-gray-500">No products found in this category</p>
-            <Link href="/dashboard/product-categories">
+            <Link href="/product-categories">
               <Button className="mt-4">Back to Categories</Button>
             </Link>
           </CardContent>
@@ -102,13 +103,13 @@ export default async function CategoryProductsPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">
-            {category?.name || "Category Products"}
+            {category?.name || "Category Products Assigned to Products"}
           </h1>
           {category?.description && (
             <p className="text-gray-600 mt-1">{category.description}</p>
           )}
         </div>
-        <Link href="/dashboard/product-categories">
+        <Link href="/product-categories">
           <Button variant="outline">Back to Categories</Button>
         </Link>
       </div>
@@ -128,7 +129,7 @@ export default async function CategoryProductsPage({
             </div>
             <Button type="submit">Search</Button>
             {searchQuery && (
-              <Link href={`/dashboard/product-categories/${params["category-id"]}`}>
+              <Link href={`/product-categories/${params["category-id"]}`}>
                 <Button variant="outline">Clear</Button>
               </Link>
             )}
@@ -262,7 +263,7 @@ export default async function CategoryProductsPage({
               return (
                 <Link 
                   key={pageNum}
-                  href={`/dashboard/product-categories/${params["category-id"]}?page=${pageNum}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+                  href={`/product-categories/${params["category-id"]}?page=${pageNum}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
                 >
                   <Button
                     variant={currentPage === pageNum ? "default" : "outline"}
@@ -277,7 +278,7 @@ export default async function CategoryProductsPage({
           </div>
           
           <Link 
-            href={`/dashboard/product-categories/${params["category-id"]}?page=${Math.min(totalPages, currentPage + 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+            href={`/product-categories/${params["category-id"]}?page=${Math.min(totalPages, currentPage + 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
           >
             <Button 
               variant="outline" 
