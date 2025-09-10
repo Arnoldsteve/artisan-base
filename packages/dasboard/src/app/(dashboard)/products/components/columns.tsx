@@ -23,7 +23,7 @@ declare module "@tanstack/react-table" {
     handleDuplicateProduct: (product: TData) => void;
     handleImageUpload: (product: TData) => void;
     handleCategoryChange: (product: TData) => void;
-    openCategoryModal: (productId: string, categories: Array<{category: {id: string, name: string}}>) => void; 
+    openImagePreview: (product: TData) => void; 
   }
 }
 
@@ -59,11 +59,14 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: "Product",
-    cell: ({ row }) => {
+   cell: ({ row, table }) => {
       const product = row.original;
       return (
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 rounded-md">
+          <Avatar 
+            className="h-10 w-10 rounded-md cursor-pointer"
+            onClick={() => table.options.meta?.openImagePreview(product)}
+          >
             <AvatarImage
               src={product.images?.[0]?.url}
               alt={product.name}
@@ -73,55 +76,11 @@ export const columns: ColumnDef<Product>[] = [
               {product.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <span
-            className="font-medium"
-            data-testid={`product-name-${product.id}`}
-          >
-            {product.name}
-          </span>
+          <span className="font-medium">{product.name}</span>
         </div>
       );
-    },
+    }
   },
-
-  // Column for Category
-  // {
-  //   accessorKey: "categories",
-  //   header: ({ column }) => (
-  //     <Button
-  //       variant="ghost"
-  //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //     >
-  //       Category
-  //       <ArrowUpDown className="ml-2 h-4 w-4" />
-  //     </Button>
-  //   ),
-  //   cell: ({ row, table }) => {
-  //     const categories = row.getValue("categories") as Array<{category: {id: string, name: string}}>;
-  //     const categoryNames = categories?.map(pc => pc.category.name) || [];
-      
-  //     return (
-  //       <div 
-  //         className="cursor-pointer"
-  //         onClick={() => table.options.meta?.openCategoryModal(row.original.id, categories)} 
-  //       >
-  //         {categoryNames.length > 0 ? (
-  //           <div className="flex flex-wrap gap-1">
-  //             {categoryNames.map((name, index) => (
-  //               <Badge key={index} variant="outline" className="capitalize">
-  //                 {name}
-  //               </Badge>
-  //             ))}
-  //           </div>
-  //         ) : (
-  //           <Badge variant="outline" className="capitalize text-muted-foreground">
-  //             Uncategorized
-  //           </Badge>
-  //         )}
-  //       </div>
-  //     );
-  //   },
-  // },
 
   // Column for Status (isActive)
   {

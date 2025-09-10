@@ -160,35 +160,23 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-start"
-                  onClick={() => table.options.meta?.openEditSheet(category)}
-                >
-                  <Pencil className="w-4 h-4 mr-2 text-blue-600" />
-                  Edit
-                </Button>
+              <DropdownMenuItem
+                onClick={() => table.options.meta?.openEditSheet(category)}
+              >
+                <Pencil className="w-4 h-4 mr-2 text-blue-600" />
+                Edit
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-start"
-                  onClick={() => window.open(`/product-categories/${category.id}`, '_blank')}
-                >
-                  <Package className="w-4 h-4 mr-2 text-green-600" />
-                  View Products
-                </Button>
+              <DropdownMenuItem
+                onClick={() => window.open(`/product-categories/${category.id}`, '_blank')}
+              >
+                <Package className="w-4 h-4 mr-2 text-green-600" />
+                View Products
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-start"
-                  onClick={() => table.options.meta?.openDeleteDialog(category)}
-                >
-                  <Trash className="w-4 h-4 mr-2 text-red-600" />
-                  Delete
-                </Button>
+              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() => table.options.meta?.openDeleteDialog(category)}
+              >
+                <Trash className="w-4 h-4 mr-2 text-red-600" />
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -33,6 +33,7 @@ import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
 import { CategoryAssignmentSheet } from "./category-assignment-sheet";
 import { PaginatedResponse } from "@/types/shared";
+import { ImagePreviewDialog } from "./image-preview-dialog";
 
 // Helper function
 const slugify = (text: string) =>
@@ -64,12 +65,17 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  
+  // image upload
   const [productForImageUpload, setProductForImageUpload] = useState<Product | null>(null);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
   // Add these lines for category modal
   const [productForCategory, setProductForCategory] = useState<Product | null>(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  // image preview
+  const [productForPreview, setProductForPreview] = useState<Product | null>(null);
+const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
   const { data: paginatedResponse, isLoading, isError } = useProducts(
@@ -95,6 +101,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const openAddSheet = () => { setProductToEdit(null); setIsSheetOpen(true); };
   const handleCategoryChange = (product: Product) => { setProductForCategory(product); setIsCategorySheetOpen(true); };
   const handleImageUpload = (product: Product) => { setProductForImageUpload(product); setIsImageUploadOpen(true); };
+  const openImagePreview = (product: Product) => { setProductForPreview(product); setIsPreviewOpen(true); };
 
   const handleDuplicateProduct = (productToDuplicate: Product) => {
     const newName = `${productToDuplicate.name} (Copy)`;
@@ -135,6 +142,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       handleDuplicateProduct,
       handleImageUpload,
       handleCategoryChange,
+      openImagePreview,
     },
   });
 
@@ -235,12 +243,18 @@ export function ProductsView({ initialData }: ProductsViewProps) {
         product={productForImageUpload}
       />
 
-      {/* Add this with your other modals */}
       <CategoryAssignmentSheet
         isOpen={isCategorySheetOpen}
         onClose={() => setIsCategorySheetOpen(false)}
         product={productForCategory}
       />
+
+      <ImagePreviewDialog
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        product={productForPreview}
+      />
+
     </div>
   );
 }
