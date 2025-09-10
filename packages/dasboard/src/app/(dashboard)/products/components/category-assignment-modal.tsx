@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// File: packages/dashboard/src/app/(dashboard)/products/components/category-assignment-modal.tsx
+
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,14 +13,15 @@ import { Button } from "@repo/ui";
 import { Checkbox } from "@repo/ui";
 import { Badge } from "@repo/ui";
 import { toast } from "sonner";
-import { createServerApiClient } from "@/lib/server-api";
 import { apiClient } from "@/lib/client-api";
+import { useCategories } from "@/hooks/use-categories";
+import { Category } from "@/types/categories";
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
+// interface Category {
+//   id: string;
+//   name: string;
+//   slug: string;
+// }
 
 interface Product {
   id: string;
@@ -37,56 +40,40 @@ export function CategoryAssignmentModal({
   onClose,
   product,
 }: CategoryAssignmentModalProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch all categories when modal opens
+  // use hook (fetches paginated categories, defaults to first page)
+  const { data, isLoading } = useCategories(1, 100); // limit high enough to fetch all
+  const categories = data?.data || []; // PaginatedResponse<Category> → use data field
+
+  // Preselect categories when modal opens
   useEffect(() => {
     if (isOpen && product) {
-      fetchCategories();
-      // Set currently assigned categories
-      const currentCategoryIds = product.categories?.map(pc => pc.category.id) || [];
+      const currentCategoryIds =
+        product.categories?.map((pc) => pc.category.id) || [];
       setSelectedCategoryIds(currentCategoryIds);
     }
   }, [isOpen, product]);
 
-  const fetchCategories = async () => {
-    setIsLoading(true);
-    try {
-      const serverApi = await createServerApiClient();
-      const data = await serverApi.get<Category[]>("/dashboard/categories");
-      console.log("Fetched categories:", data);
-      setCategories(data || []);
-    } catch (error) {
-      toast.error("Failed to load categories");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
   const handleCategoryToggle = (categoryId: string) => {
-    setSelectedCategoryIds(prev =>
+    setSelectedCategoryIds((prev) =>
       prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
+        ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
     );
   };
 
   const handleSave = async () => {
-      if (!product) return;
+    if (!product) return;
+    setIsSaving(true);
+    try {
+      await apiClient.patch(`/dashboard/products/${product.id}/categories`, {
+        categoryIds: selectedCategoryIds,
+      });
 
-      setIsSaving(true);
-      try {
-        await apiClient.patch(`/dashboard/products/${product.id}/categories`, {
-          categoryIds: selectedCategoryIds,
-        });
-
-        toast.success("Product categories updated successfully");
-        onClose();
-      apiClient.invalidateCache("products"); // optional, if you’re caching
+      toast.success("Product categories updated successfully");
+      onClose();
     } catch (error) {
       toast.error("Failed to update categories");
     } finally {
@@ -94,7 +81,7 @@ export function CategoryAssignmentModal({
     }
   };
 
-  const currentCategories = product?.categories?.map(pc => pc.category) || [];
+  const currentCategories = product?.categories?.map((pc) => pc.category) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -126,8 +113,11 @@ export function CategoryAssignmentModal({
             <h4 className="text-sm font-medium mb-3">Available Categories:</h4>
             {isLoading ? (
               <div className="space-y-2">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-6 bg-gray-200 rounded animate-pulse" />
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-6 bg-gray-200 rounded animate-pulse"
+                  />
                 ))}
               </div>
             ) : (

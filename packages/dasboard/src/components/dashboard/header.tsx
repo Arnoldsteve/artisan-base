@@ -6,8 +6,6 @@ import { Input } from "@repo/ui";
 import { useAuthContext } from "@/contexts/auth-context";
 
 export function Header() {
-  const { tenants, tenantId } = useAuthContext();
-
 
   return (
     <div className="border-b border-border bg-background">
