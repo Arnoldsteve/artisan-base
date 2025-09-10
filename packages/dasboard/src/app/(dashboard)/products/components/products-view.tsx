@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
-import { columns } from "../columns";
+import { columns } from "./columns";
 import {
   useReactTable,
   getCoreRowModel,
