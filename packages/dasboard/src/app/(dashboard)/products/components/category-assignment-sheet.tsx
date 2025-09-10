@@ -24,7 +24,7 @@ interface CategoryAssignmentModalProps {
   product: Product | null;
 }
 
-export function CategoryAssignmentModal({ isOpen, onClose, product }: CategoryAssignmentModalProps) {
+export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAssignmentModalProps) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Category[]>([]);

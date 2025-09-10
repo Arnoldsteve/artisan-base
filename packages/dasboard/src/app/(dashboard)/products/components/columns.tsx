@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown, Trash, Upload, Copy, Pencil } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Trash, Upload, Copy, Pencil, Tag } from "lucide-react";
 import { Button } from "@repo/ui";
 import { Badge } from "@repo/ui";
 import { Checkbox } from "@repo/ui";
@@ -22,6 +22,7 @@ declare module "@tanstack/react-table" {
     openEditSheet: (product: TData) => void;
     handleDuplicateProduct: (product: TData) => void;
     handleImageUpload: (product: TData) => void;
+    handleCategoryChange: (product: TData) => void;
     openCategoryModal: (productId: string, categories: Array<{category: {id: string, name: string}}>) => void; 
   }
 }
@@ -84,43 +85,43 @@ export const columns: ColumnDef<Product>[] = [
   },
 
   // Column for Category
-  {
-    accessorKey: "categories",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Category
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row, table }) => {
-      const categories = row.getValue("categories") as Array<{category: {id: string, name: string}}>;
-      const categoryNames = categories?.map(pc => pc.category.name) || [];
+  // {
+  //   accessorKey: "categories",
+  //   header: ({ column }) => (
+  //     <Button
+  //       variant="ghost"
+  //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //     >
+  //       Category
+  //       <ArrowUpDown className="ml-2 h-4 w-4" />
+  //     </Button>
+  //   ),
+  //   cell: ({ row, table }) => {
+  //     const categories = row.getValue("categories") as Array<{category: {id: string, name: string}}>;
+  //     const categoryNames = categories?.map(pc => pc.category.name) || [];
       
-      return (
-        <div 
-          className="cursor-pointer"
-          onClick={() => table.options.meta?.openCategoryModal(row.original.id, categories)} 
-        >
-          {categoryNames.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {categoryNames.map((name, index) => (
-                <Badge key={index} variant="outline" className="capitalize">
-                  {name}
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <Badge variant="outline" className="capitalize text-muted-foreground">
-              Uncategorized
-            </Badge>
-          )}
-        </div>
-      );
-    },
-  },
+  //     return (
+  //       <div 
+  //         className="cursor-pointer"
+  //         onClick={() => table.options.meta?.openCategoryModal(row.original.id, categories)} 
+  //       >
+  //         {categoryNames.length > 0 ? (
+  //           <div className="flex flex-wrap gap-1">
+  //             {categoryNames.map((name, index) => (
+  //               <Badge key={index} variant="outline" className="capitalize">
+  //                 {name}
+  //               </Badge>
+  //             ))}
+  //           </div>
+  //         ) : (
+  //           <Badge variant="outline" className="capitalize text-muted-foreground">
+  //             Uncategorized
+  //           </Badge>
+  //         )}
+  //       </div>
+  //     );
+  //   },
+  // },
 
   // Column for Status (isActive)
   {
@@ -223,48 +224,35 @@ export const columns: ColumnDef<Product>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-              >
-                <Button
-                  variant="outline"
-                className="w-full flex items-center justify-start"
                 onClick={() => table.options.meta?.openEditSheet(product)}
-                >
-                  <Pencil className="w-5 h-5 text-blue-600" />
-                  Edit
-                </Button>
+              >
+                <Pencil className="w-5 h-5 text-blue-600" />
+                Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-              >
-                <Button
-                  variant="outline"
-                className="w-full flex items-center justify-start"
                 onClick={() => table.options.meta?.handleDuplicateProduct(product)}
-                >
-                  <Copy className="w-5 h-5 text-green-600" />
-                  Duplicate
-                </Button>
+              >
+                <Copy className="w-5 h-5 text-green-600" />
+                Duplicate
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Button
-                  variant="outline"
-                className="w-full flex items-center justify-start"
-                  onClick={() => table.options.meta?.handleImageUpload(product)}
-                >
-                  <Upload className="w-5 h-5" />
-                  Upload Images
-                </Button>
+              <DropdownMenuItem
+                onClick={() => table.options.meta?.handleImageUpload(product)}
+              >
+                <Upload className="w-5 h-5" />
+                Upload Images
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => table.options.meta?.handleCategoryChange(product)}
+              >
+                <Tag  className="w-5 h-5" />
+                Assign Categories
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                >
-              <Button
-                variant="outline"
-                className="w-full flex items-center justify-start"
-                onClick={() => table.options.meta?.openDeleteDialog(product)}
+                  onClick={() => table.options.meta?.openDeleteDialog(product)}
                 >
                   <Trash className="w-5 h-5 text-red-600" />
                   Delete
-                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
