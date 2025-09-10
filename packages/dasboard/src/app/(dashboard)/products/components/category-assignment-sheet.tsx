@@ -36,7 +36,9 @@ export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAs
   // Preselect current categories
   useEffect(() => {
     if (isOpen && product) {
-      const currentCategoryIds = product.categories?.map((c) => c.id) || [];
+      // const currentCategoryIds = product.categories?.map((c) => c.id) || [];
+      const currentCategoryIds = product.categories?.map((c) => c.category.id) || [];
+
       setSelectedCategoryIds(currentCategoryIds);
     }
   }, [isOpen, product]);
@@ -90,7 +92,9 @@ export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAs
 
   // Merge search results + current product categories for badge display
   const allCategoriesMap: Record<string, Category> = {};
-  product?.categories?.forEach((c) => { allCategoriesMap[c.id] = c; });
+  // product?.categories?.forEach((c) => { allCategoriesMap[c.id] = c; });
+  product?.categories?.forEach((c) => { allCategoriesMap[c.category.id] = c.category; });
+
   searchResults.forEach((c) => { allCategoriesMap[c.id] = c; });
   const selectedCategories = selectedCategoryIds.map((id) => allCategoriesMap[id]).filter(Boolean);
 
@@ -105,7 +109,7 @@ export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAs
         <div className="space-y-4">
           {selectedCategories.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium mb-2">Selected Categories:</h4>
+              <h4 className="text-sm font-medium my-3">Selected Categories:</h4>
               <div className="flex flex-wrap gap-2 mb-2">
                 {selectedCategories.map((cat) => (
                   <Badge
