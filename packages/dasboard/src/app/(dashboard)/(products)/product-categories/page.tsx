@@ -28,7 +28,6 @@ export default async function ProductCategoriesPage() {
       <PageHeader title="Product Categories" description="Manage your product categories">
         <Button> Add Category </Button>
       </PageHeader>
-      {/* <h1 className="text-3xl font-bold">Product Categories</h1> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category: Category) => (
@@ -41,7 +40,7 @@ export default async function ProductCategoriesPage() {
                 <p className="text-gray-600">{category.description}</p>
               )}
               <Link
-                href={`/dashboard/categories/${category.slug}`}
+                href={`/product-categories/${category.id}`}
                 className="inline-block text-blue-500"
               >
                 View Products
