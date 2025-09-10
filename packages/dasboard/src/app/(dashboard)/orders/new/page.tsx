@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/shared/page-header";
-import { NewOrderForm } from "../components/NewOrderForm";
+import { NewOrderForm } from "../components/new-order-form";
 
 export default function NewOrderPage() {
   return (
