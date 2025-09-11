@@ -105,7 +105,7 @@ export default function ProductPage() {
         name: product.name,
         price: product.price,
         image: imageList[0],
-        category: product.category.name || "Uncategorized",
+        category: product.categories?.[0]?.name || "Uncategorized",
         slug: product.sku || product.id,
         description: product.description || "",
         inventoryQuantity: product.inventoryQuantity,
@@ -140,11 +140,11 @@ export default function ProductPage() {
         <span className="mx-2 text-muted-foreground">/</span>
         <Link
           href={`/products?category=${encodeURIComponent(
-            product.category.name
+            product.categories?.[0]?.name || ""
           )}`}
           className="text-muted-foreground hover:text-foreground"
         >
-          {product.category.name || "Uncategorized"}
+          {product.categories?.[0]?.name || "Uncategorized"}
         </Link>
         <span className="mx-2 text-muted-foreground">/</span>
         <span className="text-foreground">{product.name}</span>
@@ -192,7 +192,10 @@ export default function ProductPage() {
         <div className="space-y-6">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Badge variant="secondary">{product.category.name}</Badge>
+              <Badge variant="secondary">
+                {product.categories?.[0]?.name || "Uncategorized"}
+              </Badge>
+
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handleToggleWishlist}

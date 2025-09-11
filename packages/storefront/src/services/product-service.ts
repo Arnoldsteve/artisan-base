@@ -79,10 +79,7 @@ function normalizeProduct(product: any): Product {
       : undefined,
     image: product.image || (product.images && product.images[0]) || "",
     images: product.images || [],
-    category:
-      product.category ||
-      (product.categories && product.categories[0]?.name) ||
-      "",
+    categories: product.categories || [],
     categoryId: product.categoryId || "",
     rating: product.rating ?? 0,
     reviewCount: product.reviewCount ?? 0,
