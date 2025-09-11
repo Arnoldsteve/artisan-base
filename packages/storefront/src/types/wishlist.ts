@@ -4,8 +4,8 @@ export interface WishlistItem {
   id: string;
   name: string;
   price: number;
-//   image: string;
-  images?: { url: string }[];
+  image: string;
+  // images?: { url: string }[];
   category: string;
   slug?: string;
   description?: string;
