@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
-import { columns } from "../columns";
+import { columns } from "./columns";
 import {
   useReactTable,
   getCoreRowModel,
@@ -14,7 +14,7 @@ import {
   PaginationState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
-import { Product, PaginatedResponse } from "@/types/products";
+import { Product } from "@/types/products";
 import {
   useProducts,
   useDeleteProduct,
@@ -31,7 +31,9 @@ import { Button } from "@repo/ui";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
-import { CategoryAssignmentModal } from "./category-assignment-modal";
+import { CategoryAssignmentSheet } from "./category-assignment-sheet";
+import { PaginatedResponse } from "@/types/shared";
+import { ImagePreviewDialog } from "./image-preview-dialog";
 
 // Helper function
 const slugify = (text: string) =>
@@ -63,12 +65,17 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  
+  // image upload
   const [productForImageUpload, setProductForImageUpload] = useState<Product | null>(null);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
   // Add these lines for category modal
   const [productForCategory, setProductForCategory] = useState<Product | null>(null);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  // image preview
+  const [productForPreview, setProductForPreview] = useState<Product | null>(null);
+const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
   const { data: paginatedResponse, isLoading, isError } = useProducts(
@@ -92,14 +99,9 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
   const openEditSheet = (product: Product) => { setProductToEdit(product); setIsSheetOpen(true); };
   const openAddSheet = () => { setProductToEdit(null); setIsSheetOpen(true); };
+  const handleCategoryChange = (product: Product) => { setProductForCategory(product); setIsCategorySheetOpen(true); };
   const handleImageUpload = (product: Product) => { setProductForImageUpload(product); setIsImageUploadOpen(true); };
-  const openCategoryModal = (productId: string, categories: Array<{category: {id: string, name: string}}>) => {
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      setProductForCategory(product);
-      setIsCategoryModalOpen(true);
-    }
-  };
+  const openImagePreview = (product: Product) => { setProductForPreview(product); setIsPreviewOpen(true); };
 
   const handleDuplicateProduct = (productToDuplicate: Product) => {
     const newName = `${productToDuplicate.name} (Copy)`;
@@ -139,7 +141,8 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       openEditSheet,
       handleDuplicateProduct,
       handleImageUpload,
-      openCategoryModal,
+      handleCategoryChange,
+      openImagePreview,
     },
   });
 
@@ -240,12 +243,18 @@ export function ProductsView({ initialData }: ProductsViewProps) {
         product={productForImageUpload}
       />
 
-      {/* Add this with your other modals */}
-      <CategoryAssignmentModal
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+      <CategoryAssignmentSheet
+        isOpen={isCategorySheetOpen}
+        onClose={() => setIsCategorySheetOpen(false)}
         product={productForCategory}
       />
+
+      <ImagePreviewDialog
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        product={productForPreview}
+      />
+
     </div>
   );
 }

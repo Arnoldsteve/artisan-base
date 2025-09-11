@@ -32,11 +32,7 @@ interface ImageUploadDialogProps {
   product: Product | null;
 }
 
-export function ImageUploadDialog({
-  isOpen,
-  onClose,
-  product,
-}: ImageUploadDialogProps) {
+export function ImageUploadDialog({ isOpen, onClose,  product }: ImageUploadDialogProps) {
   // State for new files to be uploaded
   const [newFiles, setNewFiles] = useState<File[]>([]);
   // State for previewing all images (existing + new)

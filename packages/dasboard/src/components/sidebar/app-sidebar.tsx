@@ -72,18 +72,6 @@ const data = {
           title: "All Orders",
           url: "/orders",
         },
-        {
-          title: "Paid Orders",
-          url: "paid-orders",
-        },
-        {
-          title: "Parially Paid Orders",
-          url: "partially-paid-orders",
-        },
-        {
-          title: "Unpaid Orders",
-          url: "#",
-        },
       ],
     },
     {
@@ -98,14 +86,6 @@ const data = {
         {
           title: "Products Categories",
           url: "/product-categories",
-        },
-        {
-          title: "Active Products",
-          url: "/acitve-products",
-        },
-        {
-          title: "Inactive Products",
-          url: "/inactive-products",
         },
       ],
     },

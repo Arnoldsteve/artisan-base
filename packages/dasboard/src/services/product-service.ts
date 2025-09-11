@@ -1,9 +1,8 @@
 import { apiClient } from "@/lib/client-api"; // Use the new client-side API client
-import { Product, PaginatedResponse, CreateProductDto, UpdateProductDto } from "@/types/products";
+import { Product, CreateProductDto, UpdateProductDto, AssignCategoriesToProductDto } from "@/types/products";
+import { PaginatedResponse } from "@/types/shared";
 
-/**
- * ProductService directly handles API communication for dashboard product management.
- */
+
 export class ProductService {
   /**
    * Searches for a small number of products, typically for autocomplete fields.
@@ -17,12 +16,9 @@ export class ProductService {
       "dashboard/products",
       { page: 1, limit: 5, search: searchTerm }
     );
-    return response.data; // Return just the products array for search
+    return response.data;
   }
 
-  /**
-   * Gets a paginated list of all products.
-   */
   async getProducts(
     page = 1,
     limit = 10,
@@ -34,33 +30,36 @@ export class ProductService {
     );
   }
 
-  /**
-   * Gets a single product by its ID.
-   */
   async getProductById(id: string): Promise<Product> {
     return apiClient.get<Product>(`dashboard/products/${id}`);
   }
 
-  /**
-   * Creates a new product.
-   */
   async createProduct(productData: CreateProductDto): Promise<Product> {
     return apiClient.post<Product>("dashboard/products", productData);
   }
 
-  /**
-   * Updates an existing product.
-   */
   async updateProduct(id: string, productData: UpdateProductDto): Promise<Product> {
     return apiClient.patch<Product>(`dashboard/products/${id}`, productData);
   }
 
-  /**
-   * Deletes a single product by its ID.
-   */
   async deleteProduct(id: string): Promise<void> {
     await apiClient.delete(`dashboard/products/${id}`);
   }
+
+  // New method to assign categories to a product
+  async assignCategories(productId: string, dto: AssignCategoriesToProductDto): Promise<void> {
+    await apiClient.patch(`/dashboard/products/${productId}/categories`, dto);
+  }
+
+  async assignCategory(productId: string, categoryId: string): Promise<void> {
+    await apiClient.post("/dashboard/product-categories", { productId, categoryId });
+  }
+
+  // async unassignCategory(productId: string, categoryId: string): Promise<void> {
+  //   await apiClient.delete("/dashboard/product-categories", { data: { productId, categoryId } });
+  // }
+
+
 }
 
 export const productService = new ProductService();

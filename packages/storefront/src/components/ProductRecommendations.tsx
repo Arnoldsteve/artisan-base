@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Product } from "@/types";
 import { useRecommendations } from "@/hooks/use-recommendations";
 import { useCartContext } from "@/contexts/cart-context";
@@ -10,13 +11,12 @@ interface ProductRecommendationsProps {
   currentProduct: Product;
 }
 
-// An array to map over for rendering skeleton loaders.
+// Skeleton loader placeholders
 const skeletonArray = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   currentProduct,
 }) => {
-  // It's a good practice to destructure the `data` property from useQuery
   const { data: recommendations, isLoading, error } = useRecommendations(
     currentProduct.id
   );
@@ -26,23 +26,27 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8";
 
   const handleQuickAdd = (product: Product) => {
+    const images =
+      (product.images?.map((img) => img.url).filter(Boolean) ?? []);
+    const imageList =
+      images.length > 0
+        ? images
+        : [product.image || `https://picsum.photos/seed/${product.id}/400/400`];
+
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       slug: product.sku || product.id,
       description: product.description || "",
-      image: product.image || (product.images && product.images[0]) || "",
+      image: imageList[0],
       quantity: 1,
       inventoryQuantity: product.inventoryQuantity,
     });
     toast.success(`${product.name} added to cart!`);
   };
 
-  // --- Start of The Corrected Rendering Logic ---
-
-  // Guard Clause 1: Handle the loading state first.
-  // This shows a placeholder UI while data is being fetched.
+  // --- Loading State ---
   if (isLoading) {
     return (
       <div className="mt-16">
@@ -65,16 +69,11 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     );
   }
 
-  // Guard Clause 2: Handle all "unsuccessful" states after loading.
-  // This checks for a network error, OR if the data is undefined (which caused the crash),
-  // OR if the data is an empty array.
+  // --- Error or Empty State ---
   if (error || !recommendations || recommendations.length === 0) {
     const message = error
       ? "Could not load recommendations."
-      // This message shows if the API returns an empty array `[]`
       : "No recommendations found for this product.";
-    
-    // We still render the title, just with a message below it.
     return (
       <div className="mt-16">
         <h2 className="text-2xl font-bold text-foreground mb-6">
@@ -87,65 +86,71 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     );
   }
 
-  // The "Happy Path": If the code reaches this point, we are GUARANTEED that
-  // `recommendations` is an array with at least one product. It is now safe to render.
+  // --- Happy Path ---
   return (
     <div className="mt-16">
       <h2 className="text-2xl font-bold text-foreground mb-6">
         You might also like
       </h2>
       <div className={`grid gap-6 ${getGridCols()}`}>
-        {recommendations.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4 flex flex-col items-center group border border-gray-100 hover:border-primary"
-          >
-            <img
-              src={
-                product.image ||
-                (product.images && product.images[0]) ||
-                // Fallback image to prevent errors
-                `https://picsum.photos/200/200?random=${product.id}`
-              }
-              alt={product.name}
-              className="w-32 h-32 object-cover rounded mb-3 group-hover:scale-105 transition-transform"
-            />
-            <h3 className="font-semibold text-center text-foreground mb-1 line-clamp-2">
-              {product.name}
-            </h3>
-            <div className="flex items-center space-x-1 mb-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    // Using `?? 0` as a safety net in case rating is null/undefined
-                    i < Math.floor(product.rating ?? 0)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-              <span className="text-xs text-muted-foreground ml-1">
-                ({product.reviewCount ?? 0})
-              </span>
-            </div>
-            <div className="font-bold text-lg text-primary mb-2">
-              {new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-                // Using `?? 0` as a safety net in case price is null/undefined
-              }).format(product.price ?? 0)}
-            </div>
-            <Button
-              size="sm"
-              className="w-full mt-auto"
-              onClick={() => handleQuickAdd(product)}
-              disabled={product.inventoryQuantity === 0}
+        {recommendations.map((product) => {
+          const images =
+            (product.images?.map((img) => img.url).filter(Boolean) ?? []);
+          const imageList =
+            images.length > 0
+              ? images
+              : [
+                  product.image ||
+                    `https://picsum.photos/seed/${product.id}/400/400`,
+                ];
+
+          return (
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4 flex flex-col items-center group border border-gray-100 hover:border-primary"
             >
-              {product.inventoryQuantity > 0 ? "Quick Add" : "Out of Stock"}
-            </Button>
-          </div>
-        ))}
+              <Image
+                src={imageList[0]}
+                alt={product.name}
+                width={128}
+                height={128}
+                className="w-32 h-32 object-cover rounded mb-3 group-hover:scale-105 transition-transform"
+              />
+              <h3 className="font-semibold text-center text-foreground mb-1 line-clamp-2">
+                {product.name}
+              </h3>
+              <div className="flex items-center space-x-1 mb-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < Math.floor(product.rating ?? 0)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+                <span className="text-xs text-muted-foreground ml-1">
+                  ({product.reviewCount ?? 0})
+                </span>
+              </div>
+              <div className="font-bold text-lg text-primary mb-2">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(product.price ?? 0)}
+              </div>
+              <Button
+                size="sm"
+                className="w-full mt-auto"
+                onClick={() => handleQuickAdd(product)}
+                disabled={product.inventoryQuantity === 0}
+              >
+                {product.inventoryQuantity > 0 ? "Quick Add" : "Out of Stock"}
+              </Button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

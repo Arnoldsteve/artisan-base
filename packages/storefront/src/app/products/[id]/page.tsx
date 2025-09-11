@@ -9,7 +9,6 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/hooks/use-products";
-import { Product } from "@/types";
 import { useCartContext } from "@/contexts/cart-context";
 import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
@@ -25,55 +24,6 @@ export default function ProductPage() {
   const { addToCart } = useCartContext();
   const { isInWishlist, addToWishlist, removeFromWishlist } =
     useWishlistContext();
-
-  const isWishlisted = product ? isInWishlist(product.id) : false;
-  const handleAddToCart = () => {
-    if (!product) return;
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      slug: product.sku || product.id,
-      description: product.description || "",
-      image: product.image || (product.images && product.images[0]) || "",
-      quantity,
-      inventoryQuantity: product.inventoryQuantity,
-    });
-    toast.success(`${product.name} has been added to your cart.`);
-  };
-
-  const handleToggleWishlist = () => {
-    if (!product) return;
-    if (isWishlisted) {
-      removeFromWishlist(product.id);
-      toast.success(`${product.name} removed from wishlist`);
-    } else {
-      addToWishlist({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image || (product.images && product.images[0]) || "",
-        category: product.category.name || "Uncategorized",
-        slug: product.sku || product.id,
-        description: product.description || "",
-        inventoryQuantity: product.inventoryQuantity,
-      });
-      toast.success(`${product.name} added to wishlist`);
-    }
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: product?.name,
-        text: product?.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard");
-    }
-  };
 
   if (isLoading) {
     return (
@@ -114,7 +64,13 @@ export default function ProductPage() {
     );
   }
 
-  const images = product.images || [product.image];
+  // ✅ Normalize images
+  const images = (product.images?.map((img) => img.url) ?? []).filter(Boolean);
+  const imageList =
+    images.length > 0
+      ? images
+      : [product.image || `https://picsum.photos/seed/${product.id}/600/600`];
+
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -126,6 +82,56 @@ export default function ProductPage() {
         currency: "USD",
       }).format(product.originalPrice)
     : null;
+
+  const isWishlisted = product ? isInWishlist(product.id) : false;
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      slug: product.sku || product.id,
+      description: product.description || "",
+      image: imageList[0],
+      quantity,
+      inventoryQuantity: product.inventoryQuantity,
+    });
+    toast.success(`${product.name} has been added to your cart.`);
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+      toast.success(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: imageList[0],
+        category: product.category.name || "Uncategorized",
+        slug: product.sku || product.id,
+        description: product.description || "",
+        inventoryQuantity: product.inventoryQuantity,
+      });
+      toast.success(`${product.name} added to wishlist`);
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: product?.name,
+        text: product?.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard");
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -139,7 +145,9 @@ export default function ProductPage() {
         </Link>
         <span className="mx-2 text-muted-foreground">/</span>
         <Link
-          href={`/products?category=${encodeURIComponent(product.category.name)}`}
+          href={`/products?category=${encodeURIComponent(
+            product.category.name
+          )}`}
           className="text-muted-foreground hover:text-foreground"
         >
           {product.category.name || "Uncategorized"}
@@ -153,10 +161,7 @@ export default function ProductPage() {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg border">
             <Image
-              src={
-                images[selectedImage] ||
-                `https://picsum.photos/400/400?random=${product.id}`
-              }
+              src={imageList[selectedImage]}
               alt={product.name}
               width={600}
               height={600}
@@ -164,9 +169,9 @@ export default function ProductPage() {
             />
           </div>
 
-          {images.length > 1 && (
+          {imageList.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
-              {images.map((image, index) => (
+              {imageList.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -177,10 +182,7 @@ export default function ProductPage() {
                   }`}
                 >
                   <Image
-                    src={
-                      image ||
-                      `https://picsum.photos/400/400?random=${product.id}`
-                    }
+                    src={image}
                     alt={`${product.name} ${index + 1}`}
                     width={150}
                     height={150}

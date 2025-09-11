@@ -1,8 +1,7 @@
-// File: packages/dasboard/src/app/dashboard/products/page.tsx
-
 import { createServerApiClient } from '@/lib/server-api';
 import { ProductsView } from './components/products-view';
-import { Product, PaginatedResponse } from '@/types/products';
+import { PaginatedResponse } from '@/types/shared';
+import { Product } from '@/types/products';
 
 export default async function ProductsPage() {
   

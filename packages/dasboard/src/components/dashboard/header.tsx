@@ -6,23 +6,10 @@ import { Input } from "@repo/ui";
 import { useAuthContext } from "@/contexts/auth-context";
 
 export function Header() {
-  const { tenants, tenantId } = useAuthContext();
-
-  const currentTenantName = useMemo(() => {
-    if (!tenantId || !tenants || tenants.length === 0) {
-      return "My Store";
-    }
-    const currentTenant = tenants.find((tenant) => tenant.subdomain === tenantId);
-
-    return currentTenant ? currentTenant.name : "My Store";
-  }, [tenants, tenantId]);
 
   return (
     <div className="border-b border-border bg-background">
       <div className="flex h-16 items-center px-4">
-        <h1 className="text-xl font-bold tracking-tight mr-6 text-primary">
-          {currentTenantName}
-        </h1>
 
         <div className="ml-auto flex items-center space-x-4">
           <div>

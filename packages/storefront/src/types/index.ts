@@ -1,4 +1,8 @@
-// REFACTOR: Centralized type definitions for better maintainability and type safety
+export interface ProductImage {
+  id: string;
+  url: string;
+  path: string;
+}
 
 export interface Product {
   id: string;
@@ -7,7 +11,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   image: string;
-  images?: string[];
+  images?: ProductImage[];
   category: Category;
   categoryId: string;
   rating: number;

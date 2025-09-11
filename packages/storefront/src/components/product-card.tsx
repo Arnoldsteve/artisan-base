@@ -77,8 +77,9 @@ export const ProductCard = memo(function ProductCard({
       <div className="aspect-square overflow-hidden rounded-t-lg relative">
         <Image
           src={
-            product.image ||
-            `https://picsum.photos/400/400?random=${product.id}`
+            product.images?.[0]?.url || 
+            // `https://picsum.photos/400/400?random=${product.id}` 
+            `https://picsum.photos/seed/${product.id}/400/400`
           }
           alt={product.name}
           width={400}

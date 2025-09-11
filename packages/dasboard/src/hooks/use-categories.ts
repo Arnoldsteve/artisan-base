@@ -1,44 +1,96 @@
-// File: packages/dasboard/src/hooks/use-categories.ts
+// File: packages/dashboard/src/hooks/use-categories.ts
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { categoryService, Category } from "@/services/category-service";
+import { categoryService } from "@/services/category-service";
 import { toast } from "sonner";
+import { Category, CreateCategoryDto, UpdateCategoryDto } from "@/types/categories";
+import { PaginatedResponse } from "@/types/products";
 import { useAuthContext } from "@/contexts/auth-context";
-import { PRODUCTS_QUERY_KEY } from "./use-products";
 
-// Define a query key for categories
+// Unique key for react-query cache
 export const CATEGORIES_QUERY_KEY = ["dashboard-categories"];
 
 /**
- * Hook for fetching all categories.
+ * Fetch paginated categories (auth-aware).
  */
-export function useCategories() {
+export function useCategories(
+  page = 1,
+  limit = 10,
+  search = "",
+  initialData?: PaginatedResponse<Category>
+) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
-  return useQuery<Category[]>({
-    queryKey: CATEGORIES_QUERY_KEY,
-    queryFn: () => categoryService.getCategories(),
+  return useQuery<PaginatedResponse<Category>>({
+    queryKey: [...CATEGORIES_QUERY_KEY, { page, limit, search }],
+    queryFn: () => categoryService.getCategories(page, limit, search),
     enabled: !isAuthLoading && isAuthenticated,
+    initialData,
   });
 }
 
 /**
- * Hook for assigning categories to a product.
+ * Fetch a single category by ID.
  */
-export function useAssignCategoriesToProduct() {
+export function useCategory(categoryId: string | null) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
+  return useQuery<Category>({
+    queryKey: [...CATEGORIES_QUERY_KEY, categoryId],
+    queryFn: () => categoryService.getCategoryById(categoryId!),
+    enabled: !isAuthLoading && isAuthenticated && !!categoryId,
+  });
+}
+
+/**
+ * Create a new category.
+ */
+export function useCreateCategory() {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: (variables: { productId: string; categoryIds: string[] }) =>
-      categoryService.assignCategoriesToProduct(variables.productId, variables.categoryIds),
-    onSuccess: () => {
-      toast.success("Product categories updated successfully");
-      // Invalidate both products and categories queries
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+    mutationFn: (data: CreateCategoryDto) => categoryService.createCategory(data),
+    onSuccess: (newCategory) => {
+      toast.success(`Category "${newCategory.name}" created successfully.`);
       queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to update categories");
+      toast.error(error.message || "Failed to create category.");
+    },
+  });
+}
+
+/**
+ * Update an existing category.
+ */
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { id: string; data: UpdateCategoryDto }) =>
+      categoryService.updateCategory(variables.id, variables.data),
+    onSuccess: (updatedCategory) => {
+      toast.success(`Category "${updatedCategory.name}" updated successfully.`);
+      queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [...CATEGORIES_QUERY_KEY, updatedCategory.id] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update category.");
+    },
+  });
+}
+
+/**
+ * Delete a category.
+ */
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => categoryService.deleteCategory(id),
+    onSuccess: () => {
+      toast.success("Category deleted successfully.");
+      queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete category.");
     },
   });
 }

@@ -1,4 +1,4 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { ConflictException, Injectable, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -6,6 +6,7 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { paginate } from 'src/common/helpers/paginate.helper';
 import { IProductRepository } from './interfaces/product-repository.interface';
 import { PrismaClient } from '../../../generated/tenant';
+import slugify from 'slugify';
 
 const CACHE_TTL = 10 * 1000; // 10 seconds for demo
 
@@ -30,15 +31,44 @@ export class ProductRepository implements IProductRepository {
     return this.prismaClient;
   }
 
+  // async create(dto: CreateProductDto) {
+  //   try {
+  //     const prisma = await this.getPrisma();
+  //     const product = await prisma.product.create({ data: dto });
+  //     this.invalidateCache();
+  //     return product;
+  //   } catch (err) {
+  //     if (err.code === 'P2002' && err.meta?.target?.includes('slug')) {
+  //       throw new Error('Slug already exists');
+  //     }
+  //     throw err;
+  //   }
+  // }
   async create(dto: CreateProductDto) {
     try {
       const prisma = await this.getPrisma();
-      const product = await prisma.product.create({ data: dto });
+
+      // Generate base slug from product name
+      let baseSlug = slugify(dto.name, { lower: true, strict: true });
+      let slug = baseSlug;
+      let counter = 1;
+
+      // Keep checking until we find a unique slug
+      while (await prisma.product.findUnique({ where: { slug } })) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
+      // Create product with unique slug
+      const product = await prisma.product.create({
+        data: { ...dto, slug },
+      });
+
       this.invalidateCache();
       return product;
     } catch (err) {
       if (err.code === 'P2002' && err.meta?.target?.includes('slug')) {
-        throw new Error('Slug already exists');
+        throw new ConflictException('Slug already exists');
       }
       throw err;
     }

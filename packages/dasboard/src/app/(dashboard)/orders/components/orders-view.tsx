@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Order,
-  PaginatedResponse,
 } from "@/types/orders";
 import { columns } from "./columns";
 import {
@@ -31,11 +30,9 @@ import { DeleteOrderDialog } from "./delete-order-dialog";
 import { Button } from "@repo/ui";
 import { Trash2 } from "lucide-react";
 import { BulkDeleteAlertDialog } from "../../products/components/bulk-delete-alert-dialog";
+import { OrdersTableViewOptions } from "./data-table-view-options";
+import { PaginatedResponse } from "@/types/shared";
 
-// A simple placeholder for view options, to be enhanced later.
-const OrdersTableViewOptions = ({ table }: { table: any }) => {
-    return <div className="py-4">{/* Filtering UI would go here */}</div>;
-};
 
 interface OrdersViewProps {
   initialData: PaginatedResponse<Order>;
@@ -61,6 +58,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
 
   // --- Memoized Data ---
   const orders = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
+  const totalOrders = paginatedResponse?.meta?.total || 0;
 
   // --- Table Instance Initialization ---
   const table = useReactTable({
@@ -120,13 +118,13 @@ export function OrdersView({ initialData }: OrdersViewProps) {
         title="Orders"
         description="View and manage all customer orders."
       >
-        <Link href="/dashboard/orders/new">
+        <Link href="/orders/new">
           <Button>Create Order</Button>
         </Link>
       </PageHeader>
       
       <OrdersTableViewOptions table={table} />
-      <DataTable table={table} />
+      <DataTable table={table}  totalCount={totalOrders}/>
       
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">

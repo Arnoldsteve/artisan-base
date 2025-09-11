@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@repo/ui/components/ui/button";
@@ -9,7 +9,13 @@ interface CartButtonProps {
 
 export const CartButton: React.FC<CartButtonProps> = ({ onClick }) => {
   const { getTotalItems } = useCart();
-  const count = getTotalItems();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const count = mounted ? getTotalItems() : 0;
 
   return (
     <Button
@@ -20,11 +26,13 @@ export const CartButton: React.FC<CartButtonProps> = ({ onClick }) => {
       aria-label="Open cart"
     >
       <ShoppingCart className="h-5 w-5" />
-      {count > 0 && (
-        <span className="absolute -top-1 -right-1 bg-primary text-white rounded-full text-xs px-1.5 py-0.5">
-          {count}
-        </span>
-      )}
+      <span
+        className={`absolute -top-1 -right-1 rounded-full text-xs px-1.5 py-0.5 transition ${
+          count > 0 ? "bg-primary text-white" : "invisible"
+        }`}
+      >
+        {count}
+      </span>
     </Button>
   );
 };

@@ -2,7 +2,8 @@
 
 import { createServerApiClient } from '@/lib/server-api';
 import { OrdersView } from './components/orders-view';
-import { Order, PaginatedResponse } from '@/types/orders';
+import { Order } from '@/types/orders';
+import { PaginatedResponse } from '@/types/shared';
 
 /**
  * This is the Server Component for the Orders page.

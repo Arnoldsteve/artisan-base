@@ -1,5 +1,3 @@
-// At the bottom of your customers.dto.ts or in a new validation file
-
 import { z } from 'zod';
 
 // Zod schema for validating the customer form

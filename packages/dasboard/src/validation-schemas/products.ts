@@ -7,7 +7,7 @@ export const productFormSchema = z.object({
   id: z.string().optional(),
   
   name: z.string().min(1, { message: "Product name is required." }),
-  slug: z.string().min(1, { message: "Slug is required." }),
+  // slug: z.string().min(1, { message: "Slug is required." }),
   
   // Use .coerce to automatically convert string input from the form to a number
   price: z.coerce.number().min(0, { message: "Price must be a positive number." }),
