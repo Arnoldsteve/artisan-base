@@ -73,7 +73,7 @@ export function Footer() {
                 href="/featured"
                 className="block text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                Featured Items
+                Featured Products
               </Link>
               <Link
                 href="/new-arrivals"
