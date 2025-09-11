@@ -10,7 +10,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { Product } from "@/types";
 import { useCart } from "@/hooks/use-cart";
-import { formatCurrency } from "@/lib/format-currency";
+import { formatMoney } from "@/lib/money";
 
 interface ProductCardProps {
   product: Product;
@@ -60,10 +60,11 @@ export const ProductCard = memo(function ProductCard({
   }, []);
 
   // OPTIMIZATION: Format price once to avoid recalculation
-  const formattedPrice = formatCurrency(product.price, "USD");
+  const formattedPrice = formatMoney(product.price);
   const originalPrice = product.originalPrice
-    ? formatCurrency(product.originalPrice, "USD")
+    ? formatMoney(product.originalPrice)
     : null;
+
 
   return (
     <div className="group relative bg-card rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
@@ -129,8 +130,9 @@ export const ProductCard = memo(function ProductCard({
           <div className="flex items-center space-x-1">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
             <span className="text-xs text-muted-foreground">
-              {product.rating?.toFixed(1) || 5} ({product.reviewCount || 10000})
+              {product.rating?.toFixed(1) || 5} ({product.reviewCount || 10000})K 
             </span>
+              4.8 (10k reviews)
           </div>
 
           {/* Stock indicator */}

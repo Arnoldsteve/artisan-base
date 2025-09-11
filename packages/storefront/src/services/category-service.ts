@@ -55,6 +55,7 @@ function normalizeProduct(product: any): Product {
     name: product.name,
     description: product.description || "",
     price: Number(product.price) || 0,
+    currency: product.currency || "KES",
     originalPrice: product.originalPrice
       ? Number(product.originalPrice)
       : undefined,
