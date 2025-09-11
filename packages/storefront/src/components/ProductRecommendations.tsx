@@ -12,8 +12,7 @@ interface ProductRecommendationsProps {
   currentProduct: Product;
 }
 
-// Skeleton loader placeholders
-const skeletonArray = [1, 2, 3, 4, 5, 6, 7, 8];
+const skeletonArray = Array.from({ length: 6 });
 
 export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   currentProduct,
@@ -22,9 +21,6 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     currentProduct.id
   );
   const { addToCart } = useCartContext();
-
-  const getGridCols = () =>
-    "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8";
 
   const handleQuickAdd = (product: Product) => {
     const images =
@@ -47,18 +43,19 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     toast.success(`${product.name} added to cart!`);
   };
 
-  // --- Loading State ---
+  const getGridCols = () =>
+    "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6";
+
+  // --- Loading ---
   if (isLoading) {
     return (
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-foreground mb-6">
-          You might also like
-        </h2>
+      <section className="mt-16">
+        <h2 className="text-2xl font-bold mb-6">You might also like</h2>
         <div className={`grid gap-6 ${getGridCols()}`}>
           {skeletonArray.map((_, i) => (
             <div
               key={i}
-              className="animate-pulse bg-muted rounded-lg p-4 h-64 flex flex-col items-center justify-center"
+              className="animate-pulse bg-muted rounded-2xl p-4 h-64 flex flex-col items-center justify-center"
             >
               <div className="bg-gray-300 h-32 w-32 rounded mb-4" />
               <div className="h-4 bg-gray-300 rounded w-3/4 mb-2" />
@@ -66,33 +63,27 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
             </div>
           ))}
         </div>
-      </div>
+      </section>
     );
   }
 
-  // --- Error or Empty State ---
+  // --- Empty / Error ---
   if (error || !recommendations || recommendations.length === 0) {
     const message = error
       ? "Could not load recommendations."
       : "No recommendations found for this product.";
     return (
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-foreground mb-6">
-          You might also like
-        </h2>
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">{message}</p>
-        </div>
-      </div>
+      <section className="mt-16">
+        <h2 className="text-2xl font-bold mb-6">You might also like</h2>
+        <p className="text-center text-muted-foreground py-8">{message}</p>
+      </section>
     );
   }
 
-  // --- Happy Path ---
+  // --- Success ---
   return (
-    <div className="mt-16">
-      <h2 className="text-2xl font-bold text-foreground mb-6">
-        You might also like
-      </h2>
+    <section className="mt-16">
+      <h2 className="text-2xl font-bold mb-6">You might also like</h2>
       <div className={`grid gap-6 ${getGridCols()}`}>
         {recommendations.map((product) => {
           const images =
@@ -108,39 +99,50 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           return (
             <div
               key={product.id}
-              className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4 flex flex-col items-center group border border-gray-100 hover:border-primary"
+              className="bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all duration-300 p-4 flex flex-col group"
             >
-              <Image
-                src={imageList[0]}
-                alt={product.name}
-                width={128}
-                height={128}
-                className="w-32 h-32 object-cover rounded mb-3 group-hover:scale-105 transition-transform"
-              />
-              <h3 className="font-semibold text-center text-foreground mb-1 line-clamp-2">
+              {/* Image */}
+              <div className="relative aspect-square mb-3 overflow-hidden rounded-xl">
+                <Image
+                  src={imageList[0]}
+                  alt={product.name}
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+
+              {/* Name */}
+              <h3 className="font-medium text-sm text-center mb-1 line-clamp-2 group-hover:text-primary transition">
                 {product.name}
               </h3>
-              <div className="flex items-center space-x-1 mb-1">
+
+              {/* Rating */}
+              <div className="flex items-center justify-center gap-1 mb-2">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-4 w-4 ${
+                    className={`h-3 w-3 ${
                       i < Math.floor(product.rating ?? 0)
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-gray-300"
                     }`}
                   />
                 ))}
-                <span className="text-xs text-muted-foreground ml-1">
-                  ({product.reviewCount ?? 0})
+                <span className="text-xs text-muted-foreground">
+                  {product.rating?.toFixed(1) ?? "0.0"}
                 </span>
               </div>
-              <div className="font-bold text-lg text-primary mb-2">
+
+              {/* Price */}
+              <p className="font-semibold text-primary text-center mb-3">
                 {formatMoney(product.price, product.currency)}
-              </div>
+              </p>
+
+              {/* CTA */}
               <Button
                 size="sm"
-                className="w-full mt-auto"
+                className="w-full mt-auto rounded-xl"
                 onClick={() => handleQuickAdd(product)}
                 disabled={product.inventoryQuantity === 0}
               >
@@ -150,6 +152,6 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           );
         })}
       </div>
-    </div>
+    </section>
   );
 };
