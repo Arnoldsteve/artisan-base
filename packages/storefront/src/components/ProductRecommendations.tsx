@@ -6,6 +6,7 @@ import { useCartContext } from "@/contexts/cart-context";
 import { toast } from "sonner";
 import { Star } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
+import { formatMoney } from "@/lib/money";
 
 interface ProductRecommendationsProps {
   currentProduct: Product;
@@ -135,10 +136,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                 </span>
               </div>
               <div className="font-bold text-lg text-primary mb-2">
-                {new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(product.price ?? 0)}
+                {formatMoney(product.price, product.currency)}
               </div>
               <Button
                 size="sm"

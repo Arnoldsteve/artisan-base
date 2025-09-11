@@ -1,3 +1,5 @@
+import { Currency } from "./currency";
+
 export interface ProductImage {
   id: string;
   url: string;
@@ -9,6 +11,7 @@ export interface Product {
   name: string;
   description?: string;
   price: number;
+  currency: Currency;
   originalPrice?: number;
   image: string;
   images?: ProductImage[];

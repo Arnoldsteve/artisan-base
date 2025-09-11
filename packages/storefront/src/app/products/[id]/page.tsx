@@ -12,6 +12,7 @@ import { useProduct } from "@/hooks/use-products";
 import { useCartContext } from "@/contexts/cart-context";
 import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
+import { formatMoney } from "@/lib/money";
 
 export default function ProductPage() {
   const params = useParams();
@@ -71,16 +72,9 @@ export default function ProductPage() {
       ? images
       : [product.image || `https://picsum.photos/seed/${product.id}/600/600`];
 
-  const formattedPrice = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(product.price);
-
+  const formattedPrice = formatMoney(product.price);
   const originalPrice = product.originalPrice
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(product.originalPrice)
+    ? formatMoney(product.originalPrice)
     : null;
 
   const isWishlisted = product ? isInWishlist(product.id) : false;
