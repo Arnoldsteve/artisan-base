@@ -1,25 +1,8 @@
 "use client";
 
+import { WishlistContextType, WishlistItem } from "@/types/wishlist";
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 
-export interface WishlistItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  slug?: string;
-  description?: string;
-  inventoryQuantity: number;
-}
-
-interface WishlistContextType {
-  items: WishlistItem[];
-  addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (id: string) => void;
-  isInWishlist: (id: string) => boolean;
-  clearWishlist: () => void;
-}
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined
