@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { CartItem } from "./cart-item";
 import { Button } from "@repo/ui/components/ui/button";
@@ -12,6 +14,11 @@ interface CartDrawerProps {
 export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
   const { items, getTotalPrice, clearCart } = useCart();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div
@@ -31,11 +38,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
           ×
         </Button>
       </div>
+
       <div
         className="p-4 flex-1 overflow-y-auto"
         style={{ maxHeight: "calc(100vh - 180px)" }}
       >
-        {items.length === 0 ? (
+        {!mounted ? (
+          <div className="text-center text-muted-foreground py-12">
+            <p>Loading cart…</p>
+          </div>
+        ) : items.length === 0 ? (
           <div className="text-center text-muted-foreground py-12">
             <p>Your cart is empty.</p>
           </div>
@@ -43,18 +55,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
           items.map((item) => <CartItem key={item.id} item={item} />)
         )}
       </div>
+
       <div className="p-4 border-t bg-card">
         <div className="flex justify-between mb-4">
           <span className="font-medium">Total</span>
           <span className="font-bold text-lg">
-            ${getTotalPrice().toFixed(2)}
+            {mounted ? `$${getTotalPrice().toFixed(2)}` : "—"}
           </span>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={clearCart}
-            disabled={items.length === 0}
+            disabled={!mounted || items.length === 0}
             className="flex-1"
           >
             Clear Cart
@@ -62,7 +75,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
           <Button
             variant="default"
             className="flex-1"
-            disabled={items.length === 0}
+            disabled={!mounted || items.length === 0}
             onClick={() => {
               router.push("/checkout");
               onClose();

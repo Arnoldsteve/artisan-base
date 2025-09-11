@@ -10,7 +10,7 @@ export class CreateCategoryDto {
 
   @IsString()
   @IsOptional()
-  @Length(2, 255)
+  @Length(2, 500)
   @Transform(({ value }) => value?.trim())
   description?: string;
 }

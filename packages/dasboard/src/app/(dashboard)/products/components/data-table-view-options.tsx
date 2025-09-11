@@ -14,7 +14,7 @@ export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
   return (
     <div className="flex items-center gap-4 py-4">
       <Input
-        placeholder="Filter by name..."
+        placeholder="Filter by name... "
         value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
         onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
         className="max-w-sm"

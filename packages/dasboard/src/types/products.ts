@@ -10,7 +10,7 @@ export interface ProductImage {
 export interface Product {
   id: string;
   name: string;
-  slug: string;
+  slug?: string;
   description: string | null;
   price: Decimal; // <-- CORRECT TYPE: Uses the imported Decimal class
   sku: string | null;

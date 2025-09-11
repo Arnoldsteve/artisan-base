@@ -13,6 +13,7 @@ import ChatWidget from "@/components/ChatWidget";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://artisan-base-storefront.vercel.app"),
   title: "Artisan Base - Handcrafted Excellence",
   description:
     "Discover unique handcrafted products from talented artisans around the world.",
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
     title: "Artisan Base - Handcrafted Excellence",
     description:
       "Discover unique handcrafted products from talented artisans around the world.",
-    url: "https://artisan-base-storefront.vercel.app", 
+    url: "https://artisan-base-storefront.vercel.app",
     siteName: "Artisan Base",
     images: [
       {
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     title: "Artisan Base - Handcrafted Excellence",
     description:
       "Discover unique handcrafted products from talented artisans around the world.",
-    images: ["/og-image.png"], 
+    images: ["/og-image.png"],
   },
 };
 

@@ -6,7 +6,7 @@ export class CreateProductDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   slug: string;
 
   @IsOptional()

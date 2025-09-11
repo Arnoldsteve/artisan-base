@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const categoryFormSchema = z.object({
-  name: z.string().min(3, "Category name is required").max(255, "Name too long"),
+  name: z.string().min(2, "Category name is required").max(100, "Name too long"),
   description: z.string().optional(),
 });
 

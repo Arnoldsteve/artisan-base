@@ -85,7 +85,7 @@ export function EditProductSheet({ isOpen, onClose, product, onSave, isPending }
         form.reset({
           id: undefined,
           name: '',
-          slug: '',
+          // slug: '',
           price: 0,
           inventoryQuantity: 0,
           sku: '',
@@ -134,7 +134,7 @@ export function EditProductSheet({ isOpen, onClose, product, onSave, isPending }
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="slug"
               render={({ field }) => (
@@ -146,7 +146,7 @@ export function EditProductSheet({ isOpen, onClose, product, onSave, isPending }
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FormField
               control={form.control}
