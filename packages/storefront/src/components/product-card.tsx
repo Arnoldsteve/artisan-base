@@ -10,6 +10,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { Product } from "@/types";
 import { useCart } from "@/hooks/use-cart";
+import { formatCurrency } from "@/lib/format-currency";
 
 interface ProductCardProps {
   product: Product;
@@ -59,16 +60,9 @@ export const ProductCard = memo(function ProductCard({
   }, []);
 
   // OPTIMIZATION: Format price once to avoid recalculation
-  const formattedPrice = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(product.price);
-
+  const formattedPrice = formatCurrency(product.price, "USD");
   const originalPrice = product.originalPrice
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(product.originalPrice)
+    ? formatCurrency(product.originalPrice, "USD")
     : null;
 
   return (
@@ -124,7 +118,7 @@ export const ProductCard = memo(function ProductCard({
           <span className="px-2 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md">
            {product.category
             ? product.category.name
-            : "Category: Not Set"}
+              : "Category: Not Set"}
           </span>
         </div>
       </div>
