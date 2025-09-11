@@ -33,7 +33,7 @@ export const ProductCard = memo(function ProductCard({
       price: product.price,
       slug: product.id, // fallback to id since slug does not exist
       description: product.description || "",
-      image: product.image,
+      image: product.images?.[0]?.url || product.image || undefined,
       quantity: 1,
       inventoryQuantity: product.inventoryQuantity,
     });
