@@ -9,6 +9,7 @@ import {
   ValidateNested,
   IsEnum,
   IsArray,
+  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -66,4 +67,9 @@ export class CreateStorefrontOrderDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  // @IsNumber()
+  @IsPositive()
+  shippingAmount?: number;
 }

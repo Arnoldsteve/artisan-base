@@ -155,6 +155,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         // paymentMethod: state.selectedPaymentMethod?.id,     
         currency: 'KES',
         notes: undefined,
+        // shippingAmount: state.selectedShippingOption?.price || 0,
       };
       // Call backend API
       const response = await apiClient.post<any>(

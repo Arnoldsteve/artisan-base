@@ -47,7 +47,7 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
       );
     }
 
-    // Calculate totals using Decimal for precision
+    // Calculate subtotal using Decimal for precision
     let subtotal = new Decimal(0);
     const orderItemsData = await Promise.all(
       dto.items.map(async (item) => {
@@ -58,9 +58,8 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
             `Insufficient inventory for product: ${product.name}`,
           );
         }
-        // product.price is already a Decimal, no need to convert
-        const unitPrice = product.price; 
-        subtotal = subtotal.plus(unitPrice.mul(item.quantity)); // Use Decimal methods
+        const unitPrice = product.price; // product.price is Decimal
+        subtotal = subtotal.plus(unitPrice.mul(item.quantity));
         return {
           quantity: item.quantity,
           unitPrice,
@@ -74,6 +73,18 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
         };
       }),
     );
+
+    // --- Tax and Shipping calculations ---
+    const TAX_RATE = 0.16; // Example: 16% VAT (could be env/config later)
+    const taxAmount = subtotal.mul(TAX_RATE);
+
+    // Use shipping from dto or default to 0
+    const shippingAmount = dto.shippingAmount
+      ? new Decimal(dto.shippingAmount)
+      : new Decimal(0);
+
+    // Compute final total
+    const totalAmount = subtotal.plus(taxAmount).plus(shippingAmount);
 
     // Optionally: create/find customer
     let customerId: string | undefined = undefined;
@@ -98,17 +109,18 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
     const order = await prisma.$transaction(async (tx) => {
       const orderCount = await tx.order.count();
       const orderNumber = `ORD-${orderCount + 1}`;
+
       const createdOrder = await tx.order.create({
         data: {
           orderSequence: orderCount + 1,
           orderNumber,
           status: 'PENDING',
           paymentStatus: 'PENDING',
-          totalAmount: subtotal,
           subtotal,
-          taxAmount: 0,
+          taxAmount,
+          shippingAmount,
+          totalAmount,
           currency: dto.currency,
-          shippingAmount: 0,
           notes: dto.notes,
           shippingAddress: dto.shippingAddress,
           billingAddress: dto.billingAddress,
@@ -138,6 +150,9 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
         id: order.id,
         orderNumber: order.orderNumber,
         status: order.status,
+        subtotal: order.subtotal,
+        taxAmount: order.taxAmount,
+        shippingAmount: order.shippingAmount,
         totalAmount: order.totalAmount,
         items: 'items' in order ? order.items : [],
         createdAt: order.createdAt,
