@@ -11,7 +11,10 @@ export const OrderReviewStep = () => {
   const { items } = useCart();
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shippingCost = subtotal >= 100 ? 0 : selectedShippingOption?.price || 0;
+  let shippingCost = selectedShippingOption?.price || 0;
+  if (subtotal > 1000 && selectedShippingOption?.id === "standard") {
+    shippingCost = 0;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
