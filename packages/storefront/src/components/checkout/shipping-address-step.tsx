@@ -119,7 +119,7 @@ export const ShippingAddressStep: React.FC = () => {
                       </div>
                     </Label>
                   </div>
-                  <span className="font-semibold">${option.price.toFixed(2)}</span>
+                  <span className="font-semibold">Ksh {option.price.toFixed(2)}</span>
                 </CardContent>
               </Card>
             ))}
