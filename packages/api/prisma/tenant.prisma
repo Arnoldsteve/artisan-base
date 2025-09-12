@@ -31,14 +31,11 @@ model Product {
   inventoryQuantity Int     @default(0)
   isFeatured        Boolean @default(false)
   isActive          Boolean @default(true)
-
   images Json @default("[]")
-
   categories ProductCategory[]
   variants   ProductVariant[]
   orderItems OrderItem[]
   reviews    Review[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -50,9 +47,7 @@ model Category {
   name        String
   slug        String   @unique
   description String?
-
   products ProductCategory[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -76,11 +71,8 @@ model ProductVariant {
   name              String
   sku               String? @unique
   inventoryQuantity Int     @default(0)
-
   price Decimal? @db.Decimal(10, 2)
-
   attributes Json @default("{}")
-
   orderItems OrderItem[]
 
   @@map("product_variants")
@@ -92,26 +84,18 @@ model Order {
   orderNumber    String        @unique
   status         OrderStatus   @default(PENDING)
   paymentStatus  PaymentStatus @default(PENDING)
-
-  // --- ADDED FIELD ---
-  // The currency of the order itself, for display and reporting.
   currency       Currency
-
   totalAmount    Decimal       @db.Decimal(10, 2)
   subtotal       Decimal       @db.Decimal(10, 2)
   taxAmount      Decimal       @db.Decimal(10, 2) @default(0)
   shippingAmount Decimal       @db.Decimal(10, 2) @default(0)
   notes          String?
-
   shippingAddress Json
   billingAddress  Json
-
   items      OrderItem[]
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId String?
-
   payments Payment[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -123,12 +107,10 @@ model OrderItem {
   id          String  @id @default(cuid())
   quantity    Int
   unitPrice   Decimal @db.Decimal(10, 2)
-
   productName String
   variantName String?
   sku         String?
   image       String?
-
   order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   String
   product   Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
@@ -143,16 +125,13 @@ model Payment {
   id                      String        @id @default(cuid())
   orderId                 String
   order                   Order         @relation(fields: [orderId], references: [id])
-  
   provider                PaymentProvider
   providerTransactionId   String
   amount                  Decimal       @db.Decimal(10, 2)
   currency                Currency
   status                  PaymentStatus @default(PENDING)
-  
   checkoutRequestId       String?       @unique
   metadata                Json?
-  
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
   
@@ -167,11 +146,9 @@ model Customer {
   lastName       String?
   hashedPassword String?
   phone          String?
-
   addresses Address[]
   orders    Order[]
   reviews   Review[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -202,12 +179,10 @@ model Review {
   comment    String?
   isVerified Boolean  @default(false)
   isApproved Boolean  @default(false)
-
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  String
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   customerId String
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -223,7 +198,6 @@ model DashboardUser {
   lastName       String?
   role           DashboardUserRole @default(STAFF)
   isActive       Boolean           @default(true)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

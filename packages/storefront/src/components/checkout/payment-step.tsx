@@ -5,21 +5,8 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Label } from "@repo/ui/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
+import { paymentMethods } from "@/utils/payment-methods";
 
-const paymentMethods = [
-  {
-    id: "credit_card",
-    type: "credit_card",
-    name: "Credit Card",
-    icon: "credit-card",
-  },
-  {
-    id: "paypal",
-    type: "paypal",
-    name: "PayPal",
-    icon: "paypal",
-  },
-];
 
 export const PaymentStep: React.FC = () => {
   const { selectedPaymentMethod, setPaymentMethod, nextStep, previousStep } =

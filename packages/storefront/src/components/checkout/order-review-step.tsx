@@ -16,6 +16,7 @@ export const OrderReviewStep = () => {
     shippingCost = 0;
   }
 
+  console.log('selected paymnet methopd, ', selectedPaymentMethod);
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
@@ -123,7 +124,9 @@ export const OrderReviewStep = () => {
               <CardContent>
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-6 bg-blue-500 rounded flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">PP</span>
+                     <span className="text-white text-xs font-bold">
+                      {selectedPaymentMethod?.code || "??"}
+                    </span>
                   </div>
                   <span>{selectedPaymentMethod?.name}</span>
                 </div>

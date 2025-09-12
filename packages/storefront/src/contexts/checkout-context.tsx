@@ -10,6 +10,7 @@ import type {
 import type { CartItem } from "@/types/cart";
 import { apiClient } from "@/lib/api-client";
 import { useCart } from "@/hooks/use-cart";
+import { paymentMethods } from "@/utils/payment-methods";
 
 type State = {
   currentStep: number;
@@ -85,7 +86,16 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   const [state, dispatch] = useReducer(reducer, initialState, (init) => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("checkout");
-      return stored ? JSON.parse(stored) : init;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return {
+          ...init,
+          ...parsed,
+          selectedPaymentMethod: parsed.selectedPaymentMethod
+            ? paymentMethods.find(m => m.id === parsed.selectedPaymentMethod.id) || null
+            : null,
+        };
+      }
     }
     return init;
   });
@@ -99,22 +109,32 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   // Actions
   const setCustomer = (customer: Customer) =>
     dispatch({ type: "SET_CUSTOMER", payload: customer });
+
   const setShippingAddress = (address: ShippingAddress) =>
     dispatch({ type: "SET_SHIPPING_ADDRESS", payload: address });
+
   const setShippingOption = (option: ShippingOption) =>
     dispatch({ type: "SET_SHIPPING_OPTION", payload: option });
+
   const setPaymentMethod = (method: PaymentMethod) =>
     dispatch({ type: "SET_PAYMENT_METHOD", payload: method });
+
   const nextStep = () => dispatch({ type: "NEXT_STEP" });
+
   const previousStep = () => dispatch({ type: "PREVIOUS_STEP" });
+
   const goToStep = (step: number) =>
     dispatch({ type: "GO_TO_STEP", payload: step });
+
   const setLoading = (loading: boolean) =>
     dispatch({ type: "SET_LOADING", payload: loading });
+
   const setError = (error: string | null) =>
     dispatch({ type: "SET_ERROR", payload: error });
+
   const setOrder = (order: Order) =>
     dispatch({ type: "SET_ORDER", payload: order });
+
   const resetCheckout = () => dispatch({ type: "RESET" });
 
   // Simulate order submission
@@ -131,6 +151,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
           productId: item.id,
           quantity: item.quantity,
         })),
+        // shippingOption: state.selectedShippingOption?.id,   
+        // paymentMethod: state.selectedPaymentMethod?.id,     
         currency: 'USD',
         notes: undefined,
       };

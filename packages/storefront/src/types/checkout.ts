@@ -23,6 +23,7 @@ export interface ShippingOption {
 
 export interface PaymentMethod {
   id: string;
+  code: string; 
   // type: "credit_card" | "paypal" | "bank_transfer";
   type: string;
   name: string;
