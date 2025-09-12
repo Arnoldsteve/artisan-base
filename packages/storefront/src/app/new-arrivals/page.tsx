@@ -2,6 +2,7 @@
 
 import { ProductCard } from "@/components/product-card";
 import { useNewArrivals } from "@/hooks/use-products";
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Clock, Sparkles, TrendingUp } from "lucide-react";
 
 export default function NewArrivalsPage() {
@@ -59,21 +60,12 @@ export default function NewArrivalsPage() {
             {products.map((product, index) => (
               <div key={product.id} className="relative">
                 {/* New Badge */}
-                <div className="absolute top-2 left-2 z-10">
-                  <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                <div className="absolute top-3.5 right-2 z-10">
+                  <Badge className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
                     <TrendingUp className="h-3 w-3" />
                     New
-                  </div>
+                  </Badge>
                 </div>
-                
-                {/* Arrival Order Badge for first few items */}
-                {index < 3 && (
-                  <div className="absolute top-2 right-2 z-10">
-                    <div className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full">
-                      #{index + 1}
-                    </div>
-                  </div>
-                )}
                 
                 <ProductCard product={product} />
               </div>

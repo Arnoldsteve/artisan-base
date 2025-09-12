@@ -2,6 +2,7 @@
 
 import { ProductCard } from "@/components/product-card";
 import { useFeaturedProducts } from "@/hooks/use-products";
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Star, Sparkles } from "lucide-react";
 
 export default function FeaturedPage() {
@@ -59,11 +60,11 @@ export default function FeaturedPage() {
             {products.map((product) => (
               <div key={product.id} className="relative">
                 {/* Featured Badge */}
-                <div className="absolute top-2 left-2 z-10">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                <div className="absolute top-3.5 right-2 z-10">
+                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
                     <Star className="h-3 w-3" />
                     Featured
-                  </div>
+                  </Badge>
                 </div>
                 <ProductCard product={product} />
               </div>

@@ -73,7 +73,7 @@ export function Footer() {
                 href="/featured"
                 className="block text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                Featured Products
+                Featured items
               </Link>
               <Link
                 href="/new-arrivals"
@@ -125,11 +125,11 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+254 (796) 335-896</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>123 Artisan St, Craft City, CC 12345</span>
+                <span> 80100 Tudor, Mombasa, Kenya</span>
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-sm text-muted-foreground">
-            © 2024 Artisan Base. All rights reserved.
+            &copy; {new Date().getFullYear()} Artisan Base. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm">
             <Link
