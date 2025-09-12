@@ -361,7 +361,7 @@ export function Header() {
               </Link>
               <div className="border-t my-2" />
               <Link
-                href="/track-order"
+                href="/shipping-info"
                 className="w-full text-left px-4 py-2 hover:bg-accent rounded flex items-center space-x-3"
                 onClick={() => setIsMenuOpen(false)}
               >

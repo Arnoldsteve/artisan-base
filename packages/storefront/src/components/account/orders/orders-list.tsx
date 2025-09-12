@@ -3,6 +3,7 @@
 import { Badge } from "@repo/ui/components/ui/badge";
 import { getStatusColor } from "@/utils/status";
 import { formatMoney } from "@/lib/money";
+import { Separator } from "@repo/ui/components/ui/separator";
 
 interface OrdersListProps {
   orders: any[];
@@ -31,9 +32,6 @@ export const OrdersList: React.FC<OrdersListProps> = ({ orders, onSelectOrder })
               </p>
             </div>
             <div className="text-right">
-              <p className="font-semibold text-foreground">
-                {formatMoney(order.totalAmount, order.currency)}
-              </p>
               <Badge className={getStatusColor(order.status)}>
                 {order.status}
               </Badge>
@@ -51,6 +49,14 @@ export const OrdersList: React.FC<OrdersListProps> = ({ orders, onSelectOrder })
                 </span>
               </div>
             ))}
+            <Separator className="my-2" />
+            <div className="flex justify-between items-center">
+              <p>Total</p>
+              <p className="font-semibold text-foreground">
+                {formatMoney(order.totalAmount, order.currency)}
+              </p>
+            </div>
+
           </div>
         </button>
       ))}
