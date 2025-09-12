@@ -47,7 +47,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
       </div>
       <div className="flex flex-col items-end">
         <div className="font-semibold">
-          ${(item.price * item.quantity).toFixed(2)}
+          Ksh {(item.price * item.quantity).toFixed(2)}
         </div>
         <Button
           size="sm"

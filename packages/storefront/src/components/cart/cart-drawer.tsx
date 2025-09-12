@@ -60,7 +60,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
         <div className="flex justify-between mb-4">
           <span className="font-medium">Total</span>
           <span className="font-bold text-lg">
-            {mounted ? `$${getTotalPrice().toFixed(2)}` : "—"}
+            {mounted ? `Ksh ${getTotalPrice().toFixed(2)}` : "—"}
           </span>
         </div>
         <div className="flex gap-2">
