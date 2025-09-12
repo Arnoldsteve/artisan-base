@@ -339,7 +339,7 @@ export default function ProductPage() {
               <div>
                 <p className="font-medium text-foreground">Free Shipping</p>
                 <p className="text-sm text-muted-foreground">
-                  On orders over Ksh 10 000
+                  On orders over Ksh 1000
                 </p>
               </div>
             </div>

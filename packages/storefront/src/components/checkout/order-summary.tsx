@@ -18,13 +18,19 @@ export const OrderSummary: React.FC = () => {
 
   const { items, getTotalPrice } = useCart();
 
-  // Pick shipping price based on selected option (fallback = first option)
-  const shipping = selectedShippingOption
-    ? selectedShippingOption.price
-    : shippingOptions[0].price;
+  const subtotal = getTotalPrice();
 
-  const tax = getTotalPrice() * 0.08;
-  const total = getTotalPrice() + shipping + tax;
+  // Pick shipping option (fallback = first option)
+  const option = selectedShippingOption || shippingOptions[0];
+
+  // Apply free shipping rule
+  let shipping = option.price;
+  if (subtotal > 1000 && option.id === "standard") {
+    shipping = 0;
+  }
+
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
 
   return (
     <Card className="sticky top-8">
@@ -53,7 +59,7 @@ export const OrderSummary: React.FC = () => {
                   </p>
                 </div>
                 <p className="font-medium">
-                  Ksh {(item.price * item.quantity).toFixed(2)}
+                  Ksh {(Number(item.price) * item.quantity).toFixed(2)}
                 </p>
               </div>
             ))
@@ -65,7 +71,7 @@ export const OrderSummary: React.FC = () => {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Subtotal</span>
-            <span>Ksh {getTotalPrice().toFixed(2)}</span>
+            <span>Ksh {subtotal.toFixed(2)}</span>
           </div>
 
           <div className="flex justify-between text-sm">
@@ -75,7 +81,7 @@ export const OrderSummary: React.FC = () => {
                 <div>
                   <span className="text-green-600 font-medium">Free</span>
                   <p className="text-xs text-muted-foreground">
-                    Orders over KSh 10,000
+                    Orders over KSh 1,000
                   </p>
                 </div>
               ) : (
