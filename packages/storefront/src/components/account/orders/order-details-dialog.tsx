@@ -11,10 +11,9 @@ import {
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
-import { getStatusColor } from "@/utils/status";
-import { OrderDetailsSkeleton } from "@/skeletons/orders/order-details-skeleton";
 // import { formatMoney } from "@/lib/money-helpers"; // your currency helper
-// import { getStatusColor } from "@/utils/status"; // central status color util
+import { getStatusColor } from "@/utils/status";
+import { OrderDetailsSkeleton } from "@/skeletons/account/orders/order-details-skeleton";
 
 type OrderDetailsDialogProps = {
   open: boolean;
