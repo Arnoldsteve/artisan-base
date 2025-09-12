@@ -2,12 +2,12 @@ import React from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Badge } from "@repo/ui/components/ui/badge";
-import { CheckCircle, MapPin, Truck, CreditCard, Edit2 } from "lucide-react";
+import { CheckCircle, MapPin, Truck, CreditCard, Edit2, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 
 export const OrderReviewStep = () => {
-    const { customer, shippingAddress, selectedShippingOption, selectedPaymentMethod, previousStep, submitOrder, isLoading } = useCheckoutContext();
+    const { customer, shippingAddress, selectedShippingOption, selectedPaymentMethod, goToStep } = useCheckoutContext();
   const { items } = useCart();
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -24,18 +24,19 @@ export const OrderReviewStep = () => {
         <h1 className="text-2xl font-bold">Review Your Order</h1>
       </div>
 
-        {/* Left Column - Order Details */}
         <div className="lg:col-span-2 space-y-4">
           
           {/* Customer Information */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-base font-medium flex items-center">
-                <MapPin className="h-4 w-4 mr-2" />
+                <User className="h-4 w-4 mr-2" />
                 Customer Information
               </CardTitle>
               <Button variant="ghost" size="sm">
-                <Edit2 className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" onClick={() => goToStep(0)}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
               </Button>
             </CardHeader>
             <CardContent>
@@ -55,7 +56,9 @@ export const OrderReviewStep = () => {
                 Shipping Address
               </CardTitle>
               <Button variant="ghost" size="sm">
-                <Edit2 className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" onClick={() => goToStep(1)}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
               </Button>
             </CardHeader>
             <CardContent>
@@ -76,7 +79,9 @@ export const OrderReviewStep = () => {
                   Shipping Method
                 </CardTitle>
                 <Button variant="ghost" size="sm">
-                  <Edit2 className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" onClick={() => goToStep(1)}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
                 </Button>
               </CardHeader>
               <CardContent>
@@ -110,7 +115,9 @@ export const OrderReviewStep = () => {
                   Payment Method
                 </CardTitle>
                 <Button variant="ghost" size="sm">
-                  <Edit2 className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" onClick={() => goToStep(2)}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
                 </Button>
               </CardHeader>
               <CardContent>
