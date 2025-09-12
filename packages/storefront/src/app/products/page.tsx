@@ -64,11 +64,10 @@ function ProductsContent() {
     // You can add pagination here if needed
   });
   
-  // const products = productsResponse ?? []; 
   const products = (productsResponse as any) ?? [];
 
-  console.log("productsResponse:", productsResponse);
-  console.log("Products response:", products);
+  // console.log("productsResponse:", productsResponse);
+  // console.log("Products response:", products);
 
 
   if (isLoading || isLoadingCategories) {

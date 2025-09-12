@@ -250,8 +250,8 @@ export class ProductService {
         this.cache.setProducts(response.data.data);
       }
 
-      console.log("Service returning:", response.data);
-      console.log("Service return type check:", Array.isArray(response.data));
+      // console.log("Service returning:", response.data);
+      // console.log("Service return type check:", Array.isArray(response.data));
 
       return response.data;
     } catch (error) {

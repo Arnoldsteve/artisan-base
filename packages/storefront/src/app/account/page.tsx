@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent } from "@repo/ui/components/ui/tabs";
 import { Profile } from "@/components/account/profile";
-import { Orders } from "@/components/account/orders";
+import { Orders } from "@/components/account/orders/orders";
 import { Wishlist } from "@/components/account/wishlist";
 import { Settings as AccountSettings } from "@/components/account/settings";
 import { TabList } from "@/components/account/tablist";
