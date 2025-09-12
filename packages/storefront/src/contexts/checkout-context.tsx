@@ -153,7 +153,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         })),
         // shippingOption: state.selectedShippingOption?.id,   
         // paymentMethod: state.selectedPaymentMethod?.id,     
-        currency: 'USD',
+        currency: 'KES',
         notes: undefined,
       };
       // Call backend API
@@ -161,6 +161,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         "/api/v1/storefront/orders",
         payload
       );
+      console.log("Order response:", response);
       setOrder({
         id: response.order.id,
         customer: state.customer!,
