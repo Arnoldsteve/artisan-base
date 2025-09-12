@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@repo/ui/components/ui/button";
+import { Separator } from "@repo/ui/components/ui/separator";
 
 export const OrderConfirmationStep: React.FC = () => {
   const { order, resetCheckout } = useCheckoutContext();
@@ -9,8 +10,7 @@ export const OrderConfirmationStep: React.FC = () => {
 
   useEffect(() => {
     clearCart();
-    // Optionally reset checkout state after a delay
-    // setTimeout(resetCheckout, 10000);
+    setTimeout(resetCheckout, 20000);
   }, []);
 
   if (!order) return <div className="text-center py-12">No order found.</div>;
@@ -20,6 +20,7 @@ export const OrderConfirmationStep: React.FC = () => {
       <h2 className="text-2xl font-bold text-green-600 mb-4">
         Thank you for your order!
       </h2>
+      <Separator />
       <div className="text-lg mb-2">Order #{order.id}</div>
       <div className="text-muted-foreground mb-4">
         Estimated delivery:{" "}

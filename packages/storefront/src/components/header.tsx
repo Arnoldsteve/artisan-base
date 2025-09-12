@@ -259,7 +259,6 @@ export function Header() {
         )}
 
         {/* Mobile Menu */}
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <nav className="flex flex-col space-y-4">

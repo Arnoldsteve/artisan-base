@@ -10,7 +10,6 @@ import {
 import { useOrders } from "@/hooks/use-orders";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useOrder } from "@/hooks/use-order";
-import { formatMoney } from "@/lib/money"; 
 import { OrdersSkeleton } from "@/skeletons/account/orders/orders-skeleton";
 import { OrdersEmptyState } from "./orders-empty-state";
 import { OrdersList } from "./orders-list";

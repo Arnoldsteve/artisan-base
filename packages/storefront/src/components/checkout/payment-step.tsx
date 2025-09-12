@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
+import { Card, CardContent } from "@repo/ui/components/ui/card";
+import { Label } from "@repo/ui/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
 
 const paymentMethods = [
   {
@@ -52,22 +55,22 @@ export const PaymentStep: React.FC = () => {
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Payment</h2>
       <div className="space-y-2">
+       <RadioGroup
+        value={selected}
+        onValueChange={setSelected}
+        className="space-y-3"
+      >
         {paymentMethods.map((method) => (
-          <label
-            key={method.id}
-            className="flex items-center gap-3 p-3 border rounded cursor-pointer"
-          >
-            <input
-              type="radio"
-              name="paymentMethod"
-              value={method.id}
-              checked={selected === method.id}
-              onChange={() => setSelected(method.id)}
-              className="accent-primary"
-            />
-            <span className="flex-1 font-medium">{method.name}</span>
-          </label>
+          <Card key={method.id} className="p-3 cursor-pointer">
+            <CardContent className="flex items-center gap-3">
+              <RadioGroupItem value={method.id} id={method.id} />
+              <Label htmlFor={method.id} className="flex-1 cursor-pointer">
+                {method.name}
+              </Label>
+            </CardContent>
+          </Card>
         ))}
+      </RadioGroup>
       </div>
       {selected === "credit_card" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
