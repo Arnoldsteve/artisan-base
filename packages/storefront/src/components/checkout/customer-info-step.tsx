@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -10,24 +10,38 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { RequiredLabel } from "../RequiredLabel";
 import { countries } from "@/data/countries";
+
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/components/ui/select";
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@repo/ui/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@repo/ui/components/ui/command";
+import { Check, ArrowRight } from "lucide-react";
+import { cn } from "@repo/ui/lib/utils";
+
 import { useCheckoutContext } from "@/contexts/checkout-context";
-import { ArrowRight } from "lucide-react";
 
 export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
+  const [open, setOpen] = useState(false);
 
-  // Setup form with default values from context
+  // Local state for selected country code
+  const [selectedCode, setSelectedCode] = useState<string>(
+    customer?.countryCode || "+254"
+  );
+
   const {
     register,
     handleSubmit,
-    setValue, // ✅ needed for Select
+    setValue,
     formState: { errors },
   } = useForm<CustomerSchema>({
     resolver: zodResolver(customerSchema),
@@ -36,7 +50,7 @@ export const CustomerInfoStep: React.FC = () => {
       lastName: customer?.lastName || "",
       email: customer?.email || "",
       phone: customer?.phone || "",
-      countryCode: customer?.countryCode || "+254", // ✅ new
+      countryCode: customer?.countryCode || "+254",
     },
   });
 
@@ -44,6 +58,8 @@ export const CustomerInfoStep: React.FC = () => {
     setCustomer(data);
     nextStep();
   };
+
+  const selectedCountry = countries.find((c) => c.dialCode === selectedCode);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -82,24 +98,51 @@ export const CustomerInfoStep: React.FC = () => {
           <Label className="block text-sm font-medium mb-2">Phone</Label>
           <div className="flex gap-2">
             {/* Country Code Selector */}
-            <Select
-              defaultValue="+254"
-              onValueChange={(value) => {
-                setValue("countryCode", value, { shouldValidate: true });
-              }}
-            >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Select code" />
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((c) => (
-                  <SelectItem key={c.code} value={c.dialCode}>
-                    <span className="mr-2">{c.flag}</span>
-                    {c.name} ({c.dialCode})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-[140px] justify-between"
+                >
+                  {selectedCountry?.flag} {selectedCountry?.dialCode}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[250px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search country..." />
+                  <CommandList className="max-h-64 overflow-y-auto">
+                    <CommandEmpty>No country found.</CommandEmpty>
+                    <CommandGroup>
+                      {countries.slice(0, 10).map((c) => (
+                        <CommandItem
+                          key={c.code}
+                          value={c.name}
+                          onSelect={() => {
+                            setSelectedCode(c.dialCode);
+                            setValue("countryCode", c.dialCode, {
+                              shouldValidate: true,
+                            });
+                            setOpen(false); 
+                          }}
+                        >
+                          <span className="mr-2">{c.flag}</span>
+                          {c.name} ({c.dialCode})
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              selectedCode === c.dialCode
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
             {/* Phone Number Input */}
             <Input
@@ -115,10 +158,7 @@ export const CustomerInfoStep: React.FC = () => {
         </div>
       </div>
 
-      <Button
-        type="submit"
-        className="sm:w-auto w-full"
-      >
+      <Button type="submit" className="sm:w-auto w-full">
         Next
         <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
