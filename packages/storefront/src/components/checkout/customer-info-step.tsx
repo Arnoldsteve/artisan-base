@@ -114,16 +114,16 @@ export const CustomerInfoStep: React.FC = () => {
                   <CommandList className="max-h-64 overflow-y-auto">
                     <CommandEmpty>No country found.</CommandEmpty>
                     <CommandGroup>
-                      {countries.slice(0, 10).map((c) => (
+                      {countries.map((c) => (
                         <CommandItem
                           key={c.code}
-                          value={c.name}
+                          value={`${c.name} ${c.dialCode} ${c.code}`}
                           onSelect={() => {
                             setSelectedCode(c.dialCode);
                             setValue("countryCode", c.dialCode, {
                               shouldValidate: true,
                             });
-                            setOpen(false); 
+                            setOpen(false);
                           }}
                         >
                           <span className="mr-2">{c.flag}</span>
@@ -131,9 +131,7 @@ export const CustomerInfoStep: React.FC = () => {
                           <Check
                             className={cn(
                               "ml-auto h-4 w-4",
-                              selectedCode === c.dialCode
-                                ? "opacity-100"
-                                : "opacity-0"
+                              selectedCode === c.dialCode ? "opacity-100" : "opacity-0"
                             )}
                           />
                         </CommandItem>

@@ -139,7 +139,7 @@ const regionLabel =
                     {countries.map((c) => (
                       <CommandItem
                         key={c.code}
-                        value={c.name}
+                        value={`${c.name} ${c.dialCode} ${c.code}`}
                         onSelect={() => {
                           setValue("country", c.code, { shouldValidate: true });
                           setOpen(false); // ✅ close after select
