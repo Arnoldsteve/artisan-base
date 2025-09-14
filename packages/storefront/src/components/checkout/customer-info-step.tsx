@@ -33,15 +33,16 @@ export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
   const [open, setOpen] = useState(false);
 
-  // Local state for selected country code
+  // Local state for selected country dial code (default Kenya +254)
   const [selectedCode, setSelectedCode] = useState<string>(
-    customer?.countryCode || "+254"
+    customer?.phone?.startsWith("+")
+      ? customer.phone.match(/^\+\d+/)?.[0] || "+254"
+      : "+254"
   );
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<CustomerSchema>({
     resolver: zodResolver(customerSchema),
@@ -49,13 +50,21 @@ export const CustomerInfoStep: React.FC = () => {
       firstName: customer?.firstName || "",
       lastName: customer?.lastName || "",
       email: customer?.email || "",
-      phone: customer?.phone || "",
-      countryCode: customer?.countryCode || "+254",
+      // strip dial code if present in saved phone
+      phone: customer?.phone?.replace(/^\+\d+/, "") || "",
     },
   });
 
   const onSubmit = (data: CustomerSchema) => {
-    setCustomer(data);
+    const fullPhone = `${selectedCode}${data.phone}`.replace(/\s+/g, "");
+
+    setCustomer({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: fullPhone, // ✅ Only phone sent to backend
+    });
+
     nextStep();
   };
 
@@ -120,9 +129,6 @@ export const CustomerInfoStep: React.FC = () => {
                           value={`${c.name} ${c.dialCode} ${c.code}`}
                           onSelect={() => {
                             setSelectedCode(c.dialCode);
-                            setValue("countryCode", c.dialCode, {
-                              shouldValidate: true,
-                            });
                             setOpen(false);
                           }}
                         >

@@ -11,7 +11,6 @@ export const customerSchema = z.object({
     .string()
     .min(1, "Email is required")
     .email("Invalid email address"),
-  countryCode: z.enum([...new Set(dialCodes)] as [string, ...string[]]), // ✅ only allow valid dial codes
   phone: z
     .string()
     .min(5, "Phone number is too short")

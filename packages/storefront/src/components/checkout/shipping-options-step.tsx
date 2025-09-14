@@ -1,5 +1,4 @@
-// src/components/checkout/shipping-options-step.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 import { shippingOptions } from "@/lib/shipping-options";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
@@ -13,6 +12,14 @@ export const ShippingOptionsStep: React.FC = () => {
     selectedShippingOption?.id || shippingOptions[0].id
   );
 
+  // ✅ Ensure default option is set in context on mount
+  useEffect(() => {
+    if (!selectedShippingOption) {
+      const defaultOption = shippingOptions[0];
+      setShippingOption(defaultOption);
+    }
+  }, [selectedShippingOption, setShippingOption]);
+
   const handleSelect = (value: string) => {
     setSelectedOption(value);
     const option = shippingOptions.find((opt) => opt.id === value)!;
@@ -25,7 +32,7 @@ export const ShippingOptionsStep: React.FC = () => {
 
       <RadioGroup
         value={selectedOption}
-        onValueChange={handleSelect} // ✅ update on change
+        onValueChange={handleSelect}
         className="space-y-3"
       >
         {shippingOptions.map((option) => (
@@ -36,11 +43,14 @@ export const ShippingOptionsStep: React.FC = () => {
                 <Label htmlFor={option.id} className="cursor-pointer">
                   <div className="font-medium">{option.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {option.description} ({option.estimatedDays})
+                    {option.description}
+                    {option.estimatedDays && ` (${option.estimatedDays})`}
                   </div>
                 </Label>
               </div>
-              <span className="font-semibold">Ksh {option.price.toFixed(2)}</span>
+              <span className="font-semibold">
+                Ksh {option.price.toFixed(2)}
+              </span>
             </CardContent>
           </Card>
         ))}

@@ -13,8 +13,15 @@ import { useCheckoutContext } from "@/contexts/checkout-context";
 import { shippingOptions } from "@/lib/shipping-options";
 
 export const OrderSummary: React.FC = () => {
-  const { submitOrder, previousStep, isLoading, selectedShippingOption } =
-    useCheckoutContext();
+  const {
+    submitOrder,
+    previousStep,
+    isLoading,
+    selectedShippingOption,
+    customer,
+    shippingAddress,
+    selectedPaymentMethod,
+  } = useCheckoutContext();
 
   const { items, getTotalPrice } = useCart();
 
@@ -31,6 +38,10 @@ export const OrderSummary: React.FC = () => {
 
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  // ✅ Check if all checkout steps are completed
+  const isCheckoutComplete =
+    !!customer && !!shippingAddress && !!selectedShippingOption && !!selectedPaymentMethod;
 
   return (
     <Card className="sticky top-8">
@@ -107,8 +118,8 @@ export const OrderSummary: React.FC = () => {
           <Button
             onClick={submitOrder}
             className="w-full"
-            disabled={items.length === 0 || isLoading}
-            size={"lg"}
+            disabled={items.length === 0 || isLoading || !isCheckoutComplete}
+            size="lg"
           >
             {isLoading ? (
               <>

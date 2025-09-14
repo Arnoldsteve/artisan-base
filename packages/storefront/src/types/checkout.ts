@@ -3,7 +3,7 @@ export interface Customer {
   lastName: string;
   email: string;
   phone?: string;
-  countryCode?: string;
+  // countryCode?: string;
 }
 
 export interface ShippingAddress {
