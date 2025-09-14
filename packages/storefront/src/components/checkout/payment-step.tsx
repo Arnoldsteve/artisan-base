@@ -81,9 +81,10 @@ export const PaymentStep: React.FC = () => {
       </RadioGroup>
       </div>
       {selected === "credit_card" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-           <div className="md:col-span-2">
-            <RequiredLabel>Cardholder Name </RequiredLabel>
+        <div className="space-y-4 mt-4">
+          {/* Cardholder Name */}
+          <div>
+            <RequiredLabel>Cardholder Name</RequiredLabel>
             <Input
               name="name"
               value={card.name}
@@ -92,7 +93,9 @@ export const PaymentStep: React.FC = () => {
               placeholder="John Doe"
             />
           </div>
-          <div className="md:col-span-2">
+
+          {/* Card Number */}
+          <div>
             <RequiredLabel>Card Number</RequiredLabel>
             <Input
               name="number"
@@ -103,29 +106,32 @@ export const PaymentStep: React.FC = () => {
               placeholder="1234 5678 9012 3456"
             />
           </div>
-          <div>
-            <RequiredLabel>Expiry</RequiredLabel>
-            <Input
-              name="expiry"
-              value={card.expiry}
-              onChange={handleCardChange}
-              required
-              maxLength={5}
-              placeholder="MM/YY"
-            />
+
+          {/* Expiry + CVC always in one row */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <RequiredLabel>Expiry</RequiredLabel>
+              <Input
+                name="expiry"
+                value={card.expiry}
+                onChange={handleCardChange}
+                required
+                maxLength={5}
+                placeholder="MM/YY"
+              />
+            </div>
+            <div className="flex-1">
+              <RequiredLabel>CVC</RequiredLabel>
+              <Input
+                name="cvc"
+                value={card.cvc}
+                onChange={handleCardChange}
+                required
+                maxLength={4}
+                placeholder="123"
+              />
+            </div>
           </div>
-          <div>
-            <RequiredLabel>CVC</RequiredLabel>
-            <Input
-              name="cvc"
-              value={card.cvc}
-              onChange={handleCardChange}
-              required
-              maxLength={4}
-              placeholder="123"
-            />
-          </div>
-         
         </div>
       )}
       {error && <div className="text-red-500 text-sm">{error}</div>}
