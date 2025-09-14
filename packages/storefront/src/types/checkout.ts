@@ -2,13 +2,13 @@ export interface Customer {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone?: string;
 }
 
 export interface ShippingAddress {
   street: string;
   city: string;
-  state: string;
+  region?: string;
   zipCode: string;
   country: string;
 }

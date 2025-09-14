@@ -17,13 +17,13 @@ class CustomerDto {
   @IsEmail()
   email: string;
 
-  @IsOptional()
+  // @IsOptional()
   @IsString()
-  firstName?: string;
+  firstName: string;
 
-  @IsOptional()
+  // @IsOptional()
   @IsString()
-  lastName?: string;
+  lastName: string;
 
   @IsOptional()
   @IsString()
@@ -69,7 +69,7 @@ export class CreateStorefrontOrderDto {
   notes?: string;
 
   @IsOptional()
-  // @IsNumber()
+  @IsNumber()
   @IsPositive()
   shippingAmount?: number;
 }

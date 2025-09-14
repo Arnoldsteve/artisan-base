@@ -1,72 +1,84 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { customerSchema, CustomerSchema } from "@/validation-schemas/customer-schema";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
 
 export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
-  const [form, setForm] = useState({
-    firstName: customer?.firstName || "",
-    lastName: customer?.lastName || "",
-    email: customer?.email || "",
-    phone: customer?.phone || "",
+
+  // Setup form with default values from context
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CustomerSchema>({
+    resolver: zodResolver(customerSchema),
+    defaultValues: {
+      firstName: customer?.firstName || "",
+      lastName: customer?.lastName || "",
+      email: customer?.email || "",
+      phone: customer?.phone || "",
+    },
   });
-  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleNext = () => {
-    if (!form.firstName || !form.lastName || !form.email) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-    setCustomer(form);
+  const onSubmit = (data: CustomerSchema) => {
+    setCustomer(data);
     nextStep();
   };
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Customer Information</h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* First Name */}
         <div>
-          <label className="block text-sm font-medium mb-2">First Name *</label>
-          <Input
-            name="firstName"
-            value={form.firstName}
-            onChange={handleChange}
-            required
-          />
+          <Label className="block text-sm font-medium mb-2">
+            First Name *
+          </Label>
+          <Input {...register("firstName")} />
+          {errors.firstName && (
+            <p className="text-red-500 text-sm">{errors.firstName.message}</p>
+          )}
         </div>
+
+        {/* Last Name */}
         <div>
-          <label className="block text-sm font-medium mb-2">Last Name *</label>
-          <Input
-            name="lastName"
-            value={form.lastName}
-            onChange={handleChange}
-            required
-          />
+          <Label className="block text-sm font-medium mb-2">
+            Last Name *
+          </Label>
+          <Input {...register("lastName")} />
+          {errors.lastName && (
+            <p className="text-red-500 text-sm">{errors.lastName.message}</p>
+          )}
         </div>
+
+        {/* Email */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2">Email *</label>
-          <Input
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
+          <Label className="block text-sm font-medium mb-2">Email *</Label>
+          <Input type="email" {...register("email")} />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email.message}</p>
+          )}
         </div>
+
+        {/* Phone */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2">Phone</label>
-          <Input name="phone" value={form.phone} onChange={handleChange} />
+          <Label className="block text-sm font-medium mb-2">Phone</Label>
+          <Input {...register("phone")} />
+          {errors.phone && (
+            <p className="text-red-500 text-sm">{errors.phone.message}</p>
+          )}
         </div>
       </div>
-      {error && <div className="text-red-500 text-sm">{error}</div>}
+
       <div className="flex justify-end pt-4">
-        <Button onClick={handleNext}>Next</Button>
+        <Button type="submit">Next</Button>
       </div>
-    </div>
+    </form>
   );
 };
