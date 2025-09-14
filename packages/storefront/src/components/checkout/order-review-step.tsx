@@ -65,7 +65,7 @@ export const OrderReviewStep = () => {
             <CardContent>
               <div className="space-y-1">
                 <p>{shippingAddress?.street}</p>
-                <p>{shippingAddress?.city}, {shippingAddress?.state} {shippingAddress?.zipCode}</p>
+                <p>{shippingAddress?.city}, {shippingAddress?.region} {shippingAddress?.zipCode}</p>
                 <p>{shippingAddress?.country}</p>
               </div>
             </CardContent>
