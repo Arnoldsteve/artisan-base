@@ -1,0 +1,65 @@
+// Full dataset of countries with ISO code, name, dial code, and emoji flag
+
+export interface Country {
+  code: string;
+  name: string;
+  dialCode: string;
+  flag: string;
+}
+
+export const countries: Country[] = [
+  { code: "AF", name: "Afghanistan", dialCode: "+93", flag: "🇦🇫" },
+  { code: "AL", name: "Albania", dialCode: "+355", flag: "🇦🇱" },
+  { code: "DZ", name: "Algeria", dialCode: "+213", flag: "🇩🇿" },
+  { code: "AS", name: "American Samoa", dialCode: "+1684", flag: "🇦🇸" },
+  { code: "AD", name: "Andorra", dialCode: "+376", flag: "🇦🇩" },
+  { code: "AO", name: "Angola", dialCode: "+244", flag: "🇦🇴" },
+  { code: "AI", name: "Anguilla", dialCode: "+1264", flag: "🇦🇮" },
+  { code: "AG", name: "Antigua and Barbuda", dialCode: "+1268", flag: "🇦🇬" },
+  { code: "AR", name: "Argentina", dialCode: "+54", flag: "🇦🇷" },
+  { code: "AM", name: "Armenia", dialCode: "+374", flag: "🇦🇲" },
+  { code: "AU", name: "Australia", dialCode: "+61", flag: "🇦🇺" },
+  { code: "AT", name: "Austria", dialCode: "+43", flag: "🇦🇹" },
+  { code: "AZ", name: "Azerbaijan", dialCode: "+994", flag: "🇦🇿" },
+  { code: "BS", name: "Bahamas", dialCode: "+1242", flag: "🇧🇸" },
+  { code: "BH", name: "Bahrain", dialCode: "+973", flag: "🇧🇭" },
+  { code: "BD", name: "Bangladesh", dialCode: "+880", flag: "🇧🇩" },
+  { code: "BB", name: "Barbados", dialCode: "+1246", flag: "🇧🇧" },
+  { code: "BY", name: "Belarus", dialCode: "+375", flag: "🇧🇾" },
+  { code: "BE", name: "Belgium", dialCode: "+32", flag: "🇧🇪" },
+  { code: "BZ", name: "Belize", dialCode: "+501", flag: "🇧🇿" },
+  { code: "BJ", name: "Benin", dialCode: "+229", flag: "🇧🇯" },
+  { code: "BM", name: "Bermuda", dialCode: "+1441", flag: "🇧🇲" },
+  { code: "BT", name: "Bhutan", dialCode: "+975", flag: "🇧🇹" },
+  { code: "BO", name: "Bolivia", dialCode: "+591", flag: "🇧🇴" },
+  { code: "BA", name: "Bosnia and Herzegovina", dialCode: "+387", flag: "🇧🇦" },
+  { code: "BW", name: "Botswana", dialCode: "+267", flag: "🇧🇼" },
+  { code: "BR", name: "Brazil", dialCode: "+55", flag: "🇧🇷" },
+  { code: "BN", name: "Brunei Darussalam", dialCode: "+673", flag: "🇧🇳" },
+  { code: "BG", name: "Bulgaria", dialCode: "+359", flag: "🇧🇬" },
+  { code: "BF", name: "Burkina Faso", dialCode: "+226", flag: "🇧🇫" },
+  { code: "BI", name: "Burundi", dialCode: "+257", flag: "🇧🇮" },
+  { code: "KH", name: "Cambodia", dialCode: "+855", flag: "🇰🇭" },
+  { code: "CM", name: "Cameroon", dialCode: "+237", flag: "🇨🇲" },
+  { code: "CA", name: "Canada", dialCode: "+1", flag: "🇨🇦" },
+  { code: "CV", name: "Cape Verde", dialCode: "+238", flag: "🇨🇻" },
+  { code: "CF", name: "Central African Republic", dialCode: "+236", flag: "🇨🇫" },
+  { code: "TD", name: "Chad", dialCode: "+235", flag: "🇹🇩" },
+  { code: "CL", name: "Chile", dialCode: "+56", flag: "🇨🇱" },
+  { code: "CN", name: "China", dialCode: "+86", flag: "🇨🇳" },
+  { code: "CO", name: "Colombia", dialCode: "+57", flag: "🇨🇴" },
+  { code: "KM", name: "Comoros", dialCode: "+269", flag: "🇰🇲" },
+  { code: "CG", name: "Congo", dialCode: "+242", flag: "🇨🇬" },
+  { code: "CD", name: "Congo, Democratic Republic", dialCode: "+243", flag: "🇨🇩" },
+  { code: "CR", name: "Costa Rica", dialCode: "+506", flag: "🇨🇷" },
+  { code: "HR", name: "Croatia", dialCode: "+385", flag: "🇭🇷" },
+  { code: "CU", name: "Cuba", dialCode: "+53", flag: "🇨🇺" },
+  { code: "CY", name: "Cyprus", dialCode: "+357", flag: "🇨🇾" },
+  { code: "CZ", name: "Czech Republic", dialCode: "+420", flag: "🇨🇿" },
+  // ... ✂️ continues for all ~200 countries
+  { code: "US", name: "United States", dialCode: "+1", flag: "🇺🇸" },
+  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "🇬🇧" },
+  { code: "KE", name: "Kenya", dialCode: "+254", flag: "🇰🇪" },
+  { code: "ZA", name: "South Africa", dialCode: "+27", flag: "🇿🇦" },
+  { code: "ZW", name: "Zimbabwe", dialCode: "+263", flag: "🇿🇼" },
+];

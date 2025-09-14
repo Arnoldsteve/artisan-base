@@ -1,11 +1,23 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { customerSchema, CustomerSchema } from "@/validation-schemas/customer-schema";
-import { useCheckoutContext } from "@/contexts/checkout-context";
+import {
+  customerSchema,
+  CustomerSchema,
+} from "@/validation-schemas/customer-schema";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
+import { RequiredLabel } from "../RequiredLabel";
+import { countries } from "@/data/countries";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
+import { useCheckoutContext } from "@/contexts/checkout-context";
 
 export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
@@ -14,6 +26,7 @@ export const CustomerInfoStep: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue, // ✅ needed for Select
     formState: { errors },
   } = useForm<CustomerSchema>({
     resolver: zodResolver(customerSchema),
@@ -22,6 +35,7 @@ export const CustomerInfoStep: React.FC = () => {
       lastName: customer?.lastName || "",
       email: customer?.email || "",
       phone: customer?.phone || "",
+      countryCode: customer?.countryCode || "+254", // ✅ new
     },
   });
 
@@ -37,9 +51,7 @@ export const CustomerInfoStep: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name */}
         <div>
-          <Label className="block text-sm font-medium mb-2">
-            First Name *
-          </Label>
+          <RequiredLabel>First Name</RequiredLabel>
           <Input {...register("firstName")} />
           {errors.firstName && (
             <p className="text-red-500 text-sm">{errors.firstName.message}</p>
@@ -48,9 +60,7 @@ export const CustomerInfoStep: React.FC = () => {
 
         {/* Last Name */}
         <div>
-          <Label className="block text-sm font-medium mb-2">
-            Last Name *
-          </Label>
+          <RequiredLabel>Last Name</RequiredLabel>
           <Input {...register("lastName")} />
           {errors.lastName && (
             <p className="text-red-500 text-sm">{errors.lastName.message}</p>
@@ -59,7 +69,7 @@ export const CustomerInfoStep: React.FC = () => {
 
         {/* Email */}
         <div className="md:col-span-2">
-          <Label className="block text-sm font-medium mb-2">Email *</Label>
+          <RequiredLabel>Email</RequiredLabel>
           <Input type="email" {...register("email")} />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -69,7 +79,35 @@ export const CustomerInfoStep: React.FC = () => {
         {/* Phone */}
         <div className="md:col-span-2">
           <Label className="block text-sm font-medium mb-2">Phone</Label>
-          <Input {...register("phone")} />
+          <div className="flex gap-2">
+            {/* Country Code Selector */}
+            <Select
+              defaultValue="+254"
+              onValueChange={(value) => {
+                setValue("countryCode", value, { shouldValidate: true });
+              }}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select code" />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((c) => (
+                  <SelectItem key={c.code} value={c.dialCode}>
+                    <span className="mr-2">{c.flag}</span>
+                    {c.name} ({c.dialCode})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Phone Number Input */}
+            <Input
+              type="tel"
+              {...register("phone")}
+              placeholder="712 345 678"
+              className="flex-1"
+            />
+          </div>
           {errors.phone && (
             <p className="text-red-500 text-sm">{errors.phone.message}</p>
           )}
