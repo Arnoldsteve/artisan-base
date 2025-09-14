@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { useCheckoutContext } from "@/contexts/checkout-context";
+import { ArrowRight } from "lucide-react";
 
 export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
@@ -114,9 +115,13 @@ export const CustomerInfoStep: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-end pt-4">
-        <Button type="submit">Next</Button>
-      </div>
+      <Button
+        type="submit"
+        className="sm:w-auto w-full"
+      >
+        Next
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
     </form>
   );
 };

@@ -28,7 +28,7 @@ import {
   CommandItem,
   CommandList,
 } from "@repo/ui/components/ui/command";
-import { Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import { RequiredLabel } from "../RequiredLabel";
 
@@ -169,11 +169,25 @@ const regionLabel =
 
       <ShippingOptionsStep />
 
-      <div className="flex justify-between pt-4">
-        <Button variant="outline" type="button" onClick={previousStep}>
-          Back
-        </Button>
-        <Button type="submit">Next</Button>
+      <div className="pt-6">
+        <div className="flex justify-between gap-3">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={previousStep}
+            className="sm:w-auto w-full"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            type="submit"
+            className="sm:w-auto w-full"
+          >
+            Next
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </form>
   );

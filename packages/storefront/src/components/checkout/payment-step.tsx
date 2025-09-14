@@ -6,6 +6,9 @@ import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Label } from "@repo/ui/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
 import { paymentMethods } from "@/utils/payment-methods";
+import { paymentSchema } from "@/validation-schemas/payment-schema";
+import { RequiredLabel } from "../RequiredLabel";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 
 export const PaymentStep: React.FC = () => {
@@ -22,18 +25,36 @@ export const PaymentStep: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCard({ ...card, [e.target.name]: e.target.value });
+ const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    if (name === "expiry") {
+      // Keep only digits
+      newValue = value.replace(/\D/g, "");
+
+      // Insert slash after MM
+      if (newValue.length >= 3) {
+        newValue = newValue.slice(0, 2) + "/" + newValue.slice(2, 4);
+      }
+    }
+
+    setCard((prev) => ({ ...prev, [name]: newValue }));
   };
 
   const handleNext = () => {
     const method = paymentMethods.find((m) => m.id === selected)!;
-    if (method.type === "credit_card") {
-      if (!card.number || !card.expiry || !card.cvc || !card.name) {
-        setError("Please fill in all credit card fields.");
-        return;
-      }
+
+    const result = paymentSchema.safeParse({
+      method: method.id,
+      card: method.type === "credit_card" ? card : undefined,
+    });
+
+    if (!result.success) {
+      setError(result.error.errors[0].message);
+      return;
     }
+
     setPaymentMethod(method);
     nextStep();
   };
@@ -61,10 +82,18 @@ export const PaymentStep: React.FC = () => {
       </div>
       {selected === "credit_card" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+           <div className="md:col-span-2">
+            <RequiredLabel>Cardholder Name </RequiredLabel>
+            <Input
+              name="name"
+              value={card.name}
+              onChange={handleCardChange}
+              required
+              placeholder="John Doe"
+            />
+          </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">
-              Card Number *
-            </label>
+            <RequiredLabel>Card Number</RequiredLabel>
             <Input
               name="number"
               value={card.number}
@@ -75,7 +104,7 @@ export const PaymentStep: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Expiry *</label>
+            <RequiredLabel>Expiry</RequiredLabel>
             <Input
               name="expiry"
               value={card.expiry}
@@ -86,7 +115,7 @@ export const PaymentStep: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">CVC *</label>
+            <RequiredLabel>CVC</RequiredLabel>
             <Input
               name="cvc"
               value={card.cvc}
@@ -96,27 +125,32 @@ export const PaymentStep: React.FC = () => {
               placeholder="123"
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">
-              Cardholder Name *
-            </label>
-            <Input
-              name="name"
-              value={card.name}
-              onChange={handleCardChange}
-              required
-              placeholder="John Doe"
-            />
-          </div>
+         
         </div>
       )}
       {error && <div className="text-red-500 text-sm">{error}</div>}
-      <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={previousStep}>
-          Back
-        </Button>
-        <Button onClick={handleNext}>Next</Button>
+      <div className="pt-6">
+        <div className="flex justify-between gap-3">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={previousStep}
+            className="sm:w-auto w-full"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            type="submit"
+            className="sm:w-auto w-full"
+            onClick={handleNext}  
+          >
+            Next
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
+    
   );
 };
