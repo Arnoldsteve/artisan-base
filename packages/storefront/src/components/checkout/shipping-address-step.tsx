@@ -150,7 +150,9 @@ const regionLabel =
                         <Check
                           className={cn(
                             "ml-auto h-4 w-4",
-                            watch("country") === c.code ? "opacity-100" : "opacity-0"
+                            watch("country") === c.code 
+                              ? "text-blue-600 opacity-100" 
+                              : "text-gray-300 opacity-0"
                           )}
                         />
                       </CommandItem>

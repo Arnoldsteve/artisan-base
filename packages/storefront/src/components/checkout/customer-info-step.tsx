@@ -130,8 +130,10 @@ export const CustomerInfoStep: React.FC = () => {
                           {c.name} ({c.dialCode})
                           <Check
                             className={cn(
-                              "ml-auto h-4 w-4",
-                              selectedCode === c.dialCode ? "opacity-100" : "opacity-0"
+                              "ml-auto h-4 w-4 transition-colors",
+                              selectedCode === c.dialCode
+                                ? "text-blue-600 opacity-100"
+                                : "text-gray-300 opacity-0"
                             )}
                           />
                         </CommandItem>
@@ -156,10 +158,12 @@ export const CustomerInfoStep: React.FC = () => {
         </div>
       </div>
 
-      <Button type="submit" className="sm:w-auto w-full">
-        Next
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
+      <div className="flex justify-end pt-6">
+        <Button type="submit" className="sm:w-auto w-full">
+          Next
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
     </form>
   );
 };
