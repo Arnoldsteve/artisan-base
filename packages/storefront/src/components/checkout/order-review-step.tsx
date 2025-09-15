@@ -102,7 +102,7 @@ export const OrderReviewStep = () => {
                   </p>
                   {shippingCost === 0 && (
                     <p className="text-xs text-green-600">
-                      Free shipping on orders over $100
+                      Free shipping on orders over Ksh 1000
                     </p>
                   )}
                 </div>

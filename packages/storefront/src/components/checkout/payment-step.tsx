@@ -10,30 +10,30 @@ import { paymentSchema } from "@/validation-schemas/payment-schema";
 import { RequiredLabel } from "../RequiredLabel";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-
 export const PaymentStep: React.FC = () => {
   const { selectedPaymentMethod, setPaymentMethod, nextStep, previousStep } =
     useCheckoutContext();
+
   const [selected, setSelected] = useState(
     selectedPaymentMethod?.id || paymentMethods[0].id
   );
+
   const [card, setCard] = useState({
     number: "",
     expiry: "",
     cvc: "",
     name: "",
   });
+
+  const [mpesaPhone, setMpesaPhone] = useState(""); // ✅ dedicated state
   const [error, setError] = useState<string | null>(null);
 
- const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let newValue = value;
 
     if (name === "expiry") {
-      // Keep only digits
       newValue = value.replace(/\D/g, "");
-
-      // Insert slash after MM
       if (newValue.length >= 3) {
         newValue = newValue.slice(0, 2) + "/" + newValue.slice(2, 4);
       }
@@ -48,6 +48,7 @@ export const PaymentStep: React.FC = () => {
     const result = paymentSchema.safeParse({
       method: method.id,
       card: method.type === "credit_card" ? card : undefined,
+      mpesaPhone: method.id === "mpesa" ? mpesaPhone : undefined, // ✅ pass phone
     });
 
     if (!result.success) {
@@ -55,6 +56,7 @@ export const PaymentStep: React.FC = () => {
       return;
     }
 
+    setError(null);
     setPaymentMethod(method);
     nextStep();
   };
@@ -62,27 +64,28 @@ export const PaymentStep: React.FC = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Payment</h2>
-      <div className="space-y-2">
-       <RadioGroup
-        value={selected}
-        onValueChange={setSelected}
-        className="space-y-3"
-      >
-        {paymentMethods.map((method) => (
-          <Card key={method.id} className="p-3 cursor-pointer">
-            <CardContent className="flex items-center gap-3">
-              <RadioGroupItem value={method.id} id={method.id} />
-              <Label htmlFor={method.id} className="flex-1 cursor-pointer">
-                {method.name}
-              </Label>
-            </CardContent>
-          </Card>
-        ))}
-      </RadioGroup>
+      <div>
+        <RadioGroup
+          value={selected}
+          onValueChange={setSelected}
+          className="grid gap-3 sm:grid-cols-1 md:grid-cols-3"
+        >
+          {paymentMethods.map((method) => (
+            <Card key={method.id} className="p-3 cursor-pointer">
+              <CardContent className="flex items-center gap-3">
+                <RadioGroupItem value={method.id} id={method.id} />
+                <Label htmlFor={method.id} className="flex-1 cursor-pointer">
+                  {method.name}
+                </Label>
+              </CardContent>
+            </Card>
+          ))}
+        </RadioGroup>
       </div>
+
+      {/* Credit Card Fields */}
       {selected === "credit_card" && (
         <div className="space-y-4 mt-4">
-          {/* Cardholder Name */}
           <div>
             <RequiredLabel>Cardholder Name</RequiredLabel>
             <Input
@@ -93,8 +96,6 @@ export const PaymentStep: React.FC = () => {
               placeholder="John Doe"
             />
           </div>
-
-          {/* Card Number */}
           <div>
             <RequiredLabel>Card Number</RequiredLabel>
             <Input
@@ -106,8 +107,6 @@ export const PaymentStep: React.FC = () => {
               placeholder="1234 5678 9012 3456"
             />
           </div>
-
-          {/* Expiry + CVC always in one row */}
           <div className="flex gap-4">
             <div className="flex-1">
               <RequiredLabel>Expiry</RequiredLabel>
@@ -134,7 +133,25 @@ export const PaymentStep: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* M-Pesa Fields */}
+      {selected === "mpesa" && (
+        <div className="space-y-4 mt-4">
+          <div>
+            <RequiredLabel>Phone Number</RequiredLabel>
+            <Input
+              name="mpesaPhone"
+              value={mpesaPhone}
+              onChange={(e) => setMpesaPhone(e.target.value)}
+              required
+              placeholder="07XX XXX XXX"
+            />
+          </div>
+        </div>
+      )}
+
       {error && <div className="text-red-500 text-sm">{error}</div>}
+
       <div className="pt-6">
         <div className="flex justify-between gap-3">
           <Button
@@ -149,7 +166,7 @@ export const PaymentStep: React.FC = () => {
           <Button
             type="submit"
             className="sm:w-auto w-full"
-            onClick={handleNext}  
+            onClick={handleNext}
           >
             Next
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -157,6 +174,5 @@ export const PaymentStep: React.FC = () => {
         </div>
       </div>
     </div>
-    
   );
 };

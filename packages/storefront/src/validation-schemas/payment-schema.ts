@@ -24,17 +24,17 @@ export const paymentSchema = z
     card: z
       .object({
         number: z
-            .string()
-            .trim()
-            .min(13, "Card number too short")
-            .max(19, "Card number too long")
-            .transform((val) => val.replace(/\s+/g, "")) // strip spaces
-            .refine((val) => /^\d+$/.test(val), {
-                message: "Card number must contain only digits",
-            })
-            .refine((val) => luhnCheck(val), {
-                message: "Invalid card number",
-            }),
+          .string()
+          .trim()
+          .min(13, "Card number too short")
+          .max(19, "Card number too long")
+          .transform((val) => val.replace(/\s+/g, "")) // strip spaces
+          .refine((val) => /^\d+$/.test(val), {
+            message: "Card number must contain only digits",
+          })
+          .refine((val) => luhnCheck(val), {
+            message: "Invalid card number",
+          }),
 
         expiry: z
           .string()
@@ -46,9 +46,11 @@ export const paymentSchema = z
             const expiryDate = new Date(2000 + yy, mm, 0);
             return expiryDate >= now;
           }, "Card has expired"),
+
         cvc: z
           .string()
           .regex(/^\d{3,4}$/, "CVC must be 3 or 4 digits"),
+
         name: z
           .string()
           .trim()
@@ -56,15 +58,27 @@ export const paymentSchema = z
           .regex(/^[a-zA-Z\s'-]+$/, "Name must contain only letters"),
       })
       .optional(),
+
+    mpesaPhone: z
+      .string()
+      .trim()
+      .regex(/^(?:254|\+254|0)?7\d{8}$/, "Invalid M-Pesa phone number")
+      .optional(),
   })
   .refine(
     (data) => {
       if (data.method === "credit_card") {
         return data.card !== undefined;
       }
+      if (data.method === "mpesa") {
+        return !!data.mpesaPhone;
+      }
       return true;
     },
-    { message: "Credit card details are required", path: ["card"] }
+    {
+      message: "Payment details are required",
+      path: ["method"],
+    }
   );
 
 export type PaymentSchema = z.infer<typeof paymentSchema>;
