@@ -25,7 +25,9 @@ export const PaymentStep: React.FC = () => {
     name: "",
   });
 
-  const [mpesaPhone, setMpesaPhone] = useState(""); // ✅ dedicated state
+  const [mpesaPhone, setMpesaPhone] = useState("");
+  const [paypalEmail, setPaypalEmail] = useState(""); // ✅ new state for PayPal
+
   const [error, setError] = useState<string | null>(null);
 
   const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,8 +49,9 @@ export const PaymentStep: React.FC = () => {
 
     const result = paymentSchema.safeParse({
       method: method.id,
-      card: method.type === "credit_card" ? card : undefined,
-      mpesaPhone: method.id === "mpesa" ? mpesaPhone : undefined, // ✅ pass phone
+      card: method.id === "credit_card" ? card : undefined,
+      mpesaPhone: method.id === "mpesa" ? mpesaPhone : undefined,
+      paypal: method.id === "paypal" ? { email: paypalEmail } : undefined, // ✅ validate PayPal
     });
 
     if (!result.success) {
@@ -145,6 +148,23 @@ export const PaymentStep: React.FC = () => {
               onChange={(e) => setMpesaPhone(e.target.value)}
               required
               placeholder="07XX XXX XXX"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* PayPal Fields */}
+      {selected === "paypal" && (
+        <div className="space-y-4 mt-4">
+          <div>
+            <RequiredLabel>PayPal Email</RequiredLabel>
+            <Input
+              name="paypalEmail"
+              type="email"
+              value={paypalEmail}
+              onChange={(e) => setPaypalEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
             />
           </div>
         </div>

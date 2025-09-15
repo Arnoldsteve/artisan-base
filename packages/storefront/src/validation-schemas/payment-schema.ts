@@ -64,6 +64,12 @@ export const paymentSchema = z
       .trim()
       .regex(/^(?:254|\+254|0)?7\d{8}$/, "Invalid M-Pesa phone number")
       .optional(),
+
+    paypal: z
+      .object({
+        email: z.string().email("Invalid PayPal email address"),
+      })
+      .optional(),
   })
   .refine(
     (data) => {
@@ -72,6 +78,9 @@ export const paymentSchema = z
       }
       if (data.method === "mpesa") {
         return !!data.mpesaPhone;
+      }
+      if (data.method === "paypal") {
+        return data.paypal?.email !== undefined;
       }
       return true;
     },
