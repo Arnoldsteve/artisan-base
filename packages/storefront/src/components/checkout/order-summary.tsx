@@ -36,7 +36,7 @@ export const OrderSummary: React.FC = () => {
     shipping = 0;
   }
 
-  const tax = subtotal * 0.08;
+  const tax = subtotal * 0.16;
   const total = subtotal + shipping + tax;
 
   // ✅ Check if all checkout steps are completed

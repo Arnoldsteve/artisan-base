@@ -3,6 +3,7 @@ import { CartItem as CartItemType } from "@/types/cart";
 import { useCart } from "@/hooks/use-cart";
 import Image from "next/image";
 import { Button } from "@repo/ui/components/ui/button";
+import { formatMoney } from "@/lib/money";
 
 interface CartItemProps {
   item: CartItemType;
@@ -23,7 +24,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
       <div className="flex-1">
         <div className="font-medium">{item.name}</div>
         <div className="text-sm text-muted-foreground">
-          ${Number(item.price).toFixed(2)}
+          {formatMoney(item.price, "KES")} 
         </div>
         <div className="flex items-center gap-2 mt-2">
           <Button
@@ -47,7 +48,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
       </div>
       <div className="flex flex-col items-end">
         <div className="font-semibold">
-          Ksh {(item.price * item.quantity).toFixed(2)}
+          {formatMoney(item.price * item.quantity, "KES")}
         </div>
         <Button
           size="sm"
