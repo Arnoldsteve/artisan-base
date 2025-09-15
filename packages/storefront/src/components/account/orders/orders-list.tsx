@@ -50,13 +50,18 @@ export const OrdersList: React.FC<OrdersListProps> = ({ orders, onSelectOrder })
               </div>
             ))}
             <Separator className="my-2" />
-            <div className="flex justify-between items-center">
-              <p>Total</p>
-              <p className="font-semibold text-foreground">
-                {formatMoney(order.totalAmount, order.currency)}
-              </p>
+           <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <p>Tax</p>
+                <p>{formatMoney(order.taxAmount, order.currency)}</p>
+              </div>
+              <div className="flex justify-between items-center">
+                <p>Total</p>
+                <p className="font-semibold text-foreground">
+                  {formatMoney(order.totalAmount, order.currency)}
+                </p>
+              </div>
             </div>
-
           </div>
         </button>
       ))}

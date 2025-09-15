@@ -26,6 +26,7 @@ export const Orders: React.FC = () => {
   );
 
   if (isLoading) return <OrdersSkeleton />;
+  console.log("Orders component loaded", orders);
   
   return (
     <Card>
@@ -33,7 +34,7 @@ export const Orders: React.FC = () => {
         <CardTitle>Order History</CardTitle>
         <CardDescription>View and track your past orders</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3">
         {error ? (
           <div className="text-center py-8 text-red-500">
             Failed to load orders. Please try again later.
