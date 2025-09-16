@@ -1,4 +1,3 @@
-// src/app/dashboard/customers/[customerId]/components/customer-orders-view.tsx
 'use client';
 
 import { useState } from 'react';
@@ -17,12 +16,16 @@ export function CustomerOrdersView({ initialOrders }: { initialOrders: Order[] }
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+  
+  const totalOrders = orders.length;
 
   return (
     <Card>
-        <CardHeader><CardTitle>Order History</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Order History</CardTitle>
+        </CardHeader>
         <CardContent>
-            <DataTable table={table} />
+            <DataTable table={table}  totalCount={totalOrders}/>
         </CardContent>
     </Card>
   )

@@ -1,8 +1,6 @@
-// File: packages/dasboard/src/types/customers.ts
-
 import { Decimal } from 'decimal.js';
-import { PaginatedResponse } from './products'; // Assumes PaginatedResponse is here
-import { Order } from './orders'; // <-- 1. IMPORT THE FULL, DETAILED ORDER TYPE
+import { Order } from './orders'; 
+import { PaginatedResponse } from './shared';
 
 // Re-export this for convenience in other files
 export type { PaginatedResponse };

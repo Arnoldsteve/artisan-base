@@ -1,4 +1,3 @@
-// src/lib/format-currency.ts
 import type { Currency } from "@/types/currency";
 
 export function formatCurrency(

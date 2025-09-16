@@ -70,6 +70,8 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     }));
   }, [paginatedResponse]);
 
+  const totalCustomers = paginatedResponse?.total || 0;
+  
   // Helper to find the original customer object from the API response
   const findOriginalCustomer = (id: string): Customer | undefined => {
     return paginatedResponse?.data.find(c => c.id === id);
@@ -165,7 +167,7 @@ export function CustomersView({ initialData }: CustomersViewProps) {
         <DataTableViewOptions table={table} />
       </div>
 
-      <DataTable table={table} />
+      <DataTable table={table} totalCount={totalCustomers}/>
 
       <div className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? "translate-y-0" : "translate-y-24"}`}>
         {/* Bulk action bar would go here */}

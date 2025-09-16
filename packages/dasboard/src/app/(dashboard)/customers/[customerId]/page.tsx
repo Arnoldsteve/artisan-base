@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/app/dashboard/customers/[customerId]/page.tsx
-
 import { PageHeader } from "@/components/shared/page-header";
 import { CustomerOrdersView } from "../components/customer-orders-view";
 import { CustomerStats } from "../components/customer-stats";
@@ -38,7 +36,7 @@ export default async function CustomerDetailPage({ params }: { params: { custome
   return (
     <div className="p-4 md:p-8 lg:p-10">
       <PageHeader title={`${customer.firstName} ${customer.lastName}`}>
-        <Link href={`/dashboard/customers/${customer.id}/edit`}>
+        <Link href={`/customers/${customer.id}/edit`}>
             <Button>Edit Customer</Button>
         </Link>
       </PageHeader>

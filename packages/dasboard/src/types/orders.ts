@@ -35,7 +35,7 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   unitPrice: Decimal; // <-- CORRECT TYPE: Monetary values should be Decimal
-  image: string | null;
+  image: {url: string} | null;
 }
 
 /**

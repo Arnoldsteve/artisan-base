@@ -39,7 +39,7 @@ export default function EditCustomerPage() {
       updateCustomer({ id, data: updateData }, {
         onSuccess: () => {
           setIsSheetOpen(false);
-          router.push(`/dashboard/customers/${id}`);
+          router.push(`/customers/${id}`);
         },
       });
     }

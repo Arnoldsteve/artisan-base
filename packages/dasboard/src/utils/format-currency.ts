@@ -1,11 +1,14 @@
-/**
- * Formats a number as USD currency.
- * @param amount - The amount to format.
- * @returns The formatted currency string.
- */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
+import type { Currency } from "@/types/currency";
+
+export function formatCurrency(
+  amount: number,
+  currency: Currency,
+  locale: string = "en-US"
+): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }

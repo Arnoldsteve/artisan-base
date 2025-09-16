@@ -10,6 +10,7 @@ import {
 import { OrderItem } from "@/types/orders";
 import Image from "next/image";
 import { formatCurrency } from "@/utils/format-currency";
+import { url } from "inspector";
 
 export function OrderItemsTable({ items }: { items: OrderItem[] }) {
   return (
@@ -33,8 +34,8 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
               <TableRow key={item.id}>
                 <TableCell>
                   <Image
-                    src={item.image || `https://picsum.photos/400/400?random=${item.id}`}
-                    alt={item.productName}
+                    src={item.image?.url ?? `https://picsum.photos/400/400?random=${item.id}`}
+                    alt={item.productName || 'Product Image'}
                     width={64}
                     height={64}
                     className="rounded-md"

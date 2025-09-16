@@ -37,8 +37,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     notFound();
   }
   
-  // This `if` check is now redundant because the catch block handles the not found case.
-  // if (!order) { ... }
+  console.log("Fetched order on server:", order);
 
   return (
     <div className="p-4 md:p-8 lg:p-10">
