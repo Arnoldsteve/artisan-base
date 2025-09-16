@@ -9,6 +9,10 @@ import { CartProvider } from "@/contexts/cart-context";
 import { WishlistProvider } from "@/contexts/wishlist-context";
 import { AuthProvider } from "@/contexts/auth-context";
 import ChatWidget from "@/components/ChatWidget";
+import { cookies } from "next/headers";
+import { parseConsent } from "@/lib/cookie";
+import Analytics from "@/components/cookies/analytics";
+import CookieConsentBanner from "@/components/cookies/cookie-consent-banner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,14 +47,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
+   const raw = (await cookies()).get("cookie_consent")?.value ?? null;
+  const initialConsent = raw ? parseConsent(raw) : null;
+  
   return (
     <html lang="en">
       <body className={inter.className}>
+         {/* Analytics placed early so it can inject if consent exists server-side */}
+        <Analytics initialConsent={initialConsent} />
+        
         <QueryProvider>
           <CartProvider>
             <WishlistProvider>
@@ -66,6 +77,9 @@ export default function RootLayout({
             </WishlistProvider>
           </CartProvider>
         </QueryProvider>
+
+         {/* Banner overlays the page; initialConsent passed to avoid flicker */}
+        <CookieConsentBanner initialConsent={initialConsent} />
       </body>
     </html>
   );
