@@ -1,10 +1,9 @@
-import { createServerApiClient } from '@/lib/server-api';
-import { ProductsView } from './components/products-view';
-import { PaginatedResponse } from '@/types/shared';
-import { Product } from '@/types/products';
+import { createServerApiClient } from "@/lib/server-api";
+import { ProductsView } from "./components/products-view";
+import { PaginatedResponse } from "@/types/shared";
+import { Product } from "@/types/products";
 
 export default async function ProductsPage() {
-  
   let initialData: PaginatedResponse<Product>;
 
   try {
@@ -14,16 +13,22 @@ export default async function ProductsPage() {
 
     // 2. Now, you can safely call the `.get()` method on that instance.
     initialData = await serverApi.get<PaginatedResponse<Product>>(
-      "/dashboard/products", 
+      "/dashboard/products",
       { page: 1, limit: 10 }
     );
     console.log("Fetched initial products on server:", initialData);
-
   } catch (err) {
     console.error("Failed to fetch initial products on server:", err);
-    initialData = { 
-      data: [], 
-      meta: { total: 0, page: 1, limit: 10, totalPages: 1, prev: null, next: null } 
+    initialData = {
+      data: [],
+      meta: {
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+        prev: null,
+        next: null,
+      },
     };
   }
 

@@ -1,13 +1,18 @@
-// File: packages/dasboard/src/app/dashboard/customers/components/customer-stats.tsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { DollarSign, Hash, ShoppingBag } from "lucide-react";
-import { CustomerOrder } from "@/types/customers";
+// import { CustomerOrder } from "@/types/customers";
 import { Decimal } from "decimal.js";
+import { formatMoney } from "@/utils/money";
+import { Order } from "@/types/orders";
+
+// interface CustomerStatsProps {
+//   orders: CustomerOrder[]; // <-- THE FIX: Expect an array of CustomerOrder
+// }
 
 interface CustomerStatsProps {
-  orders: CustomerOrder[]; // <-- THE FIX: Expect an array of CustomerOrder
+  orders: Order[];
 }
 
 export function CustomerStats({ orders }: CustomerStatsProps) {
@@ -22,13 +27,6 @@ export function CustomerStats({ orders }: CustomerStatsProps) {
   const avgOrderValue =
     totalOrders > 0 ? lifetimeValue.dividedBy(totalOrders) : new Decimal(0);
 
-  // Helper function to format a Decimal value into a currency string
-  const formatCurrency = (amount: Decimal) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount.toNumber()); // Convert Decimal to number for formatting
-
   return (
     <Card>
       <CardHeader>
@@ -40,7 +38,7 @@ export function CustomerStats({ orders }: CustomerStatsProps) {
           <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">Lifetime Value</span>
             <span className="text-lg font-semibold">
-              {formatCurrency(lifetimeValue)}
+              {formatMoney(lifetimeValue)}
             </span>
           </div>
         </div>
@@ -58,7 +56,7 @@ export function CustomerStats({ orders }: CustomerStatsProps) {
               Avg. Order Value
             </span>
             <span className="text-lg font-semibold">
-              {formatCurrency(avgOrderValue)}
+              {formatMoney(avgOrderValue)}
             </span>
           </div>
         </div>

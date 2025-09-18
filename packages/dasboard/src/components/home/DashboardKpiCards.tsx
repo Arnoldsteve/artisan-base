@@ -3,8 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@repo/ui";
 import { DollarSign, Users, ShoppingBag, Package } from "lucide-react";
-import { formatCurrency } from "@/utils/format-currency";
 import { DashboardKPI } from "@/types/dashboard";
+import { formatMoney } from "@/utils/money";
 
 /**
  * A local, self-contained skeleton component for a single KPI card.
@@ -61,7 +61,7 @@ export function DashboardKpiCards({ kpis, isLoading, isError }: DashboardKpiCard
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(kpis.totalRevenue)}</div>
+              <div className="text-2xl font-bold">{formatMoney(Number(kpis.totalRevenue))}</div>
             </CardContent>
           </Card>
           <Card>
@@ -70,7 +70,7 @@ export function DashboardKpiCards({ kpis, isLoading, isError }: DashboardKpiCard
               <ShoppingBag className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+{formatCurrency(kpis.salesToday)}</div>
+              <div className="text-2xl font-bold">+{formatMoney(Number(kpis.salesToday))}</div>
             </CardContent>
           </Card>
           <Card>

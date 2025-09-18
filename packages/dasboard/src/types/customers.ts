@@ -3,7 +3,7 @@ import { Order } from './orders';
 import { PaginatedResponse } from './shared';
 
 // Re-export this for convenience in other files
-export type { PaginatedResponse };
+// export type { PaginatedResponse };
 
 // ============================================================================
 // Main Entity Types (Data received from the API)

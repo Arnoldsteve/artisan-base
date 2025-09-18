@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getOrderStatusColor, getPaymentStatusColor } from "@/utils/status-colors";
 
 import { Button } from '@repo/ui';
+import { formatMoney } from '@/utils/money';
 
 // // We can reuse the same color logic!
 // const getOrderStatusColor = (status: OrderStatus) => {
@@ -44,7 +45,7 @@ export const orderHistoryColumns: ColumnDef<Order>[] = [
     header: () => <div className="text-right">Total</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue('totalAmount'));
-      return <div className="text-right font-medium">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)}</div>;
+      return <div className="text-right font-medium">{formatMoney(amount)}</div>;
     },
   },
    {

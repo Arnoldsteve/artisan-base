@@ -18,8 +18,8 @@ import {
   AvatarFallback,
   Badge,
 } from "@repo/ui";
-import { formatCurrency } from "@/utils/format-currency";
 import { RecentOrdersResponse } from "@/types/dashboard";
+import { formatMoney } from "@/utils/money";
 
 /**
  * A local skeleton component for the recent orders card.
@@ -127,7 +127,7 @@ export function RecentOrders({ ordersData, isLoading, isError }: RecentOrdersPro
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(order.totalAmount)}
+                    {formatMoney(Number(order.totalAmount))}
                   </TableCell>
                 </TableRow>
               ))}

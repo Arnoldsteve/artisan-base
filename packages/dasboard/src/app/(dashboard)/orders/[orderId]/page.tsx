@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/app/dashboard/orders/[orderId]/page.tsx
-// No 'use client' - This remains a fast Server Component
 
 import { createServerApiClient } from "@/lib/server-api"; // <-- 1. IMPORT THE SERVER CLIENT
 import { Order } from "@/types/orders";
@@ -9,8 +7,8 @@ import { Separator } from "@repo/ui";
 import { OrderItemsTable } from "../components/order-items-table";
 import { OrderActions } from "../components/order-actions";
 import { OrderSummaryCard } from "../components/order-summary-card";
-import { formatCurrency } from "@/utils/format-currency";
-import { notFound } from "next/navigation"; // Import notFound
+import { notFound } from "next/navigation"; 
+import { formatMoney } from "@/utils/money";
 
 interface OrderDetailPageProps {
   params: { orderId: string };
@@ -53,20 +51,20 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 {/* Use a helper to format Decimal to currency string */}
-                <span>{formatCurrency(order.subtotal)}</span>
+                <span>{formatMoney(Number(order.subtotal))}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{formatCurrency(order.shippingAmount)}</span>
+                <span>{formatMoney(Number(order.shippingAmount))}</span>
               </div>
               <div className="flex justify-between">
                 <span>Taxes</span>
-                <span>{formatCurrency(order.taxAmount)}</span>
+                <span>{formatMoney(Number(order.taxAmount))}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>{formatCurrency(order.totalAmount)}</span>
+                <span>{formatMoney(Number(order.totalAmount))}</span>
               </div>
             </CardContent>
           </Card>

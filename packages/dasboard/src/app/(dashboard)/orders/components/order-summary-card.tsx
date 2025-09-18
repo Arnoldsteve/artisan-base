@@ -6,11 +6,9 @@ import {
   getOrderStatusColor,
   getPaymentStatusColor,
 } from "@/utils/status-colors";
-import { formatCurrency } from "@/utils/format-currency";
+import { formatMoney } from "@/utils/money";
 
-/**
- * OrderSummaryCard displays a summary of the order, including status and total.
- */
+
 export function OrderSummaryCard({ order }: { order: Order }) {
   return (
     <Card>
@@ -45,7 +43,7 @@ export function OrderSummaryCard({ order }: { order: Order }) {
         </div>
         <div className="flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span>{formatCurrency(order.totalAmount)}</span>
+          <span>{formatMoney(Number(order.totalAmount))}</span>
         </div>
       </CardContent>
     </Card>

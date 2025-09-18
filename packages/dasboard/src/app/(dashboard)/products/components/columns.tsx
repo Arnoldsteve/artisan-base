@@ -14,6 +14,7 @@ import {
 } from "@repo/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui";
 import { Product } from "@/types/products";
+import { formatMoney } from "@/utils/money";
 
 // Extend the TableMeta interface to include our custom function
 declare module "@tanstack/react-table" {
@@ -156,12 +157,8 @@ export const columns: ColumnDef<Product>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-      return <div className="text-right font-medium">{formatted}</div>;
+      const amount = formatMoney(parseFloat(row.getValue("price")));
+      return <div className="text-right font-medium">{amount}</div>;
     },
   },
 

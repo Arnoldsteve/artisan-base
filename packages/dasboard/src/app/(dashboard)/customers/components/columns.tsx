@@ -7,6 +7,7 @@ import { Checkbox } from '@repo/ui';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@repo/ui';
 import { Avatar, AvatarFallback } from '@repo/ui';
 import { toast } from 'sonner';
+import { formatMoney } from '@/utils/money';
 
 // Define the shape of our customer data for the table
 export type CustomerColumn = {
@@ -74,7 +75,7 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       );
     },
   },
-   {
+  {
     id: 'email', // Explicitly set the ID to 'email'
     accessorKey: 'email',
     header: 'Email', // Header for completeness, though it will be hidden
@@ -102,23 +103,17 @@ export const columns: ColumnDef<CustomerColumn>[] = [
   {
     accessorKey: 'totalSpent',
     header: ({ column }) => (
-      <div className="text-right">
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Total Spent
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Total Spent
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('totalSpent'));
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount);
-      return <div className="text-right font-medium">{formatted}</div>;
+      const amount = formatMoney(parseFloat(row.getValue('totalSpent')));
+      return <div className="text-right font-medium">{amount}</div>;
     },
   },
 

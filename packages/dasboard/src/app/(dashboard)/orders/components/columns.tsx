@@ -18,8 +18,8 @@ import {
   getOrderStatusColor,
   getPaymentStatusColor,
 } from "@/utils/status-colors";
-import { formatCurrency } from "@/utils/format-currency";
 import React from "react";
+import { formatMoney } from "@/utils/money";
 
 // Declare the new function that will be available on the table's meta object
 declare module "@tanstack/react-table" {
@@ -116,7 +116,7 @@ export const columns: ColumnDef<Order>[] = [
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("totalAmount"));
       return (
-        <div className="text-right font-medium">{formatCurrency(amount)}</div>
+        <div className="text-right font-medium">{formatMoney(amount)}</div>
       );
     }),
   },

@@ -9,8 +9,8 @@ import {
 } from "@repo/ui";
 import { OrderItem } from "@/types/orders";
 import Image from "next/image";
-import { formatCurrency } from "@/utils/format-currency";
 import { url } from "inspector";
+import { formatMoney } from "@/utils/money";
 
 export function OrderItemsTable({ items }: { items: OrderItem[] }) {
   return (
@@ -46,10 +46,10 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
                 </TableCell>
                 <TableCell className="text-right">{item.quantity}</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(item.unitPrice)}
+                  {formatMoney(Number(item.unitPrice))}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(item.unitPrice * item.quantity)}
+                  {formatMoney(Number(item.unitPrice) * item.quantity)}
                 </TableCell>
               </TableRow>
             ))}

@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/types/dashboard.ts
-
 import { Decimal } from 'decimal.js';
 import { Order } from './orders';
 import { Customer } from './customers';
