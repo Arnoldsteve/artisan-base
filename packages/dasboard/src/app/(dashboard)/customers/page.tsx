@@ -1,8 +1,7 @@
-// This is the PURE Server Component.
-
 import { createServerApiClient } from "@/lib/server-api";
 import { CustomersView } from "./components/customers-view";
-import { Customer, PaginatedResponse } from "@/types/customers";
+import { Customer } from "@/types/customers";
+import { PaginatedResponse } from "@/types/shared";
 
 export default async function CustomersPage() {
   let initialData: PaginatedResponse<Customer>;

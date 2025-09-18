@@ -1,9 +1,10 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { DashboardUserData } from '../page';
+// import { DashboardUserData } from '../page';
 import { Badge, Checkbox, Avatar, AvatarFallback } from '@repo/ui';
 import { CellAction } from './cell-action';
+import { DashboardUserData } from '@/lib/mock-data/users';
 
 // Extend TableMeta to let our column know about the delete handler
 declare module '@tanstack/react-table' {

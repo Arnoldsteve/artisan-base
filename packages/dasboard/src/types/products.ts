@@ -25,7 +25,7 @@ export interface Product {
 
 export interface CreateProductDto {
   name: string;
-  slug: string;
+  slug?: string;
   description?: string;
   price: number; // Stays as 'number'
   sku?: string;

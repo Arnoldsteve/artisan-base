@@ -81,7 +81,6 @@ export function DataTable<TData>({ table, totalCount  }: DataTableProps<TData>) 
   );
 }
 
-// --- The Skeleton Component (Now part of the same file) ---
 // We keep the padding here as it's used directly by loading.tsx
 export function DataTableSkeleton() {
   return (
@@ -140,5 +139,3 @@ export function DataTableSkeleton() {
   );
 }
 
-// Attach the Skeleton as a namespaced property to the main DataTable component
-// DataTable.Skeleton = DataTableSkeleton;

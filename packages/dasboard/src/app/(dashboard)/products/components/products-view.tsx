@@ -14,12 +14,12 @@ import {
   PaginationState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
-import { Product } from "@/types/products";
+import { CreateProductDto, Product } from "@/types/products";
 import {
-  useProducts,
-  useDeleteProduct,
   useCreateProduct,
+  useProducts,
   useUpdateProduct,
+  useDeleteProduct,
 } from "@/hooks/use-products";
 
 // UI Components
@@ -34,16 +34,8 @@ import { ImageUploadDialog } from "./image-upload-dialog";
 import { CategoryAssignmentSheet } from "./category-assignment-sheet";
 import { PaginatedResponse } from "@/types/shared";
 import { ImagePreviewDialog } from "./image-preview-dialog";
+import { slugify } from "@/utils/slugify";
 
-// Helper function
-const slugify = (text: string) =>
-  text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
 
 interface ProductsViewProps {
   initialData: PaginatedResponse<Product>;
@@ -156,17 +148,21 @@ const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   };
 
   const handleSaveChanges = (formData: ProductFormData) => {
-    if (formData.id) {
-      const { id, ...updateData } = formData;
-      updateProduct({ id: id, data: updateData }, {
-        onSuccess: () => setIsSheetOpen(false),
-      });
-    } else {
-      createProduct(formData, {
-        onSuccess: () => setIsSheetOpen(false),
-      });
-    }
-  };
+  if (formData.id) {
+    // update product → can be partial
+    const { id, ...updateData } = formData;
+    updateProduct({ id, data: updateData }, {
+      onSuccess: () => setIsSheetOpen(false),
+    });
+  } else {
+    // create product → must match CreateProductDto
+    const { id, ...createData } = formData; 
+    createProduct(createData as CreateProductDto, {  
+      onSuccess: () => setIsSheetOpen(false),
+    });
+  }
+};
+
 
   const handleBulkDelete = () => {
     const promises = selectedProductIds.map(id => deleteProduct(id));

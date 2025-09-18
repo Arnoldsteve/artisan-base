@@ -125,16 +125,40 @@ export class ProductRepository implements IProductRepository {
     }
     return product;
   }
-
+  
   async update(id: string, dto: UpdateProductDto) {
     const prisma = await this.getPrisma();
+
+    let dataToUpdate: any = { ...dto };
+
+    // If name is being updated → regenerate slug
+    if (dto.name) {
+      let baseSlug = slugify(dto.name, { lower: true, strict: true });
+      let slug = baseSlug;
+      let counter = 1;
+
+      // Ensure uniqueness
+      while (
+        await prisma.product.findFirst({
+          where: { slug, NOT: { id } }, // exclude current product
+        })
+      ) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+
+      dataToUpdate.slug = slug;
+    }
+
     const product = await prisma.product.update({
       where: { id },
-      data: dto,
+      data: dataToUpdate,
     });
+
     this.invalidateCache(id);
     return product;
   }
+
 
   async remove(id: string) {
     const prisma = await this.getPrisma();

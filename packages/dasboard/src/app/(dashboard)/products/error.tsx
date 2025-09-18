@@ -26,7 +26,7 @@ export default function Error({
             <CardContent>
                 <p>An unexpected error occurred while loading the product data. You can try again.</p>
                 {/* For debugging, you can uncomment this in development */}
-                {/* <p className="text-sm text-muted-foreground mt-2">{error.message}</p> */}
+                <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
             </CardContent>
             <CardFooter>
                  <Button
