@@ -15,7 +15,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
-import { Customer, PaginatedResponse, UpdateCustomerDto, CreateCustomerDto } from "@/types/customers";
+import { Customer, UpdateCustomerDto, CreateCustomerDto } from "@/types/customers";
 import {
   useCustomers,
   useDeleteCustomer,
@@ -30,6 +30,7 @@ import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
 import { Plus, Trash2 } from "lucide-react";
 import { CustomerFormData } from "@/validation-schemas/customers";
+import { PaginatedResponse } from "@/types/shared";
 
 interface CustomersViewProps {
   initialData: PaginatedResponse<Customer>;
@@ -94,8 +95,6 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     meta: {
       openDeleteDialog: (customer) => setCustomerToDelete(customer as CustomerColumn),
       viewCustomerDetails: (customer) => router.push(`/customers/${customer.id}`),
-      // --- THIS IS THE FIX ---
-      // When opening the edit sheet, find the ORIGINAL customer object.
       openEditSheet: (customerRow) => {
         const originalCustomer = findOriginalCustomer(customerRow.id);
         if (originalCustomer) {
@@ -108,7 +107,7 @@ export function CustomersView({ initialData }: CustomersViewProps) {
   
   // --- Event Handlers ---
   const openAddSheet = () => {
-    setCustomerToEdit(null); // Set to null for creation
+    setCustomerToEdit(null); 
     setIsSheetOpen(true);
   };
 
@@ -121,24 +120,18 @@ export function CustomersView({ initialData }: CustomersViewProps) {
   };
 
  const handleSaveChanges = (formData: CustomerFormData) => {
-    // Check if an ID exists in the form data to determine if it's an update or create
-    if (formData.id) {
-      // --- THIS IS THE FIX ---
-      // This is an update. We must separate the ID from the rest of the data.
-      
-      // 1. Destructure the formData: `id` goes into its own constant,
-      //    and the rest of the properties go into the `updateData` object.
+
+  if (formData.id) {
+
       const { id, ...updateData } = formData;
 
-      // 2. Call the mutation. The `id` is used to build the URL,
-      //    and the `updateData` (without the id) is sent as the request body.
       updateCustomer({ id: id, data: updateData }, {
         onSuccess: () => setIsSheetOpen(false),
       });
 
     } else {
-      // This is a create operation. The formData does not have an ID, so it can be sent as is.
-      createCustomer(formData, {
+
+      createCustomer(formData as CreateCustomerDto , {
         onSuccess: () => setIsSheetOpen(false),
       });
     }

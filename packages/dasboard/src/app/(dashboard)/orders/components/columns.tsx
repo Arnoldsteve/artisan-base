@@ -20,6 +20,7 @@ import {
 } from "@/utils/status-colors";
 import React from "react";
 import { formatMoney } from "@/utils/money";
+import { formatDate } from "@/utils/date";
 
 // Declare the new function that will be available on the table's meta object
 declare module "@tanstack/react-table" {
@@ -135,7 +136,7 @@ export const columns: ColumnDef<Order>[] = [
     ),
     cell: ({ row }) => (
       <div className="text-right">
-        {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        {formatDate(row.getValue('createdAt'))}
       </div>
     ),
   },

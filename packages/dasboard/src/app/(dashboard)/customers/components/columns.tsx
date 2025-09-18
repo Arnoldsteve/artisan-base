@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from '@repo/ui';
 import { toast } from 'sonner';
 import { formatMoney } from '@/utils/money';
+import { formatDate } from '@/utils/date';
 
 // Define the shape of our customer data for the table
 export type CustomerColumn = {
@@ -29,7 +30,6 @@ declare module '@tanstack/react-table' {
 }
 
 export const columns: ColumnDef<CustomerColumn>[] = [
-  // Column for row selection
   {
     id: 'select',
     header: ({ table }) => (
@@ -55,9 +55,7 @@ export const columns: ColumnDef<CustomerColumn>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
-  // Column for Customer Name, Email, and Avatar
-   {
+  {
     accessorKey: 'name',
     header: 'Customer',
     cell: ({ row }) => {
@@ -81,8 +79,6 @@ export const columns: ColumnDef<CustomerColumn>[] = [
     header: 'Email', // Header for completeness, though it will be hidden
     // We don't need a custom 'cell' because we'll hide this column.
   },
-
-  // Column for Total Orders
   {
     accessorKey: 'orderCount',
     header: ({ column }) => (
@@ -98,40 +94,43 @@ export const columns: ColumnDef<CustomerColumn>[] = [
       return <div className="text-center">{row.getValue('orderCount')}</div>;
     },
   },
-
-  // Column for Total Spent
   {
     accessorKey: 'totalSpent',
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Total Spent
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
+      <div className="text-right">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Total Spent
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
     ),
     cell: ({ row }) => {
       const amount = formatMoney(parseFloat(row.getValue('totalSpent')));
       return <div className="text-right font-medium">{amount}</div>;
     },
   },
-
-  // Column for Date Joined
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Date Joined
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
+      <div className="text-right">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Member Since
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div className="text-right">
+        {formatDate(row.getValue('createdAt'))}
+      </div>
     ),
   },
-  
-  // Column for Actions
   {
     id: 'actions',
     cell: ({ row, table }) => {
