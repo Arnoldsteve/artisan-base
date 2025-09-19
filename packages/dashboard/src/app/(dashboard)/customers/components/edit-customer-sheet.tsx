@@ -3,8 +3,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Customer } from '@/types/customers'; // <-- Import the ORIGINAL Customer type
-// import { customerFormSchema, CustomerFormData } from '@/types/customers.dto';
+import { Customer } from '@/types/customers'; 
 import { Button, Input, Label } from '@repo/ui';
 import {
   Sheet,

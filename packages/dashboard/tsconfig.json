@@ -1,36 +1,31 @@
 {
-  "extends": "../../tsconfig.base.json", // <-- THIS IS CRITICAL
+  "extends": "../typescript-config/nextjs.json",
   "compilerOptions": {
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@repo/ui": ["../ui/src"],
+      "@repo/ui/*": ["../ui/src/*"],
+      "@/lib/utils": ["../ui/src/lib/utils.ts"],
+      "@/components/ui/*": ["../ui/src/components/ui/*"],
+      "@/hooks/use-mobile": ["../ui/src/hooks/use-mobile.tsx"]
+    },
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "resolveJsonModule": true,
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    // Keep your other settings like lib, jsx, etc.
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "target": "ES2017"
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "tailwind.config.mjs"
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

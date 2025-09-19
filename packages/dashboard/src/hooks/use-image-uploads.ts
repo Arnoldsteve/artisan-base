@@ -55,9 +55,12 @@ export function useUploadProductImages() {
           // --- STEP 3: Tell our backend to finalize the upload ---
           return imageUploadService.finalizeUpload(productId, fileId, path);
 
-        } catch (error) {
-          toast.error(`Failed to upload ${file.name}: ${error.message}`);
-          // Propagate the error to let Promise.all know one of the uploads failed.
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(`Failed to upload ${file.name}: ${error.message}`);
+          } else {
+            toast.error(`Failed to upload ${file.name}: Unknown error`);
+          }
           return Promise.reject(error);
         }
       });
@@ -103,11 +106,25 @@ export function useDeleteProductImage() {
         variables.productId,
         variables.imageId
       ),
-    onSuccess: (updatedProduct) => {
-      // ... (logic is correct)
+
+    onSuccess: (updatedProduct: Product) => {
+      toast.success(
+        `Image deleted successfully from "${updatedProduct.name}".`
+      );
+
+      // Refetch product data so the UI shows the latest images
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({
+        queryKey: [...PRODUCTS_QUERY_KEY, updatedProduct.id],
+      });
     },
-    onError: (error: Error) => {
-      // ... (logic is correct)
+
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(`Failed to delete image: ${error.message}`);
+      } else {
+        toast.error("Failed to delete image: Unknown error");
+      }
     },
   });
 }

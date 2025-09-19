@@ -18,7 +18,7 @@ export interface CustomerAddress {
   firstName: string;
   lastName: string;
   addressLine1: string;
-  addressLine2: string | null;
+  addressLine2: string ;
   city: string;
   state: string;
   postalCode: string;
@@ -32,9 +32,9 @@ export interface CustomerAddress {
 export interface Customer {
   id: string;
   email: string;
-  firstName: string | null;
-  lastName: string | null;
-  phone: string | null;
+  firstName?: string ;
+  lastName?: string ;
+  phone?: string ;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   

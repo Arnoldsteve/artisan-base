@@ -11,7 +11,7 @@ export interface Product {
   id: string;
   name: string;
   slug?: string;
-  description: string | null;
+  description?: string;
   price: Decimal; // <-- CORRECT TYPE: Uses the imported Decimal class
   sku: string | null;
   inventoryQuantity: number;

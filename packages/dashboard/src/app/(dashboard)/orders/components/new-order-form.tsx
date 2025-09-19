@@ -274,6 +274,13 @@ function CustomerDetailsForm({
               setBillingAddress({
                 ...billingAddress,
                 addressLine1: e.target.value,
+                firstName: billingAddress?.firstName ?? "",
+                lastName: billingAddress?.lastName ?? "",
+                addressLine2: billingAddress?.addressLine2 ?? "",
+                city: billingAddress?.city ?? "",
+                state: billingAddress?.state ?? "",
+                postalCode: billingAddress?.postalCode ?? "",
+                country: billingAddress?.country ?? "",
               })
             }
           />

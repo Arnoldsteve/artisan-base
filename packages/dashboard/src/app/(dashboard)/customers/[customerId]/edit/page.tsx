@@ -14,7 +14,9 @@ export default function EditCustomerPage() {
   const params = useParams();
   
   // Ensure customerId is a string, handle the case where it might be an array
-  const customerId = Array.isArray(params.customerId) ? params.customerId[0] : params.customerId;
+  // const customerId = Array.isArray(params.customerId) ? params.customerId[0] : params.customerId;
+  const customerId = Array.isArray(params.customerId) ? params.customerId[0] : params.customerId ?? null;
+
   console.log('Customer ID:', customerId); // Debugging line to check the ID
 
   // Fetch the customer's data using our hook and the ID from params
@@ -63,7 +65,7 @@ export default function EditCustomerPage() {
     <EditCustomerSheet
       isOpen={isSheetOpen}
       onClose={handleCloseSheet}
-      customer={customer}
+      customer={customer ?? null}
       onSave={handleSaveChanges}
       isPending={isUpdating}
     />

@@ -14,9 +14,9 @@ export const productFormSchema = z.object({
   sku: z.string().optional(),
   description: z.string().optional(),
   
-  // Use z.boolean() for checkboxes or a transformer for select/radio
-  isActive: z.boolean().default(true),
-  isFeatured: z.boolean().default(false),
+  isActive: z.boolean().default(true).optional(),
+  isFeatured: z.boolean().default(false).optional(),
+
 });
 
 // Infer the TypeScript type from the Zod schema for use in our forms.
