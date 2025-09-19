@@ -8,9 +8,9 @@ import {
   CreateOrderDto,
   OrderStatus,
   PaymentStatus,
-  PaginatedResponse,
 } from "@/types/orders";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types/shared";
 
 // Define a query key to uniquely identify all order-related data
 const ORDERS_QUERY_KEY = ["dashboard-orders"];

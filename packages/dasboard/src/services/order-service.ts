@@ -6,8 +6,8 @@ import {
   Order,
   OrderStatus,
   PaymentStatus,
-  PaginatedResponse, // <-- 1. IMPORT PaginatedResponse
 } from "@/types/orders";
+import { PaginatedResponse } from "@/types/shared";
 
 /**
  * OrderService directly handles API communication for dashboard order management.
