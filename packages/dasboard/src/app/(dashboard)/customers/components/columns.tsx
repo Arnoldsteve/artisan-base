@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@repo/ui';
 import { toast } from 'sonner';
 import { formatMoney } from '@/utils/money';
 import { formatDate } from '@/utils/date';
+import { CustomerTableMeta, TableWithMeta } from '@/types/table-meta';
 
 // Define the shape of our customer data for the table
 export type CustomerColumn = {
@@ -20,14 +21,8 @@ export type CustomerColumn = {
   createdAt: string;
 };
 
-// Extend the TableMeta interface to include all our customer actions
-declare module '@tanstack/react-table' {
-  interface TableMeta<TData extends unknown> {
-    openDeleteDialog: (customer: TData) => void;
-    viewCustomerDetails: (customer: TData) => void;
-    openEditSheet: (customer: TData) => void; // Added this
-  }
-}
+// REMOVE the global module declaration completely
+// No more: declare module '@tanstack/react-table' { ... }
 
 export const columns: ColumnDef<CustomerColumn>[] = [
   {
@@ -135,6 +130,9 @@ export const columns: ColumnDef<CustomerColumn>[] = [
     id: 'actions',
     cell: ({ row, table }) => {
       const customer = row.original;
+      // Type assertion for the table with CustomerTableMeta
+      const typedTable = table as TableWithMeta<CustomerColumn, CustomerTableMeta<CustomerColumn>>;
+      
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -146,10 +144,10 @@ export const columns: ColumnDef<CustomerColumn>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => table.options.meta?.openEditSheet(customer)}>
+              <DropdownMenuItem onClick={() => typedTable.options.meta?.openEditSheet(customer)}>
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => table.options.meta?.viewCustomerDetails(customer)}>
+              <DropdownMenuItem onClick={() => typedTable.options.meta?.viewCustomerDetails(customer)}>
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
@@ -160,7 +158,7 @@ export const columns: ColumnDef<CustomerColumn>[] = [
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => table.options.meta?.openDeleteDialog(customer)}
+                onClick={() => typedTable.options.meta?.openDeleteDialog(customer)}
               >
                 Delete
               </DropdownMenuItem>

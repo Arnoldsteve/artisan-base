@@ -35,7 +35,7 @@ import { CategoryAssignmentSheet } from "./category-assignment-sheet";
 import { PaginatedResponse } from "@/types/shared";
 import { ImagePreviewDialog } from "./image-preview-dialog";
 import { slugify } from "@/utils/slugify";
-
+import { ProductTableMeta } from "@/types/table-meta";
 
 interface ProductsViewProps {
   initialData: PaginatedResponse<Product>;
@@ -65,9 +65,10 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   // Add these lines for category modal
   const [productForCategory, setProductForCategory] = useState<Product | null>(null);
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  
   // image preview
   const [productForPreview, setProductForPreview] = useState<Product | null>(null);
-const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
   const { data: paginatedResponse, isLoading, isError } = useProducts(
@@ -106,6 +107,16 @@ const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     });
   };
 
+  // --- Create the meta object with proper typing ---
+  const tableMeta: ProductTableMeta<Product> = {
+    openDeleteDialog,
+    openEditSheet,
+    handleDuplicateProduct,
+    handleImageUpload,
+    handleCategoryChange,
+    openImagePreview,
+  };
+
   // --- Table Instance Initialization ---
   const table = useReactTable({
     data: products,
@@ -128,14 +139,7 @@ const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: {
-      openDeleteDialog,
-      openEditSheet,
-      handleDuplicateProduct,
-      handleImageUpload,
-      handleCategoryChange,
-      openImagePreview,
-    },
+    meta: tableMeta, // Now properly typed
   });
 
   // --- Mutation Handlers ---
@@ -148,21 +152,20 @@ const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   };
 
   const handleSaveChanges = (formData: ProductFormData) => {
-  if (formData.id) {
-    // update product → can be partial
-    const { id, ...updateData } = formData;
-    updateProduct({ id, data: updateData }, {
-      onSuccess: () => setIsSheetOpen(false),
-    });
-  } else {
-    // create product → must match CreateProductDto
-    const { id, ...createData } = formData; 
-    createProduct(createData as CreateProductDto, {  
-      onSuccess: () => setIsSheetOpen(false),
-    });
-  }
-};
-
+    if (formData.id) {
+      // update product → can be partial
+      const { id, ...updateData } = formData;
+      updateProduct({ id, data: updateData }, {
+        onSuccess: () => setIsSheetOpen(false),
+      });
+    } else {
+      // create product → must match CreateProductDto
+      const { id, ...createData } = formData; 
+      createProduct(createData as CreateProductDto, {  
+        onSuccess: () => setIsSheetOpen(false),
+      });
+    }
+  };
 
   const handleBulkDelete = () => {
     const promises = selectedProductIds.map(id => deleteProduct(id));
@@ -197,7 +200,6 @@ const [isPreviewOpen, setIsPreviewOpen] = useState(false);
       
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">
-          {/* Implement Bulk Action Bar JSX here */}
           <div className="flex items-center justify-between">
             <div className="text-sm">
               {numSelected} product(s) selected.
@@ -250,7 +252,6 @@ const [isPreviewOpen, setIsPreviewOpen] = useState(false);
         onClose={() => setIsPreviewOpen(false)}
         product={productForPreview}
       />
-
     </div>
   );
 }

@@ -15,18 +15,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui";
 import { Product } from "@/types/products";
 import { formatMoney } from "@/utils/money";
+import { ProductTableMeta, TableWithMeta } from "@/types/table-meta";
 
-// Extend the TableMeta interface to include our custom function
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends unknown> {
-    openDeleteDialog: (product: TData) => void;
-    openEditSheet: (product: TData) => void;
-    handleDuplicateProduct: (product: TData) => void;
-    handleImageUpload: (product: TData) => void;
-    handleCategoryChange: (product: TData) => void;
-    openImagePreview: (product: TData) => void; 
-  }
-}
+// REMOVE the global module declaration completely
+// No more: declare module "@tanstack/react-table" { ... }
 
 export const columns: ColumnDef<Product>[] = [
   // Column for row selection
@@ -60,13 +52,16 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: "Product",
-   cell: ({ row, table }) => {
+    cell: ({ row, table }) => {
       const product = row.original;
+      // Type assertion for the table with ProductTableMeta
+      const typedTable = table as TableWithMeta<Product, ProductTableMeta<Product>>;
+      
       return (
         <div className="flex items-center gap-3">
           <Avatar 
             className="h-10 w-10 rounded-md cursor-pointer"
-            onClick={() => table.options.meta?.openImagePreview(product)}
+            onClick={() => typedTable.options.meta?.openImagePreview(product)}
           >
             <AvatarImage
               src={product.images?.[0]?.url}
@@ -166,8 +161,10 @@ export const columns: ColumnDef<Product>[] = [
   {
     id: "actions",
     cell: ({ row, table }) => {
-      // <--- We now have access to `table` here
       const product = row.original;
+      // Type assertion for the table with ProductTableMeta
+      const typedTable = table as TableWithMeta<Product, ProductTableMeta<Product>>;
+      
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -180,35 +177,35 @@ export const columns: ColumnDef<Product>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => table.options.meta?.openEditSheet(product)}
+                onClick={() => typedTable.options.meta?.openEditSheet(product)}
               >
                 <Pencil className="w-5 h-5 text-blue-600" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => table.options.meta?.handleDuplicateProduct(product)}
+                onClick={() => typedTable.options.meta?.handleDuplicateProduct(product)}
               >
                 <Copy className="w-5 h-5 text-green-600" />
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => table.options.meta?.handleImageUpload(product)}
+                onClick={() => typedTable.options.meta?.handleImageUpload(product)}
               >
                 <Upload className="w-5 h-5" />
                 Upload Images
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => table.options.meta?.handleCategoryChange(product)}
+                onClick={() => typedTable.options.meta?.handleCategoryChange(product)}
               >
-                <Tag  className="w-5 h-5" />
+                <Tag className="w-5 h-5" />
                 Assign Categories
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                  onClick={() => table.options.meta?.openDeleteDialog(product)}
-                >
-                  <Trash className="w-5 h-5 text-red-600" />
-                  Delete
+                onClick={() => typedTable.options.meta?.openDeleteDialog(product)}
+              >
+                <Trash className="w-5 h-5 text-red-600" />
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

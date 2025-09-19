@@ -26,13 +26,12 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { DeleteOrderDialog } from "./delete-order-dialog";
-// import { BulkDeleteAlertDialog } from "@/app/dashboard/products/components/bulk-delete-alert-dialog";
 import { Button } from "@repo/ui";
 import { Trash2 } from "lucide-react";
 import { BulkDeleteAlertDialog } from "../../products/components/bulk-delete-alert-dialog";
 import { OrdersTableViewOptions } from "./data-table-view-options";
 import { PaginatedResponse } from "@/types/shared";
-
+import { OrderTableMeta } from "@/types/table-meta";
 
 interface OrdersViewProps {
   initialData: PaginatedResponse<Order>;
@@ -46,6 +45,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
   const [rowSelection, setRowSelection] = useState({});
 
   // --- Modal/Dialog UI State ---
+  const [ orderToEdit, setOrderToEdit ] = useState<Order | null>(null)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 
@@ -59,6 +59,16 @@ export function OrdersView({ initialData }: OrdersViewProps) {
   // --- Memoized Data ---
   const orders = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
   const totalOrders = paginatedResponse?.meta?.total || 0;
+
+  // --- Action Handlers ---
+  const openDeleteDialog = (order: Order) => setOrderToDelete(order);
+  const openEditSheet = (order: Order) =>  setOrderToEdit(order)
+
+  // --- Create the meta object with proper typing ---
+  const tableMeta: OrderTableMeta<Order> = {
+    openDeleteDialog,
+    openEditSheet
+  };
 
   // --- Table Instance Initialization ---
   const table = useReactTable({
@@ -74,9 +84,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: {
-      openDeleteDialog: (order) => setOrderToDelete(order as Order),
-    },
+    meta: tableMeta, // Now properly typed
   });
 
   const selectedOrderIds = useMemo(() => {
@@ -124,7 +132,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
       </PageHeader>
       
       <OrdersTableViewOptions table={table} />
-      <DataTable table={table}  totalCount={totalOrders}/>
+      <DataTable table={table} totalCount={totalOrders}/>
       
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">

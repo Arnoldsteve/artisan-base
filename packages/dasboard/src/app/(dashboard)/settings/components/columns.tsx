@@ -1,23 +1,31 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-// import { DashboardUserData } from '../page';
 import { Badge, Checkbox, Avatar, AvatarFallback } from '@repo/ui';
 import { CellAction } from './cell-action';
 import { DashboardUserData } from '@/lib/mock-data/users';
+import { UserTableMeta, TableWithMeta } from '@/types/table-meta';
 
-// Extend TableMeta to let our column know about the delete handler
-declare module '@tanstack/react-table' {
-  interface TableMeta<TData extends unknown> {
-    handleUserDeleted: (userId: string) => void;
-  }
-}
+// REMOVE the global module declaration completely
+// No more: declare module '@tanstack/react-table' { ... }
 
 export const columns: ColumnDef<DashboardUserData>[] = [
   {
     id: "select",
-    header: ({ table }) => ( <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" /> ),
-    cell: ({ row }) => ( <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" /> ),
+    header: ({ table }) => ( 
+      <Checkbox 
+        checked={table.getIsAllPageRowsSelected()} 
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} 
+        aria-label="Select all" 
+      /> 
+    ),
+    cell: ({ row }) => ( 
+      <Checkbox 
+        checked={row.getIsSelected()} 
+        onCheckedChange={(value) => row.toggleSelected(!!value)} 
+        aria-label="Select row" 
+      /> 
+    ),
     enableSorting: false,
     enableHiding: false,
   },
@@ -30,7 +38,9 @@ export const columns: ColumnDef<DashboardUserData>[] = [
       const fallback = name.substring(0, 2).toUpperCase();
       return (
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10"><AvatarFallback>{fallback}</AvatarFallback></Avatar>
+          <Avatar className="h-10 w-10">
+            <AvatarFallback>{fallback}</AvatarFallback>
+          </Avatar>
           <div>
             <div className="font-medium">{name}</div>
             <div className="text-sm text-muted-foreground">{user.email}</div>
@@ -45,7 +55,11 @@ export const columns: ColumnDef<DashboardUserData>[] = [
     cell: ({ row }) => {
       const role = row.getValue('role') as string;
       const variant: "default" | "secondary" | "outline" = role === 'OWNER' ? 'default' : role === 'ADMIN' ? 'secondary' : 'outline';
-      return ( <Badge variant={variant} className="capitalize">{role.toLowerCase()}</Badge> );
+      return ( 
+        <Badge variant={variant} className="capitalize">
+          {role.toLowerCase()}
+        </Badge> 
+      );
     }
   },
   {
@@ -53,7 +67,11 @@ export const columns: ColumnDef<DashboardUserData>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const isActive = row.getValue('isActive');
-      return ( <Badge variant={isActive ? 'default' : 'destructive'}>{isActive ? 'Active' : 'Inactive'}</Badge> );
+      return ( 
+        <Badge variant={isActive ? 'default' : 'destructive'}>
+          {isActive ? 'Active' : 'Inactive'}
+        </Badge> 
+      );
     },
   },
   {
@@ -62,11 +80,16 @@ export const columns: ColumnDef<DashboardUserData>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row, table }) => (
-      <CellAction
-        data={row.original}
-        onUserDeleted={table.options.meta!.handleUserDeleted}
-      />
-    ),
+    cell: ({ row, table }) => {
+      // Type assertion for the table with UserTableMeta
+      const typedTable = table as TableWithMeta<DashboardUserData, UserTableMeta<DashboardUserData>>;
+      
+      return (
+        <CellAction
+          data={row.original}
+          onUserDeleted={typedTable.options.meta!.handleUserDeleted}
+        />
+      );
+    },
   },
 ];

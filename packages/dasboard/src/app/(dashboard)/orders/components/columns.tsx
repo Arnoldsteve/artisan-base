@@ -21,13 +21,10 @@ import {
 import React from "react";
 import { formatMoney } from "@/utils/money";
 import { formatDate } from "@/utils/date";
+import { OrderTableMeta, TableWithMeta } from "@/types/table-meta";
 
-// Declare the new function that will be available on the table's meta object
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends unknown> {
-    openDeleteDialog: (order: TData) => void;
-  }
-}
+// REMOVE the global module declaration completely
+// No more: declare module "@tanstack/react-table" { ... }
 
 export const columns: ColumnDef<Order>[] = [
   {
@@ -145,6 +142,9 @@ export const columns: ColumnDef<Order>[] = [
     cell: ({ row, table }) => {
       const order = row.original;
       const customer = order.customer;
+      // Type assertion for the table with OrderTableMeta
+      const typedTable = table as TableWithMeta<Order, OrderTableMeta<Order>>;
+      
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -172,7 +172,7 @@ export const columns: ColumnDef<Order>[] = [
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => table.options.meta?.openDeleteDialog(order)}
+                onClick={() => typedTable.options.meta?.openDeleteDialog(order)}
               >
                 Delete Order
               </DropdownMenuItem>

@@ -31,6 +31,7 @@ import { Button } from "@repo/ui";
 import { Plus, Trash2 } from "lucide-react";
 import { CustomerFormData } from "@/validation-schemas/customers";
 import { PaginatedResponse } from "@/types/shared";
+import { CustomerTableMeta } from "@/types/table-meta";
 
 interface CustomersViewProps {
   initialData: PaginatedResponse<Customer>;
@@ -78,6 +79,24 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     return paginatedResponse?.data.find(c => c.id === id);
   };
 
+  // --- Action Handlers ---
+  const openDeleteDialog = (customer: CustomerColumn) => setCustomerToDelete(customer);
+  const viewCustomerDetails = (customer: CustomerColumn) => router.push(`/customers/${customer.id}`);
+  const openEditSheet = (customerRow: CustomerColumn) => {
+    const originalCustomer = findOriginalCustomer(customerRow.id);
+    if (originalCustomer) {
+      setCustomerToEdit(originalCustomer);
+      setIsSheetOpen(true);
+    }
+  };
+
+  // --- Create the meta object with proper typing ---
+  const tableMeta: CustomerTableMeta<CustomerColumn> = {
+    openDeleteDialog,
+    viewCustomerDetails,
+    openEditSheet,
+  };
+
   // --- Table Instance Initialization ---
   const table = useReactTable({
     data: mappedCustomers,
@@ -92,17 +111,7 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: {
-      openDeleteDialog: (customer) => setCustomerToDelete(customer as CustomerColumn),
-      viewCustomerDetails: (customer) => router.push(`/customers/${customer.id}`),
-      openEditSheet: (customerRow) => {
-        const originalCustomer = findOriginalCustomer(customerRow.id);
-        if (originalCustomer) {
-          setCustomerToEdit(originalCustomer);
-          setIsSheetOpen(true);
-        }
-      },
-    },
+    meta: tableMeta, // Now properly typed
   });
   
   // --- Event Handlers ---
@@ -119,18 +128,13 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     }
   };
 
- const handleSaveChanges = (formData: CustomerFormData) => {
-
-  if (formData.id) {
-
+  const handleSaveChanges = (formData: CustomerFormData) => {
+    if (formData.id) {
       const { id, ...updateData } = formData;
-
       updateCustomer({ id: id, data: updateData }, {
         onSuccess: () => setIsSheetOpen(false),
       });
-
     } else {
-
       createCustomer(formData as CreateCustomerDto , {
         onSuccess: () => setIsSheetOpen(false),
       });

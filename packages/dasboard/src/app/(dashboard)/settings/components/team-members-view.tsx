@@ -9,6 +9,7 @@ import { DashboardUserData } from "../page";
 import { columns } from "./columns";
 import { InviteUserDialog } from "./invite-user-dialog";
 import { DashboardUserRole } from "@prisma/client";
+import { UserTableMeta } from "@/types/table-meta";
 
 interface TeamMembersViewProps {
   initialUsers: DashboardUserData[];
@@ -19,7 +20,6 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
   const [users, setUsers] = useState(initialUsers);
 
   // --- Local State Handlers ---
-
   const handleUserInvited = (data: { email: string; role: DashboardUserRole }) => {
     // Create a new user object for our mock state
     const newUser: DashboardUserData = {
@@ -37,17 +37,20 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
   const handleUserDeleted = (userId: string) => {
     setUsers(current => current.filter(u => u.id !== userId));
   };
+
+  // --- Create the meta object with proper typing ---
+  const tableMeta: UserTableMeta<DashboardUserData> = {
+    handleUserDeleted,
+    // You can add handleUserUpdated here in the future
+  };
   
   // Create the table instance
   const table = useReactTable({
     data: users,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    // Pass the local handlers to the table's meta object
-    meta: {
-      handleUserDeleted,
-      // You can add handleUserUpdated here in the future
-    },
+    // Pass the properly typed meta object
+    meta: tableMeta,
   });
 
   return (
