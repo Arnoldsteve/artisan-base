@@ -18,16 +18,20 @@ export default async function CategoryProductsPage({
   params,
   searchParams,
 }: {
-  params: { "category-id": string };
-  searchParams: { page?: string; search?: string };
+  params: Promise<{ "category-id": string }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
 }) {
+  // Await the params and searchParams
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  
   let category: Category | null = null;
   let products: Product[] = [];
   let totalProducts = 0;
   
-  const currentPage = parseInt(searchParams.page || "1");
+  const currentPage = parseInt(resolvedSearchParams.page || "1");
   const itemsPerPage = 20;
-  const searchQuery = searchParams.search || "";
+  const searchQuery = resolvedSearchParams.search || "";
 
   try {
     const serverApi = await createServerApiClient();
@@ -42,7 +46,7 @@ export default async function CategoryProductsPage({
     const res = await serverApi.get<{
       data: { categoryId: string; product: Product; productId: string }[];
       totalCount?: number;
-    }>(`/dashboard/product-categories/by-category/${params["category-id"]}?${queryParams}`);
+    }>(`/dashboard/product-categories/by-category/${resolvedParams["category-id"]}?${queryParams}`);
 
     console.log("Fetched products on server:", res);
 
@@ -55,14 +59,14 @@ export default async function CategoryProductsPage({
     if (entries.length > 0 || searchQuery) {
       try {
         const categoryRes = await serverApi.get<Category>(
-          `/dashboard/product-categories/${params["category-id"]}`
+          `/dashboard/product-categories/${resolvedParams["category-id"]}`
         );
         category = categoryRes;
         console.log("Fetched category details:", categoryRes);
       } catch (categoryError) {
         console.error("Failed to fetch category details:", categoryError);
         category = {
-          id: params["category-id"],
+          id: resolvedParams["category-id"],
           name: "Category Products",
           description: "Products for this category"
         } as Category;
@@ -129,7 +133,7 @@ export default async function CategoryProductsPage({
             </div>
             <Button type="submit">Search</Button>
             {searchQuery && (
-              <Link href={`/product-categories/${params["category-id"]}`}>
+              <Link href={`/product-categories/${resolvedParams["category-id"]}`}>
                 <Button variant="outline">Clear</Button>
               </Link>
             )}
@@ -236,7 +240,7 @@ export default async function CategoryProductsPage({
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Link 
-            href={`/dashboard/product-categories/${params["category-id"]}?page=${Math.max(1, currentPage - 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+            href={`/dashboard/product-categories/${resolvedParams["category-id"]}?page=${Math.max(1, currentPage - 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
           >
             <Button 
               variant="outline" 
@@ -263,7 +267,7 @@ export default async function CategoryProductsPage({
               return (
                 <Link 
                   key={pageNum}
-                  href={`/product-categories/${params["category-id"]}?page=${pageNum}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+                  href={`/product-categories/${resolvedParams["category-id"]}?page=${pageNum}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
                 >
                   <Button
                     variant={currentPage === pageNum ? "default" : "outline"}
@@ -278,7 +282,7 @@ export default async function CategoryProductsPage({
           </div>
           
           <Link 
-            href={`/product-categories/${params["category-id"]}?page=${Math.min(totalPages, currentPage + 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+            href={`/product-categories/${resolvedParams["category-id"]}?page=${Math.min(totalPages, currentPage + 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
           >
             <Button 
               variant="outline" 

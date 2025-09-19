@@ -1,4 +1,3 @@
-
 import { createServerApiClient } from "@/lib/server-api"; // <-- 1. IMPORT THE SERVER CLIENT
 import { Order } from "@/types/orders";
 import { PageHeader } from "@/components/shared/page-header";
@@ -7,34 +6,34 @@ import { Separator } from "@repo/ui";
 import { OrderItemsTable } from "../components/order-items-table";
 import { OrderActions } from "../components/order-actions";
 import { OrderSummaryCard } from "../components/order-summary-card";
-import { notFound } from "next/navigation"; 
+import { notFound } from "next/navigation";
 import { formatMoney } from "@/utils/money";
 
-interface OrderDetailPageProps {
-  params: { orderId: string };
-}
 
 /**
  * OrderDetailPage displays the details of a single order.
  * It fetches data on the server using a request-specific, authenticated API client.
  */
-export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
-  const { orderId } = params;
-  
+export default async function OrderDetailPage({
+  params,
+}:{ params: Promise<{orderId:string}>
+}) {
+  const resolvedParams = await params
+
   // 2. CREATE A NEW, AUTHENTICATED API CLIENT FOR THIS REQUEST
   const serverApi = await createServerApiClient();
-  
+
   let order: Order;
 
   try {
     // 3. USE THE NEW SERVER CLIENT TO FETCH DATA
-    order = await serverApi.get<Order>(`/dashboard/orders/${orderId}`);
+    order = await serverApi.get<Order>(`/dashboard/orders/${resolvedParams.orderId}`);
   } catch (error) {
-    console.error(`Failed to fetch order ${orderId} on the server:`, error);
+    console.error(`Failed to fetch order ${resolvedParams.orderId} on the server:`, error);
     // If the API call fails (e.g., returns 404), trigger Next.js's 404 page.
     notFound();
   }
-  
+
   console.log("Fetched order on server:", order);
 
   return (
@@ -70,7 +69,11 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           </Card>
         </div>
         <div className="space-y-6">
-          <OrderActions orderId={order.id} initialStatus={order.status} initialPaymentStatus={order.paymentStatus} />
+          <OrderActions
+            orderId={order.id}
+            initialStatus={order.status}
+            initialPaymentStatus={order.paymentStatus}
+          />
           <OrderSummaryCard order={order} />
         </div>
       </div>

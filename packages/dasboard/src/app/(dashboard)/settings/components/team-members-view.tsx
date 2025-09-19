@@ -5,11 +5,11 @@ import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import { Button } from "@repo/ui";
 import { Plus } from "lucide-react";
 import { DataTable } from "@/components/shared/data-table";
-import { DashboardUserData } from "../page"; 
 import { columns } from "./columns";
 import { InviteUserDialog } from "./invite-user-dialog";
-import { DashboardUserRole } from "@prisma/client";
 import { UserTableMeta } from "@/types/table-meta";
+import { TenantRole } from "@/types/roles";
+import { DashboardUserData } from "@/types/users";
 
 interface TeamMembersViewProps {
   initialUsers: DashboardUserData[];
@@ -20,7 +20,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
   const [users, setUsers] = useState(initialUsers);
 
   // --- Local State Handlers ---
-  const handleUserInvited = (data: { email: string; role: DashboardUserRole }) => {
+  const handleUserInvited = (data: { email: string; role: TenantRole  }) => {
     // Create a new user object for our mock state
     const newUser: DashboardUserData = {
       id: `user_${Math.random().toString(36).substr(2, 9)}`,
@@ -68,7 +68,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
         </Button>
       </div>
       <div className="mt-4">
-        <DataTable table={table} searchKey="email" />
+        <DataTable table={table}  totalCount={9} />
       </div>
 
       <InviteUserDialog

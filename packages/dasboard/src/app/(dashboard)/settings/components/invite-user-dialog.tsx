@@ -10,17 +10,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui';
 import { Input } from '@repo/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui';
-import { DashboardUserRole } from '@/types/shared';
+import { TenantRole } from '@/types/roles';
 
 interface InviteUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (data: { email: string; role: DashboardUserRole }) => void;
+  onSuccess: (data: { email: string; role: TenantRole }) => void;
 }
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
-  role: z.nativeEnum(DashboardUserRole, { errorMap: () => ({ message: "Please select a role." }) }),
+  role: z.nativeEnum(TenantRole, { errorMap: () => ({ message: "Please select a role." }) }),
 });
 
 export function InviteUserDialog({ isOpen, onClose, onSuccess }: InviteUserDialogProps) {
@@ -52,8 +52,8 @@ export function InviteUserDialog({ isOpen, onClose, onSuccess }: InviteUserDialo
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger></FormControl>
                   <SelectContent>
-                    <SelectItem value={DashboardUserRole.ADMIN}>Admin</SelectItem>
-                    <SelectItem value={DashboardUserRole.STAFF}>Staff</SelectItem>
+                    <SelectItem value={TenantRole.ADMIN}>Admin</SelectItem>
+                    <SelectItem value={TenantRole.STAFF}>Staff</SelectItem>
                   </SelectContent>
                 </Select><FormMessage />
               </FormItem>

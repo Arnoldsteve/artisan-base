@@ -1,4 +1,7 @@
-import { Tenant } from './tenant'; 
+// src/types/user.ts
+import { TenantRole } from './roles';
+import { Tenant } from './tenant';
+
 
 /**
  * Defines the shape of the main User object, as returned by the API.
@@ -10,7 +13,7 @@ export interface User {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  // Add any other user properties you might have, like 'role'
+  role?: TenantRole ; // 🔑 add role here
 }
 
 /**
@@ -21,3 +24,12 @@ export interface ProfileResponse {
   user: User;
   organizations: Tenant[];
 }
+
+export type DashboardUserData = {
+  id: string;
+  name: string | null;
+  email: string;
+  role: TenantRole;
+  isActive: boolean;
+  createdAt: string;
+};

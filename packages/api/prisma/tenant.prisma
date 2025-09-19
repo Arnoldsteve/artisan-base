@@ -196,7 +196,7 @@ model DashboardUser {
   hashedPassword String
   firstName      String?
   lastName       String?
-  role           DashboardUserRole @default(STAFF)
+  role           TenantRole @default(STAFF)
   isActive       Boolean           @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -255,7 +255,7 @@ enum PaymentStatus {
   EXPIRED
 }
 
-enum DashboardUserRole {
+enum TenantRole  {
   OWNER
   ADMIN
   MANAGER
