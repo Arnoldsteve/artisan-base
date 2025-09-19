@@ -38,7 +38,7 @@ export function CustomerStats({ orders }: CustomerStatsProps) {
           <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">Lifetime Value</span>
             <span className="text-lg font-semibold">
-              {formatMoney(lifetimeValue)}
+              {formatMoney(Number(lifetimeValue))}
             </span>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function CustomerStats({ orders }: CustomerStatsProps) {
               Avg. Order Value
             </span>
             <span className="text-lg font-semibold">
-              {formatMoney(avgOrderValue)}
+              {formatMoney(Number(avgOrderValue))}
             </span>
           </div>
         </div>

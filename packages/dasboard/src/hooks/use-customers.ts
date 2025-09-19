@@ -3,8 +3,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { customerService } from "@/services/customer-service";
 import { toast } from "sonner";
-import { CreateCustomerDto, Customer, PaginatedResponse, UpdateCustomerDto } from "@/types/customers";
+import { CreateCustomerDto, Customer, UpdateCustomerDto } from "@/types/customers";
 import { useAuthContext } from "@/contexts/auth-context"; // <-- 1. IMPORT THE AUTH CONTEXT
+import { PaginatedResponse } from "@/types/shared";
 
 // Define a query key to uniquely identify this data
 const CUSTOMERS_QUERY_KEY = ["dashboard-customers"];

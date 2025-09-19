@@ -69,10 +69,18 @@ export default async function OrderDetailPage({
           </Card>
         </div>
         <div className="space-y-6">
-          <OrderActions
+         <OrderActions
             orderId={order.id}
             initialStatus={order.status}
             initialPaymentStatus={order.paymentStatus}
+            onUpdateStatusClick={() => {
+              console.log("Update status clicked", order.id);
+              // TODO: open modal or call API
+            }}
+            onUpdatePaymentStatusClick={() => {
+              console.log("Update payment status clicked", order.id);
+              // TODO: open modal or call API
+            }}
           />
           <OrderSummaryCard order={order} />
         </div>

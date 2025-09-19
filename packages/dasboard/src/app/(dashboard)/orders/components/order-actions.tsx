@@ -1,5 +1,6 @@
 "use client";
 
+import { OrderStatus, PaymentStatus } from "@/types/orders";
 import { Button } from "@repo/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { toast } from "sonner";
@@ -9,6 +10,8 @@ import { toast } from "sonner";
  */
 interface OrderActionsProps {
   orderId: string;
+  initialStatus: OrderStatus;
+  initialPaymentStatus: PaymentStatus;
   onUpdateStatusClick: () => void;
   onUpdatePaymentStatusClick?: () => void;
 }

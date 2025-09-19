@@ -36,8 +36,8 @@ export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAs
   // Preselect current categories
   useEffect(() => {
     if (isOpen && product) {
-      // const currentCategoryIds = product.categories?.map((c) => c.id) || [];
-      const currentCategoryIds = product.categories?.map((c) => c.category.id) || [];
+      const currentCategoryIds = product.categories?.map((c) => c.id) || [];
+
 
       setSelectedCategoryIds(currentCategoryIds);
     }
@@ -93,7 +93,7 @@ export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAs
   // Merge search results + current product categories for badge display
   const allCategoriesMap: Record<string, Category> = {};
   // product?.categories?.forEach((c) => { allCategoriesMap[c.id] = c; });
-  product?.categories?.forEach((c) => { allCategoriesMap[c.category.id] = c.category; });
+  product?.categories?.forEach((c) => { allCategoriesMap[c.id] = c; });
 
   searchResults.forEach((c) => { allCategoriesMap[c.id] = c; });
   const selectedCategories = selectedCategoryIds.map((id) => allCategoriesMap[id]).filter(Boolean);

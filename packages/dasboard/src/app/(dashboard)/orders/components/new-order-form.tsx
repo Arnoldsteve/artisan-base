@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { Loader2, X, PlusCircle, MinusCircle } from "lucide-react";
 import { productService } from "@/services/product-service";
 import { orderService } from "@/services/order-service";
-import { formatCurrency } from "@/utils/format-currency";
+import { formatMoney } from "@/utils/money";
 
 /**
  * OrderItemState combines Product info with quantity for local state.
@@ -178,7 +178,7 @@ function OrderItemsInput({
                   </Button>
                 </div>
                 <div className="w-24 text-right">
-                  {formatCurrency(item.price * item.quantity)}
+                  {formatMoney(Number(item.price) * item.quantity)}
                 </div>
               </div>
             ))
@@ -303,7 +303,7 @@ function OrderSummary({
       <CardContent>
         <div className="flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span>{formatCurrency(totalAmount)}</span>
+          <span>{formatMoney(totalAmount)}</span>
         </div>
         {formError && (
           <p className="text-sm text-destructive mt-4">{formError}</p>
@@ -510,7 +510,7 @@ export function NewOrderForm() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const totalAmount = useMemo(() => {
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+    return items.reduce((total, item) => Number(total) + Number(item.price) * item.quantity, 0);
   }, [items]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

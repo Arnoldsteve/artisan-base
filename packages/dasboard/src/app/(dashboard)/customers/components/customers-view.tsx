@@ -72,7 +72,7 @@ export function CustomersView({ initialData }: CustomersViewProps) {
     }));
   }, [paginatedResponse]);
 
-  const totalCustomers = paginatedResponse?.total || 0;
+  const totalCustomers = paginatedResponse?.meta?.total || 0;
   
   // Helper to find the original customer object from the API response
   const findOriginalCustomer = (id: string): Customer | undefined => {

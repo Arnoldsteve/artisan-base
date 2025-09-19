@@ -3,8 +3,8 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge, Checkbox, Avatar, AvatarFallback } from '@repo/ui';
 import { CellAction } from './cell-action';
-import { DashboardUserData } from '@/lib/mock-data/users';
 import { UserTableMeta, TableWithMeta } from '@/types/table-meta';
+import { DashboardUserData } from '@/types/users';
 
 // REMOVE the global module declaration completely
 // No more: declare module '@tanstack/react-table' { ... }

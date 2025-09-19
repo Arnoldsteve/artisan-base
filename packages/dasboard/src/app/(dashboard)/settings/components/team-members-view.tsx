@@ -24,7 +24,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
     // Create a new user object for our mock state
     const newUser: DashboardUserData = {
       id: `user_${Math.random().toString(36).substr(2, 9)}`,
-      name: null, // New users don't have a name yet
+      name: data.email.split("@")[0], 
       email: data.email,
       role: data.role,
       isActive: true, // New users are active by default

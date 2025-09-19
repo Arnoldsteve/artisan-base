@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { MoreHorizontal, Edit, Trash } from 'lucide-react';
 
-import { DashboardUserData } from '../page';
 import { Button } from '@repo/ui';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui';
 import { AlertModal } from '@/components/modals/alert-modal';
+import { DashboardUserData } from '@/types/users';
 
 interface CellActionProps {
   data: DashboardUserData;

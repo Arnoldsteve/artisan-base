@@ -22,6 +22,7 @@ import { Invoice } from "@/types/billing";
 // --- THIS IS THE FIX ---
 // Import the new, specific hooks for invoices
 import { useBillingInvoices, useDownloadInvoice } from "@/hooks/use-billing";
+import { formatMoney } from "@/utils/money";
 
 interface BillingInvoiceHistoryProps {
   invoices?: Invoice[];
@@ -85,10 +86,7 @@ export function BillingInvoiceHistory({
                     </TableCell>
                     <TableCell>{invoice.status}</TableCell>
                     <TableCell className="text-right">
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      }).format(invoice.amount)}
+                      {formatMoney(invoice.amount)}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button

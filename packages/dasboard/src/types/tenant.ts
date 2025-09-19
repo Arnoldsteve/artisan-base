@@ -6,6 +6,7 @@ export interface CreateTenantDto {
 export interface Tenant {
     id: string;
     subdomain: string;
+    customDomain?: string | null
     name: string;
     dbSchema: string;
     status: string;

@@ -13,8 +13,8 @@ export interface TeamMember {
   role: TenantRole;         // must match your Prisma enum
   isActive: boolean;
   avatarUrl?: string | null;
-  createdAt: string;        // ISO string
-  updatedAt: string;        // ISO string
+  createdAt: string;       
+  updatedAt: string;       
 }
 
 // Response shape for fetching all team members of a tenant

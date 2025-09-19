@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui";
-import { useRouter } from "next/navigation";
 import {
   Avatar,
   AvatarFallback,
@@ -23,11 +22,27 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth-context";
+import { useEffect, useState } from "react";
 
 export function UserNav() {
   const router = useRouter();
   const { user, logout } = useAuthContext();
+  const [avatarSrc, setAvatarSrc] = useState<string | undefined>();
+
+  // --- Handle avatar URL or Blob ---
+  useEffect(() => {
+    if (user?.avatarUrl instanceof Blob) {
+      const url = URL.createObjectURL(user.avatarUrl);
+      setAvatarSrc(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (typeof user?.avatarUrl === "string") {
+      setAvatarSrc(user.avatarUrl);
+    } else {
+      setAvatarSrc(undefined);
+    }
+  }, [user?.avatarUrl]);
 
   if (!user) {
     return null;
@@ -63,7 +78,7 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
+              <AvatarImage src={avatarSrc} alt={`${user.firstName ?? ""} ${user.lastName ?? ""}`} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col space-y-1">

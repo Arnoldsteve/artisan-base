@@ -30,10 +30,25 @@ import {
   useSidebar,
 } from "@repo/ui";
 import { useAuthContext } from "@/contexts/auth-context";
+import { useEffect, useState } from "react";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, logout } = useAuthContext();
+  const [avatarSrc, setAvatarSrc] = useState<string | undefined>();
+
+  // --- Handle avatar string vs Blob ---
+  useEffect(() => {
+    if (user?.avatarUrl instanceof Blob) {
+      const url = URL.createObjectURL(user.avatarUrl);
+      setAvatarSrc(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (typeof user?.avatarUrl === "string") {
+      setAvatarSrc(user.avatarUrl);
+    } else {
+      setAvatarSrc(undefined);
+    }
+  }, [user?.avatarUrl]);
 
   if (!user) return null;
 
@@ -56,7 +71,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatarUrl} alt={user.firstName} />
+                <AvatarImage src={avatarSrc} alt={user.firstName ?? "User"} />
                 <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -77,7 +92,7 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatarUrl} alt={user.firstName} />
+                  <AvatarImage src={avatarSrc} alt={user.firstName ?? "User"} />
                   <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

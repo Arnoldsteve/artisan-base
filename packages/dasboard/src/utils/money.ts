@@ -1,8 +1,9 @@
 // src/lib/money.ts
+import Decimal from "decimal.js";
 import { formatCurrency } from "./format-currency";
 import type { Currency } from "@/types/currency";
 
-export function formatMoney(amount: number | string, currency: Currency = "KES") {
+export function formatMoney(amount: number | string | Decimal, currency: Currency = "KES") {
   const value = Number(amount) || 0;
 
   if (currency === "KES") {
