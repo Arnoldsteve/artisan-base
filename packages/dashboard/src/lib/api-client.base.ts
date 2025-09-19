@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/lib/api-client.base.ts
-
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 // The custom error class is shared logic.

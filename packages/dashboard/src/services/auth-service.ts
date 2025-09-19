@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/services/auth-service.ts
-
 import { apiClient } from "@/lib/client-api";
 import { LoginDto, SignUpDto, LoginResponse, SignUpResponse } from "@/types/auth";
 import { ProfileResponse } from "@/types/users";

@@ -1,4 +1,3 @@
-// C:\Users\Admin\Documents\Arnold\Personal Work\artisan-base\packages\dasboard\src\components\home\RecentOrders.tsx
 "use client";
 
 import {

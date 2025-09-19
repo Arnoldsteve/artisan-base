@@ -14,7 +14,7 @@ The Order domain in this monorepo is designed for maximum maintainability, testa
   - Services encapsulate business logic and validation.
   - Repository pattern is used for data access (Prisma).
 - **Dashboard App:**
-  - Built with Next.js (see `packages/dasboard`).
+  - Built with Next.js (see `packages/dashboard`).
   - UI components are decoupled from business logic.
   - All order logic is handled by `orderService` and `orderRepository`.
   - State management is local and component-driven.
@@ -70,8 +70,8 @@ See `packages/api/src/dashboard/order/order.controller.ts` for details.
 
 ## References
 
-- [Order Service](../../packages/dasboard/src/services/order-service.ts)
-- [Order Repository](../../packages/dasboard/src/services/order-repository.ts)
+- [Order Service](../../packages/dashboard/src/services/order-service.ts)
+- [Order Repository](../../packages/dashboard/src/services/order-repository.ts)
 - [Order API Controller](../../packages/api/src/dashboard/order/order.controller.ts)
 - [Order API Service](../../packages/api/src/dashboard/order/order.service.ts)
-- [Order UI Form](../../packages/dasboard/src/app/dashboard/orders/components/NewOrderForm.tsx)
+- [Order UI Form](../../packages/dashboard/src/app/dashboard/orders/components/NewOrderForm.tsx)

@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/services/dashboard-service.ts
-
 import { apiClient } from "@/lib/client-api";
 // Import the specific response types
 import { DashboardKPI, RecentOrdersResponse, SalesOverviewResponse } from "@/types/dashboard"; 

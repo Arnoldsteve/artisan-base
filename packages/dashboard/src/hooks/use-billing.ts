@@ -1,4 +1,3 @@
-// File: packages/dasboard/src/hooks/use-billing.ts
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

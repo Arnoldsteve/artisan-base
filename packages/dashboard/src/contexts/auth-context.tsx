@@ -1,4 +1,3 @@
-// File: packages/dasboard/src/contexts/auth-context.tsx
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';

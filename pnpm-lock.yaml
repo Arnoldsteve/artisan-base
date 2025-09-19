@@ -257,7 +257,7 @@ importers:
         specifier: ^5.3.3
         version: 5.8.2
 
-  packages/dasboard:
+  packages/dashboard:
     dependencies:
       '@hookform/resolvers':
         specifier: ^5.1.1

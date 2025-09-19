@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/hooks/use-orders.ts
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orderService } from "@/services/order-service";
 import { toast } from "sonner";

@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/services/tenant-service.ts
-
 import { apiClient } from "@/lib/client-api";
 import { 
   CreateTenantDto, 

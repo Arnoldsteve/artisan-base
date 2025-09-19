@@ -1,4 +1,3 @@
-// File: packages/dasboard/src/hooks/use-dashboard.ts
 "use client";
 
 import { useQuery, useQueries } from "@tanstack/react-query";

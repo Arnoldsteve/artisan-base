@@ -1,4 +1,3 @@
-// C:\Users\Admin\Documents\Arnold\Personal Work\artisan-base\packages\dasboard\src\components\home\DashboardKpiCards.tsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@repo/ui";

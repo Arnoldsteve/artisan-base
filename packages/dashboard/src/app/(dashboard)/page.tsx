@@ -1,4 +1,3 @@
-// C:\Users\Admin\Documents\Arnold\Personal Work\artisan-base\packages\dasboard\src\app\dashboard\page.tsx
 "use client";
 
 // No UI imports are needed here anymore besides the layout

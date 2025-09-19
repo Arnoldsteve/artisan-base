@@ -1,4 +1,3 @@
-// File: packages/dasboard/src/hooks/use-auth.ts
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';

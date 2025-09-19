@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/types/auth.ts
-
 import { User } from './users'; // <-- IMPORT THE MAIN USER TYPE
 import { Tenant } from './tenant'; // <-- IMPORT THE MAIN TENANT TYPE
 

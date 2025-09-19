@@ -1,5 +1,4 @@
-// File: packages/dasboard/src/app/dashboard/customers/[customerId]/edit/page.tsx
-'use client'; // This page MUST be a client component to use hooks
+'use client'; 
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation'; // <-- 1. IMPORT useParams

@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/services/image-upload-service.ts
-
 import { apiClient } from "@/lib/client-api";
 import { Product } from "@/types/products";
 

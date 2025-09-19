@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/services/order-service.ts
-
 import { apiClient } from "@/lib/client-api"; 
 import {
   CreateOrderDto,

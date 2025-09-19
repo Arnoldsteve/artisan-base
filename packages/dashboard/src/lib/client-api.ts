@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/lib/client-api.ts
-
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { BaseApiClient, ApiError } from "./api-client.base";
 

@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/services/customer-service.ts
-
 import { apiClient } from "@/lib/client-api";
 import { CreateCustomerDto, Customer, UpdateCustomerDto } from "@/types/customers"; // Assuming you have these types
 import { PaginatedResponse } from "@/types/shared";

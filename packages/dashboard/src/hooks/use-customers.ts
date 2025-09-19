@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/hooks/use-customers.ts
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { customerService } from "@/services/customer-service";
 import { toast } from "sonner";

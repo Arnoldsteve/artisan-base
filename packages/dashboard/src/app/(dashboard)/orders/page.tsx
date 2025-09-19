@@ -1,5 +1,3 @@
-// File: packages/dasboard/src/app/dashboard/orders/page.tsx
-
 import { createServerApiClient } from '@/lib/server-api';
 import { OrdersView } from './components/orders-view';
 import { Order } from '@/types/orders';
