@@ -7,8 +7,6 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export const dynamic = "force-dynamic";
-
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
