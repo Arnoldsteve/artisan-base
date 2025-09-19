@@ -30,19 +30,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: "/api/storefront/:path*",
-  //       destination: "/api/storefront/:path*", // Keep storefront routes local
-  //     },
-  //     {
-  //       source: "/api/:path*",
-  //       destination: "http://localhost:3001/:path*", // Rewrite other API routes to backend
-  //     },
-  //   ];
-  // },
-
   webpack: (config) => {
     config.cache = false;
     return config;
