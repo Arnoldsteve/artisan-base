@@ -13,14 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui";
 import { Category } from "@/types/categories";
+import { CategoryTableMeta, TableWithMeta } from "@/types/table-meta";
 
-// Extend the TableMeta interface to include our custom functions
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends unknown> {
-    openDeleteDialog: (category: TData) => void;
-    openEditSheet: (category: TData) => void;
-  }
-}
+// REMOVE the global module declaration completely
+// No more: declare module "@tanstack/react-table" { ... }
 
 export const columns: ColumnDef<Category & { _count?: { products: number } }>[] = [
   // Column for row selection
@@ -149,6 +145,9 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     id: "actions",
     cell: ({ row, table }) => {
       const category = row.original;
+      // Type assertion for the table with CategoryTableMeta
+      const typedTable = table as TableWithMeta<Category & { _count?: { products: number } }, CategoryTableMeta<Category & { _count?: { products: number } }>>;
+      
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -161,7 +160,7 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => table.options.meta?.openEditSheet(category)}
+                onClick={() => typedTable.options.meta?.openEditSheet(category)}
               >
                 <Pencil className="w-4 h-4 mr-2 text-blue-600" />
                 Edit
@@ -173,7 +172,7 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
                 View Products
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => table.options.meta?.openDeleteDialog(category)}
+                onClick={() => typedTable.options.meta?.openDeleteDialog(category)}
               >
                 <Trash className="w-4 h-4 mr-2 text-red-600" />
                 Delete

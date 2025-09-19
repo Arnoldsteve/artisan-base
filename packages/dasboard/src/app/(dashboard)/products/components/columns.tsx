@@ -17,7 +17,7 @@ import { Product } from "@/types/products";
 import { formatMoney } from "@/utils/money";
 import { ProductTableMeta, TableWithMeta } from "@/types/table-meta";
 
-// REMOVE the global module declaration completely
+// REMOVE the global module declaration completelyREMOVE the global module declaration completely
 // No more: declare module "@tanstack/react-table" { ... }
 
 export const columns: ColumnDef<Product>[] = [

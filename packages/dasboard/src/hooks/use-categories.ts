@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { categoryService } from "@/services/category-service";
 import { toast } from "sonner";
 import { Category, CreateCategoryDto, UpdateCategoryDto } from "@/types/categories";
-import { PaginatedResponse } from "@/types/products";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types/shared";
 
 // Unique key for react-query cache
 export const CATEGORIES_QUERY_KEY = ["dashboard-categories"];

@@ -12,6 +12,13 @@ export interface ProductTableMeta<TData = any> {
   openImagePreview: (product: TData) => void;
 }
 
+export interface CategoryTableMeta<TData = any> {
+  openDeleteDialog: (category: TData) => void;
+  openEditSheet: (category: TData) => void;
+  // Add other category-specific actions as needed
+  // viewCategoryProducts?: (category: TData) => void;
+}
+
 export interface CustomerTableMeta<TData = any> {
   viewCustomerDetails: (customer: TData) => void;
   openDeleteDialog: (customer: TData) => void;

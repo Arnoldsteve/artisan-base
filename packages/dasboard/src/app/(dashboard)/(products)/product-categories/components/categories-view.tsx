@@ -15,13 +15,10 @@ import {
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { Category } from "@/types/categories";
-import { PaginatedResponse } from "@/types/products";
 
 // UI Components
 import { EditCategorySheet } from "./edit-category-sheet";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
-// import { BulkDeleteCategoriesDialog } from "./bulk-delete-categories-dialog";
-// import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
 import { toast } from "sonner";
 
@@ -33,16 +30,8 @@ import {
   useUpdateCategory,
 } from "@/hooks/use-categories";
 import { DataTableViewOptions } from "./data-table-view-options";
-
-// Helper function
-const slugify = (text: string) =>
-  text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
+import { PaginatedResponse } from "@/types/shared";
+import { CategoryTableMeta } from "@/types/table-meta";
 
 interface CategoriesViewProps {
   initialData: PaginatedResponse<Category & { _count?: { products: number } }>;
@@ -84,14 +73,26 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
   const numSelected = selectedCategoryIds.length;
 
   // --- Action Handlers ---
-  const openDeleteDialog = (category: Category) => setCategoryToDelete(category);
-  const openEditSheet = (category: Category) => { 
-    setCategoryToEdit(category); 
+  const openDeleteDialog = (category: Category & { _count?: { products: number } }) => {
+    // Convert back to base Category type for the delete dialog
+    setCategoryToDelete(category as Category);
+  };
+  
+  const openEditSheet = (category: Category & { _count?: { products: number } }) => { 
+    // Convert back to base Category type for the edit sheet
+    setCategoryToEdit(category as Category); 
     setIsSheetOpen(true); 
   };
+  
   const openAddSheet = () => { 
     setCategoryToEdit(null); 
     setIsSheetOpen(true); 
+  };
+
+  // --- Create the meta object with proper typing ---
+  const tableMeta: CategoryTableMeta<Category & { _count?: { products: number } }> = {
+    openDeleteDialog,
+    openEditSheet,
   };
 
   // --- Table Instance Initialization ---
@@ -116,10 +117,7 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: {
-      openDeleteDialog,
-      openEditSheet,
-    },
+    meta: tableMeta, // Now properly typed
   });
 
   // --- Mutation Handlers ---
