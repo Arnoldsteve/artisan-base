@@ -42,7 +42,7 @@ interface StoreSettingsProps {
   tenant: Tenant | null;
 }
 
-function StoreSettings({ tenant }: StoreSettingsProps) {
+export function StoreSettings({ tenant }: StoreSettingsProps) {
   if (!tenant)
     return <p className="text-muted-foreground">Could not load store information.</p>;
 
@@ -67,7 +67,7 @@ interface BillingSettingsProps {
   invoices: Invoice[];
 }
 
-function BillingSettings({ plans, subscription, invoices }: BillingSettingsProps) {
+export function BillingSettings({ plans, subscription, invoices }: BillingSettingsProps) {
   return (
     <div className="space-y-6">
       <BillingCurrentPlan subscription={subscription} />

@@ -2,10 +2,10 @@
 
 import { PageHeader } from "@/components/shared/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
-import { ProfileSettings } from "./profile-settings"; // must point to the file with 'use client'
-import { TeamMembersView } from "./team-members-view";
-import { StoreSettings } from "./store-settings";
-import { BillingSettings } from "./billing-settings";
+import { ProfileSettings } from "./components/profile-settings-page";
+import { TeamMembersView } from "./components/team-members-view";
+import { BillingSettings, StoreSettings } from "./components/profile-settings-page";
+
 import { ProfileResponse, User } from "@/types/users";
 import { Tenant } from "@/types/tenant";
 import { Plan, Subscription, Invoice } from "@/types/billing";
@@ -49,7 +49,7 @@ export default function SettingsPage({
 
         <TabsContent value="team" className="mt-4">
           <TeamMembersView
-            initialUsers={teamMembers.map((m) => ({
+            initialUsers={(teamMembers ?? []).map((m) => ({
               id: m.id,
               name: `${m.firstName ?? ''} ${m.lastName ?? ''}`.trim() || m.email,
               email: m.email,
