@@ -115,8 +115,12 @@ const data = {
       icon: Settings2,
       items: [
         {
-          title: "General", // contain the storename, address, currency, etc
+          title: "General",
           url: "/settings",
+        },
+        {
+          title: "Store",
+          url: "/settings/store",
         },
         {
           title: "Team",
@@ -126,28 +130,29 @@ const data = {
           title: "Billing",
           url: "/settings/billing",
         },
-        {
-          title: "Limits",
-          url: "/settings/limits",
-        },
       ],
     },
+    {
+      title: "Analytics",
+      url: "#",
+      icon: BarChart3,
+      items: [
+        {
+          title: "Reports",
+          url: "/reports",
+        },
+        { 
+          title: "Sales & Marketing",
+          url: "#" 
+        },
+      ],  
+    }
   ],
   projects: [
     {
       name: "Users",
       url: "#",
       icon: Users,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: BarChart3,
     },
   ],
 }

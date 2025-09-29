@@ -1,9 +1,17 @@
-import React from 'react'
+import React from "react";
+import { BillingSettings } from "../components/profile-settings-page";
 
-export default function page() {
+interface BillingPageProps {
+  plans: any[];
+  subscription: any;
+  invoices: any[];
+}
+export default function page({ plans, subscription, invoices }: BillingPageProps) {
   return (
-    <div>
-      Billing page
-    </div>
-  )
+    <BillingSettings
+      plans={plans}
+      subscription={subscription}
+      invoices={invoices}
+    />
+  );
 }

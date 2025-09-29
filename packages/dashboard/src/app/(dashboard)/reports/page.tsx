@@ -3,7 +3,7 @@ import React from 'react'
 export default function page() {
   return (
     <div>
-      Linits page
+      reports will be here
     </div>
   )
 }
