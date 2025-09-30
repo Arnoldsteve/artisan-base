@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { Button } from "@repo/ui/components/ui/button";
 import { StatusProgressBar } from "./StatusProgressBar";
+import { formatMoney } from "@/lib/money";
 
 export function ReturnCard({ ret }: { ret: any }) {
   const [imageError, setImageError] = useState(false);
@@ -19,48 +21,45 @@ export function ReturnCard({ ret }: { ret: any }) {
   };
 
   const formatStatus = (status: string) => {
-    return status.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
+    return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const defaultImage =
     "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop&crop=center";
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg shadow-sm">
       {/* Top Section - Product Info */}
       <div className="p-6">
         <div className="flex flex-col items-start gap-5">
-          {/* Product Image */}
-          <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-100 shadow-sm">
-            <img
-              src={ defaultImage}
-              alt={ret.itemName}
-              onError={handleImageError}
-              className="w-24 h-24 object-cover rounded-xl border-2 border-gray-100 shadow-sm"
-            />
+          {/* Top Section with Image + Title */}
+          <div className="flex flex-row items-center gap-4">
+            <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-100 shadow-sm">
+              <Image
+                src={defaultImage}
+                alt={ret.itemName}
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <h3 className="font-semibold text-gray-900 text-xl leading-tight">
+              {ret.itemName}
+            </h3>
           </div>
 
           {/* Details Section */}
           <div className="w-full">
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="font-semibold text-gray-900 text-xl leading-tight">
-                {ret.itemName}
-              </h3>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  ${ret.refundAmount.toFixed(2)}
-                </div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide">
-                  Refund Amount
-                </div>
-              </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Refund Amount
+              </span>
+              <span className="text-2xl font-bold text-gray-900">
+                {formatMoney(ret.refundAmount)}
+              </span>
             </div>
 
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-gray-600 font-medium">
                 Order: {ret.orderNumber}
               </span>

@@ -1,16 +1,39 @@
+"use client";
+
 import React, { useState } from "react";
+import Image from "next/image";
 import { mockOrders } from "./mock-orders";
 import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+} from "@repo/ui/components/ui/card";
 
-export function Step2ItemSelect({ selectedOrderId, onNext, onBack }: { selectedOrderId: string; onNext: (selectedItems: any[]) => void; onBack: () => void }) {
+export function Step2ItemSelect({
+  selectedOrderId,
+  onNext,
+  onBack,
+}: {
+  selectedOrderId: string;
+  onNext: (selectedItems: any[]) => void;
+  onBack: () => void;
+}) {
   const order = mockOrders.find((o) => o.id === selectedOrderId);
-  const [selectedItems, setSelectedItems] = useState<{ [itemId: string]: number }>({});
+  const [selectedItems, setSelectedItems] = useState<{
+    [itemId: string]: number;
+  }>({});
 
   if (!order) return <div className="text-red-500">Order not found.</div>;
 
   const handleCheckbox = (itemId: string, checked: boolean) => {
     setSelectedItems((prev) =>
-      checked ? { ...prev, [itemId]: 1 } : Object.fromEntries(Object.entries(prev).filter(([id]) => id !== itemId))
+      checked
+        ? { ...prev, [itemId]: 1 }
+        : Object.fromEntries(Object.entries(prev).filter(([id]) => id !== itemId))
     );
   };
 
@@ -18,63 +41,121 @@ export function Step2ItemSelect({ selectedOrderId, onNext, onBack }: { selectedO
     setSelectedItems((prev) => ({ ...prev, [itemId]: qty }));
   };
 
+  
+  const defaultImage =
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop&crop=center";
+
+
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Select Items to Return</h2>
-      <div className="mb-4 p-4 bg-gray-100 rounded flex justify-between items-center">
+    <div className="space-y-6">
+      {/* Title */}
+      <h2 className="text-xl font-bold">Select Items to Return</h2>
+
+      {/* Order Header */}
+      <div className="p-4 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span className="font-semibold">Order:</span> {order.id}
-          <span className="ml-4 text-sm text-gray-500">{order.date}</span>
+          <span className="ml-2 text-sm text-gray-500">{order.date}</span>
         </div>
-        <Button variant="outline" size="sm" onClick={onBack}>Back</Button>
+        <Button variant="outline" size="sm" onClick={onBack}>
+          Back
+        </Button>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+      {/* Items Grid */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {order.items.map((item) => (
-          <div key={item.id} className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border">
-            <div className="flex gap-3 items-center">
-              <input
-                type="checkbox"
-                disabled={!item.eligible}
-                checked={!!selectedItems[item.id]}
-                onChange={(e) => handleCheckbox(item.id, e.target.checked)}
-                aria-label={`Select ${item.name}`}
-              />
-              <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
-              <div>
-                <div className="font-semibold">{item.name}</div>
-                <div className="text-xs text-gray-500">Variant: {item.variant}</div>
-                <div className="text-xs text-gray-500">${item.price.toFixed(2)}</div>
-                <div className={`text-xs mt-1 ${item.eligible ? "text-green-700" : "text-red-500"}`}>
-                  {item.eligible ? "Eligible for return" : "Return window expired"}
+          <Card
+            key={item.id}
+            className="border rounded-lg shadow-sm hover:shadow-md transition"
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                {/* Checkbox */}
+                <Checkbox
+                  checked={!!selectedItems[item.id]}
+                  onCheckedChange={(checked) =>
+                    handleCheckbox(item.id, !!checked)
+                  }
+                  disabled={!item.eligible}
+                  aria-label={`Select ${item.name}`}
+                />
+
+                {/* Item Image */}
+                <Image
+                  src={defaultImage}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="w-16 h-16 object-cover rounded-md border"
+                />
+
+                {/* Item Info */}
+                <div className="flex-1">
+                  <div className="font-medium">{item.name}</div>
+                  <div className="text-xs text-gray-500">
+                    Variant: {item.variant}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    ${item.price.toFixed(2)}
+                  </div>
+                  <div
+                    className={`text-xs mt-1 font-medium ${
+                      item.eligible ? "text-green-700" : "text-red-500"
+                    }`}
+                  >
+                    {item.eligible
+                      ? "Eligible for return"
+                      : "Return window expired"}
+                  </div>
                 </div>
               </div>
-            </div>
-            {item.eligible && selectedItems[item.id] && (
-              <div className="flex items-center gap-2 mt-2">
-                <label htmlFor={`qty-${item.id}`} className="text-xs">Qty:</label>
-                <input
-                  id={`qty-${item.id}`}
-                  type="number"
-                  min={1}
-                  max={3}
-                  value={selectedItems[item.id]}
-                  onChange={(e) => handleQuantity(item.id, Math.max(1, Math.min(3, Number(e.target.value))))}
-                  className="w-16 border rounded px-2 py-1 text-sm"
-                />
-              </div>
-            )}
-          </div>
+
+              {/* Quantity Input */}
+              {item.eligible && selectedItems[item.id] && (
+                <div className="flex items-center gap-2 mt-3">
+                  <Label
+                    htmlFor={`qty-${item.id}`}
+                    className="text-xs font-medium text-gray-600"
+                  >
+                    Qty:
+                  </Label>
+                  <Input
+                    id={`qty-${item.id}`}
+                    type="number"
+                    min={1}
+                    max={3}
+                    value={selectedItems[item.id]}
+                    onChange={(e) =>
+                      handleQuantity(
+                        item.id,
+                        Math.max(1, Math.min(3, Number(e.target.value)))
+                      )
+                    }
+                    className="w-16 text-sm"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
-      <div className="flex justify-end mt-6 gap-2">
-        <Button variant="outline" onClick={onBack}>Back</Button>
+
+      {/* Footer Buttons */}
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
+        <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
+          Back
+        </Button>
         <Button
-          onClick={() => onNext(order.items.filter((item) => selectedItems[item.id]))}
+          onClick={() =>
+            onNext(order.items.filter((item) => selectedItems[item.id]))
+          }
           disabled={Object.keys(selectedItems).length === 0}
+          className="w-full sm:w-auto"
         >
           Next
         </Button>
       </div>
     </div>
   );
-} 
+}

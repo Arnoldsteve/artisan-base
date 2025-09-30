@@ -13,7 +13,7 @@ export function StartReturnTab() {
   const [returnMethod, setReturnMethod] = useState<any>(null);
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6 flex items-center gap-4">
         <span className="font-semibold">Step {step} of 5</span>
         <div className="flex-1 h-2 bg-gray-200 rounded">
