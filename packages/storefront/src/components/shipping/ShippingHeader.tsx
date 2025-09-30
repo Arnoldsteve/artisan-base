@@ -1,25 +1,53 @@
+"use client";
+
 import React from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
+import { ArrowLeft, ChevronRight, Search } from "lucide-react";
+
+const breadcrumbs = [
+  { label: "Home", href: "/" },
+  { label: "Help Center", href: "/help-center" },
+  { label: "Shipping Information" }, // current page
+];
 
 export function ShippingHeader() {
   return (
     <header className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+      {/* Left side: back + breadcrumbs */}
       <div className="flex items-center gap-4">
         <Button asChild variant="ghost" size="sm" className="px-2">
-          <a href="/help-center">← Back to Help Center</a>
+          <a href="/help-center" className="flex items-center gap-1">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </a>
         </Button>
-        <nav className="text-sm text-gray-500 flex items-center gap-2">
-          <a href="/" className="hover:underline">Home</a>
-          <span>›</span>
-          <a href="/help-center" className="hover:underline">Help Center</a>
-          <span>›</span>
-          <span className="text-gray-900 font-semibold">Shipping Information</span>
+
+        <nav className="flex items-center text-sm text-muted-foreground">
+          {breadcrumbs.map((crumb, idx) => (
+            <span key={idx} className="flex items-center gap-1">
+              {crumb.href ? (
+                <a href={crumb.href} className="hover:underline">
+                  {crumb.label}
+                </a>
+              ) : (
+                <span className="font-semibold text-foreground">
+                  {crumb.label}
+                </span>
+              )}
+              {idx < breadcrumbs.length - 1 && (
+                <ChevronRight className="h-3 w-3" />
+              )}
+            </span>
+          ))}
         </nav>
       </div>
-      <div className="flex items-center gap-2">
-        <Input placeholder="Search shipping questions..." className="w-64" />
+
+      {/* Right side: search */}
+      <div className="relative w-full md:w-64">
+        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search shipping questions..." className="pl-8" />
       </div>
     </header>
   );
-} 
+}

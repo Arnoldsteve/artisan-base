@@ -1,9 +1,19 @@
 import React from "react";
+import { Truck } from "lucide-react";
+
+function ShippingTruckIcon() {
+  return (
+    <span className="inline-block animate-bounce">
+      <Truck className="w-16 h-16 text-blue-600" aria-hidden="true" />
+    </span>
+  );
+}
 
 export function ShippingHero() {
   return (
     <section className="flex flex-col md:flex-row items-center gap-6 mb-10">
-      <div className="flex-1">
+      {/* Left Section: Text */}
+      <div className="flex-1 text-center md:text-left">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">
           Shipping Information
         </h1>
@@ -14,23 +24,10 @@ export function ShippingHero() {
           Get your orders delivered quickly and securely
         </p>
       </div>
+
+      {/* Right Section: Icon */}
       <div className="flex items-center justify-center">
-        {/* Animated shipping truck icon */}
-        <span className="inline-block animate-bounce">
-          <svg
-            width="64"
-            height="48"
-            viewBox="0 0 64 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect x="4" y="20" width="36" height="16" rx="4" fill="#2563eb" />
-            <rect x="40" y="28" width="16" height="8" rx="2" fill="#6b7280" />
-            <rect x="48" y="20" width="8" height="8" rx="2" fill="#93c5fd" />
-            <circle cx="16" cy="40" r="4" fill="#374151" />
-            <circle cx="52" cy="40" r="4" fill="#374151" />
-          </svg>
-        </span>
+        <ShippingTruckIcon />
       </div>
     </section>
   );
