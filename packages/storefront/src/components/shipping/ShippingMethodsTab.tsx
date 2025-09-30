@@ -9,7 +9,7 @@ export function ShippingMethodsTab() {
         icon={<Truck className="w-8 h-8 text-blue-600" />}
         title="Standard Shipping"
         deliveryTime="5-7 business days"
-        cost="FREE on orders over $50 or $5.99"
+        cost="FREE on orders over 50 or 5.99"
         description="Reliable delivery for everyday orders"
         bestFor="Regular purchases, non-urgent items"
         color="#2563eb"
@@ -18,7 +18,7 @@ export function ShippingMethodsTab() {
         icon={<PackageCheck className="w-8 h-8 text-orange-600" />}
         title="Express Shipping"
         deliveryTime="2-3 business days"
-        cost="$9.99"
+        cost="9.99"
         description="Faster delivery when you need it sooner"
         bestFor="Gifts, time-sensitive items"
         color="#ea580c"
@@ -27,7 +27,7 @@ export function ShippingMethodsTab() {
         icon={<Rocket className="w-8 h-8 text-red-600" />}
         title="Overnight Shipping"
         deliveryTime="1 business day"
-        cost="$19.99"
+        cost="19.99"
         description="Next-day delivery for urgent orders"
         bestFor="Last-minute gifts, urgent needs"
         color="#dc2626"

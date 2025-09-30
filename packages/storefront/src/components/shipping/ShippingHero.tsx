@@ -21,7 +21,7 @@ export function ShippingHero() {
           Fast, Reliable Shipping Worldwide
         </h2>
         <p className="text-gray-600 mb-4">
-          Get your orders delivered quickly and securely
+          Get your orders delivered quickly and securely, Learn more about our shipping methods, delivery, and tracking
         </p>
       </div>
 
