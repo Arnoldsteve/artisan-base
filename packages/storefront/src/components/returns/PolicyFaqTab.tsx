@@ -12,7 +12,7 @@ import {
 
 export function PolicyFaqTab() {
   return (
-    <div className="max-w-2xl mx-auto space-y-10">
+    <div className="max-w-7xl mx-auto px-4 py-6">
       {/* Return Policy */}
       <section>
         <h2 className="text-xl font-bold mb-4">Return Policy & FAQ</h2>
