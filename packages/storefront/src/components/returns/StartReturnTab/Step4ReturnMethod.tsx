@@ -1,5 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
+import { Card, CardContent } from "@repo/ui/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
+import { Label } from "@repo/ui/components/ui/label";
 
 const shippingOptions = [
   {
@@ -40,63 +45,74 @@ export function Step4ReturnMethod({
   );
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Return Method</h2>
-      <div className="mb-6">
-        <h3 className="font-semibold mb-2">Return Shipping Options</h3>
-        <div className="space-y-2">
-          {shippingOptions.map((opt) => (
-            <label
-              key={opt.id}
-              className="flex items-center gap-3 p-3 border rounded cursor-pointer"
-            >
-              <input
-                type="radio"
-                name="shippingOption"
-                value={opt.id}
-                checked={selectedShipping === opt.id}
-                onChange={() => setSelectedShipping(opt.id)}
-                className="accent-primary"
-              />
-              <span className="flex-1">
-                <span className="font-medium">{opt.label}</span>
-                <span className="block text-xs text-muted-foreground">
-                  {opt.description}
-                </span>
-              </span>
-            </label>
-          ))}
+    <div className="space-y-8">
+      <h2 className="text-xl font-bold">Return Method</h2>
+
+      {/* Shipping Options */}
+      <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+        <div>
+          <h3 className="font-semibold mb-3">Return Shipping Options</h3>
+          <RadioGroup
+            value={selectedShipping}
+            onValueChange={setSelectedShipping}
+            className="space-y-3"
+          >
+            {shippingOptions.map((opt) => (
+              <Card
+                key={opt.id}
+                className="cursor-pointer transition hover:shadow-sm"
+              >
+                <CardContent className="flex items-start gap-3 p-4">
+                  <RadioGroupItem value={opt.id} id={opt.id} />
+                  <div className="flex-1">
+                    <Label htmlFor={opt.id} className="font-medium">
+                      {opt.label}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {opt.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </RadioGroup>
+        </div>
+
+        {/* Refund Options */}
+        <div>
+          <h3 className="font-semibold mb-3">Refund Method</h3>
+          <RadioGroup
+            value={selectedRefund}
+            onValueChange={setSelectedRefund}
+            className="space-y-3"
+          >
+            {refundOptions.map((opt) => (
+              <Card
+                key={opt.id}
+                className="cursor-pointer transition hover:shadow-sm"
+              >
+                <CardContent className="flex items-center gap-3 p-4">
+                  <RadioGroupItem value={opt.id} id={opt.id} />
+                  <Label htmlFor={opt.id} className="font-medium">
+                    {opt.label}
+                  </Label>
+                </CardContent>
+              </Card>
+            ))}
+          </RadioGroup>
         </div>
       </div>
-      <div className="mb-6">
-        <h3 className="font-semibold mb-2">Refund Method</h3>
-        <div className="space-y-2">
-          {refundOptions.map((opt) => (
-            <label
-              key={opt.id}
-              className="flex items-center gap-3 p-3 border rounded cursor-pointer"
-            >
-              <input
-                type="radio"
-                name="refundOption"
-                value={opt.id}
-                checked={selectedRefund === opt.id}
-                onChange={() => setSelectedRefund(opt.id)}
-                className="accent-primary"
-              />
-              <span className="font-medium">{opt.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-      <div className="flex justify-end mt-6 gap-2">
-        <Button variant="outline" onClick={onBack}>
+
+      {/* Footer */}
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
+        <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
           Back
         </Button>
         <Button
           onClick={() =>
             onNext({ shipping: selectedShipping, refund: selectedRefund })
           }
+          className="w-full sm:w-auto"
         >
           Next
         </Button>
