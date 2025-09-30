@@ -84,7 +84,7 @@ export function PolicyFaqTab() {
           Need help? Our customer service team is here for you.
         </p>
         <Button asChild size="sm">
-          <a href="mailto:support@example.com">Contact Support</a>
+          <a href="mailto:satechs.solutions.com">Contact Support</a>
         </Button>
       </section>
 
