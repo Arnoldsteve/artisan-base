@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.11.1
- * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
+ * Prisma Client JS version: 6.16.2
+ * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
  */
 Prisma.prismaVersion = {
-  client: "6.11.1",
-  engine: "f40f79ec31188888a2e33acda0ecc8fd10a853a9"
+  client: "6.16.2",
+  engine: "1c57fdcd7e44b29b9313256c76699e91c3ac3c43"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -227,7 +227,7 @@ exports.TenantStatus = exports.$Enums.TenantStatus = {
   CANCELLED: 'CANCELLED'
 };
 
-exports.UserRole = exports.$Enums.UserRole = {
+exports.PlatformUserRole = exports.$Enums.PlatformUserRole = {
   PLATFORM_ADMIN: 'PLATFORM_ADMIN',
   PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
   TENANT_OWNER: 'TENANT_OWNER'

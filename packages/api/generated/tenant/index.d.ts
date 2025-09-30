@@ -133,7 +133,7 @@ export const PaymentStatus: {
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 
-export const DashboardUserRole: {
+export const TenantRole: {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
   MANAGER: 'MANAGER',
@@ -144,7 +144,7 @@ export const DashboardUserRole: {
   VIEWER: 'VIEWER'
 };
 
-export type DashboardUserRole = (typeof DashboardUserRole)[keyof typeof DashboardUserRole]
+export type TenantRole = (typeof TenantRole)[keyof typeof TenantRole]
 
 
 export const Currency: {
@@ -176,9 +176,9 @@ export type PaymentStatus = $Enums.PaymentStatus
 
 export const PaymentStatus: typeof $Enums.PaymentStatus
 
-export type DashboardUserRole = $Enums.DashboardUserRole
+export type TenantRole = $Enums.TenantRole
 
-export const DashboardUserRole: typeof $Enums.DashboardUserRole
+export const TenantRole: typeof $Enums.TenantRole
 
 export type Currency = $Enums.Currency
 
@@ -200,7 +200,7 @@ export const Currency: typeof $Enums.Currency
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -232,13 +232,6 @@ export class PrismaClient<
    * Disconnect from the database
    */
   $disconnect(): $Utils.JsPromise<void>;
-
-  /**
-   * Add a middleware
-   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
-   * @see https://pris.ly/d/extensions
-   */
-  $use(cb: Prisma.Middleware): void
 
 /**
    * Executes a prepared raw query and returns the number of affected rows.
@@ -476,8 +469,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.11.1
-   * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
+   * Prisma Client JS version: 6.16.2
+   * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
    */
   export type PrismaVersion = {
     client: string
@@ -1748,16 +1741,24 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Defaults to stdout
+     * // Shorthand for `emit: 'stdout'`
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events
+     * // Emit as events only
      * log: [
-     *   { emit: 'stdout', level: 'query' },
-     *   { emit: 'stdout', level: 'info' },
-     *   { emit: 'stdout', level: 'warn' }
-     *   { emit: 'stdout', level: 'error' }
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
      * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1772,6 +1773,10 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
+    /**
+     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     */
+    adapter?: runtime.SqlDriverAdapterFactory | null
     /**
      * Global configuration for omitting model fields by default.
      * 
@@ -1809,10 +1814,15 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
 
   export type QueryEvent = {
     timestamp: Date
@@ -1852,25 +1862,6 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
-
-  /**
-   * These options are being passed into the middleware as "params"
-   */
-  export type MiddlewareParams = {
-    model?: ModelName
-    action: PrismaAction
-    args: any
-    dataPath: string[]
-    runInTransaction: boolean
-  }
-
-  /**
-   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
-   */
-  export type Middleware<T = any> = (
-    params: MiddlewareParams,
-    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
-  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -13822,7 +13813,7 @@ export namespace Prisma {
     hashedPassword: string | null
     firstName: string | null
     lastName: string | null
-    role: $Enums.DashboardUserRole | null
+    role: $Enums.TenantRole | null
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -13834,7 +13825,7 @@ export namespace Prisma {
     hashedPassword: string | null
     firstName: string | null
     lastName: string | null
-    role: $Enums.DashboardUserRole | null
+    role: $Enums.TenantRole | null
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -13969,7 +13960,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName: string | null
     lastName: string | null
-    role: $Enums.DashboardUserRole
+    role: $Enums.TenantRole
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -14051,7 +14042,7 @@ export namespace Prisma {
       hashedPassword: string
       firstName: string | null
       lastName: string | null
-      role: $Enums.DashboardUserRole
+      role: $Enums.TenantRole
       isActive: boolean
       createdAt: Date
       updatedAt: Date
@@ -14483,7 +14474,7 @@ export namespace Prisma {
     readonly hashedPassword: FieldRef<"DashboardUser", 'String'>
     readonly firstName: FieldRef<"DashboardUser", 'String'>
     readonly lastName: FieldRef<"DashboardUser", 'String'>
-    readonly role: FieldRef<"DashboardUser", 'DashboardUserRole'>
+    readonly role: FieldRef<"DashboardUser", 'TenantRole'>
     readonly isActive: FieldRef<"DashboardUser", 'Boolean'>
     readonly createdAt: FieldRef<"DashboardUser", 'DateTime'>
     readonly updatedAt: FieldRef<"DashboardUser", 'DateTime'>
@@ -15222,16 +15213,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'DashboardUserRole'
+   * Reference to a field of type 'TenantRole'
    */
-  export type EnumDashboardUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DashboardUserRole'>
+  export type EnumTenantRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantRole'>
     
 
 
   /**
-   * Reference to a field of type 'DashboardUserRole[]'
+   * Reference to a field of type 'TenantRole[]'
    */
-  export type ListEnumDashboardUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DashboardUserRole[]'>
+  export type ListEnumTenantRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantRole[]'>
     
 
 
@@ -16077,7 +16068,7 @@ export namespace Prisma {
     hashedPassword?: StringFilter<"DashboardUser"> | string
     firstName?: StringNullableFilter<"DashboardUser"> | string | null
     lastName?: StringNullableFilter<"DashboardUser"> | string | null
-    role?: EnumDashboardUserRoleFilter<"DashboardUser"> | $Enums.DashboardUserRole
+    role?: EnumTenantRoleFilter<"DashboardUser"> | $Enums.TenantRole
     isActive?: BoolFilter<"DashboardUser"> | boolean
     createdAt?: DateTimeFilter<"DashboardUser"> | Date | string
     updatedAt?: DateTimeFilter<"DashboardUser"> | Date | string
@@ -16104,7 +16095,7 @@ export namespace Prisma {
     hashedPassword?: StringFilter<"DashboardUser"> | string
     firstName?: StringNullableFilter<"DashboardUser"> | string | null
     lastName?: StringNullableFilter<"DashboardUser"> | string | null
-    role?: EnumDashboardUserRoleFilter<"DashboardUser"> | $Enums.DashboardUserRole
+    role?: EnumTenantRoleFilter<"DashboardUser"> | $Enums.TenantRole
     isActive?: BoolFilter<"DashboardUser"> | boolean
     createdAt?: DateTimeFilter<"DashboardUser"> | Date | string
     updatedAt?: DateTimeFilter<"DashboardUser"> | Date | string
@@ -16134,7 +16125,7 @@ export namespace Prisma {
     hashedPassword?: StringWithAggregatesFilter<"DashboardUser"> | string
     firstName?: StringNullableWithAggregatesFilter<"DashboardUser"> | string | null
     lastName?: StringNullableWithAggregatesFilter<"DashboardUser"> | string | null
-    role?: EnumDashboardUserRoleWithAggregatesFilter<"DashboardUser"> | $Enums.DashboardUserRole
+    role?: EnumTenantRoleWithAggregatesFilter<"DashboardUser"> | $Enums.TenantRole
     isActive?: BoolWithAggregatesFilter<"DashboardUser"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"DashboardUser"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"DashboardUser"> | Date | string
@@ -17041,7 +17032,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
-    role?: $Enums.DashboardUserRole
+    role?: $Enums.TenantRole
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17053,7 +17044,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
-    role?: $Enums.DashboardUserRole
+    role?: $Enums.TenantRole
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17065,7 +17056,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumDashboardUserRoleFieldUpdateOperationsInput | $Enums.DashboardUserRole
+    role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17077,7 +17068,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumDashboardUserRoleFieldUpdateOperationsInput | $Enums.DashboardUserRole
+    role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17089,7 +17080,7 @@ export namespace Prisma {
     hashedPassword: string
     firstName?: string | null
     lastName?: string | null
-    role?: $Enums.DashboardUserRole
+    role?: $Enums.TenantRole
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17101,7 +17092,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumDashboardUserRoleFieldUpdateOperationsInput | $Enums.DashboardUserRole
+    role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17113,7 +17104,7 @@ export namespace Prisma {
     hashedPassword?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumDashboardUserRoleFieldUpdateOperationsInput | $Enums.DashboardUserRole
+    role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18016,11 +18007,11 @@ export namespace Prisma {
     rating?: SortOrder
   }
 
-  export type EnumDashboardUserRoleFilter<$PrismaModel = never> = {
-    equals?: $Enums.DashboardUserRole | EnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumDashboardUserRoleFilter<$PrismaModel> | $Enums.DashboardUserRole
+  export type EnumTenantRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.TenantRole | EnumTenantRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTenantRoleFilter<$PrismaModel> | $Enums.TenantRole
   }
 
   export type DashboardUserCountOrderByAggregateInput = {
@@ -18059,14 +18050,14 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
-  export type EnumDashboardUserRoleWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.DashboardUserRole | EnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumDashboardUserRoleWithAggregatesFilter<$PrismaModel> | $Enums.DashboardUserRole
+  export type EnumTenantRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TenantRole | EnumTenantRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTenantRoleWithAggregatesFilter<$PrismaModel> | $Enums.TenantRole
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumDashboardUserRoleFilter<$PrismaModel>
-    _max?: NestedEnumDashboardUserRoleFilter<$PrismaModel>
+    _min?: NestedEnumTenantRoleFilter<$PrismaModel>
+    _max?: NestedEnumTenantRoleFilter<$PrismaModel>
   }
 
   export type ProductCategoryCreateNestedManyWithoutProductInput = {
@@ -18747,8 +18738,8 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutReviewsInput, CustomerUpdateWithoutReviewsInput>, CustomerUncheckedUpdateWithoutReviewsInput>
   }
 
-  export type EnumDashboardUserRoleFieldUpdateOperationsInput = {
-    set?: $Enums.DashboardUserRole
+  export type EnumTenantRoleFieldUpdateOperationsInput = {
+    set?: $Enums.TenantRole
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -19068,21 +19059,21 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type NestedEnumDashboardUserRoleFilter<$PrismaModel = never> = {
-    equals?: $Enums.DashboardUserRole | EnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumDashboardUserRoleFilter<$PrismaModel> | $Enums.DashboardUserRole
+  export type NestedEnumTenantRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.TenantRole | EnumTenantRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTenantRoleFilter<$PrismaModel> | $Enums.TenantRole
   }
 
-  export type NestedEnumDashboardUserRoleWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.DashboardUserRole | EnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.DashboardUserRole[] | ListEnumDashboardUserRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumDashboardUserRoleWithAggregatesFilter<$PrismaModel> | $Enums.DashboardUserRole
+  export type NestedEnumTenantRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TenantRole | EnumTenantRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TenantRole[] | ListEnumTenantRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumTenantRoleWithAggregatesFilter<$PrismaModel> | $Enums.TenantRole
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumDashboardUserRoleFilter<$PrismaModel>
-    _max?: NestedEnumDashboardUserRoleFilter<$PrismaModel>
+    _min?: NestedEnumTenantRoleFilter<$PrismaModel>
+    _max?: NestedEnumTenantRoleFilter<$PrismaModel>
   }
 
   export type ProductCategoryCreateWithoutProductInput = {

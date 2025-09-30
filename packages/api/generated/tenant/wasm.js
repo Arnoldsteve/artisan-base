@@ -5,13 +5,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
 const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientInitializationError,
+  PrismaClientValidationError,
+  getPrismaClient,
+  sqltag,
+  empty,
+  join,
+  raw,
+  skip,
   Decimal,
+  Debug,
   objectEnumValues,
   makeStrictEnum,
+  Extensions,
+  warnOnce,
+  defineDmmfProperty,
   Public,
   getRuntime,
-  skip
-} = require('./runtime/index-browser.js')
+  createParam,
+} = require('./runtime/wasm-engine-edge.js')
 
 
 const Prisma = {}
@@ -20,79 +35,35 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.11.1
- * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
+ * Prisma Client JS version: 6.16.2
+ * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
  */
 Prisma.prismaVersion = {
-  client: "6.11.1",
-  engine: "f40f79ec31188888a2e33acda0ecc8fd10a853a9"
+  client: "6.16.2",
+  engine: "1c57fdcd7e44b29b9313256c76699e91c3ac3c43"
 }
 
-Prisma.PrismaClientKnownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)};
-Prisma.PrismaClientUnknownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientRustPanicError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientInitializationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientValidationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
+Prisma.PrismaClientUnknownRequestError = PrismaClientUnknownRequestError
+Prisma.PrismaClientRustPanicError = PrismaClientRustPanicError
+Prisma.PrismaClientInitializationError = PrismaClientInitializationError
+Prisma.PrismaClientValidationError = PrismaClientValidationError
 Prisma.Decimal = Decimal
 
 /**
  * Re-export of sql-template-tag
  */
-Prisma.sql = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.empty = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.join = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.raw = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.sql = sqltag
+Prisma.empty = empty
+Prisma.join = join
+Prisma.raw = raw
 Prisma.validator = Public.validator
 
 /**
 * Extensions
 */
-Prisma.getExtensionContext = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.defineExtension = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.getExtensionContext = Extensions.getExtensionContext
+Prisma.defineExtension = Extensions.defineExtension
 
 /**
  * Shorthand utilities for JSON filtering
@@ -109,10 +80,11 @@ Prisma.NullTypes = {
 
 
 
+
+
 /**
  * Enums
  */
-
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
@@ -284,6 +256,26 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.PaymentProvider = exports.$Enums.PaymentProvider = {
+  STRIPE: 'STRIPE',
+  PAYPAL: 'PAYPAL',
+  MPESA: 'MPESA',
+  AIRTEL_MONEY: 'AIRTEL_MONEY',
+  MTN_MOMO: 'MTN_MOMO',
+  PAGA: 'PAGA',
+  CASH: 'CASH',
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CHECK: 'CHECK',
+  APPLE_PAY: 'APPLE_PAY',
+  GOOGLE_PAY: 'GOOGLE_PAY',
+  AMAZON_PAY: 'AMAZON_PAY',
+  KLARNA: 'KLARNA',
+  AFTERPAY: 'AFTERPAY',
+  ALIPAY: 'ALIPAY',
+  WECHAT_PAY: 'WECHAT_PAY',
+  CRYPTO: 'CRYPTO'
+};
+
 exports.OrderStatus = exports.$Enums.OrderStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
@@ -315,6 +307,17 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   EXPIRED: 'EXPIRED'
 };
 
+exports.TenantRole = exports.$Enums.TenantRole = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  STAFF: 'STAFF',
+  SUPPORT: 'SUPPORT',
+  ACCOUNTANT: 'ACCOUNTANT',
+  MARKETER: 'MARKETER',
+  VIEWER: 'VIEWER'
+};
+
 exports.Currency = exports.$Enums.Currency = {
   USD: 'USD',
   EUR: 'EUR',
@@ -326,37 +329,6 @@ exports.Currency = exports.$Enums.Currency = {
   CNY: 'CNY',
   INR: 'INR',
   KES: 'KES'
-};
-
-exports.PaymentProvider = exports.$Enums.PaymentProvider = {
-  STRIPE: 'STRIPE',
-  PAYPAL: 'PAYPAL',
-  MPESA: 'MPESA',
-  AIRTEL_MONEY: 'AIRTEL_MONEY',
-  MTN_MOMO: 'MTN_MOMO',
-  PAGA: 'PAGA',
-  CASH: 'CASH',
-  BANK_TRANSFER: 'BANK_TRANSFER',
-  CHECK: 'CHECK',
-  APPLE_PAY: 'APPLE_PAY',
-  GOOGLE_PAY: 'GOOGLE_PAY',
-  AMAZON_PAY: 'AMAZON_PAY',
-  KLARNA: 'KLARNA',
-  AFTERPAY: 'AFTERPAY',
-  ALIPAY: 'ALIPAY',
-  WECHAT_PAY: 'WECHAT_PAY',
-  CRYPTO: 'CRYPTO'
-};
-
-exports.DashboardUserRole = exports.$Enums.DashboardUserRole = {
-  OWNER: 'OWNER',
-  ADMIN: 'ADMIN',
-  MANAGER: 'MANAGER',
-  STAFF: 'STAFF',
-  SUPPORT: 'SUPPORT',
-  ACCOUNTANT: 'ACCOUNTANT',
-  MARKETER: 'MARKETER',
-  VIEWER: 'VIEWER'
 };
 
 exports.Prisma.ModelName = {
@@ -372,34 +344,83 @@ exports.Prisma.ModelName = {
   Review: 'Review',
   DashboardUser: 'DashboardUser'
 };
-
 /**
- * This is a stub Prisma Client that will error at runtime if called.
+ * Create the Client
  */
-class PrismaClient {
-  constructor() {
-    return new Proxy(this, {
-      get(target, prop) {
-        let message
-        const runtime = getRuntime()
-        if (runtime.isEdge) {
-          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
-- Use Prisma Accelerate: https://pris.ly/d/accelerate
-- Use Driver Adapters: https://pris.ly/d/driver-adapters
-`;
-        } else {
-          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
-        }
-
-        message += `
-If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
-
-        throw new Error(message)
+const config = {
+  "generator": {
+    "name": "tenant_template_generator",
+    "provider": {
+      "fromEnvVar": null,
+      "value": "prisma-client-js"
+    },
+    "output": {
+      "value": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\generated\\tenant",
+      "fromEnvVar": null
+    },
+    "config": {
+      "engineType": "library"
+    },
+    "binaryTargets": [
+      {
+        "fromEnvVar": null,
+        "value": "windows",
+        "native": true
       }
-    })
+    ],
+    "previewFeatures": [],
+    "sourceFilePath": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\prisma\\tenant.prisma",
+    "isCustomOutput": true
+  },
+  "relativeEnvPaths": {
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../.env"
+  },
+  "relativePath": "../../prisma",
+  "clientVersion": "6.16.2",
+  "engineVersion": "1c57fdcd7e44b29b9313256c76699e91c3ac3c43",
+  "datasourceNames": [
+    "db"
+  ],
+  "activeProvider": "postgresql",
+  "postinstall": false,
+  "inlineDatasources": {
+    "db": {
+      "url": {
+        "fromEnvVar": "DATABASE_URL",
+        "value": null
+      }
+    }
+  },
+  "inlineSchema": "// =================================================================\n// ||                TENANT TEMPLATE PRISMA SCHEMA                ||\n// =================================================================\n// This file is a TEMPLATE. It defines the database structure for a\n// SINGLE e-commerce store. It will be replicated into a new\n// PostgreSQL schema for each new tenant during onboarding.\n\ngenerator tenant_template_generator {\n  provider = \"prisma-client-js\"\n  // This output is for reference and to help create migrations.\n  // It will NOT be used directly in the running application.\n  output   = \"../generated/tenant\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ===============================================\n// Models for each tenant's schema\n// ===============================================\n\nmodel Product {\n  id                String            @id @default(cuid())\n  name              String\n  slug              String            @unique\n  description       String?           @db.Text\n  price             Decimal           @db.Decimal(10, 2)\n  sku               String?           @unique\n  inventoryQuantity Int               @default(0)\n  isFeatured        Boolean           @default(false)\n  isActive          Boolean           @default(true)\n  images            Json              @default(\"[]\")\n  categories        ProductCategory[]\n  variants          ProductVariant[]\n  orderItems        OrderItem[]\n  reviews           Review[]\n  createdAt         DateTime          @default(now())\n  updatedAt         DateTime          @updatedAt\n\n  @@map(\"products\")\n}\n\nmodel Category {\n  id          String            @id @default(cuid())\n  name        String\n  slug        String            @unique\n  description String?\n  products    ProductCategory[]\n  createdAt   DateTime          @default(now())\n  updatedAt   DateTime          @updatedAt\n\n  @@map(\"categories\")\n}\n\nmodel ProductCategory {\n  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)\n  productId  String\n  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)\n  categoryId String\n\n  @@id([productId, categoryId])\n  @@map(\"product_categories\")\n}\n\nmodel ProductVariant {\n  id                String      @id @default(cuid())\n  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)\n  productId         String\n  name              String\n  sku               String?     @unique\n  inventoryQuantity Int         @default(0)\n  price             Decimal?    @db.Decimal(10, 2)\n  attributes        Json        @default(\"{}\")\n  orderItems        OrderItem[]\n\n  @@map(\"product_variants\")\n}\n\nmodel Order {\n  id              String        @id @default(cuid())\n  orderSequence   Int\n  orderNumber     String        @unique\n  status          OrderStatus   @default(PENDING)\n  paymentStatus   PaymentStatus @default(PENDING)\n  currency        Currency\n  totalAmount     Decimal       @db.Decimal(10, 2)\n  subtotal        Decimal       @db.Decimal(10, 2)\n  taxAmount       Decimal       @default(0) @db.Decimal(10, 2)\n  shippingAmount  Decimal       @default(0) @db.Decimal(10, 2)\n  notes           String?\n  shippingAddress Json\n  billingAddress  Json\n  items           OrderItem[]\n  customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)\n  customerId      String?\n  payments        Payment[]\n  createdAt       DateTime      @default(now())\n  updatedAt       DateTime      @updatedAt\n\n  @@index([orderSequence])\n  @@map(\"orders\")\n}\n\nmodel OrderItem {\n  id          String          @id @default(cuid())\n  quantity    Int\n  unitPrice   Decimal         @db.Decimal(10, 2)\n  productName String\n  variantName String?\n  sku         String?\n  image       String?\n  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)\n  orderId     String\n  product     Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)\n  productId   String?\n  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)\n  variantId   String?\n\n  @@map(\"order_items\")\n}\n\nmodel Payment {\n  id                    String          @id @default(cuid())\n  orderId               String\n  order                 Order           @relation(fields: [orderId], references: [id])\n  provider              PaymentProvider\n  providerTransactionId String\n  amount                Decimal         @db.Decimal(10, 2)\n  currency              Currency\n  status                PaymentStatus   @default(PENDING)\n  checkoutRequestId     String?         @unique\n  metadata              Json?\n  createdAt             DateTime        @default(now())\n  updatedAt             DateTime        @updatedAt\n\n  @@unique([provider, providerTransactionId])\n  @@map(\"payments\")\n}\n\nmodel Customer {\n  id             String    @id @default(cuid())\n  email          String    @unique\n  firstName      String?\n  lastName       String?\n  hashedPassword String?\n  phone          String?\n  addresses      Address[]\n  orders         Order[]\n  reviews        Review[]\n  createdAt      DateTime  @default(now())\n  updatedAt      DateTime  @updatedAt\n\n  @@map(\"customers\")\n}\n\nmodel Address {\n  id           String   @id @default(cuid())\n  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)\n  customerId   String\n  type         String\n  firstName    String\n  lastName     String\n  addressLine1 String\n  addressLine2 String?\n  city         String\n  state        String\n  postalCode   String\n  country      String\n  isDefault    Boolean  @default(false)\n\n  @@map(\"customer_addresses\")\n}\n\nmodel Review {\n  id         String   @id @default(cuid())\n  rating     Int\n  comment    String?\n  isVerified Boolean  @default(false)\n  isApproved Boolean  @default(false)\n  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)\n  productId  String\n  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)\n  customerId String\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  @@unique([productId, customerId])\n  @@map(\"reviews\")\n}\n\nmodel DashboardUser {\n  id             String     @id @default(cuid())\n  email          String     @unique\n  hashedPassword String\n  firstName      String?\n  lastName       String?\n  role           TenantRole @default(STAFF)\n  isActive       Boolean    @default(true)\n  createdAt      DateTime   @default(now())\n  updatedAt      DateTime   @updatedAt\n\n  @@map(\"dashboard_users\")\n}\n\nenum PaymentProvider {\n  STRIPE\n  PAYPAL\n  MPESA\n  AIRTEL_MONEY\n  MTN_MOMO\n  PAGA\n  CASH\n  BANK_TRANSFER\n  CHECK\n  APPLE_PAY\n  GOOGLE_PAY\n  AMAZON_PAY\n  KLARNA\n  AFTERPAY\n  ALIPAY\n  WECHAT_PAY\n  CRYPTO\n}\n\nenum OrderStatus {\n  PENDING\n  CONFIRMED\n  PROCESSING\n  PACKED\n  SHIPPED\n  IN_TRANSIT\n  OUT_FOR_DELIVERY\n  DELIVERED\n  PARTIALLY_DELIVERED\n  RETURN_REQUESTED\n  RETURNED\n  REFUNDED\n  FAILED_DELIVERY\n  CANCELLED\n}\n\nenum PaymentStatus {\n  PENDING\n  PROCESSING\n  PARTIALLY_PAID\n  PAID\n  OVERPAID\n  FAILED\n  CANCELLED\n  REFUNDED\n  PARTIALLY_REFUNDED\n  CHARGEBACK\n  EXPIRED\n}\n\nenum TenantRole {\n  OWNER\n  ADMIN\n  MANAGER\n  STAFF\n  SUPPORT\n  ACCOUNTANT\n  MARKETER\n  VIEWER\n}\n\nenum Currency {\n  USD\n  EUR\n  GBP\n  JPY\n  AUD\n  CAD\n  CHF\n  CNY\n  INR\n  KES\n}\n",
+  "inlineSchemaHash": "f130a40b59455d5c9f6d7a2060cf27e3fd07b65125c60e21e29cf1c48a2466a5",
+  "copyEngine": true
+}
+config.dirname = '/'
+
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"slug\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"sku\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"inventoryQuantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"isFeatured\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"images\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"categories\",\"kind\":\"object\",\"type\":\"ProductCategory\",\"relationName\":\"ProductToProductCategory\"},{\"name\":\"variants\",\"kind\":\"object\",\"type\":\"ProductVariant\",\"relationName\":\"ProductToProductVariant\"},{\"name\":\"orderItems\",\"kind\":\"object\",\"type\":\"OrderItem\",\"relationName\":\"OrderItemToProduct\"},{\"name\":\"reviews\",\"kind\":\"object\",\"type\":\"Review\",\"relationName\":\"ProductToReview\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"products\"},\"Category\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"slug\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"products\",\"kind\":\"object\",\"type\":\"ProductCategory\",\"relationName\":\"CategoryToProductCategory\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"categories\"},\"ProductCategory\":{\"fields\":[{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToProductCategory\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"category\",\"kind\":\"object\",\"type\":\"Category\",\"relationName\":\"CategoryToProductCategory\"},{\"name\":\"categoryId\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":\"product_categories\"},\"ProductVariant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToProductVariant\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sku\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"inventoryQuantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"attributes\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"orderItems\",\"kind\":\"object\",\"type\":\"OrderItem\",\"relationName\":\"OrderItemToProductVariant\"}],\"dbName\":\"product_variants\"},\"Order\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderSequence\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"orderNumber\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"OrderStatus\"},{\"name\":\"paymentStatus\",\"kind\":\"enum\",\"type\":\"PaymentStatus\"},{\"name\":\"currency\",\"kind\":\"enum\",\"type\":\"Currency\"},{\"name\":\"totalAmount\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"subtotal\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"taxAmount\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"shippingAmount\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"notes\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"shippingAddress\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"billingAddress\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"items\",\"kind\":\"object\",\"type\":\"OrderItem\",\"relationName\":\"OrderToOrderItem\"},{\"name\":\"customer\",\"kind\":\"object\",\"type\":\"Customer\",\"relationName\":\"CustomerToOrder\"},{\"name\":\"customerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"payments\",\"kind\":\"object\",\"type\":\"Payment\",\"relationName\":\"OrderToPayment\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"orders\"},\"OrderItem\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"quantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"unitPrice\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"productName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"variantName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sku\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"order\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"OrderToOrderItem\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"OrderItemToProduct\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"variant\",\"kind\":\"object\",\"type\":\"ProductVariant\",\"relationName\":\"OrderItemToProductVariant\"},{\"name\":\"variantId\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":\"order_items\"},\"Payment\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"order\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"OrderToPayment\"},{\"name\":\"provider\",\"kind\":\"enum\",\"type\":\"PaymentProvider\"},{\"name\":\"providerTransactionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"currency\",\"kind\":\"enum\",\"type\":\"Currency\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"PaymentStatus\"},{\"name\":\"checkoutRequestId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"metadata\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"payments\"},\"Customer\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"addresses\",\"kind\":\"object\",\"type\":\"Address\",\"relationName\":\"AddressToCustomer\"},{\"name\":\"orders\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"CustomerToOrder\"},{\"name\":\"reviews\",\"kind\":\"object\",\"type\":\"Review\",\"relationName\":\"CustomerToReview\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"customers\"},\"Address\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"customer\",\"kind\":\"object\",\"type\":\"Customer\",\"relationName\":\"AddressToCustomer\"},{\"name\":\"customerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"addressLine1\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"addressLine2\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"state\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"postalCode\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isDefault\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":\"customer_addresses\"},\"Review\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"rating\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isVerified\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"isApproved\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToReview\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"customer\",\"kind\":\"object\",\"type\":\"Customer\",\"relationName\":\"CustomerToReview\"},{\"name\":\"customerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"reviews\"},\"DashboardUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"TenantRole\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"dashboard_users\"}},\"enums\":{},\"types\":{}}")
+defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
+config.engineWasm = {
+  getRuntime: async () => require('./query_engine_bg.js'),
+  getQueryEngineWasmModule: async () => {
+    const loader = (await import('#wasm-engine-loader')).default
+    const engine = (await loader).default
+    return engine
   }
 }
+config.compilerWasm = undefined
 
+config.injectableEdgeEnv = () => ({
+  parsed: {
+    DATABASE_URL: typeof globalThis !== 'undefined' && globalThis['DATABASE_URL'] || typeof process !== 'undefined' && process.env && process.env.DATABASE_URL || undefined
+  }
+})
+
+if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined) {
+  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined)
+}
+
+const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
-
 Object.assign(exports, Prisma)
+

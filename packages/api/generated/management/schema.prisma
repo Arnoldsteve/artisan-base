@@ -49,12 +49,12 @@ model Tenant {
 
 // Represents a user of the SAAS PLATFORM itself, not a tenant's customer.
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String           @id @default(cuid())
+  email          String           @unique
   hashedPassword String
   firstName      String?
   lastName       String?
-  role           UserRole @default(TENANT_OWNER) // Platform-level roles
+  role           PlatformUserRole @default(TENANT_OWNER) // Platform-level roles
 
   // The tenant that this user owns (if any).
   ownedTenant Tenant[]
@@ -168,7 +168,7 @@ enum SubscriptionStatus {
   UNPAID
 }
 
-enum UserRole {
+enum PlatformUserRole {
   PLATFORM_ADMIN // Full platform access
   PLATFORM_SUPPORT // Customer support access
   TENANT_OWNER // Owns tenant stores

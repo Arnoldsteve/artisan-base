@@ -22,39 +22,34 @@ datasource db {
 // ===============================================
 
 model Product {
-  id                String  @id @default(cuid())
+  id                String            @id @default(cuid())
   name              String
-  slug              String  @unique
-  description       String? @db.Text
-  price             Decimal @db.Decimal(10, 2)
-  sku               String? @unique
-  inventoryQuantity Int     @default(0)
-  isFeatured        Boolean @default(false)
-  isActive          Boolean @default(true)
-
-  images Json @default("[]")
-
-  categories ProductCategory[]
-  variants   ProductVariant[]
-  orderItems OrderItem[]
-  reviews    Review[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  slug              String            @unique
+  description       String?           @db.Text
+  price             Decimal           @db.Decimal(10, 2)
+  sku               String?           @unique
+  inventoryQuantity Int               @default(0)
+  isFeatured        Boolean           @default(false)
+  isActive          Boolean           @default(true)
+  images            Json              @default("[]")
+  categories        ProductCategory[]
+  variants          ProductVariant[]
+  orderItems        OrderItem[]
+  reviews           Review[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@map("products")
 }
 
 model Category {
-  id          String  @id @default(cuid())
+  id          String            @id @default(cuid())
   name        String
-  slug        String  @unique
+  slug        String            @unique
   description String?
-
-  products ProductCategory[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  products    ProductCategory[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@map("categories")
 }
@@ -70,110 +65,92 @@ model ProductCategory {
 }
 
 model ProductVariant {
-  id                String  @id @default(cuid())
-  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id                String      @id @default(cuid())
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId         String
   name              String
-  sku               String? @unique
-  inventoryQuantity Int     @default(0)
-
-  price Decimal? @db.Decimal(10, 2)
-
-  attributes Json @default("{}")
-
-  orderItems OrderItem[]
+  sku               String?     @unique
+  inventoryQuantity Int         @default(0)
+  price             Decimal?    @db.Decimal(10, 2)
+  attributes        Json        @default("{}")
+  orderItems        OrderItem[]
 
   @@map("product_variants")
 }
 
 model Order {
-  id            String        @id @default(cuid())
-  orderSequence Int
-  orderNumber   String        @unique
-  status        OrderStatus   @default(PENDING)
-  paymentStatus PaymentStatus @default(PENDING)
-
-  // --- ADDED FIELD ---
-  // The currency of the order itself, for display and reporting.
-  currency Currency
-
-  totalAmount    Decimal @db.Decimal(10, 2)
-  subtotal       Decimal @db.Decimal(10, 2)
-  taxAmount      Decimal @default(0) @db.Decimal(10, 2)
-  shippingAmount Decimal @default(0) @db.Decimal(10, 2)
-  notes          String?
-
+  id              String        @id @default(cuid())
+  orderSequence   Int
+  orderNumber     String        @unique
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  currency        Currency
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  subtotal        Decimal       @db.Decimal(10, 2)
+  taxAmount       Decimal       @default(0) @db.Decimal(10, 2)
+  shippingAmount  Decimal       @default(0) @db.Decimal(10, 2)
+  notes           String?
   shippingAddress Json
   billingAddress  Json
-
-  items      OrderItem[]
-  customer   Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  customerId String?
-
-  payments Payment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  items           OrderItem[]
+  customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId      String?
+  payments        Payment[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([orderSequence])
   @@map("orders")
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  unitPrice Decimal @db.Decimal(10, 2)
-
+  id          String          @id @default(cuid())
+  quantity    Int
+  unitPrice   Decimal         @db.Decimal(10, 2)
   productName String
   variantName String?
   sku         String?
   image       String?
-
-  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   String
-  product   Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
-  productId String?
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
-  variantId String?
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  product     Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantId   String?
 
   @@map("order_items")
 }
 
 model Payment {
-  id      String @id @default(cuid())
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id])
-
+  id                    String          @id @default(cuid())
+  orderId               String
+  order                 Order           @relation(fields: [orderId], references: [id])
   provider              PaymentProvider
   providerTransactionId String
   amount                Decimal         @db.Decimal(10, 2)
   currency              Currency
   status                PaymentStatus   @default(PENDING)
-
-  checkoutRequestId String? @unique
-  metadata          Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  checkoutRequestId     String?         @unique
+  metadata              Json?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
 
   @@unique([provider, providerTransactionId])
   @@map("payments")
 }
 
 model Customer {
-  id             String  @id @default(cuid())
-  email          String  @unique
+  id             String    @id @default(cuid())
+  email          String    @unique
   firstName      String?
   lastName       String?
   hashedPassword String?
   phone          String?
-
-  addresses Address[]
-  orders    Order[]
-  reviews   Review[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  addresses      Address[]
+  orders         Order[]
+  reviews        Review[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("customers")
 }
@@ -197,35 +174,32 @@ model Address {
 }
 
 model Review {
-  id         String  @id @default(cuid())
+  id         String   @id @default(cuid())
   rating     Int
   comment    String?
-  isVerified Boolean @default(false)
-  isApproved Boolean @default(false)
-
+  isVerified Boolean  @default(false)
+  isApproved Boolean  @default(false)
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  String
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   customerId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([productId, customerId])
   @@map("reviews")
 }
 
 model DashboardUser {
-  id             String            @id @default(cuid())
-  email          String            @unique
+  id             String     @id @default(cuid())
+  email          String     @unique
   hashedPassword String
   firstName      String?
   lastName       String?
-  role           DashboardUserRole @default(STAFF)
-  isActive       Boolean           @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role           TenantRole @default(STAFF)
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   @@map("dashboard_users")
 }
@@ -281,7 +255,7 @@ enum PaymentStatus {
   EXPIRED
 }
 
-enum DashboardUserRole {
+enum TenantRole {
   OWNER
   ADMIN
   MANAGER

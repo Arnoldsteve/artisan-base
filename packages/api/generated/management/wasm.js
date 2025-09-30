@@ -5,13 +5,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
 const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientInitializationError,
+  PrismaClientValidationError,
+  getPrismaClient,
+  sqltag,
+  empty,
+  join,
+  raw,
+  skip,
   Decimal,
+  Debug,
   objectEnumValues,
   makeStrictEnum,
+  Extensions,
+  warnOnce,
+  defineDmmfProperty,
   Public,
   getRuntime,
-  skip
-} = require('./runtime/index-browser.js')
+  createParam,
+} = require('./runtime/wasm-engine-edge.js')
 
 
 const Prisma = {}
@@ -20,79 +35,35 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.11.1
- * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
+ * Prisma Client JS version: 6.16.2
+ * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
  */
 Prisma.prismaVersion = {
-  client: "6.11.1",
-  engine: "f40f79ec31188888a2e33acda0ecc8fd10a853a9"
+  client: "6.16.2",
+  engine: "1c57fdcd7e44b29b9313256c76699e91c3ac3c43"
 }
 
-Prisma.PrismaClientKnownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)};
-Prisma.PrismaClientUnknownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientRustPanicError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientInitializationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientValidationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
+Prisma.PrismaClientUnknownRequestError = PrismaClientUnknownRequestError
+Prisma.PrismaClientRustPanicError = PrismaClientRustPanicError
+Prisma.PrismaClientInitializationError = PrismaClientInitializationError
+Prisma.PrismaClientValidationError = PrismaClientValidationError
 Prisma.Decimal = Decimal
 
 /**
  * Re-export of sql-template-tag
  */
-Prisma.sql = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.empty = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.join = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.raw = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.sql = sqltag
+Prisma.empty = empty
+Prisma.join = join
+Prisma.raw = raw
 Prisma.validator = Public.validator
 
 /**
 * Extensions
 */
-Prisma.getExtensionContext = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.defineExtension = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.getExtensionContext = Extensions.getExtensionContext
+Prisma.defineExtension = Extensions.defineExtension
 
 /**
  * Shorthand utilities for JSON filtering
@@ -109,10 +80,11 @@ Prisma.NullTypes = {
 
 
 
+
+
 /**
  * Enums
  */
-
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
@@ -227,12 +199,6 @@ exports.TenantStatus = exports.$Enums.TenantStatus = {
   CANCELLED: 'CANCELLED'
 };
 
-exports.UserRole = exports.$Enums.UserRole = {
-  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
-  PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
-  TENANT_OWNER: 'TENANT_OWNER'
-};
-
 exports.BillingCycle = exports.$Enums.BillingCycle = {
   MONTHLY: 'MONTHLY',
   YEARLY: 'YEARLY'
@@ -245,6 +211,12 @@ exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
   UNPAID: 'UNPAID'
 };
 
+exports.PlatformUserRole = exports.$Enums.PlatformUserRole = {
+  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
+  PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
+  TENANT_OWNER: 'TENANT_OWNER'
+};
+
 exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   User: 'User',
@@ -253,34 +225,83 @@ exports.Prisma.ModelName = {
   SubscriptionPayment: 'SubscriptionPayment',
   PaymentIndex: 'PaymentIndex'
 };
-
 /**
- * This is a stub Prisma Client that will error at runtime if called.
+ * Create the Client
  */
-class PrismaClient {
-  constructor() {
-    return new Proxy(this, {
-      get(target, prop) {
-        let message
-        const runtime = getRuntime()
-        if (runtime.isEdge) {
-          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
-- Use Prisma Accelerate: https://pris.ly/d/accelerate
-- Use Driver Adapters: https://pris.ly/d/driver-adapters
-`;
-        } else {
-          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
-        }
-
-        message += `
-If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
-
-        throw new Error(message)
+const config = {
+  "generator": {
+    "name": "client",
+    "provider": {
+      "fromEnvVar": null,
+      "value": "prisma-client-js"
+    },
+    "output": {
+      "value": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\generated\\management",
+      "fromEnvVar": null
+    },
+    "config": {
+      "engineType": "library"
+    },
+    "binaryTargets": [
+      {
+        "fromEnvVar": null,
+        "value": "windows",
+        "native": true
       }
-    })
+    ],
+    "previewFeatures": [],
+    "sourceFilePath": "C:\\Users\\Admin\\Documents\\Arnold\\ps-w\\artisan-base\\packages\\api\\prisma\\management.prisma",
+    "isCustomOutput": true
+  },
+  "relativeEnvPaths": {
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../.env"
+  },
+  "relativePath": "../../prisma",
+  "clientVersion": "6.16.2",
+  "engineVersion": "1c57fdcd7e44b29b9313256c76699e91c3ac3c43",
+  "datasourceNames": [
+    "db"
+  ],
+  "activeProvider": "postgresql",
+  "postinstall": false,
+  "inlineDatasources": {
+    "db": {
+      "url": {
+        "fromEnvVar": "DATABASE_URL",
+        "value": null
+      }
+    }
+  },
+  "inlineSchema": "// =================================================================\n// ||                COMPLETE MANAGEMENT SCHEMA                   ||\n// =================================================================\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/management\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// Represents the tenant (a single store)\nmodel Tenant {\n  id           String            @id @default(cuid())\n  name         String\n  subdomain    String            @unique\n  customDomain String?           @unique\n  dbSchema     String            @unique\n  status       TenantStatus      @default(PENDING)\n  suspendedAt  DateTime?\n  deletedAt    DateTime?\n  owner        User              @relation(fields: [ownerId], references: [id])\n  ownerId      String\n  plan         SubscriptionPlan? @relation(fields: [planId], references: [id])\n  planId       String?\n\n  // --- FIELD ADDED ---\n  // Stores the Stripe Customer ID (cus_...) associated with this tenant.\n  stripeCustomerId String? @unique\n\n  subscription TenantSubscription?\n  settings     Json?\n\n  // Back-relations added by `prisma format`\n  paymentIndices      PaymentIndex[]\n  SubscriptionPayment SubscriptionPayment[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@index([ownerId])\n  @@index([planId])\n  @@index([status])\n  @@map(\"tenants\")\n}\n\n// Represents a user of the SAAS PLATFORM itself, not a tenant's customer.\nmodel User {\n  id             String           @id @default(cuid())\n  email          String           @unique\n  hashedPassword String\n  firstName      String?\n  lastName       String?\n  role           PlatformUserRole @default(TENANT_OWNER) // Platform-level roles\n\n  // The tenant that this user owns (if any).\n  ownedTenant Tenant[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@map(\"users\")\n}\n\n// Defines the available subscription plans you offer (e.g., Basic, Pro).\nmodel SubscriptionPlan {\n  id           String       @id @default(cuid())\n  name         String // \"Basic\", \"Pro\", \"Enterprise\"\n  price        Decimal      @db.Decimal(10, 2)\n  billingCycle BillingCycle\n\n  // --- FIELD ADDED ---\n  // Stores the Stripe/PayPal Price ID (e.g., 'price_...').\n  providerPlanId String? @unique\n\n  // A JSONB field to control features and limits.\n  features Json\n\n  tenants       Tenant[]\n  subscriptions TenantSubscription[]\n\n  createdAt DateTime @default(now())\n\n  @@map(\"subscription_plans\")\n}\n\n// Represents a tenant's active subscription instance.\nmodel TenantSubscription {\n  id                     String             @id @default(cuid())\n  tenantId               String             @unique\n  tenant                 Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  planId                 String\n  plan                   SubscriptionPlan   @relation(fields: [planId], references: [id])\n  status                 SubscriptionStatus @default(ACTIVE)\n  provider               String             @default(\"STRIPE\")\n  providerSubscriptionId String?\n\n  // Timestamps managed by the payment provider (e.g., Stripe)\n  currentPeriodStart DateTime\n  currentPeriodEnd   DateTime\n\n  // Back-relation added by `prisma format`\n  SubscriptionPayment SubscriptionPayment[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@unique([provider, providerSubscriptionId])\n  @@map(\"tenant_subscriptions\")\n}\n\n// Tenant payment for the platform\nmodel SubscriptionPayment {\n  id       String @id @default(cuid())\n  tenantId String\n  tenant   Tenant @relation(fields: [tenantId], references: [id])\n\n  amount   Decimal @db.Decimal(10, 2)\n  currency String // e.g., \"USD\", \"KES\"\n  status   String // Standardized: \"COMPLETED\", \"FAILED\", \"REFUNDED\"\n\n  provider              String // \"STRIPE\", \"PAYPAL\", \"MPESA\"\n  providerTransactionId String // The unique Invoice/Transaction ID from the provider\n\n  // Link to the subscription this payment is for\n  subscriptionId String\n  subscription   TenantSubscription @relation(fields: [subscriptionId], references: [id])\n\n  createdAt DateTime @default(now())\n\n  @@unique([provider, providerTransactionId])\n  @@index([tenantId])\n  @@map(\"subscription_payments\")\n}\n\nmodel PaymentIndex {\n  id                String   @id @default(cuid())\n  tenantId          String\n  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)\n  orderId           String // The ID of the order within the tenant's schema\n  checkoutRequestId String   @unique // The temporary ID from the payment provider\n  createdAt         DateTime @default(now())\n\n  @@index([tenantId])\n  @@map(\"payment_indices\")\n}\n\n// --- Enums ---\nenum TenantStatus {\n  PENDING\n  ACTIVE\n  SUSPENDED\n  CANCELLED\n}\n\nenum BillingCycle {\n  MONTHLY\n  YEARLY\n}\n\nenum SubscriptionStatus {\n  ACTIVE\n  CANCELLED\n  PAST_DUE\n  UNPAID\n}\n\nenum PlatformUserRole {\n  PLATFORM_ADMIN // Full platform access\n  PLATFORM_SUPPORT // Customer support access\n  TENANT_OWNER // Owns tenant stores\n}\n",
+  "inlineSchemaHash": "8d47445bb5046a34f099d9ce9f14141a20b333ab7b4c86d69f854a42d89b346f",
+  "copyEngine": true
+}
+config.dirname = '/'
+
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Tenant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subdomain\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"customDomain\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dbSchema\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"TenantStatus\"},{\"name\":\"suspendedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"deletedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"owner\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"TenantToUser\"},{\"name\":\"ownerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"object\",\"type\":\"SubscriptionPlan\",\"relationName\":\"SubscriptionPlanToTenant\"},{\"name\":\"planId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"stripeCustomerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subscription\",\"kind\":\"object\",\"type\":\"TenantSubscription\",\"relationName\":\"TenantToTenantSubscription\"},{\"name\":\"settings\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"paymentIndices\",\"kind\":\"object\",\"type\":\"PaymentIndex\",\"relationName\":\"PaymentIndexToTenant\"},{\"name\":\"SubscriptionPayment\",\"kind\":\"object\",\"type\":\"SubscriptionPayment\",\"relationName\":\"SubscriptionPaymentToTenant\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"tenants\"},\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"hashedPassword\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"PlatformUserRole\"},{\"name\":\"ownedTenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"TenantToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"users\"},\"SubscriptionPlan\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"billingCycle\",\"kind\":\"enum\",\"type\":\"BillingCycle\"},{\"name\":\"providerPlanId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"features\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"tenants\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"SubscriptionPlanToTenant\"},{\"name\":\"subscriptions\",\"kind\":\"object\",\"type\":\"TenantSubscription\",\"relationName\":\"SubscriptionPlanToTenantSubscription\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"subscription_plans\"},\"TenantSubscription\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenantId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"TenantToTenantSubscription\"},{\"name\":\"planId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"object\",\"type\":\"SubscriptionPlan\",\"relationName\":\"SubscriptionPlanToTenantSubscription\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"SubscriptionStatus\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerSubscriptionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"currentPeriodStart\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"currentPeriodEnd\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"SubscriptionPayment\",\"kind\":\"object\",\"type\":\"SubscriptionPayment\",\"relationName\":\"SubscriptionPaymentToTenantSubscription\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"tenant_subscriptions\"},\"SubscriptionPayment\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenantId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"SubscriptionPaymentToTenant\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"currency\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerTransactionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subscriptionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subscription\",\"kind\":\"object\",\"type\":\"TenantSubscription\",\"relationName\":\"SubscriptionPaymentToTenantSubscription\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"subscription_payments\"},\"PaymentIndex\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenantId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"PaymentIndexToTenant\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"checkoutRequestId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"payment_indices\"}},\"enums\":{},\"types\":{}}")
+defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
+config.engineWasm = {
+  getRuntime: async () => require('./query_engine_bg.js'),
+  getQueryEngineWasmModule: async () => {
+    const loader = (await import('#wasm-engine-loader')).default
+    const engine = (await loader).default
+    return engine
   }
 }
+config.compilerWasm = undefined
 
+config.injectableEdgeEnv = () => ({
+  parsed: {
+    DATABASE_URL: typeof globalThis !== 'undefined' && globalThis['DATABASE_URL'] || typeof process !== 'undefined' && process.env && process.env.DATABASE_URL || undefined
+  }
+})
+
+if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined) {
+  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined)
+}
+
+const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
-
 Object.assign(exports, Prisma)
+
