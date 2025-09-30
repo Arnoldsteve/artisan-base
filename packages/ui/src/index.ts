@@ -25,3 +25,4 @@ export * from "./components/ui/collapsible"
 export * from "./components/ui/radio-group";    
 export * from "./components/ui/command";
 export * from "./components/ui/popover";
+export * from "./components/ui/accordion";

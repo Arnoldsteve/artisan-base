@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardContent,
 } from "@repo/ui/components/ui/card";
+import { formatMoney } from "@/lib/money";
 
 export function Step2ItemSelect({
   selectedOrderId,
@@ -97,7 +98,7 @@ export function Step2ItemSelect({
                     Variant: {item.variant}
                   </div>
                   <div className="text-xs text-gray-500">
-                    ${item.price.toFixed(2)}
+                    {formatMoney(item.price)}
                   </div>
                   <div
                     className={`text-xs mt-1 font-medium ${

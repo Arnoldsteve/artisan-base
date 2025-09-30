@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { mockOrders } from "./mock-orders";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
+import { formatMoney } from "@/lib/money";
 
 export function Step1OrderSelect({
   onNext,
@@ -45,7 +46,7 @@ export function Step1OrderSelect({
                 </div>
               </div>
               <div className="font-bold text-blue-700 text-sm md:text-lg whitespace-nowrap">
-                ${order.total.toFixed(2)}
+                {formatMoney(order.total)}
               </div>
             </div>
             <Button

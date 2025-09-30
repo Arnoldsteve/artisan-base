@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
+import { formatMoney } from "@/lib/money";
 
 const reasonOptions = [
   "Defective/Damaged",
@@ -86,7 +87,7 @@ export function Step3ReturnDetails({
                   Variant: {item.variant}
                 </div>
                 <div className="text-xs text-gray-500">
-                  ${item.price.toFixed(2)}
+                  {formatMoney(item.price)}
                 </div>
               </div>
             </div>

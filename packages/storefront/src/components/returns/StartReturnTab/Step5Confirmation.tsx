@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@repo/ui/components/ui/button";
+import { formatMoney } from "@/lib/money";
 
 export function Step5Confirmation({
   selectedOrderId,
@@ -40,7 +41,7 @@ export function Step5Confirmation({
             {selectedItems.map((item) => (
               <li key={item.id} className="mb-1">
                 <span className="font-medium">{item.name}</span> ({item.variant}
-                ) - ${item.price.toFixed(2)}
+                ) - {formatMoney(item.price)}
                 <div className="text-xs text-gray-500">
                   Reason:{" "}
                   {returnDetails.reasons[item.id] === "Other"
