@@ -1,5 +1,18 @@
+"use client";
+
 import React, { useState } from "react";
+import Image from "next/image";
 import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
+import { Card, CardContent } from "@repo/ui/components/ui/card";
 
 const reasonOptions = [
   "Defective/Damaged",
@@ -27,15 +40,12 @@ export function Step3ReturnDetails({
   onBack: () => void;
 }) {
   const [reasons, setReasons] = useState<{ [itemId: string]: string }>({});
-  const [otherReasons, setOtherReasons] = useState<{
-    [itemId: string]: string;
-  }>({});
-  const [conditions, setConditions] = useState<{ [itemId: string]: string }>(
+  const [otherReasons, setOtherReasons] = useState<{ [itemId: string]: string }>(
     {}
   );
+  const [conditions, setConditions] = useState<{ [itemId: string]: string }>({});
   const [photos, setPhotos] = useState<{ [itemId: string]: File[] }>({});
 
-  // Mock photo upload handler
   const handlePhotoUpload = (itemId: string, files: FileList | null) => {
     if (!files) return;
     setPhotos((prev) => ({
@@ -51,17 +61,24 @@ export function Step3ReturnDetails({
       conditions[item.id]
   );
 
+  const defaultImage =
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=200&fit=crop&crop=center";
+
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Return Details</h2>
-      <div className="space-y-6">
-        {selectedItems.map((item) => (
-          <div key={item.id} className="bg-white rounded-lg shadow p-4 border">
-            <div className="flex gap-4 items-center mb-2">
-              <img
-                src={item.image}
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold">Return Details</h2>
+
+      {selectedItems.map((item) => (
+        <Card key={item.id} className="border rounded-lg shadow-sm">
+          <CardContent className="p-4 space-y-4">
+            {/* Item header */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <Image
+                src={defaultImage}
                 alt={item.name}
-                className="w-16 h-16 object-cover rounded"
+                width={64}
+                height={64}
+                className="w-16 h-16 object-cover rounded-md border"
               />
               <div>
                 <div className="font-semibold">{item.name}</div>
@@ -73,27 +90,31 @@ export function Step3ReturnDetails({
                 </div>
               </div>
             </div>
-            <div className="mb-2">
-              <label className="block text-sm font-medium mb-1">
-                Reason for return
-              </label>
-              <select
-                className="border rounded px-3 py-2 w-full"
+
+            {/* Reason */}
+            <div>
+              <Label className="block mb-1">Reason for return</Label>
+              <Select
                 value={reasons[item.id] || ""}
-                onChange={(e) =>
-                  setReasons((prev) => ({ ...prev, [item.id]: e.target.value }))
+                onValueChange={(val) =>
+                  setReasons((prev) => ({ ...prev, [item.id]: val }))
                 }
               >
-                <option value="">Select reason</option>
-                {reasonOptions.map((reason) => (
-                  <option key={reason} value={reason}>
-                    {reason}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  {reasonOptions.map((reason) => (
+                    <SelectItem key={reason} value={reason}>
+                      {reason}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               {reasons[item.id] === "Other" && (
-                <input
-                  className="border rounded px-3 py-2 w-full mt-2"
+                <Input
+                  className="mt-2 w-full"
                   placeholder="Please specify"
                   value={otherReasons[item.id] || ""}
                   onChange={(e) =>
@@ -105,62 +126,70 @@ export function Step3ReturnDetails({
                 />
               )}
             </div>
-            <div className="mb-2">
-              <label className="block text-sm font-medium mb-1">
-                Condition
-              </label>
-              <select
-                className="border rounded px-3 py-2 w-full"
+
+            {/* Condition */}
+            <div>
+              <Label className="block mb-1">Condition</Label>
+              <Select
                 value={conditions[item.id] || ""}
-                onChange={(e) =>
-                  setConditions((prev) => ({
-                    ...prev,
-                    [item.id]: e.target.value,
-                  }))
+                onValueChange={(val) =>
+                  setConditions((prev) => ({ ...prev, [item.id]: val }))
                 }
               >
-                <option value="">Select condition</option>
-                {conditionOptions.map((cond) => (
-                  <option key={cond} value={cond}>
-                    {cond}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  {conditionOptions.map((cond) => (
+                    <SelectItem key={cond} value={cond}>
+                      {cond}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="mb-2">
-              <label className="block text-sm font-medium mb-1">
-                Upload Photos (optional)
-              </label>
-              <input
+
+            {/* Photo Upload */}
+            <div>
+              <Label className="block mb-1">Upload Photos (optional)</Label>
+              <Input
                 type="file"
                 accept="image/*"
                 multiple
+                className="w-full"
                 onChange={(e) => handlePhotoUpload(item.id, e.target.files)}
               />
-              <div className="flex gap-2 mt-2">
-                {(photos[item.id] || []).map((file, idx) => (
-                  <img
-                    key={idx}
-                    src={URL.createObjectURL(file)}
-                    alt="Uploaded"
-                    className="w-12 h-12 object-cover rounded border"
-                  />
-                ))}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
+              {photos[item.id]?.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {photos[item.id].map((file, idx) => (
+                    <Image
+                      key={idx}
+                      src={URL.createObjectURL(file)}
+                      alt="Uploaded"
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 object-cover rounded border"
+                    />
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
                 Photos help process your return faster
-              </div>
+              </p>
             </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-end mt-6 gap-2">
-        <Button variant="outline" onClick={onBack}>
+          </CardContent>
+        </Card>
+      ))}
+
+      {/* Footer */}
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
+        <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
           Back
         </Button>
         <Button
           onClick={() => onNext({ reasons, otherReasons, conditions, photos })}
           disabled={!isValid}
+          className="w-full sm:w-auto"
         >
           Next
         </Button>
