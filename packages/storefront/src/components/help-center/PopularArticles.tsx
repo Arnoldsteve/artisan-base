@@ -1,4 +1,8 @@
+"use client";
+
 import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 
 const articles = [
   {
@@ -62,62 +66,51 @@ export function PopularArticles() {
         Most Popular Articles
       </h3>
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {articles.map((a, i) => (
-          <div
+        {articles.map((a) => (
+          <Card
             key={a.title}
-            className="bg-white rounded-xl border shadow p-6 flex flex-col gap-2 hover:shadow-lg transition-shadow"
-            style={{ borderRadius: 12, borderWidth: 1 }}
+            className="hover:shadow-lg transition-shadow pt-3"
           >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-bold text-lg text-blue-700 hover:underline cursor-pointer">
-                {a.title}
-              </span>
-              {a.trending && (
-                <span className="ml-2 text-xs bg-orange-100 text-orange-700 rounded px-2 py-0.5">
-                  Trending
+            <CardContent className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-bold text-lg text-blue-700 hover:underline cursor-pointer">
+                  {a.title}
                 </span>
-              )}
-              {a.updated && (
-                <span className="ml-2 text-xs bg-green-100 text-green-700 rounded px-2 py-0.5">
-                  Updated
-                </span>
-              )}
-            </div>
-            <div className="text-sm text-gray-600 mb-1 line-clamp-2">
-              {a.excerpt}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span>{a.readTime}</span>
-              <span>·</span>
-              <span>{a.helpful} found this helpful</span>
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <button
-                className="text-gray-400 hover:text-blue-700"
-                aria-label="Thumbs up"
-              >
-                <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-                  <path
-                    d="M6 15V7.5L10.5 3l.5 1.5h3A1.5 1.5 0 0 1 15.5 6v6A1.5 1.5 0 0 1 14 13.5H7.5L6 15Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-              </button>
-              <button
-                className="text-gray-400 hover:text-blue-700"
-                aria-label="Thumbs down"
-              >
-                <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-                  <path
-                    d="M12 3v7.5L7.5 15l-.5-1.5h-3A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h6.5L12 3Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
+                {a.trending && (
+                  <span className="ml-2 text-xs bg-orange-100 text-orange-700 rounded px-2 py-0.5">
+                    Trending
+                  </span>
+                )}
+                {a.updated && (
+                  <span className="ml-2 text-xs bg-green-100 text-green-700 rounded px-2 py-0.5">
+                    Updated
+                  </span>
+                )}
+              </div>
+              <div className="text-sm text-gray-600 mb-1 line-clamp-2">
+                {a.excerpt}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <span>{a.readTime}</span>
+                <span>·</span>
+                <span>{a.helpful} found this helpful</span>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  className="text-gray-400 hover:text-blue-700"
+                  aria-label="Thumbs up"
+                >
+                  <ThumbsUp className="w-4 h-4" />
+                </button>
+                <button
+                  className="text-gray-400 hover:text-blue-700"
+                  aria-label="Thumbs down"
+                >
+                  <ThumbsDown className="w-4 h-4" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </section>

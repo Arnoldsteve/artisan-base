@@ -4,32 +4,35 @@
 
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User, Menu, X, Package, Grid3X3, Info, Phone, Truck, UserX, Settings, Heart, UserPlus, LogIn } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+  Package,
+  Grid3X3,
+  Info,
+  Phone,
+  Truck,
+  UserX,
+  Settings,
+  Heart,
+  UserPlus,
+  LogIn,
+} from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { useProductSearch } from "@/hooks/use-products";
 import { Product } from "@/types";
 import { CartButton } from "@/components/cart/cart-button";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { UserAccountDropdown } from "./UserAccountDropdown";
-
-// OPTIMIZATION: Debounced search hook for better performance
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useMemo(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-}
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePathname } from "next/navigation";
 
 export function Header() {
+  const pathname = usePathname();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -129,25 +132,33 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="/products"
-              className="text-foreground hover:text-primary transition-colors"
+              className={`text-foreground hover:text-primary transition-colors ${
+                pathname === "/products" ? "text-primary" : ""
+              }`}
             >
               Products
             </Link>
             <Link
               href="/categories"
-              className="text-foreground hover:text-primary transition-colors"
+              className={`text-foreground hover:text-primary transition-colors ${
+                pathname === "/categories" ? "text-primary" : ""
+              }`}
             >
               Categories
             </Link>
             <Link
               href="/about"
-              className="text-foreground hover:text-primary transition-colors"
+              className={`text-foreground hover:text-primary transition-colors ${
+                pathname === "/about" ? "text-primary" : ""
+              }`}
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="text-foreground hover:text-primary transition-colors"
+              className={`text-foreground hover:text-primary transition-colors ${
+                pathname === "/contact" ? "text-primary" : ""
+              }`}
             >
               Contact
             </Link>
@@ -294,17 +305,19 @@ export function Header() {
                 <Phone className="h-5 w-5" />
                 <span>Contact</span>
               </Link>
-              
+
               {/* ADD CART BUTTON HERE */}
               <div className="border-t pt-4" />
               <div className="flex items-center justify-start space-x-3">
-                <CartButton onClick={() => {
-                  setCartOpen(true);
-                  setIsMenuOpen(false);
-                }} />
+                <CartButton
+                  onClick={() => {
+                    setCartOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                />
                 <span className="text-foreground">Cart</span>
               </div>
-              
+
               {/* User account options for mobile */}
               <div className="border-t my-2" />
               <Link href="/auth/login" passHref>

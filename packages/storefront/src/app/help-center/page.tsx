@@ -5,21 +5,21 @@ import { CategoryGrid } from "@/components/help-center/CategoryGrid";
 import { PopularArticles } from "@/components/help-center/PopularArticles";
 import { ContactOptions } from "@/components/help-center/ContactOptions";
 import { SelfServiceTools } from "@/components/help-center/SelfServiceTools";
-import { FooterSection } from "@/components/help-center/FooterSection";
 
 export default function HelpCenterPage() {
   return (
+    <>
+    <HelpHeader />
     <div className="bg-[#f8fafc] min-h-screen pb-20">
       <div className="max-w-6xl mx-auto px-4 pt-8">
-        <HelpHeader />
-        <HelpSearch />
         <QuickActions />
         <CategoryGrid />
         <PopularArticles />
         <ContactOptions />
         <SelfServiceTools />
       </div>
-      <FooterSection />
     </div>
+    </>
+        
   );
 }
