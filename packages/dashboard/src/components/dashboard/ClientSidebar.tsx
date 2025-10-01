@@ -15,10 +15,13 @@ export function ClientSidebarLayout({ children }: ClientSidebarProps) {
 
       <SidebarInset>
         <div className="flex flex-col h-screen w-full">
-          <Header />
-          <main className="flex-1 space-y-4 p-8 pt-6 overflow-y-auto">
-            <SidebarTrigger />
-            {children}
+          {/* <Header /> */}
+          
+          <main className="flex-1 overflow-y-auto bg-[#f8fafc]">
+            {/* Wrapper div to add padding only to content, not PageHeader */}
+            <div className="space-y-4">
+              {children}
+            </div>
           </main>
         </div>
       </SidebarInset>

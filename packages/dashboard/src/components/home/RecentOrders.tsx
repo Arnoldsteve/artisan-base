@@ -24,7 +24,7 @@ import { formatMoney } from "@/utils/money";
  * A local skeleton component for the recent orders card.
  */
 const RecentOrdersSkeleton = () => (
-  <Card className="lg:col-span-3">
+  <Card className="lg:col-span-3 bg-[#FFFFFF]">
     <CardHeader>
       <CardTitle>Recent Orders</CardTitle>
       <CardDescription>Loading recent sales...</CardDescription>

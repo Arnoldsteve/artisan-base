@@ -2,9 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import {
-  Order,
-} from "@/types/orders";
+import { Order } from "@/types/orders";
 import { columns } from "./columns";
 import {
   useReactTable,
@@ -45,29 +43,37 @@ export function OrdersView({ initialData }: OrdersViewProps) {
   const [rowSelection, setRowSelection] = useState({});
 
   // --- Modal/Dialog UI State ---
-  const [ orderToEdit, setOrderToEdit ] = useState<Order | null>(null)
+  const [orderToEdit, setOrderToEdit] = useState<Order | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 
   // --- Data Fetching & Mutations with TanStack Query ---
   // We now use the single, powerful `useOrders` hook for data.
-  const { data: paginatedResponse, isLoading, isError } = useOrders(1, 10, "", initialData);
+  const {
+    data: paginatedResponse,
+    isLoading,
+    isError,
+  } = useOrders(1, 10, "", initialData);
   // And the mutation hooks for actions.
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
-  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } = useBatchDeleteOrders();
+  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } =
+    useBatchDeleteOrders();
 
   // --- Memoized Data ---
-  const orders = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
+  const orders = useMemo(
+    () => paginatedResponse?.data || [],
+    [paginatedResponse]
+  );
   const totalOrders = paginatedResponse?.meta?.total || 0;
 
   // --- Action Handlers ---
   const openDeleteDialog = (order: Order) => setOrderToDelete(order);
-  const openEditSheet = (order: Order) =>  setOrderToEdit(order)
+  const openEditSheet = (order: Order) => setOrderToEdit(order);
 
   // --- Create the meta object with proper typing ---
   const tableMeta: OrderTableMeta<Order> = {
     openDeleteDialog,
-    openEditSheet
+    openEditSheet,
   };
 
   // --- Table Instance Initialization ---
@@ -88,10 +94,12 @@ export function OrdersView({ initialData }: OrdersViewProps) {
   });
 
   const selectedOrderIds = useMemo(() => {
-    return table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
+    return table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.id);
   }, [rowSelection, table]);
   const numSelected = selectedOrderIds.length;
-  
+
   // --- Event Handlers that call mutations ---
   const handleConfirmDelete = () => {
     if (orderToDelete) {
@@ -111,7 +119,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
       });
     }
   };
-  
+
   // --- Render Logic ---
   if (isLoading && !paginatedResponse) {
     return <DataTableSkeleton />;
@@ -121,7 +129,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
   }
 
   return (
-    <div>
+    <>
       <PageHeader
         title="Orders"
         description="View and manage all customer orders."
@@ -130,51 +138,52 @@ export function OrdersView({ initialData }: OrdersViewProps) {
           <Button>Create Order</Button>
         </Link>
       </PageHeader>
-      
-      <OrdersTableViewOptions table={table} />
-      <DataTable table={table} totalCount={totalOrders}/>
-      
-      {numSelected > 0 && (
-        <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">
-          <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
-            <div className="text-sm font-medium">
-              <span className="font-semibold">{numSelected}</span> selected
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setIsBulkDeleteDialogOpen(true)}
-                disabled={isBatchDeleting}
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setRowSelection({})}
-              >
-                Cancel
-              </Button>
+      <div>
+        <OrdersTableViewOptions table={table} />
+        <DataTable table={table} totalCount={totalOrders} />
+
+        {numSelected > 0 && (
+          <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">
+            <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
+              <div className="text-sm font-medium">
+                <span className="font-semibold">{numSelected}</span> selected
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsBulkDeleteDialogOpen(true)}
+                  disabled={isBatchDeleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRowSelection({})}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      <DeleteOrderDialog
-        isOpen={!!orderToDelete}
-        onClose={() => setOrderToDelete(null)}
-        onConfirm={handleConfirmDelete}
-        orderNumber={orderToDelete?.orderNumber || ""}
-        isPending={isDeleting}
-      />
-      <BulkDeleteAlertDialog
-        isOpen={isBulkDeleteDialogOpen}
-        onClose={() => setIsBulkDeleteDialogOpen(false)}
-        onConfirm={handleBulkDelete}
-        selectedCount={numSelected}
-        isPending={isBatchDeleting}
-      />
-    </div>
+        )}
+
+        <DeleteOrderDialog
+          isOpen={!!orderToDelete}
+          onClose={() => setOrderToDelete(null)}
+          onConfirm={handleConfirmDelete}
+          orderNumber={orderToDelete?.orderNumber || ""}
+          isPending={isDeleting}
+        />
+        <BulkDeleteAlertDialog
+          isOpen={isBulkDeleteDialogOpen}
+          onClose={() => setIsBulkDeleteDialogOpen(false)}
+          onConfirm={handleBulkDelete}
+          selectedCount={numSelected}
+          isPending={isBatchDeleting}
+        />
+      </div>
+    </>
   );
 }
