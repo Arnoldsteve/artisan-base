@@ -10,6 +10,7 @@ import { InviteUserDialog } from "./invite-user-dialog";
 import { UserTableMeta } from "@/types/table-meta";
 import { TenantRole } from "@/types/roles";
 import { DashboardUserData } from "@/types/users";
+import { PageHeader } from "@/components/shared/page-header";
 
 interface TeamMembersViewProps {
   initialUsers: DashboardUserData[];
@@ -20,22 +21,22 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
   const [users, setUsers] = useState(initialUsers);
 
   // --- Local State Handlers ---
-  const handleUserInvited = (data: { email: string; role: TenantRole  }) => {
+  const handleUserInvited = (data: { email: string; role: TenantRole }) => {
     // Create a new user object for our mock state
     const newUser: DashboardUserData = {
       id: `user_${Math.random().toString(36).substr(2, 9)}`,
-      name: data.email.split("@")[0], 
+      name: data.email.split("@")[0],
       email: data.email,
       role: data.role,
       isActive: true, // New users are active by default
       createdAt: new Date().toLocaleDateString(),
     };
-    setUsers(current => [newUser, ...current]);
+    setUsers((current) => [newUser, ...current]);
     setIsInviteDialogOpen(false); // Also close dialog on success
   };
 
   const handleUserDeleted = (userId: string) => {
-    setUsers(current => current.filter(u => u.id !== userId));
+    setUsers((current) => current.filter((u) => u.id !== userId));
   };
 
   // --- Create the meta object with proper typing ---
@@ -43,7 +44,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
     handleUserDeleted,
     // You can add handleUserUpdated here in the future
   };
-  
+
   // Create the table instance
   const table = useReactTable({
     data: users,
@@ -55,7 +56,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Team Members</h3>
           <p className="text-sm text-muted-foreground">
@@ -66,16 +67,20 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
           <Plus className="mr-2 h-4 w-4" />
           Invite User
         </Button>
-      </div>
-      <div className="mt-4">
-        <DataTable table={table}  totalCount={9} />
-      </div>
+      </div> */}
+      <PageHeader title="Team Members" />
 
-      <InviteUserDialog
-        isOpen={isInviteDialogOpen}
-        onClose={() => setIsInviteDialogOpen(false)}
-        onSuccess={handleUserInvited}
-      />
+      <div className="px-8 space-y-4">
+        <div className="mt-4">
+          <DataTable table={table} totalCount={0} />
+        </div>
+
+        <InviteUserDialog
+          isOpen={isInviteDialogOpen}
+          onClose={() => setIsInviteDialogOpen(false)}
+          onSuccess={handleUserInvited}
+        />
+      </div>
     </>
   );
 }

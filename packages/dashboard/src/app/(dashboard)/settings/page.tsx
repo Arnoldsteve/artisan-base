@@ -5,8 +5,8 @@ import { ProfileSettings } from "./components/profile-settings-page";
 import { useAuthContext } from "@/contexts/auth-context";
 
 export default function SettingsPage() {
-  const { user, isLoading } = useAuthContext(); 
-  
+  const { user, isLoading } = useAuthContext();
+
   if (isLoading) {
     return <p>Loading profile...</p>;
   }
@@ -16,12 +16,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-4 md-p-8 lg-p-10">
-      <PageHeader
-        title="User Profile"
-        description="View and update your profile information"
-      />
-      <ProfileSettings user={user} />
-    </div>
+    <>
+      <PageHeader title="User Profile" />
+      <div className="px-8 space-y-4">
+        <ProfileSettings user={user} />
+      </div>
+    </>
   );
 }

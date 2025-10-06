@@ -1,12 +1,13 @@
 import React from "react";
 import { TeamMembersView } from "../components/team-members-view";
 import { TeamMember } from "@/types/team";
+import { PageHeader } from "@/components/shared/page-header";
 
 interface TeamMembersProps {
   teamMembers: TeamMember[];
 }
 
-export default function page( { teamMembers }: TeamMembersProps) {
+export default function page({ teamMembers }: TeamMembersProps) {
   return (
     <TeamMembersView
       initialUsers={(teamMembers ?? []).map((m) => ({

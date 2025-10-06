@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { createServerApiClient } from "@/lib/server-api";
 import { PageHeader } from "@/components/shared/page-header";
@@ -27,10 +27,14 @@ interface ProfileSettingsProps {
 
 export function ProfileSettings({ user }: ProfileSettingsProps) {
   if (!user)
-    return <p className="text-muted-foreground">Could not load profile information.</p>;
+    return (
+      <p className="text-muted-foreground">
+        Could not load profile information.
+      </p>
+    );
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-2 gap-4">
       <ProfileInfoForm initialData={user} />
       <ChangePasswordForm />
     </div>
@@ -44,17 +48,21 @@ interface StoreSettingsProps {
 
 export function StoreSettings({ tenant }: StoreSettingsProps) {
   if (!tenant)
-    return <p className="text-muted-foreground">Could not load store information.</p>;
+    return (
+      <p className="text-muted-foreground">Could not load store information.</p>
+    );
 
   return (
-    <div className="space-y-6">
-      <StoreDetailsForm initialData={{ name: tenant.name }} />
-      <StoreDomainsForm
-        initialData={{
-          subdomain: tenant.subdomain,
-          customDomain: tenant.customDomain || null,
-        }}
-      />
+    <div className="px-8 space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <StoreDetailsForm initialData={{ name: tenant.name }} />
+        <StoreDomainsForm
+          initialData={{
+            subdomain: tenant.subdomain,
+            customDomain: tenant.customDomain || null,
+          }}
+        />
+      </div>
       <StoreDangerZone storeName={tenant.name} />
     </div>
   );
@@ -67,7 +75,11 @@ interface BillingSettingsProps {
   invoices: Invoice[];
 }
 
-export function BillingSettings({ plans, subscription, invoices }: BillingSettingsProps) {
+export function BillingSettings({
+  plans,
+  subscription,
+  invoices,
+}: BillingSettingsProps) {
   return (
     <div className="space-y-6">
       <BillingCurrentPlan subscription={subscription} />
@@ -105,7 +117,6 @@ export default async function SettingsPage() {
     if (results[2].status === "fulfilled") subscription = results[2].value.data;
     if (results[3].status === "fulfilled") invoices = results[3].value.data;
     if (results[4].status === "fulfilled") teamMembers = results[4].value.data;
-
   } catch (error) {
     console.error("Failed to fetch settings data on server:", error);
   }
@@ -135,7 +146,8 @@ export default async function SettingsPage() {
           <TeamMembersView
             initialUsers={teamMembers.map((m) => ({
               id: m.id,
-              name: `${m.firstName ?? ''} ${m.lastName ?? ''}`.trim() || m.email,
+              name:
+                `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim() || m.email,
               email: m.email,
               role: m.role,
               isActive: m.isActive,

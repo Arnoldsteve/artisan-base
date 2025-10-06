@@ -9,7 +9,6 @@ import { DashboardKpiCards } from "@/components/home/DashboardKpiCards";
 import { SalesOverviewChart } from "@/components/home/SalesOverviewChart";
 import { RecentOrders } from "@/components/home/RecentOrders";
 import { PageHeader } from "../shared/page-header";
-import { Button } from "@repo/ui/components/ui/button";
 
 export default function HomePage() {
   // Fetch all data in parallel
@@ -33,7 +32,6 @@ export default function HomePage() {
     <>
       {/* PageHeader spans full width automatically */}
       <PageHeader title="Dashboard Overview">
-        <Button onClick={() => console.log("Add clicked!")}>Add Item</Button>
       </PageHeader>
 
       {/* Content area with padding */}
