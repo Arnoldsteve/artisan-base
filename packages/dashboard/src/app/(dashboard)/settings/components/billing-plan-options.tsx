@@ -18,6 +18,7 @@ import {
   useBillingSubscription,
   useChangePlan,
 } from "@/hooks/use-billing";
+import { formatMoney } from "@/utils/money";
 
 interface BillingPlanOptionsProps {
   availablePlans?: Plan[];
@@ -110,10 +111,7 @@ export function BillingPlanOptions({
                 <CardTitle>{plan.name}</CardTitle>
                 <CardDescription className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold">
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(parseFloat(plan.price))}
+                    {formatMoney(plan.price)}
                   </span>
                   <span className="text-muted-foreground">/ mo</span>
                 </CardDescription>

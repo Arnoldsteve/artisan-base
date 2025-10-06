@@ -1,4 +1,6 @@
-// app/(dashboard)/(customers)/big-spenders/page.tsx
+'use client';
+
+import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui";
 import { Badge } from "@repo/ui";
@@ -23,6 +25,8 @@ const bigSpenders: Customer[] = [
 
 export default function BigSpendersPage() {
   return (
+    <>
+    <PageHeader title="Big Spenders" />
     <div className="p-8 space-y-6">
       <Card>
         <CardHeader>
@@ -56,5 +60,6 @@ export default function BigSpendersPage() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

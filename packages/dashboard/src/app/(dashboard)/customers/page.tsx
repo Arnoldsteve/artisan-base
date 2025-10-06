@@ -2,6 +2,7 @@ import { createServerApiClient } from "@/lib/server-api";
 import { CustomersView } from "./components/customers-view";
 import { Customer } from "@/types/customers";
 import { PaginatedResponse } from "@/types/shared";
+import { PageHeader } from "@/components/shared/page-header";
 
 export default async function CustomersPage() {
   let initialData: PaginatedResponse<Customer>;
@@ -30,8 +31,11 @@ export default async function CustomersPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 lg:p-10">
-      <CustomersView initialData={initialData} />
-    </div>
+    <>
+      <PageHeader title="Customers" />
+      <div className="p-4 md:p-8 lg:p-10">
+        <CustomersView initialData={initialData} />
+      </div>
+    </>
   );
 }

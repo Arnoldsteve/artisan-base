@@ -81,14 +81,17 @@ export function BillingSettings({
   invoices,
 }: BillingSettingsProps) {
   return (
-    <div className="space-y-6">
-      <BillingCurrentPlan subscription={subscription} />
-      <BillingPlanOptions
-        availablePlans={plans}
-        currentPlanId={subscription?.plan.id}
-      />
-      <BillingInvoiceHistory invoices={invoices} />
-    </div>
+    <>
+      <PageHeader title="Billing" />
+      <div className="px-8 space-y-6">
+        <BillingCurrentPlan subscription={subscription} />
+        <BillingPlanOptions
+          availablePlans={plans}
+          currentPlanId={subscription?.plan.id}
+        />
+        <BillingInvoiceHistory invoices={invoices} />
+      </div>
+    </>
   );
 }
 

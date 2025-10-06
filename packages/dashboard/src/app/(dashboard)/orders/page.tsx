@@ -2,6 +2,7 @@ import { createServerApiClient } from '@/lib/server-api';
 import { OrdersView } from './components/orders-view';
 import { Order } from '@/types/orders';
 import { PaginatedResponse } from '@/types/shared';
+import { PageHeader } from '@/components/shared/page-header';
 
 
 export default async function OrdersPage() {
@@ -23,8 +24,12 @@ export default async function OrdersPage() {
   }
 
   return (
+    <>
+    <PageHeader title="Orders"/>
     <div className="p-4 md:p-8 lg:p-10">
       <OrdersView initialData={initialData} />
     </div>
+    
+    </>
   );
 }

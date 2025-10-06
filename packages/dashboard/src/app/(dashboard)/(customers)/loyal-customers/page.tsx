@@ -1,4 +1,7 @@
-// app/(dashboard)/(customers)/loyal-customers/page.tsx
+'use client';
+
+
+import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui";
 import { Badge } from "@repo/ui";
@@ -23,11 +26,11 @@ const loyalCustomers: Customer[] = [
 
 export default function LoyalCustomersPage() {
   return (
+    <>
+    <PageHeader title="Loyal Customers" />
+    
     <div className="p-8 space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Loyal Customers</CardTitle>
-        </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
@@ -56,5 +59,6 @@ export default function LoyalCustomersPage() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

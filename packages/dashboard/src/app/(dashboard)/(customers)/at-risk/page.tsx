@@ -1,4 +1,3 @@
-// app/(dashboard)/(customers)/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui";
 import { Badge } from "@repo/ui";
+import { PageHeader } from "@/components/shared/page-header";
 
 type Customer = {
   id: string;
@@ -61,8 +61,10 @@ export default function CustomersDashboardPage() {
   );
 
   return (
+    <>
+    <PageHeader title="At risk Customers" />
+    
     <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold">Customers Dashboard</h1>
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
         <TabsList>
@@ -89,5 +91,6 @@ export default function CustomersDashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </>
   );
 }
