@@ -33,11 +33,11 @@ describe('AuthController', () => {
         user: { id: '1', email: 'a@b.com' },
       };
       authService.signUp.mockResolvedValue(result);
-      expect(await controller.signup(dto as any)).toEqual(result);
+      expect(await controller.signUp(dto as any)).toEqual(result);
     });
     it('should throw ConflictException if service throws', async () => {
       authService.signUp.mockRejectedValue(new ConflictException());
-      await expect(controller.signup({} as any)).rejects.toThrow(
+      await expect(controller.signUp({} as any)).rejects.toThrow(
         ConflictException,
       );
     });
