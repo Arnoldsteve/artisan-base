@@ -28,7 +28,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
       name: data.email.split("@")[0],
       email: data.email,
       role: data.role,
-      isActive: true, // New users are active by default
+      isActive: true, 
       createdAt: new Date().toLocaleDateString(),
     };
     setUsers((current) => [newUser, ...current]);
@@ -56,22 +56,15 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
 
   return (
     <>
-      {/* <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">Team Members</h3>
-          <p className="text-sm text-muted-foreground">
-            Manage who can access your dashboard.
-          </p>
-        </div>
+      <PageHeader title="Team Members">
         <Button onClick={() => setIsInviteDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Invite User
         </Button>
-      </div> */}
-      <PageHeader title="Team Members" />
+      </PageHeader>
 
       <div className="px-8 space-y-4">
-        <div className="mt-4">
+        <div className=" bg-[#fff] mt-4">
           <DataTable table={table} totalCount={0} />
         </div>
 

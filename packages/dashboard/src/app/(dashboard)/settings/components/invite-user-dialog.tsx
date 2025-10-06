@@ -51,6 +51,7 @@ export function InviteUserDialog({
   const form = useForm<InviteMemberSchema>({
     resolver: zodResolver(inviteMemberSchema),
     defaultValues: {
+      userName: '',
       email: '',
       role: TenantRole.VIEWER,
     },
@@ -68,12 +69,32 @@ export function InviteUserDialog({
         <DialogHeader>
           <DialogTitle>Invite New User</DialogTitle>
           <DialogDescription>
-            Enter the user&apos;s email and assign a role.
+            Enter the user&apos;s name, email and assign a role.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
+            {/* Username */}
+            <FormField 
+              control={form.control} 
+              name="userName"
+              render={({ field }) => (
+                <FormItem>  
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="johndoe"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+
             {/* Email field */}
             <FormField
               control={form.control}
