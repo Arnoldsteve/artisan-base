@@ -18,7 +18,7 @@ export class BillingService {
    * Retrieves a list of all available subscription plans.
    */
   async getPlans(): Promise<Plan[]> {
-    const response = await apiClient.get<ApiResponse<Plan[]>>("/dashboard/billing/plans");
+    const response = await apiClient.get<ApiResponse<Plan[]>>("/platform/plans");
     return response.data;
   }
 
