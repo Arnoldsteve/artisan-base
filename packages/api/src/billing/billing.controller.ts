@@ -22,6 +22,11 @@ export class BillingController {
   getSubscription() {
     return this.billingService.getSubscription();
   }
+  
+  @Get('invoices')
+  getInvoices() {
+    return this.billingService.getInvoicesForCurrentTenant();
+  }
 
   @Post('create-checkout-session')
   createCheckoutSession(@Body() createCheckoutDto: CreateCheckoutDto) {

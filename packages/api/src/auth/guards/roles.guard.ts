@@ -15,6 +15,7 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     // Get the roles required for the specific route handler being called.
     const requiredRoles = this.reflector.get(Roles, context.getHandler());
+    Logger.log(`Required roles for this route: ${requiredRoles}`, 'RolesGuard');
 
     // If no @Roles() decorator is used on the route, allow access.
     if (!requiredRoles) {

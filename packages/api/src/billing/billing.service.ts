@@ -142,5 +142,12 @@ export class BillingService {
 
     this.logger.log(`Successfully fulfilled subscription for tenant: ${tenantId}`);
   }
+
+
+  async getInvoicesForCurrentTenant(): Promise<any[]> {
+    this.logger.log(`Fetching invoices for tenant: ${this.request.tenant.id}`);
+    // In a real app, you would fetch this from Stripe or another provider.
+    return []; // Return an empty array for now
+  }
 }
 
