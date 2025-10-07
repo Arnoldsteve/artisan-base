@@ -45,12 +45,12 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   };
 
   const getGridCols = () =>
-    "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6";
+    "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2";
 
   // --- Loading ---
   if (isLoading) {
     return (
-      <section className="mt-16">
+      <section className="py-4 bg-[#f4f4f4]">
         <h2 className="text-2xl font-bold mb-6">You might also like</h2>
         <div className={`grid gap-6 ${getGridCols()}`}>
           {skeletonArray.map((_, i) => (

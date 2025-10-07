@@ -1,6 +1,7 @@
 "use client";
 
 import { ProductCard } from "@/components/product-card";
+import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
 import { useNewArrivals } from "@/hooks/use-products";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Clock, Sparkles, TrendingUp } from "lucide-react";
@@ -9,20 +10,7 @@ export default function NewArrivalsPage() {
   const { data: productsResponse, isLoading } = useNewArrivals(12);
   const products = productsResponse || [];
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <ProductsLoading />;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -56,7 +44,7 @@ export default function NewArrivalsPage() {
       ) : (
         <>
           {/* New Arrivals Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {products.map((product, index) => (
               <div key={product.id} className="relative">
                 {/* New Badge */}

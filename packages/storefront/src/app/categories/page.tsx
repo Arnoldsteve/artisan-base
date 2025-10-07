@@ -11,8 +11,8 @@ export default function CategoriesPage() {
     useCategories();
   // The API returns an array of categories, each with _count.products
   const categories = categoriesResponse || [];
-  
-  if (categoriesLoading) return <CategoriesLoading/>
+
+  if (categoriesLoading) return <CategoriesLoading />;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -35,7 +35,7 @@ export default function CategoriesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
           {categories.map((category: any) => (
             <Link
               key={category.id}
@@ -56,10 +56,22 @@ export default function CategoriesPage() {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary">
-                      {category.name.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="bg-card rounded-lg border shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <div className="relative w-full h-32">
+                      <Image
+                        src={
+                          category.image &&
+                          category.image.trim() &&
+                          category.image !== "null"
+                            ? category.image
+                            : `https://picsum.photos/400/200?random=${category.id}`
+                        }
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

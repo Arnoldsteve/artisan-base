@@ -55,7 +55,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
   }
 
   return (
-    <section className="py-4 bg-muted/30">
+    <section className="py-4 bg-[#f4f4f4]">
       <div className="container mx-auto px-4">
         <div className="flex justify-between">
           <div className="text-start mb-12">
@@ -74,7 +74,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
         </div>
 
         {/* OPTIMIZATION: Grid layout with responsive design */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
           {categories.slice(0, 6).map((category) => (
             <Link
               key={category.id}
@@ -113,11 +113,11 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        {/* <div className="text-center mt-12">
           <Button asChild variant="outline">
             <Link href="/categories">View All Categories</Link>
           </Button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

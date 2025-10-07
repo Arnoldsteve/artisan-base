@@ -122,7 +122,7 @@ function ProductsContent() {
       {/* Filters */}
       {showFilters && (
         <div className="bg-card border rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             <div>
               <label className="text-sm font-medium mb-2 block">Category</label>
               <Select
@@ -201,7 +201,7 @@ function ProductsContent() {
         <div
           className={
             viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+              ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2"
               : "space-y-4"
           }
         >

@@ -52,9 +52,9 @@ export const ProductCard = memo(function ProductCard({
     : null;
 
   return (
-    <div className="group flex flex-col bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="group flex flex-col bg-card rounded-xl border shadow-sm hover:shadow-md transition-all duration-300">
       {/* Image Section */}
-      <div className="relative aspect-square rounded-t-2xl overflow-hidden">
+      <div className="relative aspect-square rounded-t-xl overflow-hidden">
         <Link href={`/products/${product.id}`}>
         <Image
           src={
