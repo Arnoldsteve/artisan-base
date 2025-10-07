@@ -102,7 +102,7 @@ export const ProductCard = memo(function ProductCard({
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
             <span>
-              {product.rating?.toFixed(1) ?? "5.0"} (
+              {product.rating?.toFixed(1) ?? "0.0"} (
               {product.reviewCount ?? "0"})
             </span>
           </div>
@@ -119,7 +119,7 @@ export const ProductCard = memo(function ProductCard({
 
         {/* Name */}
         <Link href={`/products/${product.id}`} className="flex-1">
-          <h3 className="font-semibold text-base line-clamp-2 text-foreground group-hover:text-primary transition">
+          <h3 className="text-base line-clamp-2 text-foreground group-hover:text-primary transition">
             {product.name}
           </h3>
         </Link>
