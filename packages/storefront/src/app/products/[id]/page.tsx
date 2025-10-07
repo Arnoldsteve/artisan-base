@@ -265,37 +265,12 @@ export default function ProductPage() {
           {/* Description */}
           {product.description && (
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Description</h3>
-
-              {product.description.includes("Features:") ? (
-                (() => {
-                  const [mainDesc, featuresText] =
-                    product.description.split("Features:");
-                  const features = featuresText
-                    ?.trim()
-                    .split("\n")
-                    .filter(Boolean);
-
-                  return (
-                    <>
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line mb-4">
-                        {mainDesc.trim()}
-                      </p>
-
-                      <h4 className="font-semibold text-foreground mb-2">Features</h4>
-                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                        {features.map((f, i) => (
-                          <li key={i}>{f.trim()}</li>
-                        ))}
-                      </ul>
-                    </>
-                  );
-                })()
-              ) : (
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {product.description}
-                </p>
-              )}
+              <h3 className="font-semibold text-foreground mb-2">
+                Description
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {product.description}
+              </p>
             </div>
           )}
 

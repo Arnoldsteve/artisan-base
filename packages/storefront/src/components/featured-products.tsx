@@ -19,15 +19,15 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (isLoading) {
     return (
-      <section className="py-16">
+      <section className="py-4">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+           <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover our most popular handcrafted items, carefully selected
-              for their quality, beauty, and craftsmanship.
+            <p className="text-start text-sm">
+              Discover our most popular handcrafted items, carefully selected for
+              their quality, beauty, and craftsmanship.
             </p>
           </div>
 
@@ -43,13 +43,13 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
     return (
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+          <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover our most popular handcrafted items, carefully selected
-              for their quality, beauty, and craftsmanship.
+            <p className="text-start text-sm">
+              Discover our most popular handcrafted items, carefully selected for
+              their quality, beauty, and craftsmanship.
             </p>
           </div>
 
@@ -68,15 +68,15 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (!products.length) {
     return (
-      <section className="py-16">
+      <section className="py-4">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+         <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover our most popular handcrafted items, carefully selected
-              for their quality, beauty, and craftsmanship.
+            <p className="text-start text-sm">
+              Discover our most popular handcrafted items, carefully selected for
+              their quality, beauty, and craftsmanship.
             </p>
           </div>
 
@@ -91,16 +91,23 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
   }
 
   return (
-    <section className="py-16">
+    <section className="py-4">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Featured Products
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Discover our most popular handcrafted items, carefully selected for
-            their quality, beauty, and craftsmanship.
-          </p>
+        <div className="flex justify-between"> 
+          <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              Featured Products
+            </h2>
+            <p className="text-start text-sm">
+              Discover our most popular handcrafted items, carefully selected for
+              their quality, beauty, and craftsmanship.
+            </p>
+          </div>
+          <div className="text-center mt-12">
+            <Button asChild variant="outline">
+              <a href="/products">View All Products</a>
+            </Button>
+          </div>
         </div>
 
         {/* OPTIMIZATION: Grid layout with responsive design */}

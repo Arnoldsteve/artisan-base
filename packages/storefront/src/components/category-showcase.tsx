@@ -16,14 +16,14 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
     return (
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Shop by Category
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore our curated collections of handcrafted products
-            </p>
-          </div>
+           <div className="text-start mb-12">
+          <h2 className="text-2xl font-bold text-foreground mb-1">
+            Shop by Category
+          </h2>
+          <p className="text-start text-sm">
+            Explore our curated collections of handcrafted products
+          </p>
+        </div>
 
           <div className="flex justify-center items-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -35,13 +35,13 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
 
   if (error || !categories.length) {
     return (
-      <section className="py-16 bg-muted/30">
+      <section className="py-4 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+          <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
               Shop by Category
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-start text-sm">
               Explore our curated collections of handcrafted products
             </p>
           </div>
@@ -57,19 +57,19 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
   }
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-4 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
+        <div className="text-start mb-12">
+          <h2 className="text-2xl font-bold text-foreground mb-1">
             Shop by Category
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-start text-sm">
             Explore our curated collections of handcrafted products
           </p>
         </div>
 
         {/* OPTIMIZATION: Grid layout with responsive design */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {categories.slice(0, 6).map((category) => (
             <Link
               key={category.id}

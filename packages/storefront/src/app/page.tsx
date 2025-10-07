@@ -34,7 +34,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <Hero />
+      {/* <Hero /> */}
 
       {/* Featured Products */}
       <Suspense fallback={<LoadingSection />}>
