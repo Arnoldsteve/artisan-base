@@ -72,7 +72,7 @@ export function useProduct(id: string, options?: UseQueryOptions<Product>) {
 }
 
 // OPTIMIZATION: Featured products with longer cache time
-export function useFeaturedProducts(limit: number = 6) {
+export function useFeaturedProducts(limit: number = 12) {
   return useQuery({
     queryKey: productKeys.featured(),
     queryFn: () => productService.getFeaturedProducts(limit),

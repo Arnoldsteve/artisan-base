@@ -57,20 +57,13 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
   return (
     <section className="py-4 bg-[#f4f4f4]">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between">
-          <div className="text-start mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-1">
-              Shop by Category
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              Explore our curated collections of handcrafted products
-            </p>
-          </div>
-          <div className="text-center mt-12">
-            <Button asChild variant="outline">
-              <Link href="/categories">View All Categories</Link>
-            </Button>
-          </div>
+        <div className="text-start mb-12">
+          <h2 className="text-2xl font-bold text-foreground mb-1">
+            Shop by Category
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Explore our curated collections of handcrafted products
+          </p>
         </div>
 
         {/* OPTIMIZATION: Grid layout with responsive design */}
@@ -113,11 +106,11 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
           ))}
         </div>
 
-        {/* <div className="text-center mt-12">
-          <Button asChild variant="outline">
+        <div className="text-start mt-12">
+          <Button asChild variant="default" className="w-full sm:w-auto">
             <Link href="/categories">View All Categories</Link>
           </Button>
-        </div> */}
+        </div>
       </div>
     </section>
   );

@@ -29,7 +29,7 @@ export function ClientSidebarLayout({ children }: ClientSidebarProps) {
       <AppSidebar />
       <SidebarInset>
         <div className="flex flex-col h-screen w-full">
-          <main className="flex-1 overflow-y-auto bg-[#f8fafc]">
+          <main className="flex-1 overflow-y-auto bg-[#f4f4f4]">
             <div className="space-y-4">{children}</div>
           </main>
         </div>

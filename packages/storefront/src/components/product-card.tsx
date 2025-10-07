@@ -88,11 +88,11 @@ export const ProductCard = memo(function ProductCard({
             />
           </button>
         )}
-        <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
+        {/* <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
           {product.categories?.length
             ? product.categories[0].name
             : "Uncategorized"}
-        </div>
+        </div> */}
       </div>
 
       {/* Content */}
