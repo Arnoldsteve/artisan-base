@@ -8,6 +8,8 @@ import { Star } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import Link from "next/link";
+import { ProductsLoading } from "./skeletons/product-card-skeleton";
+import StarRating from "./star-rating";
 
 interface ProductRecommendationsProps {
   currentProduct: Product;
@@ -48,25 +50,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2";
 
   // --- Loading ---
-  if (isLoading) {
-    return (
-      <section className="py-4 bg-[#f4f4f4]">
-        <h2 className="text-2xl font-bold mb-6">You might also like</h2>
-        <div className={`grid gap-6 ${getGridCols()}`}>
-          {skeletonArray.map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse bg-muted rounded-2xl p-4 h-64 flex flex-col items-center justify-center"
-            >
-              <div className="bg-gray-300 h-32 w-32 rounded mb-4" />
-              <div className="h-4 bg-gray-300 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
+  if (isLoading) return <ProductsLoading/>
 
   // --- Empty / Error ---
   if (error || !recommendations || recommendations.length === 0) {
@@ -74,16 +58,15 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
       ? "Could not load recommendations."
       : "No recommendations found for this product.";
     return (
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold mb-6">You might also like</h2>
-        <p className="text-center text-muted-foreground py-8">{message}</p>
+      <section className="mt-8">
+        {/* Show nothing if no recommendatin is found */}
       </section>
     );
   }
 
   // --- Success ---
   return (
-    <section className="mt-16">
+    <section className="mt-8">
       <h2 className="text-2xl font-bold mb-6">You might also like</h2>
       <div className={`grid gap-6 ${getGridCols()}`}>
         {recommendations.map((product) => {
@@ -123,21 +106,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
               </Link>
 
               {/* Rating */}
-              <div className="flex items-center justify-center gap-1 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-3 w-3 ${
-                      i < Math.floor(product.rating ?? 0)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-                <span className="text-xs text-muted-foreground">
-                  {product.rating?.toFixed(1) ?? "0.0"}
-                </span>
-              </div>
+              <StarRating rating={product.rating} />
 
               {/* Price */}
               <p className="font-semibold text-primary text-center mb-3">
