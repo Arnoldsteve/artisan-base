@@ -4,19 +4,19 @@ export function ContactInfo() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6">
+        <h2 className="text-xl font-bold text-foreground mb-1">
           Get in Touch
         </h2>
-        <p className="text-muted-foreground mb-6">
+        <p className=" text-sm text-muted-foreground mb-6">
           We're here to help and answer any questions you might have. We look
           forward to hearing from you.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="text-sm space-y-6">
         <div className="flex items-start space-x-4">
           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Mail className="h-5 w-5 text-primary" />
+            <Mail className="h-4 w-4 text-primary" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">Email</h3>
@@ -29,7 +29,7 @@ export function ContactInfo() {
 
         <div className="flex items-start space-x-4">
           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Phone className="h-5 w-5 text-primary" />
+            <Phone className="h-4 w-4 text-primary" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">Phone</h3>
@@ -42,7 +42,7 @@ export function ContactInfo() {
 
         <div className="flex items-start space-x-4">
           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <MapPin className="h-5 w-5 text-primary" />
+            <MapPin className="h-4 w-4 text-primary" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">Address</h3>
@@ -58,7 +58,7 @@ export function ContactInfo() {
 
         <div className="flex items-start space-x-4">
           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Clock className="h-5 w-5 text-primary" />
+            <Clock className="h-4 w-4 text-primary" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">

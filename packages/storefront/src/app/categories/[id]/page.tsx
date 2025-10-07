@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react"; 
+import { ArrowLeft } from "lucide-react";
 
 import CategoryCard from "@/components/category-card";
 import { ProductCard } from "@/components/product-card";
@@ -44,28 +44,30 @@ export default function CategoryPage() {
   const products = categoryData.products || [];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <CategoryCard category={category} />
-      
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4 text-foreground">
-          Products in {category.name}
-        </h2>
+    <section className="py-4 bg-[#f4f4f4]">
+      <div className="container mx-auto px-4 py-8">
+        <CategoryCard category={category} />
 
-        {products.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              There are currently no products in this category.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-            {products.map((product: Product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4 text-foreground">
+            Products in {category.name}
+          </h2>
+
+          {products.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                There are currently no products in this category.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+              {products.map((product: Product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

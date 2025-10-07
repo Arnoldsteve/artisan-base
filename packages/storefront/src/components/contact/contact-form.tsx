@@ -102,9 +102,9 @@ export function ContactForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full flex items-center justify-center space-x-2"
+          className="w-1/4 flex items-center justify-center space-x-2 mt-8"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-2 w-2" />
           <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
         </Button>
       </form>

@@ -19,7 +19,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (isLoading) {
     return (
-      <section className="py-4">
+      <section className="py-4 bg-[#f4f4f4]">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -38,7 +38,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (error) {
     return (
-      <section className="bg-[#f4f4f4] py-16">
+      <section className="py-4 bg-[#f4f4f4]">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -65,7 +65,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (!products.length) {
     return (
-      <section className="py-4">
+      <section className="py-4 bg-[#f4f4f4]">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -88,7 +88,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
   }
 
   return (
-    <section className="py-4 bg-[#f4f4f4]" >
+    <section className="py-4 bg-[#f4f4f4]">
       <div className="container mx-auto px-4">
         <div className="flex justify-between">
           <div className="text-start mb-12">
