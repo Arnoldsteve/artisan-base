@@ -53,7 +53,9 @@ export const ProductCard = memo(function ProductCard({
     : null;
 
   return (
-    <div className="group flex flex-col h-full bg-card rounded-md border shadow-sm hover:shadow-md transition-all duration-300">
+    <div 
+      className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group"
+    >
       {/* Image Section */}
       <div className="relative aspect-square rounded-t-md overflow-hidden">
         <Link href={`/products/${product.id}`}>
@@ -97,7 +99,7 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col p-4 flex-1">
+      <div className="flex flex-col px-0 py-2 flex-1">
         {/* Rating + Stock */}
         {/* ({product.reviewCount ?? 0}) */}
         <div className="flex items-center justify-between mb-2">
@@ -140,7 +142,7 @@ export const ProductCard = memo(function ProductCard({
           size="sm"
           onClick={handleAddToCart}
           disabled={product.inventoryQuantity === 0}
-          className="w-full flex items-center justify-center gap-2 rounded-xl"
+          className="w-full flex items-center justify-center gap-2 rounded-lg"
         >
           <ShoppingCart className="h-4 w-4" />
           {product.inventoryQuantity > 0 ? "Add to Cart" : "Out of Stock"}
