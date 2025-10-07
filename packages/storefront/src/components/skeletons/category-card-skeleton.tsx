@@ -1,7 +1,7 @@
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import React from "react";
 
-export function ProductsLoading() {
+export function CategoriesLoading() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header placeholder */}

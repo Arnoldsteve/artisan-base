@@ -6,6 +6,7 @@ import { ProductCard } from "./product-card";
 import { useFeaturedProducts } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { ProductsLoading } from "./skeletons/product-card-skeleton";
 
 // OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 export const FeaturedProducts = memo(function FeaturedProducts() {
@@ -16,24 +17,20 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
     refetch,
   } = useFeaturedProducts(6);
 
-
   if (isLoading) {
     return (
       <section className="py-4">
         <div className="container mx-auto px-4">
-           <div className="text-start mb-12">
+          <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-start text-sm">
-              Discover our most popular handcrafted items, carefully selected for
-              their quality, beauty, and craftsmanship.
+            <p className="text-muted-foreground text-sm">
+              Discover our most popular handcrafted items, carefully selected
+              for their quality, beauty, and craftsmanship.
             </p>
           </div>
-
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <ProductsLoading />
         </div>
       </section>
     );
@@ -47,9 +44,9 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-start text-sm">
-              Discover our most popular handcrafted items, carefully selected for
-              their quality, beauty, and craftsmanship.
+            <p className="text-muted-foreground text-sm">
+              Discover our most popular handcrafted items, carefully selected
+              for their quality, beauty, and craftsmanship.
             </p>
           </div>
 
@@ -70,13 +67,13 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
     return (
       <section className="py-4">
         <div className="container mx-auto px-4">
-         <div className="text-start mb-12">
+          <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-start text-sm">
-              Discover our most popular handcrafted items, carefully selected for
-              their quality, beauty, and craftsmanship.
+            <p className="text-muted-foreground text-sm">
+              Discover our most popular handcrafted items, carefully selected
+              for their quality, beauty, and craftsmanship.
             </p>
           </div>
 
@@ -93,14 +90,14 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
   return (
     <section className="py-4">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between"> 
+        <div className="flex justify-between">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-start text-sm">
-              Discover our most popular handcrafted items, carefully selected for
-              their quality, beauty, and craftsmanship.
+            <p className="text-muted-foreground text-sm">
+              Discover our most popular handcrafted items, carefully selected
+              for their quality, beauty, and craftsmanship.
             </p>
           </div>
           <div className="text-center mt-12">
@@ -117,7 +114,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-end mt-12">
           <Button asChild variant="outline">
             <a href="/products">View All Products</a>
           </Button>

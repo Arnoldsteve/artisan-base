@@ -78,12 +78,12 @@ function ProductsContent() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl font-bold text-foreground mb-1">
             {searchQuery
               ? `Search results for "${searchQuery}"`
               : "All Products"}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {products.length} product
             {products.length !== 1 ? "s" : ""} found
           </p>

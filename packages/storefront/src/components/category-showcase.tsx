@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useCategories } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { CategoriesLoading } from "./skeletons/category-card-skeleton";
 
 // OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 export const CategoryShowcase = memo(function CategoryShowcase() {
@@ -16,18 +17,15 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
     return (
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-           <div className="text-start mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-1">
-            Shop by Category
-          </h2>
-          <p className="text-start text-sm">
-            Explore our curated collections of handcrafted products
-          </p>
-        </div>
-
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              Shop by Category
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Explore our curated collections of handcrafted products
+            </p>
           </div>
+          <CategoriesLoading />
         </div>
       </section>
     );
@@ -41,7 +39,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Shop by Category
             </h2>
-            <p className="text-start text-sm">
+            <p className="text-muted-foreground">
               Explore our curated collections of handcrafted products
             </p>
           </div>
@@ -59,13 +57,20 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
   return (
     <section className="py-4 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-start mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-1">
-            Shop by Category
-          </h2>
-          <p className="text-start text-sm">
-            Explore our curated collections of handcrafted products
-          </p>
+        <div className="flex justify-between">
+          <div className="text-start mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              Shop by Category
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Explore our curated collections of handcrafted products
+            </p>
+          </div>
+          <div className="text-center mt-12">
+            <Button asChild variant="outline">
+              <Link href="/categories">View All Categories</Link>
+            </Button>
+          </div>
         </div>
 
         {/* OPTIMIZATION: Grid layout with responsive design */}
@@ -79,7 +84,10 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
               <div className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                 <div className="aspect-video relative overflow-hidden">
                   <Image
-                    src={category.image || `https://picsum.photos/400/400?random=${category.id}`}
+                    src={
+                      category.image ||
+                      `https://picsum.photos/400/400?random=${category.id}`
+                    }
                     alt={category.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"

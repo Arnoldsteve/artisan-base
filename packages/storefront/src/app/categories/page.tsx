@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCategories } from "@/hooks/use-products";
+import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton";
 import { Category } from "@/types";
 
 export default function CategoriesPage() {
@@ -11,28 +12,17 @@ export default function CategoriesPage() {
   // The API returns an array of categories, each with _count.products
   const categories = categoriesResponse || [];
   
-  if (categoriesLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (categoriesLoading) return <CategoriesLoading/>
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-1">
           Product Categories
         </h1>
-        <p className="text-muted-foreground">Browse our products by category</p>
+        <p className="text-muted-foreground text-sm">
+          Browse our products by category
+        </p>
       </div>
 
       {categories.length === 0 ? (
@@ -40,12 +30,12 @@ export default function CategoriesPage() {
           <h2 className="text-xl font-semibold text-foreground mb-2">
             No categories found
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground ">
             Categories will appear here once they're added.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {categories.map((category: any) => (
             <Link
               key={category.id}
