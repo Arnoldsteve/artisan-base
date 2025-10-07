@@ -16,8 +16,9 @@ import {
 
 import { Filter, Grid, List } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/use-products";
-import { Product, ProductFilters } from "@/types";
+import { Product, ProductFilters as ProductFilterType } from "@/types";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
+import { ProductFilters } from "@/components/products/product-filters";
 
 // Products content component
 function ProductsContent() {
@@ -26,8 +27,8 @@ function ProductsContent() {
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] =
-    useState<NonNullable<ProductFilters["sortBy"]>>("name");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+    useState<NonNullable<ProductFilterType["sortBy"]>>("name");
+  const [priceRange, setPriceRange] = useState<[number, number]>([1, 100000]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -75,7 +76,6 @@ function ProductsContent() {
   return (
     <section className="py-4 bg-[#f4f4f4]">
       <div className="container mx-auto px-4">
-
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
@@ -120,86 +120,21 @@ function ProductsContent() {
           </div>
         </div>
 
-        {/* Filters */}
+         {/* Filters Section */}
         {showFilters && (
-          <div className="bg-card border rounded-lg p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Category
-                </label>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.name}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Sort By
-                </label>
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => setSortBy(value as typeof sortBy)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name">Name A-Z</SelectItem>
-                    <SelectItem value="price-low">
-                      Price: Low to High
-                    </SelectItem>
-                    <SelectItem value="price-high">
-                      Price: High to Low
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Price Range: Ksh {priceRange[0]} - Ksh {priceRange[1]}
-                </label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={priceRange[0]}
-                    onChange={(e) =>
-                      setPriceRange([Number(e.target.value), priceRange[1]])
-                    }
-                    className="w-20"
-                  />
-                  <span className="self-center">-</span>
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={priceRange[1]}
-                    onChange={(e) =>
-                      setPriceRange([priceRange[0], Number(e.target.value)])
-                    }
-                    className="w-20"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <ProductFilters
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            sortBy={sortBy}
+            setSortBy={(value) => {
+              if (value !== undefined) setSortBy(value);
+            }}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+          />
         )}
 
-        {/* Products Grid */}
         {products.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold text-foreground mb-2">
@@ -227,7 +162,6 @@ function ProductsContent() {
   );
 }
 
-// Main page component with Suspense
 export default function ProductsPage() {
   return (
     <Suspense fallback={<ProductsLoading />}>
