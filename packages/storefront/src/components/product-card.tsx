@@ -53,10 +53,7 @@ export const ProductCard = memo(function ProductCard({
     : null;
 
   return (
-    <div 
-      className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group"
-    >
-      {/* Image Section */}
+    <div className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group">
       <div className="relative h-40 rounded-t-md overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <Image
@@ -78,7 +75,6 @@ export const ProductCard = memo(function ProductCard({
           <div className="absolute inset-0 bg-muted animate-pulse" />
         )}
 
-        {/* Wishlist */}
         {showWishlist && (
           <button
             onClick={handleToggleWishlist}
@@ -91,22 +87,11 @@ export const ProductCard = memo(function ProductCard({
             />
           </button>
         )}
-        {/* <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
-          {product.categories?.length
-            ? product.categories[0].name
-            : "Uncategorized"}
-        </div> */}
       </div>
 
-      {/* Content */}
       <div className="flex flex-col px-0 py-2 flex-1">
-        {/* Rating + Stock */}
-        {/* ({product.reviewCount ?? 0}) */}
         <div className="flex items-center justify-between mb-2">
-          {/* Rating */}
           <StarRating rating={product.rating ?? 3.7} />
-
-          {/* Stock badge */}
           <span
             className={`text-[10px] px-2 py-1 rounded-full flex items-center justify-center ${
               product.inventoryQuantity > 0
@@ -118,14 +103,12 @@ export const ProductCard = memo(function ProductCard({
           </span>
         </div>
 
-        {/* Name */}
         <Link href={`/products/${product.id}`} className="flex-1">
           <h3 className="text-sm line-clamp-2 text-foreground group-hover:text-primary transition">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price */}
         <div className="flex items-center gap-2 mt-2 mb-4">
           <span className="text-md font-semibold text-foreground">
             {formattedPrice}
@@ -137,7 +120,6 @@ export const ProductCard = memo(function ProductCard({
           )}
         </div>
 
-        {/* CTA */}
         <Button
           size="sm"
           onClick={handleAddToCart}

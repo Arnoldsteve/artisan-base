@@ -20,14 +20,15 @@ const skeletonArray = Array.from({ length: 6 });
 export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   currentProduct,
 }) => {
-  const { data: recommendations, isLoading, error } = useRecommendations(
-    currentProduct.id
-  );
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+  } = useRecommendations(currentProduct.id);
   const { addToCart } = useCartContext();
 
   const handleQuickAdd = (product: Product) => {
-    const images =
-      (product.images?.map((img) => img.url).filter(Boolean) ?? []);
+    const images = product.images?.map((img) => img.url).filter(Boolean) ?? [];
     const imageList =
       images.length > 0
         ? images
@@ -50,7 +51,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2";
 
   // --- Loading ---
-  if (isLoading) return <ProductsLoading/>
+  if (isLoading) return <ProductsLoading />;
 
   // --- Empty / Error ---
   if (error || !recommendations || recommendations.length === 0) {
@@ -71,7 +72,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
       <div className={`grid gap-6 ${getGridCols()}`}>
         {recommendations.map((product) => {
           const images =
-            (product.images?.map((img) => img.url).filter(Boolean) ?? []);
+            product.images?.map((img) => img.url).filter(Boolean) ?? [];
           const imageList =
             images.length > 0
               ? images
@@ -85,35 +86,32 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
               key={product.id}
               className="bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all duration-300 p-4 flex flex-col group"
             >
-              {/* Image */}
               <div className="relative aspect-square mb-3 overflow-hidden rounded-xl">
                 <Link href={`/products/${product.id}`}>
-                <Image
-                  src={imageList[0]}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
+                  <Image
+                    src={imageList[0]}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
                 </Link>
               </div>
 
-              {/* Name */}
-              <Link href={`/products/${product.id}`}>
-                <h3 className="font-medium text-sm text-center mb-1 line-clamp-2 group-hover:text-primary transition">
-                  {product.name}
-                </h3>
-              </Link>
+              <div className="text-center space-y-2 mb-2">
+                <Link href={`/products/${product.id}`}>
+                  <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition">
+                    {product.name}
+                  </h3>
+                </Link>
+                <div className="flex justify-center">
+                  <StarRating rating={product.rating ?? 3.7} />
+                </div>
+                <p className="font-semibold text-primary">
+                  {formatMoney(product.price, product.currency)}
+                </p>
+              </div>
 
-              {/* Rating */}
-              <StarRating rating={product.rating} />
-
-              {/* Price */}
-              <p className="font-semibold text-primary text-center mb-3">
-                {formatMoney(product.price, product.currency)}
-              </p>
-
-              {/* CTA */}
               <Button
                 size="sm"
                 className="w-full mt-auto rounded-xl"

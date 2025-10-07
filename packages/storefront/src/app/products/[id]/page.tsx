@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
-import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
+import { Star, Heart, Share2, Truck, Shield, ArrowLeft, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useProduct } from "@/hooks/use-products";
 import { useCartContext } from "@/contexts/cart-context";
@@ -14,6 +14,7 @@ import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
 import { formatMoney } from "@/lib/money";
 import ProductDetailsSkeleton from "@/components/skeletons/product-details-skeleton";
+import StarRating from "@/components/star-rating";
 
 export default function ProductPage() {
   const params = useParams();
@@ -203,30 +204,19 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               {product.name}
             </h1>
 
             <div className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < Math.floor(product.rating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
+              <StarRating rating={product.rating || 3.7} />
               <span className="text-sm text-muted-foreground">
-                {product.rating.toFixed(1)} ({product.reviewCount} reviews)
+                {product.rating.toFixed(1)} ({product.reviewCount || 10} reviews)
               </span>
             </div>
 
             <div className="flex items-center space-x-3 mb-6">
-              <span className="text-3xl font-bold text-foreground">
+              <span className="text-2xl font-semibold text-foreground">
                 {formattedPrice}
               </span>
               {originalPrice && (
@@ -253,7 +243,7 @@ export default function ProductPage() {
               <h3 className="font-semibold text-foreground mb-2">
                 Description
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {product.description}
               </p>
             </div>
@@ -307,14 +297,15 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <Button
-              onClick={handleAddToCart}
-              disabled={product.inventoryQuantity === 0}
-              className="w-full"
-              size="lg"
-            >
-              {product.inventoryQuantity > 0 ? "Add to Cart" : "Out of Stock"}
-            </Button>
+             <Button
+          size="sm"
+          onClick={handleAddToCart}
+          disabled={product.inventoryQuantity === 0}
+          className="w-full flex items-center justify-center gap-2 rounded-lg"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          {product.inventoryQuantity > 0 ? "Add to Cart" : "Out of Stock"}
+        </Button>
           </div>
 
           {/* Features */}
