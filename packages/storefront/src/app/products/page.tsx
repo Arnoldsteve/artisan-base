@@ -23,8 +23,8 @@ function ProductsLoading() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="h-10 bg-gray-200 rounded w-1/4 mb-8"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="h-64 bg-gray-200 rounded"></div>
           ))}
@@ -136,7 +136,7 @@ function ProductsContent() {
       {/* Filters */}
       {showFilters && (
         <div className="bg-card border rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             <div>
               <label className="text-sm font-medium mb-2 block">Category</label>
               <Select
@@ -173,7 +173,7 @@ function ProductsContent() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">
-                Price Range: ${priceRange[0]} - ${priceRange[1]}
+                Price Range: Ksh {priceRange[0]} - Ksh {priceRange[1]}
               </label>
               <div className="flex space-x-2">
                 <Input
@@ -215,7 +215,7 @@ function ProductsContent() {
         <div
           className={
             viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
               : "space-y-4"
           }
         >
