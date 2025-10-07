@@ -55,6 +55,7 @@ export const ProductCard = memo(function ProductCard({
     <div className="group flex flex-col bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all duration-300">
       {/* Image Section */}
       <div className="relative aspect-square rounded-t-2xl overflow-hidden">
+        <Link href={`/products/${product.id}`}>
         <Image
           src={
             product.images?.[0]?.url ||
@@ -69,6 +70,7 @@ export const ProductCard = memo(function ProductCard({
           onLoad={() => setIsImageLoading(false)}
           loading="lazy"
         />
+         </Link>
         {isImageLoading && (
           <div className="absolute inset-0 bg-muted animate-pulse" />
         )}
@@ -86,11 +88,6 @@ export const ProductCard = memo(function ProductCard({
             />
           </button>
         )}
-
-        {/* Category */}
-        {/* <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
-          {product.category ? product.category.name : "Uncategorized"}
-        </div> */}
         <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
           {product.categories?.length
             ? product.categories[0].name

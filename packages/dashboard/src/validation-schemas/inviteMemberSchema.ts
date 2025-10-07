@@ -1,4 +1,3 @@
-// validation-schemas/inviteMemberSchema.ts
 import { z } from 'zod';
 import { TenantRole } from '@/types/roles';
 

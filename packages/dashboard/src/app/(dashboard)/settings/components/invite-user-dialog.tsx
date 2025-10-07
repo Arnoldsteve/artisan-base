@@ -30,8 +30,6 @@ import {
   SelectValue,
 } from '@repo/ui';
 import { TenantRole } from '@/types/roles';
-
-// ✅ Import centralized schema
 import {
   inviteMemberSchema,
   InviteMemberSchema,
@@ -40,7 +38,7 @@ import {
 interface InviteUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (data: InviteMemberSchema) => void; // 🔑 use schema type here
+  onSuccess: (data: InviteMemberSchema) => void; 
 }
 
 export function InviteUserDialog({
@@ -59,7 +57,7 @@ export function InviteUserDialog({
 
   const onSubmit = (values: InviteMemberSchema) => {
     toast.success(`Invitation sent to ${values.email}`);
-    onSuccess(values); // ✅ perfectly typed now
+    onSuccess(values); 
     form.reset();
   };
 
