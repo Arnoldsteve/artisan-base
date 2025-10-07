@@ -114,6 +114,7 @@ export default function ProductPage() {
   };
 
   return (
+    <section className="bg-[#f4f4f4]">
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav className="mb-8">
@@ -347,5 +348,6 @@ export default function ProductPage() {
       {/* Related Products Section */}
       <ProductRecommendations currentProduct={product} />
     </div>
+    </section>
   );
 }

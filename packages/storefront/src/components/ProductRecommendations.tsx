@@ -4,7 +4,7 @@ import { Product } from "@/types";
 import { useRecommendations } from "@/hooks/use-recommendations";
 import { useCartContext } from "@/contexts/cart-context";
 import { toast } from "sonner";
-import { Star } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import Link from "next/link";
@@ -114,10 +114,11 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
 
               <Button
                 size="sm"
-                className="w-full mt-auto rounded-xl"
                 onClick={() => handleQuickAdd(product)}
                 disabled={product.inventoryQuantity === 0}
+                className="w-full flex items-center justify-center gap-2 rounded-lg"
               >
+                <ShoppingCart className="h-4 w-4" />
                 {product.inventoryQuantity > 0 ? "Quick Add" : "Out of Stock"}
               </Button>
             </div>
