@@ -16,15 +16,15 @@ export default function FeaturedPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-1">
           <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg">
-            <Star className="h-6 w-6 text-white" />
+            <Star className="h-3 w-3 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-2xl font-bold text-foreground">
             Featured Items
           </h1>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Discover our handpicked collection of exceptional artisan products
         </p>
       </div>
