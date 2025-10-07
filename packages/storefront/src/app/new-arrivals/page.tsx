@@ -44,16 +44,16 @@ export default function NewArrivalsPage() {
       ) : (
         <>
           {/* New Arrivals Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
             {products.map((product, index) => (
               <div key={product.id} className="relative">
                 {/* New Badge */}
-                <div className="absolute top-3.5 right-2 z-10">
+                {/* <div className="absolute top-3.5 right-2 z-10">
                   <Badge className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
                     <TrendingUp className="h-3 w-3" />
                     New
                   </Badge>
-                </div>
+                </div> */}
                 
                 <ProductCard product={product} />
               </div>
