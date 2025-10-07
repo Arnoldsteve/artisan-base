@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Star } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
+import Link from "next/link";
 
 interface ProductRecommendationsProps {
   currentProduct: Product;
@@ -103,6 +104,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
             >
               {/* Image */}
               <div className="relative aspect-square mb-3 overflow-hidden rounded-xl">
+                <Link href={`/products/${product.id}`}>
                 <Image
                   src={imageList[0]}
                   alt={product.name}
@@ -110,12 +112,15 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                   height={200}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
+                </Link>
               </div>
 
               {/* Name */}
-              <h3 className="font-medium text-sm text-center mb-1 line-clamp-2 group-hover:text-primary transition">
-                {product.name}
-              </h3>
+              <Link href={`/products/${product.id}`}>
+                <h3 className="font-medium text-sm text-center mb-1 line-clamp-2 group-hover:text-primary transition">
+                  {product.name}
+                </h3>
+              </Link>
 
               {/* Rating */}
               <div className="flex items-center justify-center gap-1 mb-2">
