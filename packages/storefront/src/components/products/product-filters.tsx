@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@repo/ui/components/ui/button";
 import { ProductFilters as FiltersType } from "@/types"; 
 
 interface ProductFiltersProps {
@@ -19,6 +20,8 @@ interface ProductFiltersProps {
   setSortBy: (value: FiltersType["sortBy"]) => void;
   priceRange: [number, number]; 
   setPriceRange: (value: [number, number]) => void;
+  onApplyPriceFilter: () => void;
+  hasUnappliedPriceChanges: boolean;
 }
 
 export function ProductFilters({
@@ -29,6 +32,8 @@ export function ProductFilters({
   setSortBy,
   priceRange,
   setPriceRange,
+  onApplyPriceFilter,
+  hasUnappliedPriceChanges,
 }: ProductFiltersProps) {
   return (
     <div className="bg-card border rounded-lg p-6 mb-8">
@@ -72,9 +77,9 @@ export function ProductFilters({
         {/* Price Range Filter */}
         <div>
           <label className="text-sm font-medium mb-2 block">
-            Price Range: Ksh {priceRange[0]} - Ksh {priceRange[1]}
+            Price Range: Ksh {priceRange[0].toLocaleString()} - Ksh {priceRange[1].toLocaleString()}
           </label>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 mb-2">
             <Input
               type="number"
               placeholder="Min"
@@ -82,7 +87,7 @@ export function ProductFilters({
               onChange={(e) =>
                 setPriceRange([Number(e.target.value), priceRange[1]])
               }
-              className="w-20"
+              className="w-24"
             />
             <span className="self-center">-</span>
             <Input
@@ -92,9 +97,20 @@ export function ProductFilters({
               onChange={(e) =>
                 setPriceRange([priceRange[0], Number(e.target.value)])
               }
-              className="w-20"
+              className="w-24"
             />
           </div>
+          
+          {/* Apply Button - Only shows when there are unapplied changes */}
+          {hasUnappliedPriceChanges && (
+            <Button
+              onClick={onApplyPriceFilter}
+              size="sm"
+              className="w-full"
+            >
+              Apply Price Filter
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -5,15 +5,6 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/components/ui/select";
-
 import { Filter, Grid, List } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/use-products";
 import { Product, ProductFilters as ProductFilterType } from "@/types";
@@ -25,10 +16,14 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] =
-    useState<NonNullable<ProductFilterType["sortBy"]>>("name");
+  const [sortBy, setSortBy] = useState<NonNullable<ProductFilterType["sortBy"]>>("name");
+  
+  // Local state for price inputs (not sent to API immediately)
   const [priceRange, setPriceRange] = useState<[number, number]>([1, 100000]);
+  
+  // Applied state for price (sent to API only when "Apply" is clicked)
+  const [appliedPriceRange, setAppliedPriceRange] = useState<[number, number]>([1, 100000]);
+  
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -38,6 +33,7 @@ function ProductsContent() {
   const categories = categoriesResponse || [];
 
   // Fetch products from API with filters
+  // Use appliedPriceRange instead of priceRange
   const {
     data: productsResponse,
     isLoading,
@@ -45,15 +41,23 @@ function ProductsContent() {
   } = useProducts({
     search: searchQuery,
     category: selectedCategory !== "all" ? selectedCategory : undefined,
-    minPrice: priceRange[0],
-    maxPrice: priceRange[1],
+    minPrice: appliedPriceRange[0], // ← Use applied price
+    maxPrice: appliedPriceRange[1], // ← Use applied price
     sortBy,
-    // You can add pagination here if needed
   });
 
   const products = (productsResponse as any) ?? [];
 
-  // console.log("productsResponse:", productsResponse);
+  // Check if there are unapplied price changes
+  const hasUnappliedPriceChanges = 
+    priceRange[0] !== appliedPriceRange[0] || 
+    priceRange[1] !== appliedPriceRange[1];
+
+  // Handler to apply price filter
+  const handleApplyPriceFilter = () => {
+    setAppliedPriceRange(priceRange);
+  };
+
   console.log("Products response:", products);
 
   if (isLoading || isLoadingCategories) {
@@ -100,27 +104,10 @@ function ProductsContent() {
               <Filter className="h-4 w-4" />
               <span>Filters</span>
             </Button>
-
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </div>
 
-         {/* Filters Section */}
+        {/* Filters Section */}
         {showFilters && (
           <ProductFilters
             categories={categories}
@@ -132,6 +119,8 @@ function ProductsContent() {
             }}
             priceRange={priceRange}
             setPriceRange={setPriceRange}
+            onApplyPriceFilter={handleApplyPriceFilter}
+            hasUnappliedPriceChanges={hasUnappliedPriceChanges}
           />
         )}
 
@@ -146,11 +135,7 @@ function ProductsContent() {
           </div>
         ) : (
           <div
-            className={
-              viewMode === "grid"
-                ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2"
-                : "space-y-4"
-            }
+            className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2"
           >
             {products.map((product: Product) => (
               <ProductCard key={product.id} product={product} />
