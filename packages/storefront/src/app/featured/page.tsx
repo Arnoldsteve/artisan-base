@@ -47,13 +47,6 @@ export default function FeaturedPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
             {products.map((product) => (
               <div key={product.id} className="relative">
-                {/* Featured Badge */}
-                {/* <div className="absolute top-3.5 right-2 z-10">
-                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-                    <Star className="h-3 w-3" />
-                    Featured
-                  </Badge>
-                </div> */}
                 <ProductCard product={product} />
               </div>
             ))}
