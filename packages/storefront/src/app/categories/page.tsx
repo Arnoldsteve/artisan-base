@@ -16,7 +16,9 @@ export default function CategoriesPage() {
 
   return (
     <section className="py-4 bg-[#f4f4f4]">
-      <div className="container mx-auto px-4 py-8">
+      <div 
+        className="container mx-auto px-4 py-8"
+      >
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground mb-1">
             Product Categories
