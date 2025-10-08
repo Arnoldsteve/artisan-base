@@ -27,7 +27,10 @@ export class TenantClientFactory implements OnModuleDestroy {
     if (!databaseUrl) {
       throw new Error('DATABASE_URL environment variable is not set.');
     }
-    const urlWithSchema = `${databaseUrl}?schema=${tenantSchema}`;
+
+    // ✅ Use proper separator - & if URL already has ?, otherwise ?
+    const separator = databaseUrl.includes('?') ? '&' : '?';
+    const urlWithSchema = `${databaseUrl}${separator}schema=${tenantSchema}`;
 
     const newClient = new PrismaClient({
       datasources: {
@@ -44,14 +47,18 @@ export class TenantClientFactory implements OnModuleDestroy {
 
       // 4. Store the new, connected client in the cache for future requests.
       this.clients.set(tenantSchema, newClient);
-      
-      return newClient;
 
+      return newClient;
     } catch (error) {
-      this.logger.error(`Failed to connect to schema: ${tenantSchema}`, error.stack);
+      this.logger.error(
+        `Failed to connect to schema: ${tenantSchema}`,
+        error.stack,
+      );
       // If connection fails, disconnect the failed client and re-throw the error.
       await newClient.$disconnect();
-      throw new Error(`Could not connect to database for schema ${tenantSchema}.`);
+      throw new Error(
+        `Could not connect to database for schema ${tenantSchema}.`,
+      );
     }
   }
 
