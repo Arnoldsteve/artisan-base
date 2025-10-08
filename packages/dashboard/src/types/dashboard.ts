@@ -9,9 +9,20 @@ import { Customer } from './customers';
 /**
  * Defines the shape of the Key Performance Indicator (KPI) stats object.
  */
+// export interface DashboardKPI {
+//   totalRevenue: Decimal;
+//   salesToday: Decimal; // Renamed from 'sales' for clarity
+//   totalCustomers: number;
+//   activeProducts: number;
+//   inactiveProducts: number;
+// }
+
+
 export interface DashboardKPI {
-  totalRevenue: Decimal;
-  salesToday: Decimal; // Renamed from 'sales' for clarity
+  totalRevenue: string;
+  salesToday: string;
+  receivables: string;
+  cashCollected: string;
   totalCustomers: number;
   activeProducts: number;
   inactiveProducts: number;

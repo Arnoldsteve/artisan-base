@@ -24,6 +24,17 @@ export class DashboardKpisResponseDto {
   inactiveProducts: number;
 }
 
+
+// export class DashboardKpisResponseDto {
+//   totalRevenue: string;      // Delivered + Paid
+//   salesToday: string;        // Delivered today + Paid
+//   receivables: string;       // Delivered but Unpaid
+//   cashCollected: string;     // Actual payments received
+//   totalCustomers: number;
+//   activeProducts: number;
+//   inactiveProducts: number;
+// }
+
 export class DashboardRecentOrdersResponseDto {
     recentOrders: RecentOrderDto[];
 }

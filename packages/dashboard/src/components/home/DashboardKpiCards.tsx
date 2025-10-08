@@ -35,60 +35,107 @@ interface DashboardKpiCardsProps {
  * A component that renders the grid of 4 KPI cards for the dashboard.
  * It handles its own loading and error states internally.
  */
-export function DashboardKpiCards({ kpis, isLoading, isError }: DashboardKpiCardsProps) {
+export function DashboardKpiCards({
+  kpis,
+  isLoading,
+  isError,
+}: DashboardKpiCardsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {isLoading ? (
-        // --- Loading State ---
         <>
+          <KpiCardSkeleton />
+          <KpiCardSkeleton />
           <KpiCardSkeleton />
           <KpiCardSkeleton />
           <KpiCardSkeleton />
           <KpiCardSkeleton />
         </>
       ) : isError ? (
-        // --- Error State ---
         <p className="col-span-4 text-sm text-destructive">
           Failed to load dashboard stats.
         </p>
       ) : kpis ? (
-        // --- Success State ---
         <>
-          <Card className="bg-[#FFFFFF]">
+          <Card className="bg-[#fff]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatMoney(Number(kpis.totalRevenue))}</div>
+              <div className="text-2xl font-bold">
+                {formatMoney(Number(kpis.totalRevenue))}
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Sales Today</CardTitle>
               <ShoppingBag className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+{formatMoney(Number(kpis.salesToday))}</div>
+              <div className="text-2xl font-bold">
+                +{formatMoney(Number(kpis.salesToday))}
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+              <CardTitle className="text-sm font-medium">Receivables</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {formatMoney(Number(kpis.receivables))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Pending payment on delivered goods
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Cash Collected
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatMoney(Number(kpis.cashCollected))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Customers
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">+{kpis.totalCustomers}</div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Products</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Products
+              </CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{kpis.activeProducts}</div>
-              <p className="text-xs text-muted-foreground">{kpis.inactiveProducts} Inactive</p>
+              <p className="text-xs text-muted-foreground">
+                {kpis.inactiveProducts} Inactive
+              </p>
             </CardContent>
           </Card>
         </>
