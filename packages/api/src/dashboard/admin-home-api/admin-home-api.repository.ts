@@ -33,45 +33,133 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
   /**
    * Fetches the Key Performance Indicators (KPIs) for the dashboard.
    */
+  // async getKpis(): Promise<DashboardKpisResponseDto> {
+  //   const prisma = await this.getPrisma();
+
+  //   const [
+  //     totalRevenueResult,
+  //     salesTodayResult,
+  //     totalCustomers,
+  //     activeProducts,
+  //     inactiveProducts,
+  //   ] = await Promise.all([
+  //     prisma.order.aggregate({
+  //       _sum: { totalAmount: true },
+  //       where: { paymentStatus: 'PAID' },
+  //     }),
+  //     prisma.order.aggregate({
+  //       _sum: { totalAmount: true },
+  //       where: {
+  //         paymentStatus: 'PAID',
+  //         createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+  //       },
+  //     }),
+  //     prisma.customer.count(),
+  //     prisma.product.count({ where: { isActive: true } }),
+  //     prisma.product.count({ where: { isActive: false } }),
+  //   ]);
+
+  //   return {
+  //     totalRevenue: (
+  //       totalRevenueResult._sum.totalAmount || new Decimal(0)
+  //     ).toString(),
+  //     salesToday: (
+  //       salesTodayResult._sum.totalAmount || new Decimal(0)
+  //     ).toString(),
+  //     totalCustomers,
+  //     activeProducts,
+  //     inactiveProducts,
+  //   };
+  // }
+
+  /**
+   * Fetches the Key Performance Indicators (KPIs) for the dashboard.
+   * Sequential approach - more reliable for unstable connections
+   */
   async getKpis(): Promise<DashboardKpisResponseDto> {
     const prisma = await this.getPrisma();
 
-    const [
-      totalRevenueResult,
-      salesTodayResult,
-      totalCustomers,
-      activeProducts,
-      inactiveProducts,
-    ] = await Promise.all([
-      prisma.order.aggregate({
-        _sum: { totalAmount: true },
-        where: { paymentStatus: 'PAID' },
-      }),
-      prisma.order.aggregate({
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    try {
+      // Execute queries sequentially to avoid connection pool exhaustion
+
+      // Total Revenue - Delivered and Paid orders
+      const totalRevenueResult = await prisma.order.aggregate({
         _sum: { totalAmount: true },
         where: {
+          status: 'DELIVERED',
           paymentStatus: 'PAID',
-          createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
         },
-      }),
-      prisma.customer.count(),
-      prisma.product.count({ where: { isActive: true } }),
-      prisma.product.count({ where: { isActive: false } }),
-    ]);
+      });
 
-    return {
-      totalRevenue: (
-        totalRevenueResult._sum.totalAmount || new Decimal(0)
-      ).toString(),
-      salesToday: (
-        salesTodayResult._sum.totalAmount || new Decimal(0)
-      ).toString(),
-      totalCustomers,
-      activeProducts,
-      inactiveProducts,
-    };
+      // Sales Today - Delivered and Paid orders from today
+      const salesTodayResult = await prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: {
+          status: 'DELIVERED',
+          paymentStatus: 'PAID',
+          createdAt: { gte: today },
+        },
+      });
+
+      // Receivables - Delivered but not fully paid
+      const receivablesResult = await prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: {
+          status: 'DELIVERED',
+          paymentStatus: {
+            in: ['PENDING', 'PARTIALLY_PAID', 'PROCESSING'],
+          },
+        },
+      });
+
+      // Cash Collected - Sum of all successful payments
+      const cashCollectedResult = await prisma.payment.aggregate({
+        _sum: { amount: true },
+        where: {
+          status: {
+            in: ['PAID', 'PARTIALLY_PAID'],
+          },
+        },
+      });
+
+      // Customer count
+      const totalCustomers = await prisma.customer.count();
+
+      // Active products
+      const activeProducts = await prisma.product.count({
+        where: { isActive: true },
+      });
+
+      // Inactive products
+      const inactiveProducts = await prisma.product.count({
+        where: { isActive: false },
+      });
+
+      return {
+        totalRevenue: (
+          totalRevenueResult._sum.totalAmount || new Decimal(0)
+        ).toString(),
+        salesToday: (
+          salesTodayResult._sum.totalAmount || new Decimal(0)
+        ).toString(),
+        receivables: (
+          receivablesResult._sum.totalAmount || new Decimal(0)
+        ).toString(),
+        cashCollected: (
+          cashCollectedResult._sum.amount || new Decimal(0)
+        ).toString(),
+        totalCustomers,
+        activeProducts,
+        inactiveProducts,
+      };
+    } catch (error) {
+      Logger.error('Error fetching KPIs', error);
+      throw error;
+    }
   }
-
   /**
    * Fetches the most recent orders for the dashboard.
    */
@@ -115,21 +203,23 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
     const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
     twelveMonthsAgo.setHours(0, 0, 0, 0); // Normalize to the start of the day
 
-    Logger.debug(`Fetching PENDING sales data from ${twelveMonthsAgo.toISOString()}`);
+    Logger.debug(
+      `Fetching PENDING sales data from ${twelveMonthsAgo.toISOString()}`,
+    );
 
     // 2. Initialize a map with all 12 months to guarantee they exist in the output
     const monthlyTotals = new Map<string, Decimal>();
     const monthOrder: string[] = []; // To ensure correct chronological sorting
 
     for (let i = 11; i >= 0; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-        
-        // Pre-fill the map and the sorting array
-        if (!monthlyTotals.has(monthName)) {
-            monthlyTotals.set(monthName, new Decimal(0));
-            monthOrder.push(monthName);
-        }
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+
+      // Pre-fill the map and the sorting array
+      if (!monthlyTotals.has(monthName)) {
+        monthlyTotals.set(monthName, new Decimal(0));
+        monthOrder.push(monthName);
+      }
     }
 
     // 3. Fetch all relevant orders from the database using a more efficient query
@@ -140,7 +230,7 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
         },
         // NOTE: This is still filtering for only PENDING orders as per your last code.
         // Remove this line if you want to see totals for all statuses.
-        paymentStatus: 'PENDING', 
+        paymentStatus: 'PENDING',
       },
       select: {
         totalAmount: true,
@@ -152,8 +242,10 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
 
     // 4. Populate the map with the actual sales data from the database
     orders.forEach((order) => {
-      const monthName = order.createdAt.toLocaleDateString('en-US', { month: 'short' });
-      
+      const monthName = order.createdAt.toLocaleDateString('en-US', {
+        month: 'short',
+      });
+
       // We know the month exists in the map because we pre-filled it
       const currentTotal = monthlyTotals.get(monthName)!;
       const orderAmount = order.totalAmount || new Decimal(0);
@@ -161,7 +253,7 @@ export class AdminHomeApiRepository implements IAdminHomeApiRepository {
     });
 
     // 5. Convert the map to the final array, using our sort order to guarantee chronology
-    const sales = monthOrder.map(monthName => ({
+    const sales = monthOrder.map((monthName) => ({
       name: monthName,
       total: monthlyTotals.get(monthName)!.toString(),
     }));
