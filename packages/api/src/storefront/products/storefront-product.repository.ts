@@ -5,7 +5,9 @@ import { GetProductsDto } from './dto/get-products.dto';
 import { PrismaClient } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
-export class StorefrontProductRepository implements IStorefrontProductRepository {
+export class StorefrontProductRepository
+  implements IStorefrontProductRepository
+{
   private readonly logger = new Logger(StorefrontProductRepository.name);
 
   // This will hold the client once it's initialized
@@ -134,12 +136,13 @@ export class StorefrontProductRepository implements IStorefrontProductRepository
     };
   }
 
-  async findOne(id: string) {
+  async findOne(identifier: string) {
     const prisma = await this.getPrisma();
+
     const product = await prisma.product.findFirst({
       where: {
-        id,
-        isActive: true,
+        AND: [{ isActive: true }],
+        OR: [{ id: identifier }, { slug: identifier }],
       },
       select: {
         id: true,

@@ -13957,7 +13957,7 @@ export namespace Prisma {
   export type DashboardUserGroupByOutputType = {
     id: string
     email: string
-    hashedPassword: string
+    hashedPassword: string | null
     firstName: string | null
     lastName: string | null
     role: $Enums.TenantRole
@@ -14039,7 +14039,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string
-      hashedPassword: string
+      hashedPassword: string | null
       firstName: string | null
       lastName: string | null
       role: $Enums.TenantRole
@@ -16065,7 +16065,7 @@ export namespace Prisma {
     NOT?: DashboardUserWhereInput | DashboardUserWhereInput[]
     id?: StringFilter<"DashboardUser"> | string
     email?: StringFilter<"DashboardUser"> | string
-    hashedPassword?: StringFilter<"DashboardUser"> | string
+    hashedPassword?: StringNullableFilter<"DashboardUser"> | string | null
     firstName?: StringNullableFilter<"DashboardUser"> | string | null
     lastName?: StringNullableFilter<"DashboardUser"> | string | null
     role?: EnumTenantRoleFilter<"DashboardUser"> | $Enums.TenantRole
@@ -16077,7 +16077,7 @@ export namespace Prisma {
   export type DashboardUserOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrder
-    hashedPassword?: SortOrder
+    hashedPassword?: SortOrderInput | SortOrder
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
     role?: SortOrder
@@ -16092,7 +16092,7 @@ export namespace Prisma {
     AND?: DashboardUserWhereInput | DashboardUserWhereInput[]
     OR?: DashboardUserWhereInput[]
     NOT?: DashboardUserWhereInput | DashboardUserWhereInput[]
-    hashedPassword?: StringFilter<"DashboardUser"> | string
+    hashedPassword?: StringNullableFilter<"DashboardUser"> | string | null
     firstName?: StringNullableFilter<"DashboardUser"> | string | null
     lastName?: StringNullableFilter<"DashboardUser"> | string | null
     role?: EnumTenantRoleFilter<"DashboardUser"> | $Enums.TenantRole
@@ -16104,7 +16104,7 @@ export namespace Prisma {
   export type DashboardUserOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
-    hashedPassword?: SortOrder
+    hashedPassword?: SortOrderInput | SortOrder
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
     role?: SortOrder
@@ -16122,7 +16122,7 @@ export namespace Prisma {
     NOT?: DashboardUserScalarWhereWithAggregatesInput | DashboardUserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"DashboardUser"> | string
     email?: StringWithAggregatesFilter<"DashboardUser"> | string
-    hashedPassword?: StringWithAggregatesFilter<"DashboardUser"> | string
+    hashedPassword?: StringNullableWithAggregatesFilter<"DashboardUser"> | string | null
     firstName?: StringNullableWithAggregatesFilter<"DashboardUser"> | string | null
     lastName?: StringNullableWithAggregatesFilter<"DashboardUser"> | string | null
     role?: EnumTenantRoleWithAggregatesFilter<"DashboardUser"> | $Enums.TenantRole
@@ -17029,7 +17029,7 @@ export namespace Prisma {
   export type DashboardUserCreateInput = {
     id?: string
     email: string
-    hashedPassword: string
+    hashedPassword?: string | null
     firstName?: string | null
     lastName?: string | null
     role?: $Enums.TenantRole
@@ -17041,7 +17041,7 @@ export namespace Prisma {
   export type DashboardUserUncheckedCreateInput = {
     id?: string
     email: string
-    hashedPassword: string
+    hashedPassword?: string | null
     firstName?: string | null
     lastName?: string | null
     role?: $Enums.TenantRole
@@ -17053,7 +17053,7 @@ export namespace Prisma {
   export type DashboardUserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    hashedPassword?: StringFieldUpdateOperationsInput | string
+    hashedPassword?: NullableStringFieldUpdateOperationsInput | string | null
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
@@ -17065,7 +17065,7 @@ export namespace Prisma {
   export type DashboardUserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    hashedPassword?: StringFieldUpdateOperationsInput | string
+    hashedPassword?: NullableStringFieldUpdateOperationsInput | string | null
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
@@ -17077,7 +17077,7 @@ export namespace Prisma {
   export type DashboardUserCreateManyInput = {
     id?: string
     email: string
-    hashedPassword: string
+    hashedPassword?: string | null
     firstName?: string | null
     lastName?: string | null
     role?: $Enums.TenantRole
@@ -17089,7 +17089,7 @@ export namespace Prisma {
   export type DashboardUserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    hashedPassword?: StringFieldUpdateOperationsInput | string
+    hashedPassword?: NullableStringFieldUpdateOperationsInput | string | null
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole
@@ -17101,7 +17101,7 @@ export namespace Prisma {
   export type DashboardUserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    hashedPassword?: StringFieldUpdateOperationsInput | string
+    hashedPassword?: NullableStringFieldUpdateOperationsInput | string | null
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumTenantRoleFieldUpdateOperationsInput | $Enums.TenantRole

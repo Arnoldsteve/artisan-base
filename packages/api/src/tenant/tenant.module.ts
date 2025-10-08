@@ -11,7 +11,7 @@ import { ITenantRepository } from './interfaces/tenant-repository.interface';
   controllers: [TenantController],
   providers: [
     TenantService,
-    PrismaService,
+    // PrismaService,
     { provide: 'TenantRepository', useClass: TenantRepository },
   ],
 })

@@ -32,7 +32,7 @@ export class TenantMiddleware implements NestMiddleware {
     const tenant = await this.managementPrisma.tenant.findUnique({
       where: { subdomain: tenantSubdomain }, 
     });
-    // Logger.log(`[TenantMiddleware] Looked up tenant for subdomain "${tenantSubdomain}". Found: ${tenant ? tenant.id : 'none'}`);
+    Logger.log(`[TenantMiddleware] Looked up tenant for subdomain "${tenantSubdomain}". Found: ${tenant ? tenant.id : 'none'}`);
 
     if (!tenant || tenant.status !== 'ACTIVE') {
       throw new NotFoundException(`Store with subdomain '${tenantSubdomain}' not found or is inactive.`);

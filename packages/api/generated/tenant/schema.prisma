@@ -193,7 +193,7 @@ model Review {
 model DashboardUser {
   id             String     @id @default(cuid())
   email          String     @unique
-  hashedPassword String
+  hashedPassword String?
   firstName      String?
   lastName       String?
   role           TenantRole @default(STAFF)
