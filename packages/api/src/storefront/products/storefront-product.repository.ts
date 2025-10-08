@@ -2,7 +2,7 @@ import { Injectable, Scope, Logger } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
-import { PrismaClient } from '../../../generated/tenant';
+import { PrismaClient, Prisma  } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductRepository
@@ -38,12 +38,11 @@ export class StorefrontProductRepository
       sortOrder = 'asc',
     } = filters;
 
-    const skip = (page - 1) * limit;
+    const pageNum = Math.max(Number(page) || 1, 1);
+    const limitNum = Math.max(Number(limit) || 20, 1);
+    const skip = (pageNum - 1) * limitNum;
 
-    // Build where clause
-    const where: any = {
-      isActive: true, // Only show active products in storefront
-    };
+    const where: any = { isActive: true };
 
     if (search) {
       where.OR = [
@@ -56,7 +55,7 @@ export class StorefrontProductRepository
       where.categories = {
         some: {
           category: {
-            name: category,
+            name: { equals: category, mode: 'insensitive' },
           },
         },
       };
@@ -64,33 +63,35 @@ export class StorefrontProductRepository
 
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
-      if (minPrice !== undefined) where.price.gte = minPrice;
-      if (maxPrice !== undefined) where.price.lte = maxPrice;
+      if (minPrice !== undefined && !isNaN(Number(minPrice)))
+        where.price.gte = new Prisma.Decimal(minPrice);
+      if (maxPrice !== undefined && !isNaN(Number(maxPrice)))
+        where.price.lte = new Prisma.Decimal(maxPrice);
     }
 
-    // Build order by clause
     let orderBy: any = {};
     switch (sortBy) {
       case 'price-low':
-        orderBy.price = 'asc';
+        orderBy = { price: 'asc' };
         break;
       case 'price-high':
-        orderBy.price = 'desc';
+        orderBy = { price: 'desc' };
         break;
       case 'created':
-        orderBy.createdAt = sortOrder;
+        orderBy = { createdAt: sortOrder === 'desc' ? 'desc' : 'asc' };
         break;
       default:
-        orderBy.name = sortOrder;
+        orderBy = { name: sortOrder === 'desc' ? 'desc' : 'asc' };
     }
 
     const prisma = await this.getPrisma();
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         orderBy,
         skip,
-        take: limit,
+        take: limitNum,
         select: {
           id: true,
           name: true,
@@ -106,12 +107,7 @@ export class StorefrontProductRepository
           updatedAt: true,
           categories: {
             select: {
-              category: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
+              category: { select: { id: true, name: true } },
             },
           },
         },
@@ -119,19 +115,18 @@ export class StorefrontProductRepository
       prisma.product.count({ where }),
     ]);
 
-    // Flatten categories for each product
-    const productsWithCategories = products.map((product) => ({
-      ...product,
-      categories: product.categories.map((c) => c.category),
+    const productsWithCategories = products.map((p) => ({
+      ...p,
+      categories: p.categories.map((c) => c.category),
     }));
 
     return {
       data: productsWithCategories,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       },
     };
   }
@@ -183,7 +178,7 @@ export class StorefrontProductRepository
         isActive: true,
         isFeatured: true,
       },
-      take: 8,
+      take: 12,
       orderBy: {
         createdAt: 'desc',
       },
