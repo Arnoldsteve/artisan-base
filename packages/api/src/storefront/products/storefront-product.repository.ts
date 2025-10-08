@@ -229,6 +229,7 @@ export class StorefrontProductRepository
       select: {
         id: true,
         name: true,
+        slug: true,
       },
     });
     return categories;

@@ -40,15 +40,12 @@ export class StorefrontCategoryRepository
     }
 
     const prisma = await this.getPrisma();
-    // Use a transaction for consistency
     const [categories, total] = await prisma.$transaction([
-      // Query 1: Get the categories for the current page
       prisma.category.findMany({
         where,
         orderBy: { name: 'asc' },
         skip,
         take: limit,
-        // EFFICIENTLY count related active products directly in the database
         include: {
           _count: {
             select: {
@@ -63,12 +60,8 @@ export class StorefrontCategoryRepository
           },
         },
       }),
-      // Query 2: Get the total count of categories matching the filter
       prisma.category.count({ where }),
     ]);
-
-    // Prisma already did the counting. No manual mapping is needed.
-    // The `categories` object now has a `_count: { products: number }` property.
 
     return {
       data: categories,
@@ -85,14 +78,16 @@ export class StorefrontCategoryRepository
    * CORRECTLY finds a single category, its newest 20 active products,
    * AND the TRUE total count of all its active products.
    */
-  async findOne(id: string) {
+  async findOne(identifier: string) {
     const prisma = await this.getPrisma();
     // We need two pieces of info: the paginated products and the total count.
     // A transaction runs both queries at the same time for max efficiency.
     const [category, activeProductCount] = await prisma.$transaction([
       // Query 1: Get the category and its 20 newest products
       prisma.category.findFirst({
-        where: { id },
+        where: {
+          OR: [{ id: identifier }, { slug: identifier }],
+        },
         include: {
           products: {
             include: {
@@ -107,11 +102,16 @@ export class StorefrontCategoryRepository
       prisma.product.count({
         where: {
           isActive: true,
-          categories: { some: { categoryId: id } },
+          categories: {
+            some: {
+              category: {
+                OR: [{ id: identifier }, { slug: identifier }],
+              },
+            },
+          },
         },
       }),
     ]);
-
     if (!category) {
       return null;
     }
