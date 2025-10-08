@@ -285,7 +285,7 @@ export class ProductService {
     }
   }
 
-  async getFeaturedProducts(limit: number = 6): Promise<Product[]> {
+  async getFeaturedProducts(limit: number = 12): Promise<Product[]> {
     try {
       // OPTIMIZATION: Use cache for featured products
       if (!this.cache.isStale()) {
@@ -312,7 +312,7 @@ export class ProductService {
     }
   }
 
-  async getNewArrivals(limit: number = 12): Promise<Product[]> {
+  async getNewArrivals(limit: number = 24): Promise<Product[]> {
     try {
       // This method now works correctly because it calls the fixed getProducts method
       const allProducts = await this.getProducts({ limit: 100 });
