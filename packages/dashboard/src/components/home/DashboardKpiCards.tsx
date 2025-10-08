@@ -62,12 +62,17 @@ export function DashboardKpiCards({
               <CardTitle className="text-sm font-medium">
                 Total Revenue
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold text-muted-foreground">
+                KSH
+              </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {formatMoney(Number(kpis.totalRevenue))}
               </div>
+              <p className="text-xs text-muted-foreground">
+                All paid and delivered orders
+              </p>
             </CardContent>
           </Card>
 
@@ -80,20 +85,25 @@ export function DashboardKpiCards({
               <div className="text-2xl font-bold">
                 +{formatMoney(Number(kpis.salesToday))}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Orders paid and delivered today
+              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Receivables</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold text-muted-foreground">
+                KSH
+              </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
                 {formatMoney(Number(kpis.receivables))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Pending payment on delivered goods
+                Delivered but not yet paid
               </p>
             </CardContent>
           </Card>
@@ -103,12 +113,17 @@ export function DashboardKpiCards({
               <CardTitle className="text-sm font-medium">
                 Cash Collected
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold text-muted-foreground">
+                KSH
+              </span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
                 {formatMoney(Number(kpis.cashCollected))}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Total payments received
+              </p>
             </CardContent>
           </Card>
 
@@ -121,6 +136,9 @@ export function DashboardKpiCards({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">+{kpis.totalCustomers}</div>
+              <p className="text-xs text-muted-foreground">
+                Registered customer accounts
+              </p>
             </CardContent>
           </Card>
 
@@ -134,7 +152,7 @@ export function DashboardKpiCards({
             <CardContent>
               <div className="text-2xl font-bold">{kpis.activeProducts}</div>
               <p className="text-xs text-muted-foreground">
-                {kpis.inactiveProducts} Inactive
+                {kpis.inactiveProducts} inactive listings
               </p>
             </CardContent>
           </Card>
