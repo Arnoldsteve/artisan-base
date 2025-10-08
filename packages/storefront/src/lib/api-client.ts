@@ -59,7 +59,7 @@ export class ApiClient {
   private cache: ApiCache;
 
   constructor(
-    baseURL: string = process.env.NEXT_PUBLIC_API_URL!
+    baseURL: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
   ) {
     this.cache = new ApiCache();
 

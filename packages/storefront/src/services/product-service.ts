@@ -343,6 +343,7 @@ export class ProductService {
 
       if (response && response.data && Array.isArray(response.data)) {
         this.cache.setCategories(response.data);
+        console.log("categories response in the service", response)
         return response.data;
       }
 

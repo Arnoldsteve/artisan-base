@@ -7,10 +7,10 @@ import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton
 import { Category } from "@/types";
 
 export default function CategoriesPage() {
-  const { data: categoriesResponse, isLoading: categoriesLoading } =
-    useCategories();
-  // The API returns an array of categories, each with _count.products
+  const { data: categoriesResponse, isLoading: categoriesLoading } =  useCategories();
   const categories = categoriesResponse || [];
+
+  console.log("Categoies are here", categories)
 
   if (categoriesLoading) return <CategoriesLoading />;
 
@@ -42,7 +42,7 @@ export default function CategoriesPage() {
             {categories.map((category: any) => (
               <Link
                 key={category.id}
-                href={`/categories/${category.id}`}
+                href={`/categories/${category.slug}`}
                 className="group block bg-card rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]"
               >
                 <div className="aspect-video overflow-hidden rounded-t-lg relative">

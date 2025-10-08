@@ -55,7 +55,7 @@ export const ProductCard = memo(function ProductCard({
   return (
     <div className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group">
       <div className="relative h-40 rounded-t-md overflow-hidden">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${product.slug}`}>
           <Image
             src={
               product.images?.[0]?.url ||
@@ -103,7 +103,7 @@ export const ProductCard = memo(function ProductCard({
           </span>
         </div>
 
-        <Link href={`/products/${product.id}`} className="flex-1">
+        <Link href={`/products/${product.slug}`} className="flex-1">
           <h3 className="text-sm line-clamp-2 text-foreground group-hover:text-primary transition">
             {product.name}
           </h3>
