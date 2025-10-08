@@ -58,7 +58,7 @@ function ProductsContent() {
     setAppliedPriceRange(priceRange);
   };
 
-  console.log("Products response:", products);
+  // console.log("Products response:", products);
 
   if (isLoading || isLoadingCategories) {
     return <ProductsLoading />;

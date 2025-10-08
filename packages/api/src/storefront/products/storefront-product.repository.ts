@@ -178,7 +178,7 @@ export class StorefrontProductRepository
         isActive: true,
         isFeatured: true,
       },
-      take: 12,
+      take: 100,
       orderBy: {
         createdAt: 'desc',
       },
@@ -215,7 +215,6 @@ export class StorefrontProductRepository
 
   async findCategories() {
     const prisma = await this.getPrisma();
-    // Get all categories that have at least one active product
     const categories = await prisma.category.findMany({
       where: {
         products: {
