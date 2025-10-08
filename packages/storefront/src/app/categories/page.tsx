@@ -10,8 +10,6 @@ export default function CategoriesPage() {
   const { data: categoriesResponse, isLoading: categoriesLoading } =  useCategories();
   const categories = categoriesResponse || [];
 
-  console.log("Categoies are here", categories)
-
   if (categoriesLoading) return <CategoriesLoading />;
 
   return (

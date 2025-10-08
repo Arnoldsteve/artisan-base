@@ -33,13 +33,13 @@ export class StorefrontProductRepository
       minPrice,
       maxPrice,
       page = 1,
-      limit = 20,
+      limit = 100,
       sortBy = 'name',
       sortOrder = 'asc',
     } = filters;
 
     const pageNum = Math.max(Number(page) || 1, 1);
-    const limitNum = Math.max(Number(limit) || 20, 1);
+    const limitNum = Math.max(Number(limit) || 100, 1);
     const skip = (pageNum - 1) * limitNum;
 
     const where: any = { isActive: true };
