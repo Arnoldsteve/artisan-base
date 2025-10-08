@@ -282,7 +282,7 @@ export default function ProductPage() {
                     {/* Render features if found */}
                     {features.length > 0 && (
                       <>
-                        <h4 className="mt-6 mb-2 font-semibold text-foreground text-base">
+                        <h4 className="mt-6 mb-2  text-foreground ">
                           Features
                         </h4>
                         <ul className="list-disc ml-6 text-muted-foreground space-y-0 text-sm">
