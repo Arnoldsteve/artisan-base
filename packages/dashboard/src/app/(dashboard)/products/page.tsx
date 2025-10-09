@@ -8,11 +8,8 @@ export default async function ProductsPage() {
   let initialData: PaginatedResponse<Product>;
 
   try {
-    // --- THIS IS THE FIX ---
-    // 1. First, `await` the factory function to get the resolved client instance.
     const serverApi = await createServerApiClient();
 
-    // 2. Now, you can safely call the `.get()` method on that instance.
     initialData = await serverApi.get<PaginatedResponse<Product>>(
       "/dashboard/products",
       { page: 1, limit: 10 }

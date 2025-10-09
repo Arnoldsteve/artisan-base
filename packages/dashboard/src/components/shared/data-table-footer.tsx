@@ -32,7 +32,6 @@ export function DataTablePagination<TData>({
   return (
     <div className="flex items-center justify-between space-x-2 py-4">
       <div className="flex-1 text-sm text-muted-foreground">
-        {/* Display the new, more informative pagination text */}
         Showing {firstItem} to {lastItem} of {totalCount} products
       </div>
       <div className="flex items-center space-x-2">

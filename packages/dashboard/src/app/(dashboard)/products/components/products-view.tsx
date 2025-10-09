@@ -48,7 +48,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
+    pageIndex: 1,
     pageSize: 10,
   });
 
@@ -57,47 +57,72 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
-  
+
   // image upload
-  const [productForImageUpload, setProductForImageUpload] = useState<Product | null>(null);
+  const [productForImageUpload, setProductForImageUpload] =
+    useState<Product | null>(null);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
   // Add these lines for category modal
-  const [productForCategory, setProductForCategory] = useState<Product | null>(null);
+  const [productForCategory, setProductForCategory] = useState<Product | null>(
+    null
+  );
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
-  
+
   // image preview
-  const [productForPreview, setProductForPreview] = useState<Product | null>(null);
+  const [productForPreview, setProductForPreview] = useState<Product | null>(
+    null
+  );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
-  const { data: paginatedResponse, isLoading, isError } = useProducts(
-    pageIndex + 1,
-    pageSize,
-    "",
-    initialData
-  );
+  const {
+    data: paginatedResponse,
+    isLoading,
+    isError,
+    isFetching,
+  } = useProducts(pageIndex + 1, pageSize, "", initialData);
 
+  console.log("product data from product view: ", paginatedResponse);
 
-  console.log("product data from product view: ", paginatedResponse)
-  
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
   // --- Memoized Data ---
-  const products = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
+  const products = useMemo(
+    () => paginatedResponse?.data || [],
+    [paginatedResponse]
+  );
   const totalProducts = paginatedResponse?.meta?.total ?? 0;
-  const selectedProductIds = useMemo(() => Object.keys(rowSelection), [rowSelection]);
+  const selectedProductIds = useMemo(
+    () => Object.keys(rowSelection),
+    [rowSelection]
+  );
   const numSelected = selectedProductIds.length;
 
   // --- Action Handlers ---
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
-  const openEditSheet = (product: Product) => { setProductToEdit(product); setIsSheetOpen(true); };
-  const openAddSheet = () => { setProductToEdit(null); setIsSheetOpen(true); };
-  const handleCategoryChange = (product: Product) => { setProductForCategory(product); setIsCategorySheetOpen(true); };
-  const handleImageUpload = (product: Product) => { setProductForImageUpload(product); setIsImageUploadOpen(true); };
-  const openImagePreview = (product: Product) => { setProductForPreview(product); setIsPreviewOpen(true); };
+  const openEditSheet = (product: Product) => {
+    setProductToEdit(product);
+    setIsSheetOpen(true);
+  };
+  const openAddSheet = () => {
+    setProductToEdit(null);
+    setIsSheetOpen(true);
+  };
+  const handleCategoryChange = (product: Product) => {
+    setProductForCategory(product);
+    setIsCategorySheetOpen(true);
+  };
+  const handleImageUpload = (product: Product) => {
+    setProductForImageUpload(product);
+    setIsImageUploadOpen(true);
+  };
+  const openImagePreview = (product: Product) => {
+    setProductForPreview(product);
+    setIsPreviewOpen(true);
+  };
 
   const handleDuplicateProduct = (productToDuplicate: Product) => {
     const newName = `${productToDuplicate.name} (Copy)`;
@@ -118,13 +143,16 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     handleImageUpload,
     handleCategoryChange,
     openImagePreview,
+    isFetching,
   };
 
   // --- Table Instance Initialization ---
   const table = useReactTable({
     data: products,
     columns,
-    pageCount: paginatedResponse?.meta?.totalPages ?? -1,
+    pageCount:
+      paginatedResponse?.meta?.totalPages ??
+      (totalProducts > 0 ? Math.ceil(totalProducts / pageSize) : 1),
     manualPagination: true,
     state: {
       sorting,
@@ -158,20 +186,23 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     if (formData.id) {
       // update product → can be partial
       const { id, ...updateData } = formData;
-      updateProduct({ id, data: updateData }, {
-        onSuccess: () => setIsSheetOpen(false),
-      });
+      updateProduct(
+        { id, data: updateData },
+        {
+          onSuccess: () => setIsSheetOpen(false),
+        }
+      );
     } else {
       // create product → must match CreateProductDto
-      const { id, ...createData } = formData; 
-      createProduct(createData as CreateProductDto, {  
+      const { id, ...createData } = formData;
+      createProduct(createData as CreateProductDto, {
         onSuccess: () => setIsSheetOpen(false),
       });
     }
   };
 
   const handleBulkDelete = () => {
-    const promises = selectedProductIds.map(id => deleteProduct(id));
+    const promises = selectedProductIds.map((id) => deleteProduct(id));
     toast.promise(Promise.all(promises), {
       loading: `Deleting ${numSelected} products...`,
       success: () => {
@@ -179,7 +210,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
         setIsBulkDeleteDialogOpen(false);
         return `${numSelected} products deleted.`;
       },
-      error: "Failed to delete one or more products."
+      error: "Failed to delete one or more products.",
     });
   };
 
@@ -193,20 +224,30 @@ export function ProductsView({ initialData }: ProductsViewProps) {
 
   return (
     <div>
-      <PageHeader title="Products" description="Manage all products for your store.">
+      <PageHeader
+        title="Products"
+        description="Manage all products for your store."
+      >
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>
-      
+
       <DataTableViewOptions table={table} />
-      
+
+      <div className="relative">
+        {isFetching && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm z-10">
+            <span className="text-sm text-muted-foreground">Loading…</span>
+          </div>
+        )}
+        {/* <DataTable table={table} totalCount={totalProducts} /> */}
+      </div>
+
       <DataTable table={table} totalCount={totalProducts} />
-      
+
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">
           <div className="flex items-center justify-between">
-            <div className="text-sm">
-              {numSelected} product(s) selected.
-            </div>
+            <div className="text-sm">{numSelected} product(s) selected.</div>
             <Button
               variant="destructive"
               onClick={() => setIsBulkDeleteDialogOpen(true)}
