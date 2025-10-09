@@ -219,6 +219,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     return <DataTableSkeleton />;
   }
   if (isError) {
+    // console.error("Error loading product data:", error);
     return <div className="p-8 text-red-500">Failed to load product data.</div>;
   }
 
@@ -232,15 +233,6 @@ export function ProductsView({ initialData }: ProductsViewProps) {
       </PageHeader>
 
       <DataTableViewOptions table={table} />
-
-      <div className="relative">
-        {isFetching && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm z-10">
-            <span className="text-sm text-muted-foreground">Loading…</span>
-          </div>
-        )}
-        {/* <DataTable table={table} totalCount={totalProducts} /> */}
-      </div>
 
       <DataTable table={table} totalCount={totalProducts} />
 
