@@ -10,7 +10,7 @@ export interface ProductTableMeta<TData = any> {
   handleImageUpload: (product: TData) => void;
   handleCategoryChange: (product: TData) => void;
   openImagePreview: (product: TData) => void;
-  isFetching?: boolean; 
+  // isFetching?: boolean; 
 }
 
 export interface CategoryTableMeta<TData = any> {

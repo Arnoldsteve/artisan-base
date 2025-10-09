@@ -80,7 +80,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     data: paginatedResponse,
     isLoading,
     isError,
-    isFetching,
+    // isFetching,
   } = useProducts(pageIndex + 1, pageSize, "", initialData);
 
   console.log("product data from product view: ", paginatedResponse);
@@ -143,7 +143,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     handleImageUpload,
     handleCategoryChange,
     openImagePreview,
-    isFetching,
+    // isFetching,
   };
 
   // --- Table Instance Initialization ---

@@ -127,7 +127,7 @@ export function CategoryAssignmentSheet({
         <SheetHeader>
           <SheetTitle>Assign Categories</SheetTitle>
           <SheetDescription>
-            Assign categories to "{product?.name}"
+            Assign categories to <span className="font-semibold">{product?.name}</span>
           </SheetDescription>
         </SheetHeader>
 
