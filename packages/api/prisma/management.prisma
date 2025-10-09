@@ -1,7 +1,3 @@
-// =================================================================
-// ||                COMPLETE MANAGEMENT SCHEMA                   ||
-// =================================================================
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/management"
@@ -12,34 +8,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Represents the tenant (a single store)
 model Tenant {
-  id              String  @id @default(cuid())
-  name            String
-  subdomain       String  @unique
-  customDomain    String? @unique
-  dbSchema        String @unique
-  status          TenantStatus @default(PENDING)
-  suspendedAt     DateTime?
-  deletedAt       DateTime?
-  owner           User   @relation(fields: [ownerId], references: [id])
-  ownerId         String 
-  plan            SubscriptionPlan? @relation(fields: [planId], references: [id])
-  planId          String?
-
-  // --- FIELD ADDED ---
-  // Stores the Stripe Customer ID (cus_...) associated with this tenant.
-  stripeCustomerId String? @unique
-
-  subscription    TenantSubscription?
-  settings        Json?
-  
-  // Back-relations added by `prisma format`
-  paymentIndices  PaymentIndex[]
+  id                  String                @id @default(cuid())
+  name                String
+  subdomain           String                @unique
+  customDomain        String?               @unique
+  dbSchema            String                @unique
+  status              TenantStatus          @default(PENDING)
+  suspendedAt         DateTime?
+  deletedAt           DateTime?
+  ownerId             String
+  planId              String?
+  settings            Json?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  stripeCustomerId    String?               @unique
+  paymentIndices      PaymentIndex[]
   SubscriptionPayment SubscriptionPayment[]
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  subscription        TenantSubscription?
+  owner               User                  @relation(fields: [ownerId], references: [id])
+  plan                SubscriptionPlan?     @relation(fields: [planId], references: [id])
 
   @@index([ownerId])
   @@index([planId])
@@ -47,89 +35,65 @@ model Tenant {
   @@map("tenants")
 }
 
-// Represents a user of the SAAS PLATFORM itself, not a tenant's customer.
 model User {
   id             String   @id @default(cuid())
   email          String   @unique
   hashedPassword String
   firstName      String?
   lastName       String?
-  role           PlatformUserRole @default(TENANT_OWNER) // Platform-level roles
-
-  // The tenant that this user owns (if any).
-  ownedTenant   Tenant[]
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  role           UserRole @default(TENANT_OWNER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ownedTenant    Tenant[]
 
   @@map("users")
 }
 
-// Defines the available subscription plans you offer (e.g., Basic, Pro).
 model SubscriptionPlan {
-  id            String       @id @default(cuid())
-  name          String       // "Basic", "Pro", "Enterprise"
-  price         Decimal      @db.Decimal(10, 2)
-  billingCycle  BillingCycle
-
-  // --- FIELD ADDED ---
-  // Stores the Stripe/PayPal Price ID (e.g., 'price_...').
-  providerPlanId String? @unique
-
-  // A JSONB field to control features and limits.
-  features      Json
-
-  tenants       Tenant[]
-  subscriptions TenantSubscription[]
-
-  createdAt     DateTime @default(now())
+  id             String               @id @default(cuid())
+  name           String
+  price          Decimal              @db.Decimal(10, 2)
+  billingCycle   BillingCycle
+  features       Json
+  createdAt      DateTime             @default(now())
+  providerPlanId String?              @unique
+  subscriptions  TenantSubscription[]
+  tenants        Tenant[]
 
   @@map("subscription_plans")
 }
 
-// Represents a tenant's active subscription instance.
 model TenantSubscription {
-  id        String   @id @default(cuid())
-  tenantId  String   @unique
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  planId    String
-  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
-  status    SubscriptionStatus @default(ACTIVE)
-  provider               String @default("STRIPE")  
+  id                     String                @id @default(cuid())
+  tenantId               String                @unique
+  planId                 String
+  status                 SubscriptionStatus    @default(ACTIVE)
+  provider               String                @default("STRIPE")
   providerSubscriptionId String?
-  
-  // Timestamps managed by the payment provider (e.g., Stripe)
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-
-  // Back-relation added by `prisma format`
-  SubscriptionPayment SubscriptionPayment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  currentPeriodStart     DateTime
+  currentPeriodEnd       DateTime
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  SubscriptionPayment    SubscriptionPayment[]
+  plan                   SubscriptionPlan      @relation(fields: [planId], references: [id])
+  tenant                 Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerSubscriptionId])
   @@map("tenant_subscriptions")
 }
 
-// Tenant payment for the platform
 model SubscriptionPayment {
-  id                   String   @id @default(cuid())
-  tenantId             String
-  tenant               Tenant   @relation(fields: [tenantId], references: [id])
-  
-  amount               Decimal  @db.Decimal(10, 2)
-  currency             String   // e.g., "USD", "KES"
-  status               String   // Standardized: "COMPLETED", "FAILED", "REFUNDED"
-  
-  provider             String   // "STRIPE", "PAYPAL", "MPESA"
-  providerTransactionId String  // The unique Invoice/Transaction ID from the provider
-
-  // Link to the subscription this payment is for
-  subscriptionId       String
-  subscription         TenantSubscription @relation(fields: [subscriptionId], references: [id])
-
-  createdAt            DateTime @default(now())
+  id                    String             @id @default(cuid())
+  tenantId              String
+  amount                Decimal            @db.Decimal(10, 2)
+  currency              String
+  status                String
+  provider              String
+  providerTransactionId String
+  subscriptionId        String
+  createdAt             DateTime           @default(now())
+  subscription          TenantSubscription @relation(fields: [subscriptionId], references: [id])
+  tenant                Tenant             @relation(fields: [tenantId], references: [id])
 
   @@unique([provider, providerTransactionId])
   @@index([tenantId])
@@ -139,16 +103,15 @@ model SubscriptionPayment {
 model PaymentIndex {
   id                String   @id @default(cuid())
   tenantId          String
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orderId           String   // The ID of the order within the tenant's schema
-  checkoutRequestId String   @unique // The temporary ID from the payment provider
+  orderId           String
+  checkoutRequestId String   @unique
   createdAt         DateTime @default(now())
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@map("payment_indices")
 }
 
-// --- Enums ---
 enum TenantStatus {
   PENDING
   ACTIVE
@@ -168,8 +131,8 @@ enum SubscriptionStatus {
   UNPAID
 }
 
-enum PlatformUserRole   {
-  PLATFORM_ADMIN    // Full platform access
-  PLATFORM_SUPPORT  // Customer support access
-  TENANT_OWNER      // Owns tenant stores
+enum UserRole {
+  PLATFORM_ADMIN
+  PLATFORM_SUPPORT
+  TENANT_OWNER
 }

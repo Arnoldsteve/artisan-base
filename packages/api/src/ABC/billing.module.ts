@@ -18,4 +18,4 @@ import { IBillingRepository } from './interfaces/billing-repository.interface';
     },
   ],
 })
-export class BillingModule {}
+export class BillingModule11 {}
