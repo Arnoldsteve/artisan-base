@@ -30,11 +30,11 @@ export function DataTablePagination<TData>({
   const showPagination = totalCount > 0 && firstItem <= totalCount;
 
   return (
-    <div className="flex items-center justify-between space-x-2 py-4">
-      <div className="flex-1 text-sm text-muted-foreground">
+    <div className="bg-[#fff] rounded-md border flex items-center justify-between space-x-2 py-2">
+      <div className="flex-1 text-sm text-muted-foreground px-2">
         Showing {firstItem} to {lastItem} of {totalCount} products
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 px-2">
         <Button
           variant="outline"
           size="sm"

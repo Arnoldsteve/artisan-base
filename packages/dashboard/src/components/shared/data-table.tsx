@@ -25,7 +25,7 @@ export function DataTable<TData>({ table, totalCount  }: DataTableProps<TData>) 
   return (
     <div>
       {/* Table */}
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-[#fff]">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -102,7 +102,7 @@ export function DataTableSkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-[#fff]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -128,8 +128,8 @@ export function DataTableSkeleton() {
       </div>
 
       {/* Pagination Skeleton */}
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1">
+      <div className="bg-[#fff] rounded-md border flex items-center justify-end space-x-2 py-2 px-2">
+        <div className="flex-1 px-2">
           <Skeleton className="h-4 w-24" />
         </div>
         <Skeleton className="h-10 w-24" />
