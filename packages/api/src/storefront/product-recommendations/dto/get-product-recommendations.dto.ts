@@ -1,5 +1,3 @@
-// C:\...\api\src\storefront\product-recommendations\dto\get-product-recommendations.dto.ts
-
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class GetProductRecommendationsDto {

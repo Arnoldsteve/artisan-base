@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Product } from "@/types";
 import { useCart } from "@/hooks/use-cart";
 import { formatMoney } from "@/lib/money";
-import StarRating from "./star-rating";
+import StarRating from "./products/star-rating";
 
 interface ProductCardProps {
   product: Product;

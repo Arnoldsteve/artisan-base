@@ -9,7 +9,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import Link from "next/link";
 import { ProductsLoading } from "./skeletons/product-card-skeleton";
-import StarRating from "./star-rating";
+import StarRating from "./products/star-rating";
 
 interface ProductRecommendationsProps {
   currentProduct: Product;

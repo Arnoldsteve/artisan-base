@@ -22,7 +22,8 @@ import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
 import { formatMoney } from "@/lib/money";
 import ProductDetailsSkeleton from "@/components/skeletons/product-details-skeleton";
-import StarRating from "@/components/star-rating";
+import { CustomerReviewSection } from "@/components/products/customer-review-section";
+import StarRating from "@/components/products/star-rating";
 
 export default function ProductPage() {
   const params = useParams();
@@ -392,6 +393,8 @@ export default function ProductPage() {
             )}
           </div>
         </div>
+
+        <CustomerReviewSection product={product} />
 
         {/* Related Products Section */}
         <ProductRecommendations currentProduct={product} />
