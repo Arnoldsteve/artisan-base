@@ -48,7 +48,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster position="top-right" />
+        <Toaster position="bottom-right" />
         {process.env.NODE_ENV === "development" && (
           <ReactQueryDevtools initialIsOpen={false} />
         )}

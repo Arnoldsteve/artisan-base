@@ -24,7 +24,10 @@ export function useProducts(
     queryKey: [...PRODUCTS_QUERY_KEY, { page, limit, search }],
     queryFn: () => productService.getProducts(page, limit, search),
     enabled: !isAuthLoading && isAuthenticated,
-    initialData: initialData,
+    // Only use initialData for page 1, otherwise undefined
+    initialData: page === 1 ? initialData : undefined,
+    // Ensure data is always fresh when pagination changes
+    staleTime: 0,
   });
 }
 

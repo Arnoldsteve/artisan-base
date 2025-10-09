@@ -98,6 +98,8 @@ export function CategoryAssignmentSheet({ isOpen, onClose, product }: CategoryAs
   searchResults.forEach((c) => { allCategoriesMap[c.id] = c; });
   const selectedCategories = selectedCategoryIds.map((id) => allCategoriesMap[id]).filter(Boolean);
 
+  // console.log("selected category",selectedCategories )
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
