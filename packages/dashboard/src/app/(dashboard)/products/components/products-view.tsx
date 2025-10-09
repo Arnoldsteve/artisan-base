@@ -77,6 +77,9 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     "",
     initialData
   );
+
+
+  console.log("product data from product view: ", paginatedResponse)
   
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();

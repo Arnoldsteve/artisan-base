@@ -20,8 +20,14 @@ export function DataTablePagination<TData>({
   const { pageIndex, pageSize } = table.getState().pagination;
 
   // Calculate the starting and ending item numbers for the current page
-  const firstItem = pageIndex * pageSize + 1;
+  // const firstItem = pageIndex * pageSize + 1;
+  // const lastItem = Math.min((pageIndex + 1) * pageSize, totalCount);
+
+  const firstItem = Math.min(pageIndex * pageSize + 1, totalCount);
   const lastItem = Math.min((pageIndex + 1) * pageSize, totalCount);
+
+  // Don't show pagination text if there are no items
+  const showPagination = totalCount > 0 && firstItem <= totalCount;
 
   return (
     <div className="flex items-center justify-between space-x-2 py-4">

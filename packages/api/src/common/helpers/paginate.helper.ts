@@ -61,7 +61,7 @@ export async function paginate<T>(
     }),
   ]);
 
-  const lastPage = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit);
 
   return {
     data,
@@ -69,7 +69,9 @@ export async function paginate<T>(
       total,
       page,
       limit,
-      lastPage,
+      totalPages,  
+      prev: page > 1 ? page - 1 : null,  
+      next: page < totalPages ? page + 1 : null,  
     },
   };
 }

@@ -17,7 +17,7 @@ export default async function ProductsPage() {
       "/dashboard/products",
       { page: 1, limit: 10 }
     );
-    console.log("Fetched initial products on server:", initialData);
+    // console.log("Fetched initial products on server:", initialData);
   } catch (err) {
     console.error("Failed to fetch initial products on server:", err);
     initialData = {

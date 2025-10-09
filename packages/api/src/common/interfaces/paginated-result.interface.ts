@@ -4,6 +4,8 @@ export interface PaginatedResult<T> {
     total: number;
     page: number;
     limit: number;
-    lastPage: number;
+    totalPages: number; 
+    prev: number | null;  
+    next: number | null;  
   };
 }
