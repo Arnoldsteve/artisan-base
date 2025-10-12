@@ -7,11 +7,15 @@ import { CategoryShowcase } from "@/components/category-showcase";
 import { Testimonials } from "@/components/testimonials";
 import { Newsletter } from "@/components/newsletter";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
+import { HeroSearch } from "@/components/products/search/hero-search";
 
 
 export default function HomePage() {
   return (
     <div className="min-h-screen">
+      {/* hero search  */}
+      <HeroSearch/>
+
       {/* Hero Section */}
       <Hero />
 
