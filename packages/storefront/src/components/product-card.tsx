@@ -54,7 +54,9 @@ export const ProductCard = memo(function ProductCard({
 
   return (
     <div className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group">
-      <div className="relative h-40 rounded-t-md overflow-hidden">
+      {/* <div className="relative aspect-square rounded-t-md overflow-hidden"> */}
+      <div className="relative aspect-square sm:aspect-[4/5] rounded-t-md overflow-hidden">
+
         <Link href={`/products/${product.slug}`}>
           <Image
             src={
@@ -62,12 +64,12 @@ export const ProductCard = memo(function ProductCard({
               `https://picsum.photos/seed/${product.id}/400/400`
             }
             alt={product.name}
-            width={200}
-            height={200}
+            fill
             className={`h-full w-full object-cover transition-transform duration-300 ${
               isImageLoading ? "blur-md" : "blur-0"
             } group-hover:scale-105`}
             onLoad={() => setIsImageLoading(false)}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"
           />
         </Link>

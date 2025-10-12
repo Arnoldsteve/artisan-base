@@ -67,14 +67,14 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
         </div>
 
         {/* OPTIMIZATION: Grid layout with responsive design */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-          {categories.slice(0, 6).map((category) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {categories.slice(0, 12).map((category) => (
             <Link
               key={category.id}
               href={`/categories/${category.id}`}
               className="group block"
             >
-              <div className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+              <div className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] flex flex-col h-full">
                 <div className="aspect-video relative overflow-hidden">
                   <Image
                     src={
@@ -85,19 +85,32 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+
+                {/* Content section stretches evenly */}
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                     {category.name}
                   </h3>
+
+                  {/* Spacer pushes button to bottom */}
+                  <div className="flex-1" />
+
                   {category.description && (
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                       {category.description}
                     </p>
                   )}
-                  <Button variant="outline" size="sm" className="w-full">
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-auto truncate text-ellipsis whitespace-nowrap"
+                    title={`Explore ${category.name}`} // shows full text on hover
+                  >
                     Explore {category.name}
                   </Button>
                 </div>

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export function Hero() {
   return (
-    <section className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/20">
+    <section className="min-h-screen relative overflow-hidden bg-[#f4f4f4]">
       {/* Background Glow */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-1/3 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
