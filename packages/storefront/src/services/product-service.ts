@@ -302,6 +302,7 @@ export class ProductService {
 
       if (response.success) {
         this.cache.setFeaturedProducts(response.data);
+        // console.log("features products response data", response)
         return response.data.slice(0, limit);
       }
 

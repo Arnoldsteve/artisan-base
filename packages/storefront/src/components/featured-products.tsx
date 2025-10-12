@@ -15,7 +15,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
     isLoading,
     error,
     refetch,
-  } = useFeaturedProducts(6);
+  } = useFeaturedProducts();
 
   if (isLoading) {
     return (
