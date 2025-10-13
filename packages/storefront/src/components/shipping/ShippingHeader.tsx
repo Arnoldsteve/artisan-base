@@ -8,13 +8,12 @@ import { ArrowLeft, ChevronRight, Search } from "lucide-react";
 const breadcrumbs = [
   { label: "Home", href: "/" },
   { label: "Help Center", href: "/help-center" },
-  { label: "Shipping Information" }, // current page
+  { label: "Shipping Information" },
 ];
 
 export function ShippingHeader() {
   return (
     <header className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-      {/* Left side: back + breadcrumbs */}
       <div className="flex items-center gap-4">
         <Button asChild variant="ghost" size="sm" className="px-2">
           <a href="/help-center" className="flex items-center gap-1">
@@ -41,12 +40,6 @@ export function ShippingHeader() {
             </span>
           ))}
         </nav>
-      </div>
-
-      {/* Right side: search */}
-      <div className="relative w-full md:w-64">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search shipping questions..." className="pl-8" />
       </div>
     </header>
   );
