@@ -4,9 +4,13 @@ import { StorefrontReviewService } from './storefront-review.service';
 import { TenantContextService } from '@/common/tenant-context.service';
 import { StorefrontReviewRepository } from './storefront-review.repository';
 import { StorefrontProductModule } from '../products/storefront-product.module';
+import { StorefrontAuthModule } from '../auth/storefront-auth.module';
 
 @Module({
-  imports: [StorefrontProductModule],
+  imports: [
+    StorefrontProductModule,
+    StorefrontAuthModule,
+  ],
   controllers: [StorefrontReviewController],
   providers: [
     StorefrontReviewService,

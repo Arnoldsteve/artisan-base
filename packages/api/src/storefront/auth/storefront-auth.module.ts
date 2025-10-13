@@ -20,10 +20,13 @@ import { PassportModule } from '@nestjs/passport';
   controllers: [StorefrontAuthController],
   providers: [
     StorefrontAuthService,
-    // SIMPLY LIST THE REPOSITORY CLASS HERE.
     StorefrontAuthRepository,
     StorefrontJwtStrategy,
   ],
-  exports: [StorefrontAuthService],
+  exports: [
+    StorefrontAuthService,
+    StorefrontAuthRepository,
+
+  ],
 })
 export class StorefrontAuthModule {}

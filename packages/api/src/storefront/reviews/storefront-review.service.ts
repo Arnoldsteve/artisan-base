@@ -8,7 +8,7 @@ import {
 import { StorefrontReviewRepository } from './storefront-review.repository';
 import { CreateStorefrontReviewDto } from './dto/create-storefront-review.dto';
 import { StorefrontProductService } from '../products/storefront-product.service';
-import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
+import { StorefrontAuthRepository } from '../auth/storefront-auth.repository';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontReviewService {
@@ -16,30 +16,38 @@ export class StorefrontReviewService {
 
   constructor(
     private readonly reviewRepository: StorefrontReviewRepository,
-    private readonly productService: StorefrontProductService, 
+    private readonly productService: StorefrontProductService,
+    private readonly authRepository: StorefrontAuthRepository,
   ) {}
 
   async create(dto: CreateStorefrontReviewDto) {
+    // ✅ 1. Ensure product exists
     const product = await this.productService.findOne(dto.productId);
-    if (!product) {
-      throw new NotFoundException('Product not found');
-    }
+    if (!product) throw new NotFoundException('Product not found');
 
+    // ✅ 2. Ensure customer exists
+    const customer = await this.authRepository.findCustomerById(dto.customerId);
+    if (!customer) throw new NotFoundException('Customer not found');
+
+    // ✅ 3. Prevent duplicate reviews
     const existing = await this.reviewRepository.checkExistingReview(
       dto.productId,
-      dto.customerId,
+      customer.id,
     );
-
     if (existing) {
       throw new BadRequestException(
         'You have already submitted a review for this product.',
       );
     }
 
-    const review = await this.reviewRepository.create(dto);
+    // ✅ 4. Create the review
+    const review = await this.reviewRepository.create({
+      ...dto,
+      customerId: customer.id,
+    });
 
     this.logger.log(
-      `Review created for product ${dto.productId} by customer ${dto.customerId}`,
+      `Review created for product ${dto.productId} by customer ${customer.id}`,
     );
 
     return review;

@@ -26,6 +26,11 @@ export class StorefrontAuthRepository implements IStorefrontAuthRepository {
     return prisma.customer.findUnique({ where: { email } });
   }
 
+  async findCustomerById(id: string) {
+    const prisma = await this.getPrisma();
+    return prisma.customer.findUnique({ where: { id } });
+  }
+
   async createCustomer(data: {
     email: string;
     hashedPassword: string;
@@ -47,7 +52,7 @@ export class StorefrontAuthRepository implements IStorefrontAuthRepository {
 
   async updateCustomerDetails(
     email: string,
-    data: Partial<{ firstName: string; lastName:string; phone: string }>,
+    data: Partial<{ firstName: string; lastName: string; phone: string }>,
   ) {
     const prisma = await this.getPrisma();
     return prisma.customer.update({ where: { email }, data });
