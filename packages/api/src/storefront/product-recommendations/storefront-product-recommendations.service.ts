@@ -2,12 +2,12 @@ import { Injectable, Scope, Inject, Logger } from '@nestjs/common';
 import { 
   IStorefrontProductRecommendationsRepository 
 } from './interfaces/storefront-product-recommendations-repository.interface';
+import { StorefrontProductRecommendationsRepository } from './storefront-product-recommendations.repository';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefontProductRecommendationsService {
   constructor(
-    @Inject(IStorefrontProductRecommendationsRepository) // Inject using the interface token
-    private readonly recommendationsRepository: IStorefrontProductRecommendationsRepository,
+    private readonly recommendationsRepository: StorefrontProductRecommendationsRepository,
   ) {}
 
   /**

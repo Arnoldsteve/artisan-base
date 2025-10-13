@@ -16,23 +16,16 @@ import { PopularityScoreStrategy } from './strategies/popularity-score.strategy'
 @Module({
   imports: [
     CacheModule.register(),
-    // This is the key. By importing the module, we gain access to its exported providers.
     StorefrontProductModule,
   ],
   controllers: [StorefontProductRecommendationsController],
   providers: [
     StorefontProductRecommendationsService,
-    {
-      // This provider now correctly uses StorefrontProductService, which is available
-      // because we imported StorefrontProductModule.
-      provide: IStorefrontProductRecommendationsRepository, // Ensure this token matches the one in the service
-      useClass: StorefrontProductRecommendationsRepository,
-    },
+    StorefrontProductRecommendationsRepository,
     CategoryMatchStrategy,
     TagSimilarityStrategy,
     PriceScoreStrategy,
     PopularityScoreStrategy,
-    // --- DO NOT PROVIDE StorefrontProductService or StorefrontProductRepository HERE ---
   ],
 })
 export class StorefontProductRecommendationsModule {}
