@@ -1,13 +1,12 @@
 import { Injectable, Scope, Inject } from '@nestjs/common';
 import { CreateStorefrontOrderDto } from './dto/create-storefront-order.dto';
-import { IStorefrontOrderRepository } from './interfaces/storefront-order-repository.interface';
 import { GetStorefrontOrdersDto } from './dto/get-storefront-orders.dto';
+import { StorefrontOrderRepository } from './storefront-order.repository';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontOrderService {
   constructor(
-    @Inject('StorefrontOrderRepository')
-    private readonly orderRepository: IStorefrontOrderRepository,
+    private readonly orderRepository: StorefrontOrderRepository,
   ) {}
 
   async create(dto: CreateStorefrontOrderDto) {

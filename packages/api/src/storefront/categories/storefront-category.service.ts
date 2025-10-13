@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException, Scope, Inject } from '@nestjs/common';
 import { GetCategoriesDto } from './dto/get-categories.dto';
-import { IStorefrontCategoryRepository } from './interfaces/storefront-category-repository.interface';
+import { StorefrontCategoryRepository } from './storefront-category.repository';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontCategoryService {
   constructor(
-    @Inject('StorefrontCategoryRepository')
-    private readonly categoryRepository: IStorefrontCategoryRepository,
+    private readonly categoryRepository: StorefrontCategoryRepository,
   ) {}
 
   async findAll(filters: GetCategoriesDto) {

@@ -9,10 +9,7 @@ import { TenantContextService } from 'src/common/tenant-context.service';
   controllers: [StorefrontCategoryController],
   providers: [
     StorefrontCategoryService,
-    {
-      provide: 'StorefrontCategoryRepository',
-      useClass: StorefrontCategoryRepository,
-    },
+    StorefrontCategoryRepository,
     {
       provide: TenantContextService,
       useClass: TenantContextService,

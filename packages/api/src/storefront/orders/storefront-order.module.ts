@@ -10,10 +10,10 @@ import { TenantContextService } from 'src/common/tenant-context.service';
   providers: [
     StorefrontOrderService,
     StorefrontOrderRepository,
-    {
-      provide: 'StorefrontOrderRepository',
-      useClass: StorefrontOrderRepository,
-    },
+    // {
+    //   provide: 'StorefrontOrderRepository',
+    //   useClass: StorefrontOrderRepository,
+    // },
     {
       provide: TenantContextService,
       useClass: TenantContextService,

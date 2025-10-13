@@ -2,7 +2,7 @@ import { Injectable, Scope, Logger } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
-import { PrismaClient, Prisma  } from '../../../generated/tenant';
+import { PrismaClient, Prisma } from '../../../generated/tenant';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductRepository

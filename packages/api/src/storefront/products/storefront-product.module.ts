@@ -9,9 +9,6 @@ import { TenantContextService } from 'src/common/tenant-context.service';
   controllers: [StorefrontProductController],
   providers: [
     StorefrontProductService,
-    // SIMPLIFY THE PROVIDER.
-    // Since StorefrontProductRepository is decorated with `@Injectable({ scope: Scope.REQUEST })`,
-    // NestJS will automatically honor it when we list the class here.
     StorefrontProductRepository,
     {
       provide: TenantContextService,
