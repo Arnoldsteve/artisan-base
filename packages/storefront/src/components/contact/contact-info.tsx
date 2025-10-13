@@ -4,9 +4,7 @@ export function ContactInfo() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1">
-          Get in Touch
-        </h2>
+        <h2 className="text-xl font-bold text-foreground mb-1">Get in Touch</h2>
         <p className=" text-sm text-muted-foreground mb-6">
           We're here to help and answer any questions you might have. We look
           forward to hearing from you.
@@ -33,10 +31,8 @@ export function ContactInfo() {
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">Phone</h3>
-            <p className="text-muted-foreground">+1 (555) 123-4567</p>
-            <p className="text-sm text-muted-foreground">
-              Mon-Fri 9AM-6PM EST
-            </p>
+            <p className="text-muted-foreground">+254 796 335 895</p>
+            <p className="text-sm text-muted-foreground">Mon - Fri 9:00 AM - 4:00 PM EST</p>
           </div>
         </div>
 
@@ -47,11 +43,11 @@ export function ContactInfo() {
           <div>
             <h3 className="font-semibold text-foreground mb-1">Address</h3>
             <p className="text-muted-foreground">
-              123 Artisan Street
+              Tudor
               <br />
-              Craft District, CA 90210
+              Mombasa, 80100
               <br />
-              United States
+              Kenya
             </p>
           </div>
         </div>
@@ -65,11 +61,11 @@ export function ContactInfo() {
               Business Hours
             </h3>
             <p className="text-muted-foreground">
-              Monday - Friday: 9:00 AM - 6:00 PM
+              Monday - Friday: 9:00 AM - 4:00 PM 
               <br />
-              Saturday: 10:00 AM - 4:00 PM
+              Saturday: Closed
               <br />
-              Sunday: Closed
+              Sunday: 10:00 AM - 4:00 PM
             </p>
           </div>
         </div>

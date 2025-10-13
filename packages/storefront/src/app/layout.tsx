@@ -73,7 +73,7 @@ export default async function RootLayout({
                   {/* <ChatWidget /> */}
                   <Footer />
                 </div>
-                <Toaster position="top-right" richColors closeButton />
+                <Toaster position="bottom-right" richColors closeButton />
               </AuthProvider>
             </WishlistProvider>
           </CartProvider>

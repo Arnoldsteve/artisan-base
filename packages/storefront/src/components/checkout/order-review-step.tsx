@@ -5,6 +5,8 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { CheckCircle, MapPin, Truck, CreditCard, Edit2, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useCheckoutContext } from "@/contexts/checkout-context";
+import { formatMoney } from "@/lib/money";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 
 export const OrderReviewStep = () => {
     const { customer, shippingAddress, selectedShippingOption, selectedPaymentMethod, goToStep } = useCheckoutContext();
@@ -102,7 +104,7 @@ export const OrderReviewStep = () => {
                   </p>
                   {shippingCost === 0 && (
                     <p className="text-xs text-green-600">
-                      Free shipping on orders over Ksh 1000
+                      Free shipping on orders over {formatMoney(FREE_SHIPPING_THRESHOLD)}
                     </p>
                   )}
                 </div>

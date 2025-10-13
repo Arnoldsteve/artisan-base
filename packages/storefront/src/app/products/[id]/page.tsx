@@ -24,6 +24,7 @@ import { formatMoney } from "@/lib/money";
 import ProductDetailsSkeleton from "@/components/skeletons/product-details-skeleton";
 import { CustomerReviewSection } from "@/components/products/customer-review-section";
 import StarRating from "@/components/products/star-rating";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 
 export default function ProductPage() {
   const params = useParams();
@@ -365,7 +366,7 @@ export default function ProductPage() {
                 <div>
                   <p className="font-medium text-foreground">Free Shipping</p>
                   <p className="text-sm text-muted-foreground">
-                    On orders over Ksh 1000
+                    On orders over {formatMoney(FREE_SHIPPING_THRESHOLD)}
                   </p>
                 </div>
               </div>

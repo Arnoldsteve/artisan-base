@@ -44,7 +44,7 @@ export function ShippingMethodCard({
   };
 
   return (
-    <Card className="w-[300px] hover:shadow-xl transition-transform hover:-translate-y-1">
+    <Card className="w-[300px]">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-3">
           <span className="text-2xl" style={{ color }}>

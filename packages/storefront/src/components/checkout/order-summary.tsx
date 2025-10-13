@@ -11,6 +11,8 @@ import { Separator } from "@repo/ui/components/ui/separator";
 import { Button } from "@repo/ui/components/ui/button";
 import { useCheckoutContext } from "@/contexts/checkout-context";
 import { shippingOptions } from "@/lib/shipping-options";
+import { FREE_SHIPPING_THRESHOLD, TAX_RATE } from "@/lib/constants";
+import { formatMoney } from "@/lib/money";
 
 export const OrderSummary: React.FC = () => {
   const {
@@ -32,16 +34,19 @@ export const OrderSummary: React.FC = () => {
 
   // Apply free shipping rule
   let shipping = option.price;
-  if (subtotal > 1000 && option.id === "standard") {
+  if (subtotal > FREE_SHIPPING_THRESHOLD && option.id === "standard") {
     shipping = 0;
   }
 
-  const tax = subtotal * 0.16;
+  const tax = subtotal * TAX_RATE;
   const total = subtotal + shipping + tax;
 
-  // ✅ Check if all checkout steps are completed
+  //  Check if all checkout steps are completed
   const isCheckoutComplete =
-    !!customer && !!shippingAddress && !!selectedShippingOption && !!selectedPaymentMethod;
+    !!customer &&
+    !!shippingAddress &&
+    !!selectedShippingOption &&
+    !!selectedPaymentMethod;
 
   return (
     <Card className="sticky top-8">
@@ -59,10 +64,7 @@ export const OrderSummary: React.FC = () => {
             </div>
           ) : (
             items.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-start"
-              >
+              <div key={item.id} className="flex justify-between items-start">
                 <div className="flex-1">
                   <p className="font-medium text-sm">{item.name}</p>
                   <p className="text-xs text-muted-foreground">
@@ -92,7 +94,7 @@ export const OrderSummary: React.FC = () => {
                 <div>
                   <span className="text-green-600 font-medium">Free</span>
                   <p className="text-xs text-muted-foreground">
-                    Orders over KSh 1,000
+                    Orders over {formatMoney(FREE_SHIPPING_THRESHOLD)}
                   </p>
                 </div>
               ) : (
@@ -131,11 +133,7 @@ export const OrderSummary: React.FC = () => {
             )}
           </Button>
 
-          <Button
-            variant="outline"
-            onClick={previousStep}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={previousStep} className="w-full">
             Back to Payment
           </Button>
         </div>
