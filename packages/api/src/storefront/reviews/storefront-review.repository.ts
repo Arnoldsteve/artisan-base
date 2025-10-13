@@ -87,6 +87,50 @@ export class StorefrontReviewRepository implements IStorefrontReviewRepository {
       orderBy: { [sortBy]: sortOrder },
     });
   }
+  async findRatingsWithReviewsByProductId(productId: string) {
+    const prisma = await this.getPrisma();
+
+    // 1️⃣ Aggregate rating info
+    const aggregate = await prisma.review.aggregate({
+      where: { productId, isApproved: true },
+      _avg: { rating: true },
+      _count: { id: true },
+    });
+
+    // 2️⃣ Fetch all reviews for the product
+    const reviews = await prisma.review.findMany({
+      where: { productId, isApproved: true },
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        customer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 3️⃣ Fetch product info (id and slug)
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true, slug: true },
+    });
+
+    return {
+      productId: product?.id,
+      slug: product?.slug,
+      averageRating: aggregate._avg.rating ?? 0,
+      reviewCount: aggregate._count.id,
+      reviews,
+    };
+  }
 
   async checkExistingReview(productId: string, customerId: string) {
     const prisma = await this.getPrisma();

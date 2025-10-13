@@ -7,6 +7,7 @@ import {
   Logger,
   Query,
   Get,
+  Param,
 } from '@nestjs/common';
 import { StorefrontReviewService } from './storefront-review.service';
 import { CreateStorefrontReviewDto } from './dto/create-storefront-review.dto';
@@ -27,5 +28,11 @@ export class StorefrontReviewController {
   @Get()
   async findAll(@Query(ValidationPipe) filters: GetStorefrontReviewsDto) {
     return this.reviewService.findAll(filters);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const review = await this.reviewService.findRatingByProductId(id);
+    return review;
   }
 }

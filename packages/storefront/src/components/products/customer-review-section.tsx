@@ -4,7 +4,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { reviewSchema, ReviewSchema } from "@/validation-schemas/review";
+import { reviewSchema, ReviewSchema } from "@/validation-schemas/review-schema";
 import StarRating from "./star-rating";
 import {
   Card,
@@ -17,7 +17,8 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 import { Label } from "@repo/ui/components/ui/label";
 import { useAuthContext } from "@/contexts/auth-context";
-import { reviewService } from "@/services/review";
+import { toast } from "sonner";
+import { useCreateReview, useProductReviews } from "@/hooks/use-review";
 
 interface CustomerReviewSectionProps {
   product: {
@@ -32,6 +33,8 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
   product,
 }) => {
   const { user, isAuthenticated } = useAuthContext();
+  const createReviewMutation = useCreateReview();
+  const { data: reviews, isLoading } = useProductReviews(product.id);
 
   const {
     register,
@@ -44,35 +47,30 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
     defaultValues: {
       productId: product.id,
       rating: 0,
-      reviewText: "",
+      comment: "",
     },
   });
 
   const rating = watch("rating");
 
-  const onSubmit = async (data: ReviewSchema) => {
+  const onSubmit = (data: ReviewSchema) => {
     if (!isAuthenticated || !user) {
-      alert("You must be logged in to submit a review.");
+      toast.error("You must be logged in to submit a review.");
       return;
     }
 
-    const payload: ReviewSchema = {
-      ...data,
-      userId: user.id, // attach logged-in user ID
-    };
-
-    try {
-      const createdReview = await reviewService.createReview(payload);
-      console.log("Review created:", createdReview);
-
-      // reset form
-      setValue("rating", 0);
-      setValue("reviewText", "");
-      // Optionally, update product rating/reviewCount locally here
-    } catch (err) {
-      console.error(err);
-      alert("Failed to submit review");
-    }
+    createReviewMutation.mutate(
+      {
+        ...data,
+        customerId: user.id,
+      },
+      {
+        onSuccess: () => {
+          setValue("rating", 0);
+          setValue("comment", "");
+        },
+      }
+    );
   };
 
   return (
@@ -87,21 +85,40 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
         </span>
       </div>
 
-      <Card className="mb-8 shadow-none">
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground text-center">
+      {/* Display reviews if they exist */}
+      {isLoading ? (
+        <Card className="mb-8 shadow-none">
+          <CardContent className="py-6 text-center text-sm text-muted-foreground">
+            Loading reviews...
+          </CardContent>
+        </Card>
+      ) : reviews && reviews.length > 0 ? (
+        reviews.map((review) => (
+          <Card key={review.id} className="mb-4 shadow-none">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <strong>{review.user?.firstName || "Anonymous"}</strong>
+                <StarRating rating={review.rating} />
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">{review.comment}</p>
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <Card className="mb-8 shadow-none">
+          <CardContent className="py-6 text-center text-sm text-muted-foreground">
             No reviews yet. Be the first to leave one!
-          </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Write a review */}
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="text-lg font-medium">Write a Review</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Rating */}
             <div>
               <Label>Your Rating</Label>
               <div className="mt-2">
@@ -114,24 +131,19 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
                 />
               </div>
               {errors.rating && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.rating.message}
-                </p>
+                <p className="text-sm text-red-500 mt-1">{errors.rating.message}</p>
               )}
             </div>
 
-            {/* Review Text */}
             <div>
               <Label>Your Review</Label>
               <Textarea
                 placeholder="Share your thoughts about this product..."
                 className="mt-2"
-                {...register("reviewText")}
+                {...register("comment")}
               />
-              {errors.reviewText && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.reviewText.message}
-                </p>
+              {errors.comment && (
+                <p className="text-sm text-red-500 mt-1">{errors.comment.message}</p>
               )}
             </div>
           </div>
@@ -139,10 +151,10 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
         <CardFooter>
           <Button
             className="w-full"
-            disabled={!rating || !watch("reviewText")?.trim()}
+            disabled={!rating || !watch("comment")?.trim() || createReviewMutation.isMutating}
             onClick={handleSubmit(onSubmit)}
           >
-            Submit Review
+            {createReviewMutation.isMutating ? "Submitting..." : "Submit Review"}
           </Button>
         </CardFooter>
       </Card>

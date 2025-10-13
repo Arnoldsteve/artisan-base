@@ -62,4 +62,16 @@ export class StorefrontReviewService {
       },
     };
   }
+
+ async findRatingByProductId(id: string) {
+  if (!id) throw new BadRequestException('Review ID is required');
+
+  const review = await this.reviewRepository.findRatingsWithReviewsByProductId(id);
+  console.log("review", review)
+
+  if (!review) throw new NotFoundException('Review not found');
+
+  return review;
+}
+
 }

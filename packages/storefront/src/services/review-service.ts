@@ -1,6 +1,6 @@
 // src/services/review.ts
 import { apiClient } from "@/lib/api-client";
-import { ReviewSchema } from "@/validation-schemas/review";
+import { ReviewSchema } from "@/validation-schemas/review-schema";
 import { ApiResponse } from "@/types";
 
 export interface Review {
@@ -23,8 +23,10 @@ export class ReviewService {
   async getProductReviews(productId: string): Promise<Review[]> {
     if (!productId) return [];
     const response = await apiClient.get<ApiResponse<Review[]>>(
-      `/api/v1/storefront/products/${productId}/reviews`
+      `/api/v1/storefront/reviews/product/${productId}`
     );
+
+    console.log("product with review", response.data)
     return response.data;
   }
 
