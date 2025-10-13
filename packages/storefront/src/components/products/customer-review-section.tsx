@@ -1,6 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { reviewSchema, ReviewSchema } from "@/validation-schemas/review";
+import StarRating from "./star-rating";
 import {
   Card,
   CardHeader,
@@ -11,7 +16,8 @@ import {
 import { Button } from "@repo/ui/components/ui/button";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 import { Label } from "@repo/ui/components/ui/label";
-import StarRating from "./star-rating";
+import { useAuthContext } from "@/contexts/auth-context";
+import { reviewService } from "@/services/review";
 
 interface CustomerReviewSectionProps {
   product: {
@@ -22,13 +28,51 @@ interface CustomerReviewSectionProps {
   };
 }
 
-export function CustomerReviewSection({ product }: CustomerReviewSectionProps) {
-  const [userRating, setUserRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
+export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
+  product,
+}) => {
+  const { user, isAuthenticated } = useAuthContext();
 
-  const handleSubmit = () => {
-    console.log("Submitted review:", { userRating, reviewText });
-    // later -> send to API
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ReviewSchema>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      productId: product.id,
+      rating: 0,
+      reviewText: "",
+    },
+  });
+
+  const rating = watch("rating");
+
+  const onSubmit = async (data: ReviewSchema) => {
+    if (!isAuthenticated || !user) {
+      alert("You must be logged in to submit a review.");
+      return;
+    }
+
+    const payload: ReviewSchema = {
+      ...data,
+      userId: user.id, // attach logged-in user ID
+    };
+
+    try {
+      const createdReview = await reviewService.createReview(payload);
+      console.log("Review created:", createdReview);
+
+      // reset form
+      setValue("rating", 0);
+      setValue("reviewText", "");
+      // Optionally, update product rating/reviewCount locally here
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit review");
+    }
   };
 
   return (
@@ -38,7 +82,7 @@ export function CustomerReviewSection({ product }: CustomerReviewSectionProps) {
       <div className="flex items-center space-x-3 mb-6">
         <StarRating rating={product.rating || 0} />
         <span className="text-sm text-muted-foreground">
-          {product.rating ? product.rating.toFixed(1)  : "No ratings yet"}
+          {product.rating ? product.rating.toFixed(1) : "No ratings yet"}
           {product.reviewCount ? ` (${product.reviewCount} reviews)` : ""}
         </span>
       </div>
@@ -53,40 +97,50 @@ export function CustomerReviewSection({ product }: CustomerReviewSectionProps) {
 
       <Card className="shadow-none">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">
-            Write a Review
-          </CardTitle>
+          <CardTitle className="text-lg font-medium">Write a Review</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Rating */}
             <div>
-              <Label htmlFor="rating">Your Rating</Label>
+              <Label>Your Rating</Label>
               <div className="mt-2">
-                <StarRating 
-                  rating={userRating}
+                <StarRating
+                  rating={rating}
                   editable
-                  onChange={setUserRating}
+                  onChange={(value) =>
+                    setValue("rating", value, { shouldValidate: true })
+                  }
                 />
               </div>
+              {errors.rating && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.rating.message}
+                </p>
+              )}
             </div>
 
+            {/* Review Text */}
             <div>
-              <Label htmlFor="review">Your Review</Label>
+              <Label>Your Review</Label>
               <Textarea
-                id="review"
                 placeholder="Share your thoughts about this product..."
                 className="mt-2"
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
+                {...register("reviewText")}
               />
+              {errors.reviewText && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.reviewText.message}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
         <CardFooter>
           <Button
             className="w-full"
-            disabled={!userRating || !reviewText.trim()}
-            onClick={handleSubmit}
+            disabled={!rating || !watch("reviewText")?.trim()}
+            onClick={handleSubmit(onSubmit)}
           >
             Submit Review
           </Button>
@@ -94,4 +148,4 @@ export function CustomerReviewSection({ product }: CustomerReviewSectionProps) {
       </Card>
     </section>
   );
-}
+};

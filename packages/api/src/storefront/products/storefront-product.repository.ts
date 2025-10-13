@@ -110,6 +110,16 @@ export class StorefrontProductRepository
               category: { select: { id: true, name: true } },
             },
           },
+          reviews: {
+            where: { isApproved: false }, 
+            select: {
+              id: true,
+              rating: true,
+              comment: true,
+              createdAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+          },
         },
       }),
       prisma.product.count({ where }),

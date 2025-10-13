@@ -16,8 +16,7 @@ export interface Product {
   originalPrice?: number;
   image: string;
   images?: ProductImage[];
-  // category: Category;
-  categories: Category[]; // <-- plural, array
+  categories: Category[]; 
   categoryId: string;
   rating: number;
   reviewCount: number;

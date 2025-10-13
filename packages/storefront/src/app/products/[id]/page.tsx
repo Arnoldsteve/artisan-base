@@ -38,7 +38,7 @@ export default function ProductPage() {
   const { isInWishlist, addToWishlist, removeFromWishlist } =
     useWishlistContext();
 
-  console.log("product data response from api inthe oage leve", product);
+  // console.log("product data response from api inthe oage leve", product);
   if (isLoading) return <ProductDetailsSkeleton />;
 
   if (error || !product) {
