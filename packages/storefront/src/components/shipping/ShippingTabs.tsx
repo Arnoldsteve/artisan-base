@@ -14,26 +14,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { ShippingMethodsTab } from "./ShippingMethodsTab";
-import { DeliveryTimesTab } from "./DeliveryTimesTab";
-import { ShippingCostsTab } from "./ShippingCostsTab";
+import { ShippingInfoTab } from "./ShippingInfoTab";
 import { InternationalShippingTab } from "./InternationalShippingTab";
 import { OrderProcessingTab } from "./OrderProcessingTab";
 import { TrackOrderTab } from "./TrackOrderTab";
 
 // Tab config
 const tabs = [
-  { id: "methods", label: "Shipping Methods", component: <ShippingMethodsTab /> },
-  { id: "delivery", label: "Delivery Times", component: <DeliveryTimesTab /> },
-  { id: "costs", label: "Shipping Costs", component: <ShippingCostsTab /> },
-  { id: "international", label: "International Shipping", component: <InternationalShippingTab /> },
-  { id: "processing", label: "Order Processing", component: <OrderProcessingTab /> },
-  { id: "track", label: "Track Your Order", component: <TrackOrderTab /> },
+  {
+    id: "shipping-info",
+    label: "Shipping Info",
+    component: <ShippingInfoTab />, 
+  },
+  {
+    id: "international",
+    label: "International Shipping",
+    component: <InternationalShippingTab />,
+  },
+  {
+    id: "processing",
+    label: "Order Processing",
+    component: <OrderProcessingTab />,
+  },
+  {
+    id: "track",
+    label: "Track Your Order",
+    component: <TrackOrderTab />,
+  },
 ];
 
 export function ShippingTabs() {
-  const [activeTab, setActiveTab] = React.useState("methods");
+  const [activeTab, setActiveTab] = React.useState("shipping-info");
 
   return (
     <div className="min-h-screen bg-gray-50 mb-8">
