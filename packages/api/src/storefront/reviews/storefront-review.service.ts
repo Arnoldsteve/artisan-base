@@ -9,6 +9,7 @@ import { StorefrontReviewRepository } from './storefront-review.repository';
 import { CreateStorefrontReviewDto } from './dto/create-storefront-review.dto';
 import { StorefrontProductService } from '../products/storefront-product.service';
 import { StorefrontAuthRepository } from '../auth/storefront-auth.repository';
+import { GetStorefrontReviewsDto } from './dto/get-storefront-reviews.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontReviewService {
@@ -21,15 +22,12 @@ export class StorefrontReviewService {
   ) {}
 
   async create(dto: CreateStorefrontReviewDto) {
-    // ✅ 1. Ensure product exists
     const product = await this.productService.findOne(dto.productId);
     if (!product) throw new NotFoundException('Product not found');
 
-    // ✅ 2. Ensure customer exists
     const customer = await this.authRepository.findCustomerById(dto.customerId);
     if (!customer) throw new NotFoundException('Customer not found');
 
-    // ✅ 3. Prevent duplicate reviews
     const existing = await this.reviewRepository.checkExistingReview(
       dto.productId,
       customer.id,
@@ -40,7 +38,6 @@ export class StorefrontReviewService {
       );
     }
 
-    // ✅ 4. Create the review
     const review = await this.reviewRepository.create({
       ...dto,
       customerId: customer.id,
@@ -51,5 +48,18 @@ export class StorefrontReviewService {
     );
 
     return review;
+  }
+
+  async findAll(filters: GetStorefrontReviewsDto) {
+    const reviews = await this.reviewRepository.findAll(filters);
+
+    return {
+      data: reviews,
+      meta: {
+        page: filters.page ?? 1,
+        limit: filters.limit ?? 10,
+        total: reviews.length, // optional: can fetch real total count separately if needed
+      },
+    };
   }
 }

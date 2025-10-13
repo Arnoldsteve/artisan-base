@@ -5,9 +5,12 @@ import {
   ValidationPipe,
   Scope,
   Logger,
+  Query,
+  Get,
 } from '@nestjs/common';
 import { StorefrontReviewService } from './storefront-review.service';
 import { CreateStorefrontReviewDto } from './dto/create-storefront-review.dto';
+import { GetStorefrontReviewsDto } from './dto/get-storefront-reviews.dto';
 
 @Controller({
   path: 'storefront/reviews',
@@ -18,7 +21,11 @@ export class StorefrontReviewController {
 
   @Post()
   async create(@Body(ValidationPipe) dto: CreateStorefrontReviewDto) {
-    Logger.log(`Creating storefront review: ${JSON.stringify(dto)}`);
     return this.reviewService.create(dto);
+  }
+
+  @Get()
+  async findAll(@Query(ValidationPipe) filters: GetStorefrontReviewsDto) {
+    return this.reviewService.findAll(filters);
   }
 }

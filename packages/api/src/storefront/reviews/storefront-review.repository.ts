@@ -3,6 +3,7 @@ import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontReviewRepository } from './interfaces/storefront-review-repository.interface';
 import { CreateStorefrontReviewDto } from './dto/create-storefront-review.dto';
 import { PrismaClient } from '../../../generated/tenant';
+import { GetStorefrontReviewsDto } from './dto/get-storefront-reviews.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontReviewRepository implements IStorefrontReviewRepository {
@@ -53,9 +54,40 @@ export class StorefrontReviewRepository implements IStorefrontReviewRepository {
     });
   }
 
-  /**
-   * Check if this customer already reviewed this product
-   */
+  async findAll(options: GetStorefrontReviewsDto) {
+    const prisma = await this.getPrisma();
+    const {
+      productId,
+      customerId,
+      rating,
+      isApproved,
+      isVerified,
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = options;
+
+    return prisma.review.findMany({
+      where: {
+        ...(productId && { productId }),
+        ...(customerId && { customerId }),
+        ...(rating !== undefined && { rating }),
+        ...(isApproved !== undefined && { isApproved }),
+        ...(isVerified !== undefined && { isVerified }),
+      },
+      include: {
+        customer: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        product: { select: { id: true, name: true, slug: true } },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { [sortBy]: sortOrder },
+    });
+  }
+
   async checkExistingReview(productId: string, customerId: string) {
     const prisma = await this.getPrisma();
     return prisma.review.findFirst({
