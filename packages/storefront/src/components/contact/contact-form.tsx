@@ -14,7 +14,8 @@ import { Send } from "lucide-react";
 import { useContactForm } from "@/hooks/use-contact-form";
 
 export function ContactForm() {
-  const { formData, isSubmitting, handleChange, handleSubmit } = useContactForm();
+  const { formData, isSubmitting, handleChange, handleSubmit } =
+    useContactForm();
 
   return (
     <div className="bg-card border rounded-lg p-8">
@@ -102,7 +103,7 @@ export function ContactForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-1/4 flex items-center justify-center space-x-2 mt-8"
+          className="w-full flex items-center justify-center space-x-2 mt-8"
         >
           <Send className="h-2 w-2" />
           <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
