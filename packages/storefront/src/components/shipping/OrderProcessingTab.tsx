@@ -19,7 +19,7 @@ export function OrderProcessingTab() {
       <h3 className="text-lg font-semibold mb-4">Order Processing Timeline</h3>
 
       {/* Steps Timeline */}
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col mb-8">
         <div className="flex items-center gap-4">
           {steps.map((step, idx) => (
             <React.Fragment key={step.label}>
@@ -55,12 +55,12 @@ export function OrderProcessingTab() {
       </div>
 
       {/* Processing Info */}
-      <div className="bg-white rounded-xl shadow p-6 max-w-xl mx-auto mb-6">
+      <div className="bg-white rounded-xl shadow p-6 mb-6">
         <h4 className="font-semibold mb-2">Processing Details</h4>
         <ul className="list-disc ml-6 text-sm mb-2 space-y-1">
           <li>
             Orders placed before <span className="font-semibold">2 PM</span>{" "}
-            ship the same day.
+            ship the same day within kenya
           </li>
           <li>Weekend orders process on Monday.</li>
           <li>
@@ -81,7 +81,7 @@ export function OrderProcessingTab() {
       </div>
 
       {/* Footer Note */}
-      <div className="text-xs text-gray-400 max-w-xl mx-auto text-center">
+      <div className="text-xs text-gray-400">
         You will receive email updates as your order progresses through each
         stage.
       </div>

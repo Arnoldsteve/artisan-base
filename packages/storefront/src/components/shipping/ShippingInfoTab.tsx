@@ -121,13 +121,10 @@ export function ShippingInfoTab() {
 
       {/* SECTION 3: Estimated Delivery Calendar */}
       <section>
-        <Card className="w-full mx-auto">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold text-gray-800">
-              Estimated Delivery Calendar
-            </CardTitle>
-          </CardHeader>
-
+        <h3 className="text-lg font-semibold mb-2">
+         Estimated Delivery Calendar
+        </h3>
+        <Card className="rounded-sm w-full mx-auto py-4">
           <CardContent>
             {/* Current date display */}
             <div className="flex flex-wrap items-center justify-between text-sm text-gray-500 mb-4">

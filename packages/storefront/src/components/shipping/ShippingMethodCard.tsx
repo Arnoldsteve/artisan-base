@@ -44,7 +44,7 @@ export function ShippingMethodCard({
   };
 
   return (
-    <Card className="w-full h-full">
+    <Card className="rounded-sm w-full h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-3">
           <span className="text-2xl" style={{ color }}>

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Input } from "@repo/ui/components/ui/input";
 import {
@@ -11,21 +13,25 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatMoney } from "@/lib/money";
 
+// Approximate shipping costs from Kenya (in KSh)
 const regions = [
-  { region: "North America", cost: "24.99", delivery: "7-10 business days" },
-  { region: "Europe", cost: "29.99", delivery: "8-12 business days" },
-  { region: "Asia", cost: "34.99", delivery: "10-15 business days" },
-  { region: "Australia", cost: "34.99", delivery: "10-15 business days" },
-  { region: "Other", cost: "39.99", delivery: "12-20 business days" },
+  { region: "East Africa", cost: 1500, delivery: "3–5 business days" },
+  { region: "Rest of Africa", cost: 3500, delivery: "5–10 business days" },
+  { region: "Europe", cost: 5500, delivery: "7–12 business days" },
+  { region: "Middle East", cost: 4800, delivery: "6–10 business days" },
+  { region: "Asia", cost: 6500, delivery: "8–14 business days" },
+  { region: "North America", cost: 7000, delivery: "10–15 business days" },
+  { region: "Australia", cost: 8500, delivery: "12–18 business days" },
+  { region: "Other Regions", cost: 9000, delivery: "12–20 business days" },
 ];
 
 const restrictedItems = [
-  "Batteries",
-  "Aerosols",
+  "Batteries and power banks",
+  "Aerosols and sprays",
   "Flammable liquids",
   "Perishable goods",
-  "Live animals",
-  "Currency",
+  "Live animals or plants",
+  "Currency or valuables",
 ];
 
 export function InternationalShippingTab() {
@@ -41,7 +47,7 @@ export function InternationalShippingTab() {
           Select your country
         </label>
         <Input
-          placeholder="Start typing your country..."
+          placeholder="Start typing your destination country..."
           value={country}
           onChange={(e) => setCountry(e.target.value)}
           className="w-72"
@@ -51,14 +57,16 @@ export function InternationalShippingTab() {
       {/* Shipping Regions */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Shipping Regions & Costs</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Shipping Regions & Costs
+          </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="font-semibold">Region</TableHead>
-                <TableHead className="font-semibold">Shipping Cost</TableHead>
+                <TableHead className="font-semibold">Shipping Cost (KSh)</TableHead>
                 <TableHead className="font-semibold">Delivery Time</TableHead>
               </TableRow>
             </TableHeader>
@@ -72,22 +80,27 @@ export function InternationalShippingTab() {
               ))}
             </TableBody>
           </Table>
+          <p className="text-xs text-gray-400 mt-2">
+            * Rates are estimates and may vary depending on destination, weight, and courier.
+          </p>
         </CardContent>
       </Card>
 
       {/* Customs */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Customs & Import Duties</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Customs & Import Duties
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-1">
-            International shipments may be subject to customs fees, import
-            duties, and taxes of the destination country. These charges are the
-            responsibility of the recipient.
+            International shipments from Kenya may be subject to customs fees,
+            import duties, and taxes imposed by the destination country. These
+            charges are the responsibility of the recipient.
           </p>
           <p className="text-xs text-gray-400">
-            Please check with your local customs office for more information.
+            Please check with your local customs office for applicable charges.
           </p>
         </CardContent>
       </Card>
@@ -95,7 +108,7 @@ export function InternationalShippingTab() {
       {/* Restricted Items */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Restricted Items</CardTitle>
+          <CardTitle className="text-base font-semibold">Restricted Items</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="list-disc ml-6 text-sm text-gray-600">
@@ -109,12 +122,13 @@ export function InternationalShippingTab() {
       {/* Processing Time */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Processing Time</CardTitle>
+          <CardTitle className="text-base font-semibold">Processing Time</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            International orders are processed within 1-3 business days.
-            Delivery times may vary by destination and customs processing.
+            International orders are processed within 1 - 3 business days after payment
+            confirmation. Delivery times vary based on the destination, courier, and
+            customs processing.
           </p>
         </CardContent>
       </Card>
