@@ -63,7 +63,7 @@ export class StorefrontReviewService {
     };
   }
 
- async findRatingByProductId(id: string) {
+ async findRatingsWithReviewsByProductId(id: string) {
   if (!id) throw new BadRequestException('Review ID is required');
 
   const review = await this.reviewRepository.findRatingsWithReviewsByProductId(id);

@@ -1,4 +1,5 @@
 import { Currency } from "./currency";
+import { Review } from "./review";
 
 export interface ProductImage {
   id: string;
@@ -26,6 +27,10 @@ export interface Product {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // added
+  reviews?: Review[];          
+  averageRating?: number;
 }
 
 export interface ProductVariant {

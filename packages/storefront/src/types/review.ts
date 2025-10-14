@@ -1,6 +1,26 @@
 export interface CreateReviewDto {
-  productId: string;  // the product being reviewed
-  rating: number;     // user rating, e.g., 1-5
-  comment: string; // the text content of the review
-  userId?: string;    // optional if user is logged in
+  productId: string;
+  rating: number;
+  comment: string;
+  userId?: string;
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  customer: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+export interface ProductReviewsResponse {
+  productId: string;
+  slug: string;
+  averageRating: number;
+  reviewCount: number;
+  reviews: Review[];
 }

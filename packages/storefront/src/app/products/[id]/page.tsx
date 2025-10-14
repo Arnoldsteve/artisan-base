@@ -395,9 +395,8 @@ export default function ProductPage() {
           </div>
         </div>
 
-        <CustomerReviewSection product={product} />
-
-        {/* Related Products Section */}
+        {/* <CustomerReviewSection product={product} */}
+        <CustomerReviewSection productId={product.id} />
         <ProductRecommendations currentProduct={product} />
       </div>
     </section>

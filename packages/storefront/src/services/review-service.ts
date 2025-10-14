@@ -1,46 +1,49 @@
-// src/services/review.ts
-import { apiClient } from "@/lib/api-client";
-import { ReviewSchema } from "@/validation-schemas/review-schema";
-import { ApiResponse } from "@/types";
 
-export interface Review {
-  id: string;
-  productId: string;
-  rating: number;
-  reviewText: string;
-  createdAt: string;
-  updatedAt: string;
-  user?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-  };
-}
+import { apiClient } from "@/lib/api-client";
+import { ApiResponse } from "@/types";
+import { Review, ProductReviewsResponse } from "@/types/review";
 
 export class ReviewService {
-  // Fetch all reviews for a product
-  async getProductReviews(productId: string): Promise<Review[]> {
-    if (!productId) return [];
-    const response = await apiClient.get<ApiResponse<Review[]>>(
-      `/api/v1/storefront/reviews/product/${productId}`
-    );
+  async getProductReviews(productId: string): Promise<ProductReviewsResponse> {
+    if (!productId) {
+      return {
+        productId: "",
+        slug: "",
+        averageRating: 0,
+        reviewCount: 0,
+        reviews: [],
+      };
+    }
 
-    console.log("product with review", response.data)
-    return response.data;
+    try {
+      const response = await apiClient.get<ApiResponse<ProductReviewsResponse>>(
+        `/api/v1/storefront/reviews/product/${productId}`
+      );
+
+      console.log("product review response from service", response);
+      
+      return (
+        response.data || {
+          productId: productId,
+          slug: "",
+          averageRating: 0,
+          reviewCount: 0,
+          reviews: [],
+        }
+      );
+    } catch (error) {
+      console.error("Failed to fetch product reviews", error);
+      return {
+        productId: productId,
+        slug: "",
+        averageRating: 0,
+        reviewCount: 0,
+        reviews: [],
+      };
+    }
   }
 
-  // Fetch a single review by ID
-  async getReview(reviewId: string): Promise<Review | null> {
-    if (!reviewId) return null;
-    const response = await apiClient.get<ApiResponse<Review>>(
-      `/api/v1/storefront/reviews/${reviewId}`
-    );
-    return response.data;
-  }
-
-  // Create a new review
-  async createReview(review: ReviewSchema): Promise<Review> {
+  async createReview(review: any) {
     const response = await apiClient.post<ApiResponse<Review>>(
       `/api/v1/storefront/reviews`,
       review

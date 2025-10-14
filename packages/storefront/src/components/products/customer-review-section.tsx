@@ -19,33 +19,32 @@ import { Label } from "@repo/ui/components/ui/label";
 import { useAuthContext } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { useCreateReview, useProductReviews } from "@/hooks/use-review";
+import { Loader2 } from "lucide-react";
 
 interface CustomerReviewSectionProps {
-  product: {
-    id: string;
-    name: string;
-    rating?: number;
-    reviewCount?: number;
-  };
+  productId: string;
 }
 
 export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
-  product,
+  productId,
 }) => {
   const { user, isAuthenticated } = useAuthContext();
   const createReviewMutation = useCreateReview();
-  const { data: reviews, isLoading } = useProductReviews(product.id);
+  const { data: productReviews, isLoading } = useProductReviews(productId);
+
+  console.log("productReviews", productReviews)
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<ReviewSchema>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
-      productId: product.id,
+      productId: productId,
       rating: 0,
       comment: "",
     },
@@ -66,59 +65,95 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
       },
       {
         onSuccess: () => {
-          setValue("rating", 0);
-          setValue("comment", "");
+          reset({
+            productId: productId,
+            rating: 0,
+            comment: "",
+          });
+          toast.success("Review submitted successfully!");
         },
       }
     );
+  };
+
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
     <section className="mt-12 border-t pt-8">
       <h2 className="text-xl font-semibold mb-6">Customer Reviews</h2>
 
+      {/* Rating Summary */}
       <div className="flex items-center space-x-3 mb-6">
-        <StarRating rating={product.rating || 0} />
+        <StarRating rating={productReviews?.averageRating || 0} />
         <span className="text-sm text-muted-foreground">
-          {product.rating ? product.rating.toFixed(1) : "No ratings yet"}
-          {product.reviewCount ? ` (${product.reviewCount} reviews)` : ""}
+          {productReviews?.averageRating
+            ? productReviews.averageRating.toFixed(1)
+            : "No ratings yet"}
+          {productReviews?.reviewCount
+            ? ` (${productReviews.reviewCount} ${
+                productReviews.reviewCount === 1 ? "review" : "reviews"
+              })`
+            : ""}
         </span>
       </div>
 
-      {/* Display reviews if they exist */}
+      {/* Reviews List */}
       {isLoading ? (
         <Card className="mb-8 shadow-none">
-          <CardContent className="py-6 text-center text-sm text-muted-foreground">
-            Loading reviews...
+          <CardContent className="py-8 flex flex-col items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">Loading reviews...</p>
           </CardContent>
         </Card>
-      ) : reviews && reviews.length > 0 ? (
-        reviews.map((review) => (
-          <Card key={review.id} className="mb-4 shadow-none">
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <strong>{review.user?.firstName || "Anonymous"}</strong>
-                <StarRating rating={review.rating} />
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">{review.comment}</p>
-            </CardContent>
-          </Card>
-        ))
+      ) : productReviews && productReviews.reviews && productReviews.reviews.length > 0 ? (
+        <div className="space-y-4 mb-8">
+          {productReviews.reviews.map((review) => (
+            <Card key={review.id} className="shadow-none">
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <strong className="text-base">
+                      {review.customer?.firstName || "Anonymous"}{" "}
+                      {review.customer?.lastName || ""}
+                    </strong>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formatDate(review.createdAt)}
+                    </p>
+                  </div>
+                  <StarRating rating={review.rating} />
+                </div>
+                <p className="text-sm text-foreground leading-relaxed">
+                  {review.comment}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <Card className="mb-8 shadow-none">
-          <CardContent className="py-6 text-center text-sm text-muted-foreground">
-            No reviews yet. Be the first to leave one!
+          <CardContent className="py-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No reviews yet. Be the first to leave one!
+            </p>
           </CardContent>
         </Card>
       )}
 
-      {/* Write a review */}
+      {/* Write a Review Form */}
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="text-lg font-medium">Write a Review</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Label>Your Rating</Label>
               <div className="mt-2">
@@ -131,33 +166,56 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
                 />
               </div>
               {errors.rating && (
-                <p className="text-sm text-red-500 mt-1">{errors.rating.message}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.rating.message}
+                </p>
               )}
             </div>
 
             <div>
-              <Label>Your Review</Label>
+              <Label htmlFor="comment">Your Review</Label>
               <Textarea
+                id="comment"
                 placeholder="Share your thoughts about this product..."
-                className="mt-2"
+                className="mt-2 min-h-[100px]"
                 {...register("comment")}
               />
               {errors.comment && (
-                <p className="text-sm text-red-500 mt-1">{errors.comment.message}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.comment.message}
+                </p>
               )}
             </div>
-          </div>
+          </form>
         </CardContent>
         <CardFooter>
           <Button
             className="w-full"
-            disabled={!rating || !watch("comment")?.trim() || createReviewMutation.isMutating}
+            disabled={
+              !isAuthenticated ||
+              !rating ||
+              !watch("comment")?.trim() ||
+              createReviewMutation.isPending
+            }
             onClick={handleSubmit(onSubmit)}
           >
-            {createReviewMutation.isMutating ? "Submitting..." : "Submit Review"}
+            {createReviewMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Review"
+            )}
           </Button>
         </CardFooter>
       </Card>
+
+      {!isAuthenticated && (
+        <p className="text-sm text-muted-foreground text-center mt-4">
+          Please log in to submit a review
+        </p>
+      )}
     </section>
   );
 };
