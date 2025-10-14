@@ -183,7 +183,6 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
           <Button
             className="w-full"
             disabled={
-              !isAuthenticated ||
               !rating ||
               !watch("comment")?.trim() ||
               createReviewMutation.isPending
