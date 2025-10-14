@@ -1,12 +1,12 @@
 import { Injectable, CanActivate, ExecutionContext, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PlatformUserRole  } from '@prisma/client/management';
+import { UserRole } from '@prisma/client/management';
 
 /**
  * A custom decorator to associate roles with a route handler.
  * @param roles An array of roles that are allowed to access the route.
  */
-export const Roles = Reflector.createDecorator<PlatformUserRole []>();
+export const Roles = Reflector.createDecorator<UserRole []>();
 
 @Injectable()
 export class RolesGuard implements CanActivate {

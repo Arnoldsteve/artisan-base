@@ -131,10 +131,10 @@ exports.Prisma.TenantScalarFieldEnum = {
   deletedAt: 'deletedAt',
   ownerId: 'ownerId',
   planId: 'planId',
-  stripeCustomerId: 'stripeCustomerId',
   settings: 'settings',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  stripeCustomerId: 'stripeCustomerId'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -153,9 +153,9 @@ exports.Prisma.SubscriptionPlanScalarFieldEnum = {
   name: 'name',
   price: 'price',
   billingCycle: 'billingCycle',
-  providerPlanId: 'providerPlanId',
   features: 'features',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  providerPlanId: 'providerPlanId'
 };
 
 exports.Prisma.TenantSubscriptionScalarFieldEnum = {
@@ -227,7 +227,7 @@ exports.TenantStatus = exports.$Enums.TenantStatus = {
   CANCELLED: 'CANCELLED'
 };
 
-exports.PlatformUserRole = exports.$Enums.PlatformUserRole = {
+exports.UserRole = exports.$Enums.UserRole = {
   PLATFORM_ADMIN: 'PLATFORM_ADMIN',
   PLATFORM_SUPPORT: 'PLATFORM_SUPPORT',
   TENANT_OWNER: 'TENANT_OWNER'
