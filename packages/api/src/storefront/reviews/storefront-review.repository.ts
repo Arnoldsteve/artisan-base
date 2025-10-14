@@ -31,8 +31,8 @@ export class StorefrontReviewRepository implements IStorefrontReviewRepository {
         comment: dto.comment,
         productId: dto.productId,
         customerId: dto.customerId,
-        isVerified: false,
-        isApproved: false,
+        isVerified: true,
+        isApproved: true,
       },
       include: {
         customer: {

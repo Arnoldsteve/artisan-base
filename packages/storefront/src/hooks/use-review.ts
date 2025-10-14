@@ -11,12 +11,15 @@ export const reviewKeys = {
   detail: (reviewId: string) => [...reviewKeys.all, "detail", reviewId] as const,
 };
 
-// ✅ Hook to create a review
 export function useCreateReview() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ReviewSchema) => reviewService.createReview(data),
+   mutationFn: (data: ReviewSchema) => {
+    console.log("Mutation data going to service:", data);
+    return reviewService.createReview(data);
+  },
+    
     onSuccess: (createdReview) => {
       toast.success("Review submitted successfully!");
 
@@ -41,6 +44,6 @@ export function useProductReviews(productId: string) {
     queryKey: reviewKeys.list(productId),
     queryFn: () => reviewService.getProductReviews(productId),
     enabled: !!productId,
-    // staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 }

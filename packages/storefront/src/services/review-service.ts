@@ -44,10 +44,13 @@ export class ReviewService {
   }
 
   async createReview(review: any) {
+    console.log("srevice received clined request like this", review)
     const response = await apiClient.post<ApiResponse<Review>>(
       `/api/v1/storefront/reviews`,
       review
     );
+
+    console.log("service received api response like this", response)
     return response.data;
   }
 }

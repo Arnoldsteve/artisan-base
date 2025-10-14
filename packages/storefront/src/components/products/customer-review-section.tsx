@@ -20,6 +20,7 @@ import { useAuthContext } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { useCreateReview, useProductReviews } from "@/hooks/use-review";
 import { Loader2 } from "lucide-react";
+import { formatDate } from "@/utils/date";
 
 interface CustomerReviewSectionProps {
   productId: string;
@@ -74,16 +75,6 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
         },
       }
     );
-  };
-
-  // Format date helper
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
   };
 
   return (

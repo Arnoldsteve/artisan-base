@@ -47,7 +47,11 @@ export class StorefrontReviewService {
       `Review created for product ${dto.productId} by customer ${customer.id}`,
     );
 
-    return review;
+    return {
+      success: true,
+      message: 'Review created successfully',
+      data: review,
+    };
   }
 
   async findAll(filters: GetStorefrontReviewsDto) {
@@ -63,15 +67,15 @@ export class StorefrontReviewService {
     };
   }
 
- async findRatingsWithReviewsByProductId(id: string) {
-  if (!id) throw new BadRequestException('Review ID is required');
+  async findRatingsWithReviewsByProductId(id: string) {
+    if (!id) throw new BadRequestException('Review ID is required');
 
-  const review = await this.reviewRepository.findRatingsWithReviewsByProductId(id);
-  console.log("review", review)
+    const review =
+      await this.reviewRepository.findRatingsWithReviewsByProductId(id);
+    console.log('review', review);
 
-  if (!review) throw new NotFoundException('Review not found');
+    if (!review) throw new NotFoundException('Review not found');
 
-  return review;
-}
-
+    return review;
+  }
 }
