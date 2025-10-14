@@ -7,6 +7,8 @@ import { CartItem } from "@/components/cart/cart-item";
 import { Button } from "@repo/ui/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Card } from "@repo/ui/components/ui/card";
+import { ArrowLeft } from "lucide-react";
+import { formatMoney } from "@/lib/money";
 
 export default function CartPage() {
   const { items, getTotalPrice, getTotalItems, clearCart } = useCart();
@@ -49,16 +51,12 @@ export default function CartPage() {
 
               <div className="flex justify-between mb-2 text-sm">
                 <span>Item's total ({mounted ? getTotalItems() : 0})</span>
-                <span>
-                  {mounted ? `KSh ${getTotalPrice().toLocaleString()}` : "—"}
-                </span>
+                <span>{mounted ? `${formatMoney(getTotalPrice())}` : "—"}</span>
               </div>
 
               <div className="flex justify-between font-medium text-base border-t pt-2 mt-2">
                 <span>Subtotal</span>
-                <span>
-                  {mounted ? `KSh ${getTotalPrice().toLocaleString()}` : "—"}
-                </span>
+                <span>{mounted ? `${formatMoney(getTotalPrice())}` : "—"}</span>
               </div>
             </div>
 
@@ -76,11 +74,17 @@ export default function CartPage() {
                 disabled={!mounted || items.length === 0}
                 onClick={() => router.push("/checkout")}
               >
-                Checkout
+                Checkout ({formatMoney(getTotalPrice())})
               </Button>
             </div>
           </div>
         </Card>
+      </div>
+      <div className="flex  items-center gap-2 pt-4">
+        <Button variant="outline" onClick={() => router.push("/products")}>
+          <ArrowLeft className="h-3 w-3" />
+          Continue Shopping
+        </Button>
       </div>
     </div>
   );

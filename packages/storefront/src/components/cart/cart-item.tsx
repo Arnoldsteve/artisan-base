@@ -24,13 +24,13 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           className="rounded object-cover"
         />
         <div className="flex items-center gap-0">
-          <Trash className="h-4 w-4 text-red-500" />
           <Button
             size="sm"
             variant="ghost"
             onClick={() => removeFromCart(item.id)}
             className="text-red-500"
           >
+          <Trash className="h-2 w-2 text-red-500" />
             Remove
           </Button>
         </div>
