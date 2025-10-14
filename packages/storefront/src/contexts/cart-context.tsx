@@ -1,7 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useState,
+} from "react";
 import { CartItem, CartContextType } from "@/types/cart";
+import { CartConfirmationModal } from "@/components/cart/cart-confirmation-modal";
 
 type Action =
   | { type: "ADD"; item: CartItem }
@@ -18,10 +25,10 @@ const initialState: State = { items: [] };
 function cartReducer(state: State, action: Action): State {
   switch (action.type) {
     case "ADD": {
-      const existing = state.items.find(i => i.id === action.item.id);
+      const existing = state.items.find((i) => i.id === action.item.id);
       if (existing) {
         return {
-          items: state.items.map(i =>
+          items: state.items.map((i) =>
             i.id === action.item.id
               ? {
                   ...i,
@@ -37,10 +44,10 @@ function cartReducer(state: State, action: Action): State {
       return { items: [...state.items, action.item] };
     }
     case "REMOVE":
-      return { items: state.items.filter(i => i.id !== action.id) };
+      return { items: state.items.filter((i) => i.id !== action.id) };
     case "UPDATE":
       return {
-        items: state.items.map(i =>
+        items: state.items.map((i) =>
           i.id === action.id
             ? {
                 ...i,
@@ -72,12 +79,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     return init;
   });
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addedProduct, setAddedProduct] = useState<CartItem | null>(null);
+
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state));
   }, [state]);
 
   const addToCart = (item: CartItem) => {
     dispatch({ type: "ADD", item });
+
+    setAddedProduct(item);
+    setIsModalOpen(true);
   };
   const removeFromCart = (id: string) => {
     dispatch({ type: "REMOVE", id });
@@ -106,6 +119,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       }}
     >
       {children}
+       {addedProduct && (
+      <CartConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        // product={addedProduct}
+        onGoToCart={() => {
+          setIsModalOpen(false);
+          window.location.href = "/cart"; // navigate to cart page
+        }}
+      />
+    )}
     </CartContext.Provider>
   );
 };
@@ -114,4 +138,4 @@ export function useCartContext() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCartContext must be used within CartProvider");
   return ctx;
-} 
+}

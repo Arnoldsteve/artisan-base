@@ -20,9 +20,17 @@ export const ProductCard = memo(function ProductCard({
   product,
   showWishlist = false,
 }: ProductCardProps) {
+  const { addToCart } = useCart();
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const { addToCart } = useCart();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addedProduct, setAddedProduct] = useState({
+    name: "",
+    price: 0,
+    image: "",
+    quantity: 1,
+  });
 
   const handleAddToCart = useCallback(() => {
     addToCart({
@@ -35,6 +43,7 @@ export const ProductCard = memo(function ProductCard({
       quantity: 1,
       inventoryQuantity: product.inventoryQuantity,
     });
+    
     toast.success(`${product.name} has been added to your cart.`);
   }, [addToCart, product]);
 
@@ -56,7 +65,6 @@ export const ProductCard = memo(function ProductCard({
     <div className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group">
       {/* <div className="relative aspect-square rounded-t-md overflow-hidden"> */}
       <div className="relative aspect-square sm:aspect-[4/5] rounded-t-md overflow-hidden">
-
         <Link href={`/products/${product.slug}`}>
           <Image
             src={
