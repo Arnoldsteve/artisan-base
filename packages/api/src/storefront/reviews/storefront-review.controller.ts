@@ -32,8 +32,7 @@ export class StorefrontReviewController {
 
   @Get('product/:productId')
   async findByProduct(@Param('productId') productId: string) {
-    const review =
-      await this.reviewService.findRatingsWithReviewsByProductId(productId);
-    return review;
+    const review = await this.reviewService.findRatingsWithReviewsByProductId(productId);
+    return {success:true, data: review};
   }
 }

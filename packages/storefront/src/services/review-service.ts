@@ -20,7 +20,7 @@ export class ReviewService {
         `/api/v1/storefront/reviews/product/${productId}`
       );
 
-      console.log("product review response from service", response);
+      console.log("product review response from service", response.data);
       
       return (
         response.data || {
