@@ -17,7 +17,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
   return (
     <div className="border-b last:border-b-0">
       <Link
-        href={`/products/${item.slug || item.id}`}
+        href={`/products/${item.slug}`}
         className="flex items-center justify-between gap-4 py-3 hover:bg-muted/30 transition-colors rounded-md"
       >
         <div className="flex items-center justify-between gap-4 py-3">

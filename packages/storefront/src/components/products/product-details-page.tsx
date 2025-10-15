@@ -21,11 +21,11 @@ import { useCartContext } from "@/contexts/cart-context";
 import { useWishlistContext } from "@/contexts/wishlist-context";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
 import { formatMoney } from "@/lib/money";
-import ProductDetailsSkeleton from "@/components/skeletons/product-details-skeleton";
 import { CustomerReviewSection } from "@/components/products/customer-review-section";
 import StarRating from "@/components/products/star-rating";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { Product } from "@/types";
+import ProductDetailsSkeleton from "@/skeletons/products/product-details-skeleton";
 
 
 interface ProductDetailsPageProps {

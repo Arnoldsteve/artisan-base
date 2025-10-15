@@ -60,7 +60,6 @@ export function useInfiniteProducts(
 }
 
 // OPTIMIZATION: Individual product query with caching
-
 export function useProduct(
   id: string,
   options?: Partial<UseQueryOptions<Product>> & { initialData?: Product }
@@ -69,8 +68,9 @@ export function useProduct(
     queryKey: ["product", id],
     queryFn: () => productService.getProduct(id),
     enabled: !!id,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 0,
     gcTime: 30 * 60 * 1000,
+    placeholderData: (prev) => prev,
     initialData: options?.initialData,
     ...options,
   });
