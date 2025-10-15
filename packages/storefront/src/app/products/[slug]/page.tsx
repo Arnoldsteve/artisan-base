@@ -42,7 +42,8 @@ export async function generateMetadata({
           url:
             typeof product.image === "string"
               ? product.image
-              : product.image?.url,
+              : (product.image as { url?: string })?.url ||
+                "/default-image.jpg",
           width: 1200,
           height: 630,
           alt: product.name,
