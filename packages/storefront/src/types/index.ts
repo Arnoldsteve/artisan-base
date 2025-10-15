@@ -11,7 +11,7 @@ export interface Product {
   id: string;
   name: string;
   description?: string;
-  slug?: string;
+  slug: string;
   price: number;
   currency: Currency;
   originalPrice?: number;

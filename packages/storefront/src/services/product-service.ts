@@ -71,6 +71,7 @@ function normalizeProduct(product: any): Product {
   return {
     id: product.id,
     name: product.name,
+    slug: product.slug,
     description: product.description || "",
     price: Number(product.price) || 0,
     currency: product.currency || "KES",
@@ -274,7 +275,7 @@ export class ProductService {
       if (response.success) {
         const normalized = normalizeProduct(response.data);
         // this.cache.setProduct(normalized);
-         console.log("service level normalized data", normalized)
+        //  console.log("service level normalized data", normalized)
         return normalized;
       }
 

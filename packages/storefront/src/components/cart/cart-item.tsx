@@ -6,6 +6,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import { Trash } from "lucide-react";
 import Link from "next/link";
+import { Separator } from "@repo/ui/components/ui/separator";
 
 interface CartItemProps {
   item: CartItemType;
@@ -20,7 +21,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
         href={`/products/${item.slug}`}
         className="flex items-center justify-between gap-4 py-3 hover:bg-muted/30 transition-colors rounded-md"
       >
-        <div className="flex items-center justify-between gap-4 py-3">
+        <div className="flex items-center justify-between gap-4 py-1">
           <div className="flex-shrink-0">
             <Image
               src={
@@ -34,8 +35,8 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </div>
 
           <div className="flex-1">
-            <p className="">{item.name}</p>
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm">{item.name}</p>
+            <p className="text-sm text-muted-foreground line-clamp-1">
               {item.description}
             </p>
             <div className="text-sm text-muted-foreground">
@@ -50,7 +51,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
         </div>
       </Link>
 
-      <div className="flex items-center justify-between py-2 border-b last:border-b-0">
+      <div className="flex items-center justify-between py-2">
         <div>
           <Button
             size="sm"
@@ -83,6 +84,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </Button>
         </div>
       </div>
+       <Separator/>
     </div>
   );
 };

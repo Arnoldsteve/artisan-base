@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { CartItem } from "@/components/cart/cart-item";
 import { Button } from "@repo/ui/components/ui/button";
+import { Separator } from "@repo/ui/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { Card } from "@repo/ui/components/ui/card";
 import { ArrowLeft } from "lucide-react";
@@ -25,7 +26,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="flex justify-center min-h-screen items-center bg-background p-6">
+    <div className="flex justify-center  items-center bg-background p-6">
       <div className="w-full max-w-6xl">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Cart Items */}
@@ -33,6 +34,9 @@ export default function CartPage() {
             <h1 className="font-semibold text-lg mb-4">
               Shopping Cart ({getTotalItems()})
             </h1>
+
+            <Separator />
+            
             {items.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
                 <p>Your cart is empty.</p>

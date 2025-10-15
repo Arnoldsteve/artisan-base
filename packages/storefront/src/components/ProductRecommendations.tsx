@@ -38,7 +38,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
       id: product.id,
       name: product.name,
       price: product.price,
-      slug: product.sku || product.id,
+      slug: product.slug,
       description: product.description || "",
       image: imageList[0],
       quantity: 1,

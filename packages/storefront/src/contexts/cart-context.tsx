@@ -126,7 +126,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         // product={addedProduct}
         onGoToCart={() => {
           setIsModalOpen(false);
-          window.location.href = "/cart"; // navigate to cart page
+          window.location.href = "/cart"; 
         }}
       />
     )}
