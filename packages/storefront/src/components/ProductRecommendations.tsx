@@ -98,7 +98,8 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                 </Link>
               </div>
 
-              <div className="text-center space-y-2 mb-2">
+              {/* 🧩 Make content grow to push button down */}
+              <div className="flex-1 flex flex-col text-center space-y-2 mb-2">
                 <Link href={`/products/${product.id}`}>
                   <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition">
                     {product.name}
@@ -112,11 +113,12 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                 </p>
               </div>
 
+              {/* 🧩 Button stays at the bottom */}
               <Button
                 size="sm"
                 onClick={() => handleQuickAdd(product)}
                 disabled={product.inventoryQuantity === 0}
-                className="w-full flex items-center justify-center gap-2 rounded-lg"
+                className="w-full flex items-center justify-center gap-2 rounded-lg mt-auto"
               >
                 <ShoppingCart className="h-4 w-4" />
                 {product.inventoryQuantity > 0 ? "Quick Add" : "Out of Stock"}
