@@ -53,6 +53,7 @@ function normalizeProduct(product: any): Product {
   return {
     id: product.id,
     name: product.name,
+    slug: product.slug,
     description: product.description || "",
     price: Number(product.price) || 0,
     currency: product.currency || "KES",
