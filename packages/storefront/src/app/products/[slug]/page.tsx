@@ -1,10 +1,12 @@
+// src/app/products/[slug]/page.tsx
 import { createMetadata } from "@/lib/metadata";
 import ProductDetailsPage from "@/components/products/product-details-page";
 import { productService } from "@/services/product-service";
 
-async function fetchProduct(id: string) {
+async function fetchProduct(identifier: string) {
   try {
-    return await productService.getProduct(id);
+    const product = await productService.getProduct(identifier);
+    return product;
   } catch (e) {
     console.error("Error fetching product:", e);
     return null;
@@ -12,11 +14,16 @@ async function fetchProduct(id: string) {
 }
 
 interface PageParams {
-  id: string;
+  slug: string;
 }
 
-export async function generateMetadata({ params }: { params: PageParams }) {
-  const product = await fetchProduct(params.id);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { slug } = await params;
+  const product = await fetchProduct(slug);
 
   if (!product) {
     return createMetadata({
@@ -32,7 +39,10 @@ export async function generateMetadata({ params }: { params: PageParams }) {
       title: product.name,
       images: [
         {
-          url: product.image || "/default-og.png",
+          url:
+            typeof product.image === "string"
+              ? product.image
+              : product.image?.url,
           width: 1200,
           height: 630,
           alt: product.name,
@@ -42,12 +52,14 @@ export async function generateMetadata({ params }: { params: PageParams }) {
   });
 }
 
-export default async function Page({ params }: { params: PageParams }) {
-  const product = await fetchProduct(params.id);
+export default async function Page({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { slug } = await params;
+  const product = await fetchProduct(slug);
 
-  if (!product) {
-    return <div>Product not found.</div>;
-  }
-
+  if (!product) return <div className="justify-center">Product not found.</div>;
   return <ProductDetailsPage initialProduct={product} />;
 }

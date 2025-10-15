@@ -89,7 +89,6 @@ function normalizeProduct(product: any): Product {
     isActive: product.isActive ?? true,
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
-
   };
 }
 
@@ -119,7 +118,6 @@ export class ProductService {
       if (filters.maxPrice !== undefined && product.price > filters.maxPrice) {
         return false;
       }
-
 
       // Rating filter
       if (filters.rating && product.rating < filters.rating) {
@@ -261,6 +259,7 @@ export class ProductService {
   }
 
   async getProduct(id: string): Promise<Product> {
+    console.log("srevice level id", id)
     try {
       // OPTIMIZATION: Check cache first
       const cachedProduct = this.cache.getProduct(id);
@@ -371,6 +370,12 @@ export class ProductService {
       console.error("Error searching products:", error);
       return [];
     }
+  }
+
+  async getProductBySlug(slug: string) {
+    return apiClient.get<ApiResponse<Product>>(
+      `/api/v1/storefront/products/slug/${slug}`
+    );
   }
 
   clearCache(): void {
