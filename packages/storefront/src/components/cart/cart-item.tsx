@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
 import { Trash } from "lucide-react";
+import Link from "next/link";
 
 interface CartItemProps {
   item: CartItemType;
@@ -15,31 +16,39 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
   return (
     <div className="border-b last:border-b-0">
-      <div className="flex items-center justify-between gap-4 py-3">
-        <div className="flex-shrink-0">
-          <Image
-            src={
-              item.image || `https://picsum.photos/400/400?random=${item.id}`
-            }
-            alt={item.name}
-            width={90}
-            height={90}
-            className="rounded object-cover"
-          />
-        </div>
-
-        <div className="flex-1">
-          <p className="">{item.name}</p>
-          <div className="text-sm text-muted-foreground">
-            {formatMoney(item.price, "KES")} per unit
+      <Link
+        href={`/products/${item.slug || item.id}`}
+        className="flex items-center justify-between gap-4 py-3 hover:bg-muted/30 transition-colors rounded-md"
+      >
+        <div className="flex items-center justify-between gap-4 py-3">
+          <div className="flex-shrink-0">
+            <Image
+              src={
+                item.image || `https://picsum.photos/400/400?random=${item.id}`
+              }
+              alt={item.name}
+              width={90}
+              height={90}
+              className="rounded object-cover"
+            />
           </div>
-          <p className="text-sm text-orange-500">Few units left</p>
-        </div>
 
-        <div className="hidden sm:block md:hidden font-semibold text-right min-w-[100px]">
-          {formatMoney(item.price * item.quantity, "KES")}
+          <div className="flex-1">
+            <p className="">{item.name}</p>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {item.description}
+            </p>
+            <div className="text-sm text-muted-foreground">
+              {formatMoney(item.price, "KES")} per unit
+            </div>
+            <p className="text-sm text-orange-500">Few units left</p>
+          </div>
+
+          <div className="hidden md:block font-semibold text-right min-w-[100px]">
+            {formatMoney(item.price * item.quantity, "KES")}
+          </div>
         </div>
-      </div>
+      </Link>
 
       <div className="flex items-center justify-between py-2 border-b last:border-b-0">
         <div>
