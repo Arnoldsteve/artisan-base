@@ -8,6 +8,16 @@ import { Testimonials } from "@/components/testimonials";
 import { Newsletter } from "@/components/newsletter";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
 import { HeroSearch } from "@/components/products/search/hero-search";
+import { createMetadata } from "@/lib/metadata";
+
+export const metadata = createMetadata({
+  title: "Home - Artisan Base",
+  description: "Discover featured products and handpicked collections.",
+  openGraph: {
+    title: "Home - Artisan Base",
+    images: [{ url: "/home-og-image.png", width: 1200, height: 630, alt: "Home Banner" }],
+  },
+});
 
 
 export default function HomePage() {
