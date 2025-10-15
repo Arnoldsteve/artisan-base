@@ -42,7 +42,7 @@ export default function NewArrivalsPage() {
         ) : (
           <>
             {/* New Arrivals Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
               {products.map((product, index) => (
                 <div key={product.id} className="relative">
                   <ProductCard product={product} />
@@ -76,8 +76,8 @@ export default function NewArrivalsPage() {
             </div>
 
             {/* Info Section */}
-            <div className="mt-8 bg-muted/10 rounded-lg p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div className="mt-8 bg-muted/10 rounded-lg p-0 md:p-6">
+              <div className="grid grid-cols-3 md:grid-cols-3 gap-6 text-center">
                 <div>
                   <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
                   <h4 className="font-semibold text-foreground mb-1">

@@ -82,7 +82,7 @@ export const ProductsGrid = memo(function ProductsGrid({
       </div>
 
       {/* OPTIMIZATION: Grid layout with responsive design */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-0 md:gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

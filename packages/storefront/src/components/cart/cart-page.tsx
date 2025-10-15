@@ -26,7 +26,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="flex justify-center  items-center bg-background p-6">
+    <div className="flex justify-center  items-center bg-background p-0 md:p-6">
       <div className="w-full max-w-6xl">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Cart Items */}

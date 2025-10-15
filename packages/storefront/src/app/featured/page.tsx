@@ -43,7 +43,7 @@ export default function FeaturedPage() {
         ) : (
           <>
             {/* Featured Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 px-0 gap-2">
               {products.map((product) => (
                 <div key={product.id} className="relative">
                   <ProductCard product={product} />

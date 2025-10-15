@@ -78,7 +78,7 @@ export function ProductsContent() {
 
   return (
     <section className="py-4 bg-[#f4f4f4]">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-0 md:px-4">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
@@ -134,7 +134,7 @@ export function ProductsContent() {
           </div>
         ) : (
           <div
-            className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2"
           >
             {products.map((product: Product) => (
               <ProductCard key={product.id} product={product} />
