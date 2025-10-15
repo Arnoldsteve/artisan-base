@@ -25,18 +25,18 @@ import { Button } from "@repo/ui/components/ui/button";
 import { useProductSearch } from "@/hooks/use-products";
 import { Product } from "@/types";
 import { CartButton } from "@/components/cart/cart-button";
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import { UserAccountDropdown } from "./UserAccountDropdown";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -217,7 +217,7 @@ export function Header() {
             >
               <Search className="h-5 w-5" />
             </Button>
-            <CartButton onClick={() => setCartOpen(true)} />
+            <CartButton onClick={() => router.push("/cart")} />
             <div className="relative" ref={userDropdownRef}>
               <Button
                 variant="ghost"
@@ -311,7 +311,7 @@ export function Header() {
               <div className="flex items-center justify-start space-x-3">
                 <CartButton
                   onClick={() => {
-                    setCartOpen(true);
+                    router.push("/cart");
                     setIsMenuOpen(false);
                   }}
                 />
@@ -392,7 +392,6 @@ export function Header() {
           </div>
         )}
       </div>
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );
 }
