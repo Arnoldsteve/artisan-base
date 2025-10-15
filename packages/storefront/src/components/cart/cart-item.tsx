@@ -15,61 +15,70 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
   return (
     <div className="border-b last:border-b-0">
-      <div className="flex items-center gap-4 py-3">
-        <Image
-          src={item.image || `https://picsum.photos/400/400?random=${item.id}`}
-          alt={item.name}
-          width={90}
-          height={90}
-          className="rounded object-cover"
-        />
+      <div className="flex items-center justify-between gap-4 py-3">
+        {/* Image */}
+        <div className="flex-shrink-0">
+          <Image
+            src={
+              item.image || `https://picsum.photos/400/400?random=${item.id}`
+            }
+            alt={item.name}
+            width={90}
+            height={90}
+            className="rounded object-cover"
+          />
+        </div>
+
+        {/* Product details */}
         <div className="flex-1">
-          <div className="font-medium">{item.name}</div>
+          <p className="">{item.name}</p>
           <div className="text-sm text-muted-foreground">
             Per unit price is {formatMoney(item.price, "KES")}
           </div>
-          <p className="text-sm text-orange-500">Few unit Left</p>
-          <div className="font-semibold">
-            {formatMoney(item.price * item.quantity, "KES")}
-          </div>
+          <p className="text-sm text-orange-500">Few units left</p>
+        </div>
+
+        {/* Total price */}
+        <div className="font-semibold text-right min-w-[100px]">
+          {formatMoney(item.price * item.quantity, "KES")}
         </div>
       </div>
-      <div className="flex items-center justify-between py-3 border-b last:border-b-0">
-  {/* Remove button */}
-  <div>
-    <Button
-      size="sm"
-      variant="ghost"
-      onClick={() => removeFromCart(item.id)}
-      className="text-red-500 flex items-center gap-1"
-    >
-      <Trash className="h-3 w-3 text-red-500" />
-      Remove
-    </Button>
-  </div>
 
-  {/* Quantity controls */}
-  <div className="flex items-center gap-3">
-    <Button
-      size="sm"
-      variant="default"
-      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-      disabled={item.quantity <= 1}
-    >
-      -
-    </Button>
-    <span className="px-2">{item.quantity}</span>
-    <Button
-      size="sm"
-      variant="default"
-      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-      disabled={item.quantity >= item.inventoryQuantity}
-    >
-      +
-    </Button>
-  </div>
-</div>
+      <div className="flex items-center justify-between py-2 border-b last:border-b-0">
+        {/* Remove button */}
+        <div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => removeFromCart(item.id)}
+            className="text-red-500 flex items-center gap-1"
+          >
+            <Trash className="h-3 w-3 text-red-500" />
+            Remove
+          </Button>
+        </div>
 
+        {/* Quantity controls */}
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            variant="default"
+            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+            disabled={item.quantity <= 1}
+          >
+            -
+          </Button>
+          <span className="px-2">{item.quantity}</span>
+          <Button
+            size="sm"
+            variant="default"
+            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+            disabled={item.quantity >= item.inventoryQuantity}
+          >
+            +
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
