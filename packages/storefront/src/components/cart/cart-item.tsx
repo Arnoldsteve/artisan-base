@@ -16,7 +16,6 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
   return (
     <div className="border-b last:border-b-0">
       <div className="flex items-center justify-between gap-4 py-3">
-        {/* Image */}
         <div className="flex-shrink-0">
           <Image
             src={
@@ -29,23 +28,20 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           />
         </div>
 
-        {/* Product details */}
         <div className="flex-1">
           <p className="">{item.name}</p>
           <div className="text-sm text-muted-foreground">
-            Per unit price is {formatMoney(item.price, "KES")}
+            {formatMoney(item.price, "KES")} per unit
           </div>
           <p className="text-sm text-orange-500">Few units left</p>
         </div>
 
-        {/* Total price */}
-        <div className="font-semibold text-right min-w-[100px]">
+        <div className="hidden sm:block md:hidden font-semibold text-right min-w-[100px]">
           {formatMoney(item.price * item.quantity, "KES")}
         </div>
       </div>
 
       <div className="flex items-center justify-between py-2 border-b last:border-b-0">
-        {/* Remove button */}
         <div>
           <Button
             size="sm"
@@ -58,7 +54,6 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </Button>
         </div>
 
-        {/* Quantity controls */}
         <div className="flex items-center gap-3">
           <Button
             size="sm"
