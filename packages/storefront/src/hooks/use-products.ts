@@ -70,7 +70,6 @@ export function useProduct(
     enabled: !!id,
     staleTime: 0,
     gcTime: 30 * 60 * 1000,
-    placeholderData: (prev) => prev,
     initialData: options?.initialData,
     ...options,
   });

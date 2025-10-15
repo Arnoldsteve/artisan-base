@@ -33,8 +33,8 @@ interface ProductDetailsPageProps {
 }
 
 export default function ProductDetailsPage({ initialProduct }: ProductDetailsPageProps) {
-    const params = useParams<{ id: string }>();
-    const productId = params.id;
+    const params = useParams<{ slug: string }>();
+    const productId = params.slug;
 
 
     const [selectedImage, setSelectedImage] = useState(0);
@@ -42,12 +42,11 @@ export default function ProductDetailsPage({ initialProduct }: ProductDetailsPag
     const { addToCart } = useCartContext();
     const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistContext();
 
-        const { data: product, isLoading, error } = useProduct(productId, {
-        initialData: initialProduct,
+    const { data: product, isLoading, error } = useProduct(productId, {
+      initialData: initialProduct,
     });
     
-
-  // console.log("product data response from api inthe oage leve", product);
+    
   if (isLoading) return <ProductDetailsSkeleton />;
 
   if (error || !product) {

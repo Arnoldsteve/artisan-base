@@ -259,13 +259,13 @@ export class ProductService {
   }
 
   async getProduct(id: string): Promise<Product> {
-    console.log("srevice level id", id)
+    console.log("service level id", id)
     try {
       // OPTIMIZATION: Check cache first
-      const cachedProduct = this.cache.getProduct(id);
-      if (cachedProduct) {
-        return cachedProduct;
-      }
+      // const cachedProduct = this.cache.getProduct(id);
+      // if (cachedProduct) {
+      //   return cachedProduct;
+      // }
 
       const response = await apiClient.get<ApiResponse<Product>>(
         `/api/v1/storefront/products/${id}`
@@ -273,7 +273,8 @@ export class ProductService {
 
       if (response.success) {
         const normalized = normalizeProduct(response.data);
-        this.cache.setProduct(normalized);
+        // this.cache.setProduct(normalized);
+         console.log("service level normalized data", normalized)
         return normalized;
       }
 
