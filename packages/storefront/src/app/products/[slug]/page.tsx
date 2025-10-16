@@ -2,6 +2,7 @@
 import { createMetadata } from "@/lib/metadata";
 import ProductDetailsPage from "@/components/products/product-details-page";
 import { productService } from "@/services/product-service";
+import { formatMoney } from "@/lib/money";
 
 async function fetchProduct(identifier: string) {
   try {
@@ -32,9 +33,17 @@ export async function generateMetadata({
     });
   }
 
+  const formattedPrice = formatMoney(product.price, product.currency);
+  const inStock = product.inventoryQuantity > 0;
+
+  const description = product.description
+    ? `${product.description.slice(0, 150)}... | ${formattedPrice} | ${inStock ? "In Stock" : "Out of Stock"} | Handcrafted with care.`
+    : `Buy ${product.name} for ${formattedPrice}. Handcrafted artisan product. ${inStock ? "Available now" : "Currently unavailable"}.`;
+
   return createMetadata({
-    title: `${product.name} - Artisan Base`,
-    description: product.description || "Beautiful handcrafted product.",
+    title: `${product.name} | Buy Handcrafted ${product.categories?.[0]?.name || 'Artisan Product'} - Artisan Base`,
+    description,
+
     openGraph: {
       title: product.name,
       images: [
@@ -62,6 +71,5 @@ export default async function Page({
   const product = await fetchProduct(slug);
 
   if (!product) return <div className="justify-center">Product not found.</div>;
-  // console.log("Product data from the page level", product)
   return <ProductDetailsPage initialProduct={product} />;
 }
