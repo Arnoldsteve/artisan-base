@@ -66,7 +66,6 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
           </p>
         </div>
 
-        {/* OPTIMIZATION: Grid layout with responsive design */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {categories.slice(0, 12).map((category) => (
             <Link

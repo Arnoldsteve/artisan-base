@@ -6,17 +6,25 @@ interface StarRatingProps {
   rating?: number;
   editable?: boolean;
   onChange?: (value: number) => void;
-  size?: number;
+  size?: "small" | "medium" | "large";
   showValue?: boolean;
 }
+
+const sizeMap = {
+  small: 14,
+  medium: 18,
+  large: 24,
+};
 
 export default function StarRating({
   rating = 0,
   editable = false,
   onChange,
-  size = 16,
+  size = "medium",
   showValue = true,
 }: StarRatingProps) {
+  const starSize = sizeMap[size];
+
   const handleClick = (value: number) => {
     if (editable && onChange) {
       onChange(value);
@@ -43,13 +51,21 @@ export default function StarRating({
                   ? "fill-yellow-400 text-yellow-400"
                   : "text-gray-300 dark:text-gray-600"
               }`}
-              size={size}
+              size={starSize}
             />
           </button>
         );
       })}
       {showValue && (
-        <span className="text-xs text-muted-foreground">
+        <span
+          className={`text-muted-foreground ${
+            size === "small"
+              ? "text-xs"
+              : size === "medium"
+                ? "text-sm"
+                : "text-base"
+          }`}
+        >
           {rating.toFixed(1)}
         </span>
       )}

@@ -43,7 +43,7 @@ export const ProductCard = memo(function ProductCard({
       quantity: 1,
       inventoryQuantity: product.inventoryQuantity,
     });
-    
+
     toast.success(`${product.name} has been added to your cart.`);
   }, [addToCart, product]);
 
@@ -62,8 +62,7 @@ export const ProductCard = memo(function ProductCard({
     : null;
 
   return (
-    <div className="bg-card rounded-2xl border h-full shadow-sm hover:shadow-md transition-all duration-300 p-3 flex flex-col group">
-      {/* <div className="relative aspect-square rounded-t-md overflow-hidden"> */}
+    <div className="bg-card rounded-sm border h-full shadow-sm hover:shadow-md transition-all duration-300 p-2 flex flex-col group">
       <div className="relative aspect-square sm:aspect-[4/5] rounded-t-md overflow-hidden">
         <Link href={`/products/${product.slug}`}>
           <Image
@@ -100,27 +99,14 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       <div className="flex flex-col px-0 py-2 flex-1">
-        <div className="flex items-center justify-between mb-2">
-          <StarRating rating={product.rating ?? 3.7} />
-          <span
-            className={`text-[10px] px-2 py-1 rounded-full flex items-center justify-center ${
-              product.inventoryQuantity > 0
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {product.inventoryQuantity > 0 ? "In Stock" : "Out of Stock"}
-          </span>
-        </div>
-
         <Link href={`/products/${product.slug}`} className="flex-1">
           <h3 className="text-sm line-clamp-2 text-foreground group-hover:text-primary transition">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-2 mt-2 mb-4">
-          <span className="text-md font-semibold text-foreground">
+        <div className="flex items-center gap-2 mt-1 mb-2">
+          <span className="text-sm md:text-md font-semibold text-foreground">
             {formattedPrice}
           </span>
           {originalPrice && (
@@ -128,6 +114,9 @@ export const ProductCard = memo(function ProductCard({
               {originalPrice}
             </span>
           )}
+        </div>
+        <div className="mb-2">
+          <StarRating rating={product.rating ?? 3.7} size="small" />
         </div>
 
         <Button

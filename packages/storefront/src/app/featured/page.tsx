@@ -15,7 +15,7 @@ export default function FeaturedPage() {
 
   return (
     <section className="py-4 bg-[#f4f4f4]">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 md:px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">

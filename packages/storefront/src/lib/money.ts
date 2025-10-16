@@ -7,8 +7,8 @@ export function formatMoney(amount: number | string, currency: Currency = "KES")
 
   if (currency === "KES") {
     return `Ksh ${value.toLocaleString("en-KE", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      // minimumFractionDigits: 2,
+      // maximumFractionDigits: 2,
     })}`;
   }
   return formatCurrency(value, currency);

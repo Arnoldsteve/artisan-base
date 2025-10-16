@@ -23,28 +23,23 @@ export const metadata = createMetadata({
 export default function HomePage() {
   return (
     <div className="min-h-screen">
-      {/* hero search  */}
       <HeroSearch/>
 
-      {/* Hero Section */}
       <Hero />
 
-      {/* Featured Products */}
       <Suspense fallback={<ProductsLoading />}>
         <FeaturedProducts />
       </Suspense>
 
-      {/* Category Showcase */}
+
       <Suspense fallback={<ProductsLoading />}>
         <CategoryShowcase />
       </Suspense>
 
-      {/* Testimonials */}
       <Suspense fallback={<ProductsLoading />}>
         <Testimonials />
       </Suspense>
 
-      {/* Newsletter */}
       <Newsletter />
     </div>
   );

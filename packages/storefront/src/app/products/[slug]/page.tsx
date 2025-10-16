@@ -62,6 +62,6 @@ export default async function Page({
   const product = await fetchProduct(slug);
 
   if (!product) return <div className="justify-center">Product not found.</div>;
-  console.log("Product data from the page level", product)
+  // console.log("Product data from the page level", product)
   return <ProductDetailsPage initialProduct={product} />;
 }

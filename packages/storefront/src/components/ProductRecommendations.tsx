@@ -50,7 +50,6 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   const getGridCols = () =>
     "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2";
 
-  // --- Loading ---
   if (isLoading) return <ProductsLoading />;
 
   // --- Empty / Error ---
@@ -69,7 +68,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   return (
     <section className="mt-8">
       <h2 className="text-2xl font-bold mb-6">You might also like</h2>
-      <div className={`grid gap-6 ${getGridCols()}`}>
+      <div className={`grid ${getGridCols()}`}>
         {recommendations.map((product) => {
           const images =
             product.images?.map((img) => img.url).filter(Boolean) ?? [];
@@ -84,7 +83,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           return (
             <div
               key={product.id}
-              className="bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all duration-300 p-4 flex flex-col group"
+              className="bg-card rounded-sm border shadow-sm hover:shadow-md transition-all duration-300 p-2 flex flex-col group"
             >
               <div className="relative aspect-square mb-3 overflow-hidden rounded-xl">
                 <Link href={`/products/${product.id}`}>
@@ -98,27 +97,31 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                 </Link>
               </div>
 
-              {/* 🧩 Make content grow to push button down */}
-              <div className="flex-1 flex flex-col text-center space-y-2 mb-2">
+              <div className="flex-1 flex flex-col space-y-2 mb-0">
                 <Link href={`/products/${product.id}`}>
-                  <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition">
+                  <h3 className=" text-xs line-clamp-2 group-hover:text-primary transition">
                     {product.name}
                   </h3>
                 </Link>
-                <div className="flex justify-center">
-                  <StarRating rating={product.rating ?? 3.7} />
-                </div>
-                <p className="font-semibold text-primary">
+              </div>
+              <div className="mb-2 mt-1">
+                <p className="text-sm md:text-md font-semibold text-foreground mb-1">
                   {formatMoney(product.price, product.currency)}
                 </p>
+                <div className="mt-flex justify-center">
+                  <StarRating
+                    rating={product.rating ?? 3.7}
+                    size="small"
+                    showValue={false}
+                  />
+                </div>
               </div>
 
-              {/* 🧩 Button stays at the bottom */}
               <Button
                 size="sm"
                 onClick={() => handleQuickAdd(product)}
                 disabled={product.inventoryQuantity === 0}
-                className="w-full flex items-center justify-center gap-2 rounded-lg mt-auto"
+                className="w-full flex items-center justify-center gap-2 rounded-sm mt-auto"
               >
                 <ShoppingCart className="h-4 w-4" />
                 {product.inventoryQuantity > 0 ? "Quick Add" : "Out of Stock"}

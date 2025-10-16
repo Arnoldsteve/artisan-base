@@ -11,7 +11,6 @@ import { Product, ProductFilters as ProductFilterType } from "@/types";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
 import { ProductFilters } from "@/components/products/product-filters";
 
-// Products content component
 export function ProductsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
@@ -31,7 +30,6 @@ export function ProductsContent() {
     useCategories();
   const categories = categoriesResponse || [];
 
-  // Fetch products from API with filters
   // Use appliedPriceRange instead of priceRange
   const {
     data: productsResponse,
@@ -78,7 +76,7 @@ export function ProductsContent() {
 
   return (
     <section className="py-4 bg-[#f4f4f4]">
-      <div className="container mx-auto px-0 md:px-4">
+      <div className="container mx-auto px-2 md:px-4 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
