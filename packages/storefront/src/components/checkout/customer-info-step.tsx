@@ -62,7 +62,7 @@ export const CustomerInfoStep: React.FC = () => {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      phone: fullPhone, // ✅ Only phone sent to backend
+      phone: fullPhone, 
     });
 
     nextStep();

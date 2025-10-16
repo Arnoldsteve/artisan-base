@@ -166,7 +166,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         "/api/v1/storefront/orders",
         payload
       );
-      console.log("Order response:", response);
+      console.log("Order response from order checkout:", response);
       setOrder({
         id: response.order.id,
         customer: state.customer!,

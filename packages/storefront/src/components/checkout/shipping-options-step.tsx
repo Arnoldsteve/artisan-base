@@ -12,7 +12,6 @@ export const ShippingOptionsStep: React.FC = () => {
     selectedShippingOption?.id || shippingOptions[0].id
   );
 
-  // ✅ Ensure default option is set in context on mount
   useEffect(() => {
     if (!selectedShippingOption) {
       const defaultOption = shippingOptions[0];
@@ -23,7 +22,7 @@ export const ShippingOptionsStep: React.FC = () => {
   const handleSelect = (value: string) => {
     setSelectedOption(value);
     const option = shippingOptions.find((opt) => opt.id === value)!;
-    setShippingOption(option); // ✅ update context immediately
+    setShippingOption(option); 
   };
 
   return (
@@ -36,7 +35,7 @@ export const ShippingOptionsStep: React.FC = () => {
         className="space-y-3"
       >
         {shippingOptions.map((option) => (
-          <Card key={option.id} className="p-3 cursor-pointer">
+          <Card key={option.id} className="p-2 px-2 cursor-pointer">
             <CardContent className="flex items-center justify-between gap-3">
               <div className="flex items-start gap-3">
                 <RadioGroupItem value={option.id} id={option.id} />

@@ -49,14 +49,14 @@ export const OrderSummary: React.FC = () => {
     !!selectedPaymentMethod;
 
   return (
-    <Card className="sticky top-8">
+    <Card className="sticky top-8 mx-0">
       <CardHeader>
         <CardTitle className="flex items-center">
           <ShoppingBag className="h-5 w-5 mr-2" />
           Order Summary
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-2">
         <div className="space-y-3">
           {items.length === 0 ? (
             <div className="text-muted-foreground text-sm">

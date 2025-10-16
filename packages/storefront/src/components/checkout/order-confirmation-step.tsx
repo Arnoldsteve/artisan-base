@@ -22,10 +22,10 @@ import { formatDate } from "@/utils/date";
 
 export const OrderConfirmationStep = () => {
   const { order, resetCheckout } = useCheckoutContext();
-  const { clearCart } = useCart();
   const [mounted, setMounted] = React.useState(false);
 
-  useEffect(() => clearCart(), []);
+  console.log("oder data in order confimation page", order)
+
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
@@ -44,7 +44,7 @@ export const OrderConfirmationStep = () => {
   const estimatedDelivery = formatDate(order.estimatedDelivery.toString());
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 py-8">
+    <div className="max-w-4xl mx-auto space-y-8 py-8 px-2">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex justify-center">
@@ -167,6 +167,7 @@ export const OrderConfirmationStep = () => {
           {[
             ["Subtotal", order.subtotal],
             ["Shipping", order.shippingCost],
+            ["tax", order.tax],
             ...(order.tax > 0 ? [["Tax", order.tax]] : []),
           ].map(([label, value]) => (
             <div key={label} className="flex justify-between text-sm">
@@ -233,7 +234,7 @@ export const OrderConfirmationStep = () => {
         <Button
           asChild
           size="lg"
-          className="flex-1"
+          className=""
           onClick={handleContinueShopping}
         >
           <Link href="/products">
@@ -244,7 +245,7 @@ export const OrderConfirmationStep = () => {
           asChild
           variant="outline"
           size="lg"
-          className="flex-1"
+          className=""
           onClick={handleContinueShopping}
         >
           <Link href={`/orders/${order.id}`}>View Order Details</Link>

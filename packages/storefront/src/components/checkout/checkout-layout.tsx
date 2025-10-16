@@ -13,7 +13,7 @@ export const CheckoutLayout: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   return (
-    <div className="container py-8">
+    <div className="px-4 py-8">
       <CheckoutProgress />
       <div className="grid md:grid-cols-3 gap-8 mt-8">
         <div className="md:col-span-2">{children}</div>
