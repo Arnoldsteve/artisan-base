@@ -13,7 +13,6 @@ import { useCart } from "@/hooks/use-cart";
 import { paymentMethods } from "@/utils/payment-methods";
 import { useRouter } from "next/navigation";
 
-
 type State = {
   currentStep: number;
   customer: Customer | null;
@@ -72,7 +71,8 @@ function reducer(state: State, action: Action): State {
     case "SET_ORDER":
       return { ...state, order: action.payload };
     case "RESET":
-      return initialState;
+      return { ...initialState, customer: state.customer,
+      };
     default:
       return state;
   }
@@ -95,7 +95,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
           ...init,
           ...parsed,
           selectedPaymentMethod: parsed.selectedPaymentMethod
-            ? paymentMethods.find(m => m.id === parsed.selectedPaymentMethod.id) || null
+            ? paymentMethods.find(
+                (m) => m.id === parsed.selectedPaymentMethod.id
+              ) || null
             : null,
         };
       }
@@ -141,7 +143,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetCheckout = () => dispatch({ type: "RESET" });
 
   const submitOrder = async () => {
-
     setLoading(true);
     setError(null);
     try {
@@ -154,9 +155,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
           productId: item.id,
           quantity: item.quantity,
         })),
-        // shippingOption: state.selectedShippingOption?.id,   
-        // paymentMethod: state.selectedPaymentMethod?.id,     
-        currency: 'KES',
+        // shippingOption: state.selectedShippingOption?.id,
+        // paymentMethod: state.selectedPaymentMethod?.id,
+        currency: "KES",
         notes: undefined,
         // shippingAmount: state.selectedShippingOption?.price || 0,
       };
@@ -186,7 +187,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       clearCart();
       nextStep();
       router.push("/checkout/confirmation");
-
     } catch (e: any) {
       setError(e.message || "Failed to submit order. Please try again.");
     } finally {
