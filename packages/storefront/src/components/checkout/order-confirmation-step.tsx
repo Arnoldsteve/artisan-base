@@ -23,8 +23,11 @@ import { formatDate } from "@/utils/date";
 export const OrderConfirmationStep = () => {
   const { order, resetCheckout } = useCheckoutContext();
   const { clearCart } = useCart();
+  const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => clearCart(), []);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
 
   if (!order)
     return (
@@ -38,7 +41,7 @@ export const OrderConfirmationStep = () => {
 
   const handleContinueShopping = () => resetCheckout();
 
-  const estimatedDelivery = order.estimatedDelivery;
+  const estimatedDelivery = formatDate(order.estimatedDelivery.toString());
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-8">
@@ -73,55 +76,57 @@ export const OrderConfirmationStep = () => {
         </div>
       </div>
 
-     {/* Timeline */}
-<div className="bg-card border rounded-lg p-6">
-  <h2 className="text-xl font-semibold mb-6">What happens next?</h2>
+      {/* Timeline */}
+      <div className="bg-card border rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-6">What happens next?</h2>
 
-  <div className="relative flex justify-between items-start">
-    {/* Single connector line behind all steps */}
-    <div className="absolute top-6 left-0 w-full h-0.5 bg-gray-300 -z-10" />
+        <div className="relative flex justify-between items-start">
+          {/* Single connector line behind all steps */}
+          <div className="absolute top-6 left-0 w-full h-0.5 bg-gray-300 -z-10" />
 
-    {[
-      {
-        icon: <CheckCircle2 className="h-5 w-5 text-green-600" />,
-        title: "Order Placed",
-        subtitle: "Just now",
-        active: true,
-      },
-      {
-        icon: <Package className="h-5 w-5 text-gray-600" />,
-        title: "Processing",
-        subtitle: "Within 24 hours",
-      },
-      {
-        icon: <Truck className="h-5 w-5 text-gray-600" />,
-        title: "Shipped",
-        subtitle: "2–3 business days",
-      },
-      {
-        icon: <MapPin className="h-5 w-5 text-gray-600" />,
-        title: "Delivered",
-        subtitle: `Est. ${estimatedDelivery}`,
-      },
-    ].map((step, i) => (
-      <div key={i} className="flex flex-col items-center flex-1 text-center">
-        {/* Icon */}
-        <div
-          className={`rounded-full p-3 mb-2 relative z-10 ${
-            step.active ? "bg-green-100" : "bg-gray-200"
-          }`}
-        >
-          {step.icon}
+          {[
+            {
+              icon: <CheckCircle2 className="h-5 w-5 text-green-600" />,
+              title: "Order Placed",
+              subtitle: "Just now",
+              active: true,
+            },
+            {
+              icon: <Package className="h-5 w-5 text-gray-600" />,
+              title: "Processing",
+              subtitle: "Within 24 hours",
+            },
+            {
+              icon: <Truck className="h-5 w-5 text-gray-600" />,
+              title: "Shipped",
+              subtitle: "2–3 business days",
+            },
+            {
+              icon: <MapPin className="h-5 w-5 text-gray-600" />,
+              title: "Delivered",
+              subtitle: `Est. ${estimatedDelivery}`,
+            },
+          ].map((step, i) => (
+            <div
+              key={i}
+              className="flex flex-col items-center flex-1 text-center"
+            >
+              {/* Icon */}
+              <div
+                className={`rounded-full p-3 mb-2 relative z-10 ${
+                  step.active ? "bg-green-100" : "bg-gray-200"
+                }`}
+              >
+                {step.icon}
+              </div>
+
+              {/* Title */}
+              <p className="font-medium">{step.title}</p>
+              <p className="text-sm text-muted-foreground">{step.subtitle}</p>
+            </div>
+          ))}
         </div>
-
-        {/* Title */}
-        <p className="font-medium">{step.title}</p>
-        <p className="text-sm text-muted-foreground">{step.subtitle}</p>
       </div>
-    ))}
-  </div>
-</div>
-
 
       {/* Summary */}
       <div className="bg-card border rounded-lg p-6">

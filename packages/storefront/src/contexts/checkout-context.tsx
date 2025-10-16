@@ -11,6 +11,8 @@ import type { CartItem } from "@/types/cart";
 import { apiClient } from "@/lib/api-client";
 import { useCart } from "@/hooks/use-cart";
 import { paymentMethods } from "@/utils/payment-methods";
+import { useRouter } from "next/navigation";
+
 
 type State = {
   currentStep: number;
@@ -83,6 +85,7 @@ const CheckoutContext = createContext<CheckoutContextType | undefined>(
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState, (init) => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("checkout");
@@ -138,6 +141,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetCheckout = () => dispatch({ type: "RESET" });
 
   const submitOrder = async () => {
+
     setLoading(true);
     setError(null);
     try {
@@ -181,6 +185,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       });
       clearCart();
       nextStep();
+      router.push("/checkout/confirmation");
+
     } catch (e: any) {
       setError(e.message || "Failed to submit order. Please try again.");
     } finally {
