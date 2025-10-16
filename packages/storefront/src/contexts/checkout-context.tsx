@@ -137,7 +137,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const resetCheckout = () => dispatch({ type: "RESET" });
 
-  // Simulate order submission
   const submitOrder = async () => {
     setLoading(true);
     setError(null);

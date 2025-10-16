@@ -1,18 +1,28 @@
-import React from "react";
-import { CheckoutProgress } from "./checkout-progress";
-import { OrderSummary } from "./order-summary";
+"use client";
 
-export const CheckoutLayout: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+import React from "react";
+import { useCheckoutContext } from "@/contexts/checkout-context";
+import { CheckoutProgress } from "@/components/checkout/checkout-progress";
+import { OrderSummary } from "@/components/checkout/order-summary";
+
+export const CheckoutLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { currentStep } = useCheckoutContext();
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8">
       <CheckoutProgress />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        <div className="lg:col-span-2">{children}</div>
-        <div className="lg:col-span-1">
-          <OrderSummary />
+
+      <div className="grid md:grid-cols-3 gap-8 mt-8">
+        <div 
+        className={currentStep === 4 ? "md:col-span-3" : "md:col-span-2"}
+        >
+          {children}
         </div>
+        {currentStep < 4 && (
+          <div className="md:col-span-1">
+            <OrderSummary />
+          </div>
+         )} 
       </div>
     </div>
   );
