@@ -6,10 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCategories } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { CategoriesLoading } from "./skeletons/category-card-skeleton";
 
-// OPTIMIZATION: Memoized component to prevent unnecessary re-renders
 export const CategoryShowcase = memo(function CategoryShowcase() {
   const { data: categories = [], isLoading, error } = useCategories();
 
@@ -67,10 +65,10 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {categories.slice(0, 12).map((category) => (
+          {categories.slice(0, 12).map((category: any) => (
             <Link
               key={category.id}
-              href={`/categories/${category.id}`}
+              href={`/categories/${category.slug}`}
               className="group block"
             >
               <div className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] flex flex-col h-full">
@@ -108,7 +106,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
                     variant="outline"
                     size="sm"
                     className="w-full mt-auto truncate text-ellipsis whitespace-nowrap"
-                    title={`Explore ${category.name}`} // shows full text on hover
+                    title={`Explore ${category.name}`} 
                   >
                     Explore {category.name}
                   </Button>

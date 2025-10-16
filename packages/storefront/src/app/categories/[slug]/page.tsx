@@ -6,7 +6,6 @@ import React from "react";
 async function fetchCategory(identifier: string) {
   try {
     const category = await categoryService.getCategoryById(identifier);
-    console.log("category data from page level", category);
     return category;
   } catch (e) {
     console.error("error fetching categories", e);
