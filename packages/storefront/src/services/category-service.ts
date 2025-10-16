@@ -206,17 +206,17 @@ export class CategoryService {
   async getCategoryById(id: string): Promise<Category | null> {
     try {
       // OPTIMIZATION: Check cache first
-      const cachedCategory = this.cache.getCategory(id);
-      if (cachedCategory) {
-        return cachedCategory;
-      }
+      // const cachedCategory = this.cache.getCategory(id);
+      // if (cachedCategory) {
+      //   return cachedCategory;
+      // }
 
       const response = await apiClient.get<ApiResponse<Category>>(
         `/api/v1/storefront/categories/${id}`
       );
 
       if (response && response.success && response.data) {
-        this.cache.setCategory(response.data);
+        // this.cache.setCategory(response.data);
         return response.data || response;
       }
 

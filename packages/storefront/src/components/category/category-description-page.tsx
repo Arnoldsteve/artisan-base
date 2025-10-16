@@ -11,11 +11,17 @@ import { useCategory } from "@/hooks/use-categories";
 import { Category, Product } from "@/types";
 import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton";
 
-export default function CategoryPage() {
-  const params = useParams();
-  const categoryId = params.id as string;
 
-  const { data: categoryData, isLoading, error } = useCategory(categoryId);
+interface CategoryDetailsPageProps {
+    initialCategory?: Category
+}
+export default function CategoryDetailsPage({ initialCategory }: CategoryDetailsPageProps) {
+  const params = useParams<{ slug: string}>();
+  const categoryId = params.slug;
+
+  const { data: categoryData, isLoading, error } = useCategory(categoryId, {
+    initialData: initialCategory
+  });
 
   if (isLoading) return <CategoriesLoading />;
 

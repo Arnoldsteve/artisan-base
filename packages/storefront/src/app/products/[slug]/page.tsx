@@ -1,4 +1,3 @@
-// src/app/products/[slug]/page.tsx
 import { createMetadata } from "@/lib/metadata";
 import ProductDetailsPage from "@/components/products/product-details-page";
 import { productService } from "@/services/product-service";

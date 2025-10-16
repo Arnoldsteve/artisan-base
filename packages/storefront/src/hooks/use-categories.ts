@@ -30,13 +30,17 @@ export const categoryKeys = {
 };
 
 // OPTIMIZATION: Individual category query with caching
-export function useCategory(id: string, options?: UseQueryOptions<Category | null>) {
+export function useCategory(
+  id: string, 
+  options?:  Partial<UseQueryOptions<Category | null>> & {initialData?:Category}
+) {
   return useQuery({
     queryKey: categoryKeys.detail(id),
     queryFn: () => categoryService.getCategoryById(id),
     enabled: !!id,
-    staleTime: 15 * 60 * 1000, // 15 minutes - categories don't change often
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 0,
+    gcTime: 30 * 60 * 1000, 
+    initialData: options?.initialData,
     ...options,
   });
 }
