@@ -5,13 +5,8 @@ import { CreateProductDto, Product, UpdateProductDto } from "@/types/products";
 import { useAuthContext } from "@/contexts/auth-context";
 import { PaginatedResponse } from "@/types/shared";
 
-// Define a query key to uniquely identify product data
 export const PRODUCTS_QUERY_KEY = ["dashboard-products"];
 
-/**
- * Hook for fetching a paginated list of products.
- * It is "auth-aware" and will not run until the user is authenticated.
- */
 export function useProducts(
   page = 1,
   limit = 10,
@@ -29,9 +24,6 @@ export function useProducts(
   });
 }
 
-/**
- * Hook for fetching a single product by its ID.
- */
 export function useProduct(productId: string | null) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
@@ -42,9 +34,6 @@ export function useProduct(productId: string | null) {
   });
 }
 
-/**
- * Hook for creating a new product.
- */
 export function useCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -60,9 +49,6 @@ export function useCreateProduct() {
   });
 }
 
-/**
- * Hook for updating an existing product.
- */
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -80,9 +66,6 @@ export function useUpdateProduct() {
   });
 }
 
-/**
- * Hook for deleting a product.
- */
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -97,9 +80,6 @@ export function useDeleteProduct() {
   });
 }
 
-/**
- * Hook for assigning categories to a product.
- */
 export function useAssignCategories() {
   const queryClient = useQueryClient();
 

@@ -35,7 +35,7 @@ export default async function ProductsPage() {
       <PageHeader title="Products" />
 
       <div className="p-4 md:p-8 lg:p-10">
-        <ProductsView initialData={initialData} />
+        <ProductsView initialProductData={initialData} />
       </div>
     </>
   );

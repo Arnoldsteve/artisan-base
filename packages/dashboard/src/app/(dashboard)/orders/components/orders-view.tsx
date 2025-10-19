@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
-import { Order } from "@/types/orders";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { columns } from "./columns";
+import { Order } from "@/types/orders";
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,16 +13,17 @@ import {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  PaginationState,
 } from "@tanstack/react-table";
 import {
   useOrders,
   useDeleteOrder,
   useBatchDeleteOrders,
 } from "@/hooks/use-orders";
+import Link from "next/link";
 
 // UI Components
 import { PageHeader } from "@/components/shared/page-header";
-import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { DeleteOrderDialog } from "./delete-order-dialog";
 import { Button } from "@repo/ui";
 import { Trash2 } from "lucide-react";
@@ -32,15 +33,19 @@ import { PaginatedResponse } from "@/types/shared";
 import { OrderTableMeta } from "@/types/table-meta";
 
 interface OrdersViewProps {
-  initialData: PaginatedResponse<Order>;
+  initialOrderData: PaginatedResponse<Order>;
 }
 
-export function OrdersView({ initialData }: OrdersViewProps) {
+export function OrdersView({ initialOrderData }: OrdersViewProps) {
   // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+    const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+      pageIndex: 1,
+      pageSize: 10,
+    });
 
   // --- Modal/Dialog UI State ---
   const [orderToEdit, setOrderToEdit] = useState<Order | null>(null);
@@ -53,11 +58,13 @@ export function OrdersView({ initialData }: OrdersViewProps) {
     data: paginatedResponse,
     isLoading,
     isError,
-  } = useOrders(1, 10, "", initialData);
-  // And the mutation hooks for actions.
+  } = useOrders(pageIndex + 1, pageSize, "", initialOrderData);
+
+    console.log("Order data from product view: ", paginatedResponse);
+
+
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
-  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } =
-    useBatchDeleteOrders();
+  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } = useBatchDeleteOrders();
 
   // --- Memoized Data ---
   const orders = useMemo(
@@ -68,6 +75,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
 
   // --- Action Handlers ---
   const openDeleteDialog = (order: Order) => setOrderToDelete(order);
+
   const openEditSheet = (order: Order) => setOrderToEdit(order);
 
   // --- Create the meta object with proper typing ---
@@ -80,6 +88,10 @@ export function OrdersView({ initialData }: OrdersViewProps) {
   const table = useReactTable({
     data: orders,
     columns,
+    pageCount:
+      paginatedResponse?.meta?.totalPages ??
+      (totalOrders > 0 ? Math.ceil(totalOrders / pageSize) : 1),
+    manualPagination: true,
     state: { sorting, columnVisibility, rowSelection, columnFilters },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -90,7 +102,7 @@ export function OrdersView({ initialData }: OrdersViewProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: tableMeta, // Now properly typed
+    meta: tableMeta, 
   });
 
   const selectedOrderIds = useMemo(() => {

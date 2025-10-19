@@ -38,10 +38,10 @@ import { slugify } from "@/utils/slugify";
 import { ProductTableMeta } from "@/types/table-meta";
 
 interface ProductsViewProps {
-  initialData: PaginatedResponse<Product>;
+  initialProductData: PaginatedResponse<Product>;
 }
 
-export function ProductsView({ initialData }: ProductsViewProps) {
+export function ProductsView({ initialProductData }: ProductsViewProps) {
   // --- Table State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -81,9 +81,9 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     isLoading,
     isError,
     // isFetching,
-  } = useProducts(pageIndex + 1, pageSize, "", initialData);
+  } = useProducts(pageIndex + 1, pageSize, "", initialProductData);
 
-  console.log("product data from product view: ", paginatedResponse);
+  // console.log("product data from product view: ", paginatedResponse);
 
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
@@ -95,6 +95,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     [paginatedResponse]
   );
   const totalProducts = paginatedResponse?.meta?.total ?? 0;
+
   const selectedProductIds = useMemo(
     () => Object.keys(rowSelection),
     [rowSelection]
@@ -103,6 +104,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
 
   // --- Action Handlers ---
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
+
   const openEditSheet = (product: Product) => {
     setProductToEdit(product);
     setIsSheetOpen(true);
@@ -170,7 +172,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: tableMeta, // Now properly typed
+    meta: tableMeta, 
   });
 
   // --- Mutation Handlers ---
@@ -215,7 +217,7 @@ export function ProductsView({ initialData }: ProductsViewProps) {
   };
 
   // --- Render Logic ---
-  if (isLoading && !initialData) {
+  if (isLoading && !initialProductData) {
     return <DataTableSkeleton />;
   }
   if (isError) {

@@ -10,58 +10,41 @@ import {
 import { useAuthContext } from "@/contexts/auth-context";
 import { PaginatedResponse } from "@/types/shared";
 
-// Define a query key to uniquely identify all order-related data
 const ORDERS_QUERY_KEY = ["dashboard-orders"];
 
-/**
- * Hook for fetching a paginated list of orders.
- * It is "auth-aware" and will not run until the user is authenticated.
- */
 export function useOrders(
   page = 1,
   limit = 10,
-  search = '', // Assuming you might add search functionality later
+  search = '', 
   initialData?: PaginatedResponse<Order>
 ) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
   return useQuery<PaginatedResponse<Order>>({
-    // The query key is an array that uniquely identifies this specific data fetch
     queryKey: [...ORDERS_QUERY_KEY, { page, limit, search }],
-    // The queryFn is the async function that fetches the data
     queryFn: () => orderService.getAll({ page, limit, search }),
-    // This query will only run if auth is not loading AND the user is authenticated
     enabled: !isAuthLoading && isAuthenticated,
-    // This provides the server-fetched data to prevent a loading flicker on the first visit
-    initialData: initialData,
+    initialData: page === 1 ? initialData : undefined,
+    staleTime: 0,
   });
 }
 
-/**
- * Hook for fetching a single order by its ID.
- */
 export function useOrder(orderId: string | null) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
   return useQuery<Order>({
     queryKey: [...ORDERS_QUERY_KEY, orderId],
-    queryFn: () => orderService.getById(orderId!), // The '!' is safe because of the `enabled` flag
-    // The query will only run if auth is ready and an orderId is provided
+    queryFn: () => orderService.getById(orderId!),
     enabled: !isAuthLoading && isAuthenticated && !!orderId,
   });
 }
 
-/**
- * Hook for creating a new manual order.
- * Returns a `mutate` function to trigger the creation.
- */
 export function useCreateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateOrderDto) => orderService.createOrder(data),
     onSuccess: (newOrder) => {
       toast.success(`Order #${newOrder.orderNumber} created successfully.`);
-      // Invalidate all order list queries to trigger a refetch and show the new order
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
     },
     onError: (error: Error) => {
@@ -70,9 +53,6 @@ export function useCreateOrder() {
   });
 }
 
-/**
- * Hook for updating an order's fulfillment status.
- */
 export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -80,7 +60,6 @@ export function useUpdateOrderStatus() {
       orderService.updateStatus(variables.orderId, variables.status),
     onSuccess: (updatedOrder) => {
       toast.success(`Order #${updatedOrder.orderNumber}'s status has been updated.`);
-      // Invalidate both the main list and the specific order's cache for immediate UI update
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: [...ORDERS_QUERY_KEY, updatedOrder.id] });
     },
@@ -90,9 +69,6 @@ export function useUpdateOrderStatus() {
   });
 }
 
-/**
- * Hook for updating an order's payment status.
- */
 export function useUpdateOrderPaymentStatus() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -109,9 +85,6 @@ export function useUpdateOrderPaymentStatus() {
   });
 }
 
-/**
- * Hook for deleting a single order.
- */
 export function useDeleteOrder() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -126,9 +99,6 @@ export function useDeleteOrder() {
   });
 }
 
-/**
- * Hook for deleting multiple orders in a batch.
- */
 export function useBatchDeleteOrders() {
     const queryClient = useQueryClient();
     return useMutation({
