@@ -29,7 +29,7 @@ import { DeleteCustomerDialog } from "./delete-customer-dialog";
 import { EditCustomerSheet } from "./edit-customer-sheet";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CustomerFormData } from "@/validation-schemas/customers";
 import { PaginatedResponse } from "@/types/shared";
 import { CustomerTableMeta } from "@/types/table-meta";
@@ -123,7 +123,7 @@ export function CustomersView({ initialCustomerData }: CustomersViewProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: tableMeta, // Now properly typed
+    meta: tableMeta, 
   });
   
   // --- Event Handlers ---
