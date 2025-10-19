@@ -7,12 +7,8 @@ import { Category, CreateCategoryDto, UpdateCategoryDto } from "@/types/categori
 import { useAuthContext } from "@/contexts/auth-context";
 import { PaginatedResponse } from "@/types/shared";
 
-// Unique key for react-query cache
 export const CATEGORIES_QUERY_KEY = ["dashboard-categories"];
 
-/**
- * Fetch paginated categories (auth-aware).
- */
 export function useCategories(
   page = 1,
   limit = 10,
@@ -29,9 +25,6 @@ export function useCategories(
   });
 }
 
-/**
- * Fetch a single category by ID.
- */
 export function useCategory(categoryId: string | null) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
@@ -42,9 +35,6 @@ export function useCategory(categoryId: string | null) {
   });
 }
 
-/**
- * Create a new category.
- */
 export function useCreateCategory() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -59,9 +49,6 @@ export function useCreateCategory() {
   });
 }
 
-/**
- * Update an existing category.
- */
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -78,9 +65,6 @@ export function useUpdateCategory() {
   });
 }
 
-/**
- * Delete a category.
- */
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
   return useMutation({

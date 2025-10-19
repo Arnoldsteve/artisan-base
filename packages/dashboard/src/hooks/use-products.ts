@@ -40,7 +40,6 @@ export function useCreateProduct() {
     mutationFn: (data: CreateProductDto) => productService.createProduct(data),
     onSuccess: (newProduct) => {
       toast.success(`Product "${newProduct.name}" created successfully.`);
-      // Invalidate the main products list to trigger a refetch
       queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
     },
     onError: (error: Error) => {
@@ -56,7 +55,6 @@ export function useUpdateProduct() {
       productService.updateProduct(variables.id, variables.data),
     onSuccess: (updatedProduct) => {
       toast.success(`Product "${updatedProduct.name}" updated successfully.`);
-      // Invalidate both the list and the specific product's query cache
       queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: [...PRODUCTS_QUERY_KEY, updatedProduct.id] });
     },
@@ -85,7 +83,6 @@ export function useAssignCategories() {
 
   return useMutation({
     mutationFn: async ({ productId, categoryIds }: { productId: string; categoryIds: string[] }) => {
-      // Loop through each selected category and call POST
       for (const categoryId of categoryIds) {
         await productService.assignCategory(productId, categoryId); 
       }

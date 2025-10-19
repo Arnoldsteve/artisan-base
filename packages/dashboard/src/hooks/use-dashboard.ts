@@ -2,19 +2,13 @@
 
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { dashboardService } from "@/services/dashboard-service";
-// Import the new SalesOverviewResponse type
 import { DashboardKPI, RecentOrdersResponse, SalesOverviewResponse } from "@/types/dashboard";
 import { useAuthContext } from "@/contexts/auth-context";
 
-// Define unique query keys for each piece of data
 const KPIS_QUERY_KEY = ["dashboard-kpis"];
 const RECENT_ORDERS_QUERY_KEY = ["dashboard-recent-orders"];
-// --- NEW ---
 const SALES_OVERVIEW_QUERY_KEY = ["dashboard-sales-overview"];
 
-/**
- * Hook for fetching ONLY the KPI data for the dashboard stats cards.
- */
 export function useDashboardKpis() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
@@ -22,13 +16,10 @@ export function useDashboardKpis() {
     queryKey: KPIS_QUERY_KEY,
     queryFn: () => dashboardService.getKpis(),
     enabled: !isAuthLoading && isAuthenticated,
-    staleTime: 1000 * 60 * 5, // Cache KPIs for 5 minutes
+    staleTime: 1000 * 60 * 5, 
   });
 }
 
-/**
- * Hook for fetching ONLY the recent orders for the dashboard table.
- */
 export function useRecentOrders() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
@@ -36,13 +27,10 @@ export function useRecentOrders() {
     queryKey: RECENT_ORDERS_QUERY_KEY,
     queryFn: () => dashboardService.getRecentOrders(),
     enabled: !isAuthLoading && isAuthenticated,
-    staleTime: 1000 * 60, // Cache recent orders for 1 minute
+    staleTime: 1000 * 60, 
   });
 }
 
-/**
- * Hook for fetching ONLY the sales overview data for the chart.
- */
 export function useSalesOverview() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
@@ -88,7 +76,6 @@ export function useDashboardData() {
         ]
     });
 
-    // Consolidate the results into a single, convenient object
     const isLoading = results.some(query => query.isLoading);
     const isError = results.some(query => query.isError);
 
@@ -97,7 +84,6 @@ export function useDashboardData() {
         isError,
         kpis: results[0].data as DashboardKPI | undefined,
         recentOrdersData: results[1].data as RecentOrdersResponse | undefined,
-        // --- NEW ---
         salesOverviewData: results[2].data as SalesOverviewResponse | undefined,
     }
 }

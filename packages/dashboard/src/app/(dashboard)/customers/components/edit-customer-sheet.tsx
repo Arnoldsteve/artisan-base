@@ -27,8 +27,6 @@ import { CustomerFormData, customerFormSchema } from '@/validation-schemas/custo
 interface EditCustomerSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  // --- THIS IS THE FIX ---
-  // The sheet now expects the original Customer object (or null for creation).
   customer: Partial<Customer> | null;
   onSave: (data: CustomerFormData) => void;
   isPending: boolean;
@@ -39,7 +37,6 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(customerFormSchema),
-    // Set default values for the form schema
     defaultValues: {
       id: customer?.id || undefined,
       firstName: customer?.firstName || '',
@@ -49,10 +46,8 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
     },
   });
 
-  // Effect to reset the form's values when the sheet is opened or the customer data changes
   useEffect(() => {
     if (isOpen) {
-      // The form can now correctly access the individual name and phone fields
       form.reset({
         id: customer?.id || undefined,
         firstName: customer?.firstName || '',
@@ -63,7 +58,6 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
     }
   }, [customer, isOpen, form]);
 
-  // The `handleSubmit` from the hook will first validate, then call our onSave
   const onSubmit = (data: CustomerFormData) => {
     onSave(data);
   };

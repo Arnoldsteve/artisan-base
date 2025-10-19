@@ -21,7 +21,6 @@ import { ProductTableMeta, TableWithMeta } from "@/types/table-meta";
 // No more: declare module "@tanstack/react-table" { ... }
 
 export const columns: ColumnDef<Product>[] = [
-  // Column for row selection
   {
     id: "select",
     header: ({ table }) => (
@@ -48,7 +47,6 @@ export const columns: ColumnDef<Product>[] = [
     enableHiding: false,
   },
 
-  // Column for Product Name and Image
   {
     accessorKey: "name",
     header: "Product",
@@ -78,7 +76,6 @@ export const columns: ColumnDef<Product>[] = [
     }
   },
 
-  // Column for Status (isActive)
   {
     accessorKey: "isActive",
     header: ({ column }) => (
@@ -105,7 +102,6 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
 
-  // Column for Inventory
   {
     accessorKey: "inventoryQuantity",
     header: ({ column }) => (
@@ -137,7 +133,6 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
 
-  // Column for Price
   {
     accessorKey: "price",
     header: ({ column }) => (
@@ -157,12 +152,10 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
 
-  // Column for Actions
   {
     id: "actions",
     cell: ({ row, table }) => {
       const product = row.original;
-      // Type assertion for the table with ProductTableMeta
       const typedTable = table as TableWithMeta<Product, ProductTableMeta<Product>>;
       
       return (

@@ -58,18 +58,15 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 
-  // image upload
   const [productForImageUpload, setProductForImageUpload] =
     useState<Product | null>(null);
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
-  // Add these lines for category modal
   const [productForCategory, setProductForCategory] = useState<Product | null>(
     null
   );
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
-  // image preview
   const [productForPreview, setProductForPreview] = useState<Product | null>(
     null
   );
@@ -137,7 +134,6 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     });
   };
 
-  // --- Create the meta object with proper typing ---
   const tableMeta: ProductTableMeta<Product> = {
     openDeleteDialog,
     openEditSheet,
@@ -148,7 +144,6 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     // isFetching,
   };
 
-  // --- Table Instance Initialization ---
   const table = useReactTable({
     data: products,
     columns,

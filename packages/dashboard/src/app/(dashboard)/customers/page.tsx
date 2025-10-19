@@ -34,7 +34,7 @@ export default async function CustomersPage() {
     <>
       <PageHeader title="Customers" />
       <div className="p-4 md:p-8 lg:p-10">
-        <CustomersView initialData={initialData} />
+        <CustomersView initialCustomerData={initialData} />
       </div>
     </>
   );

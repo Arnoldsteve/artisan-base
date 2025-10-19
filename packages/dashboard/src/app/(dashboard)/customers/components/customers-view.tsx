@@ -13,6 +13,7 @@ import {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  PaginationState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { Customer, UpdateCustomerDto, CreateCustomerDto } from "@/types/customers";
@@ -34,10 +35,10 @@ import { PaginatedResponse } from "@/types/shared";
 import { CustomerTableMeta } from "@/types/table-meta";
 
 interface CustomersViewProps {
-  initialData: PaginatedResponse<Customer>;
+  initialCustomerData: PaginatedResponse<Customer>;
 }
 
-export function CustomersView({ initialData }: CustomersViewProps) {
+export function CustomersView({ initialCustomerData }: CustomersViewProps) {
   const router = useRouter();
 
   // --- Component State ---
@@ -45,16 +46,23 @@ export function CustomersView({ initialData }: CustomersViewProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ email: false });
   const [rowSelection, setRowSelection] = useState({});
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 1,
+    pageSize: 10,
+  });
 
-  // --- State for Modals/Dialogs ---
   const [customerToDelete, setCustomerToDelete] = useState<CustomerColumn | null>(null);
-  // --- THIS IS THE FIX ---
-  // The state for the customer to edit should hold the ORIGINAL Customer type.
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
-  const { data: paginatedResponse, isLoading, isError } = useCustomers(1, 10, "", initialData);
+  const { 
+    data: paginatedResponse, 
+    isLoading, 
+    isError 
+  } = useCustomers(pageIndex + 1, pageSize, "", initialCustomerData);
+
+
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
   const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
@@ -101,6 +109,10 @@ export function CustomersView({ initialData }: CustomersViewProps) {
   const table = useReactTable({
     data: mappedCustomers,
     columns,
+     pageCount:
+      paginatedResponse?.meta?.totalPages ??
+      (totalCustomers > 0 ? Math.ceil(totalCustomers / pageSize) : 1),
+    manualPagination: true,
     state: { sorting, columnVisibility, rowSelection, columnFilters },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,

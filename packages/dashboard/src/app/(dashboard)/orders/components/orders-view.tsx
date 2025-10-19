@@ -84,7 +84,6 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
     openEditSheet,
   };
 
-  // --- Table Instance Initialization ---
   const table = useReactTable({
     data: orders,
     columns,
@@ -133,7 +132,7 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
   };
 
   // --- Render Logic ---
-  if (isLoading && !paginatedResponse) {
+  if (isLoading && !initialOrderData) {
     return <DataTableSkeleton />;
   }
   if (isError) {

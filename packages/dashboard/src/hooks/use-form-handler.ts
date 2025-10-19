@@ -3,19 +3,14 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/client-api'; // Import our custom error type
+import { ApiError } from '@/lib/client-api'; 
 
-// --- Type Definitions ---
-
-// A generic function signature for any async submission logic (e.g., login, createProduct)
-// TData is the type of data the form submits (e.g., LoginDto)
-// TResponse is the type of the expected successful response.
 type SubmitFunction<TData, TResponse> = (data: TData) => Promise<TResponse>;
 
 interface UseFormHandlerOptions {
-  onSuccess?: (response: any) => void; // Optional callback for custom success logic
-  onSuccessRedirect?: string;         // Optional path to redirect to on success
-  successMessage?: string;            // Optional success toast message
+  onSuccess?: (response: any) => void; 
+  onSuccessRedirect?: string;        
+  successMessage?: string;           
 }
 
 /**
@@ -39,23 +34,19 @@ export function useFormHandler<TData, TResponse>(
     try {
       const response = await submitFn(data);
 
-      // Show success toast if a message is provided
       if (options.successMessage) {
         toast.success(options.successMessage);
       }
       
-      // Handle success actions
       if (options.onSuccess) {
         options.onSuccess(response);
       }
       
       if (options.onSuccessRedirect) {
-        // Use router.push for client-side navigation within the dashboard
         router.push(options.onSuccessRedirect);
       }
 
     } catch (err) {
-      // Handle the structured ApiError from our apiClient
       if (err instanceof ApiError) {
         setError(err.message);
         toast.error(err.message || "Submission failed.");
@@ -73,7 +64,6 @@ export function useFormHandler<TData, TResponse>(
     isLoading, 
     error, 
     handleSubmit,
-    // Add a function to manually clear the error if needed
     clearError: () => setError(null) 
   };
 }

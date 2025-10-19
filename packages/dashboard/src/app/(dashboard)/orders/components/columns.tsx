@@ -142,7 +142,6 @@ export const columns: ColumnDef<Order>[] = [
     cell: ({ row, table }) => {
       const order = row.original;
       const customer = order.customer;
-      // Type assertion for the table with OrderTableMeta
       const typedTable = table as TableWithMeta<Order, OrderTableMeta<Order>>;
       
       return (
