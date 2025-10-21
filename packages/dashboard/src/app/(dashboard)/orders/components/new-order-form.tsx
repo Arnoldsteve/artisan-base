@@ -284,6 +284,7 @@ function AddressForm({
           <Input
             id={`${prefix}-firstName`}
             value={address.firstName}
+             placeholder="e.g. Steve"
             onChange={(e) =>
               setAddress({ ...address, firstName: e.target.value })
             }
@@ -295,6 +296,7 @@ function AddressForm({
           <Input
             id={`${prefix}-lastName`}
             value={address.lastName}
+            placeholder="e.g. Arnold"
             onChange={(e) =>
               setAddress({ ...address, lastName: e.target.value })
             }
@@ -307,6 +309,7 @@ function AddressForm({
         <Input
           id={`${prefix}-addressLine1`}
           value={address.addressLine1}
+          placeholder="e.g. P.O. Box 90420-80100 or House No. 12, Moi Ave"
           onChange={(e) =>
             setAddress({ ...address, addressLine1: e.target.value })
           }
@@ -318,6 +321,7 @@ function AddressForm({
         <Input
           id={`${prefix}-addressLine2`}
           value={address.addressLine2}
+          placeholder="e.g. Apartment, building, or landmark (optional)"
           onChange={(e) =>
             setAddress({ ...address, addressLine2: e.target.value })
           }
@@ -329,15 +333,17 @@ function AddressForm({
           <Input
             id={`${prefix}-city`}
             value={address.city}
+            placeholder="e.g. Mombasa"
             onChange={(e) => setAddress({ ...address, city: e.target.value })}
             required
           />
         </div>
         <div>
-          <Label htmlFor={`${prefix}-state`}>State</Label>
+          <Label htmlFor={`${prefix}-state`}>County/State</Label>
           <Input
             id={`${prefix}-state`}
             value={address.state}
+             placeholder="e.g. Mombasa County"
             onChange={(e) => setAddress({ ...address, state: e.target.value })}
             required
           />
@@ -349,6 +355,7 @@ function AddressForm({
           <Input
             id={`${prefix}-postalCode`}
             value={address.postalCode}
+            placeholder="e.g. 80100"
             onChange={(e) =>
               setAddress({ ...address, postalCode: e.target.value })
             }
@@ -360,6 +367,7 @@ function AddressForm({
           <Input
             id={`${prefix}-country`}
             value={address.country}
+            placeholder="e.g. Kenya"
             onChange={(e) =>
               setAddress({ ...address, country: e.target.value })
             }
@@ -398,6 +406,7 @@ function CustomerForm({
           id="customer-email"
           type="email"
           value={email}
+          placeholder="e.g. stevearnold@gmail.com"
           onChange={(e) => setEmail(e.target.value)}
           required
         />
@@ -408,6 +417,7 @@ function CustomerForm({
           <Input
             id="customer-firstName"
             value={firstName}
+            placeholder="e.g. Steve"
             onChange={(e) => setFirstName(e.target.value)}
             required
           />
@@ -417,6 +427,7 @@ function CustomerForm({
           <Input
             id="customer-lastName"
             value={lastName}
+            placeholder="e.g. Arnold"
             onChange={(e) => setLastName(e.target.value)}
             required
           />
@@ -427,6 +438,7 @@ function CustomerForm({
         <Input
           id="customer-phone"
           value={phone}
+          placeholder="e.g. 0712345678 | +254712345678"
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
         />

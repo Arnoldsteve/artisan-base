@@ -12,17 +12,26 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
-import { 
-  CalendarDays, 
-  Package, 
-  MapPin, 
+import {
+  CalendarDays,
+  Package,
+  MapPin,
   CreditCard,
   ShoppingBag,
-  Truck
+  Truck,
 } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import { getStatusColor } from "@/utils/status";
 import { OrderDetailsSkeleton } from "@/skeletons/account/orders/order-details-skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui/components/ui/table";
 
 type OrderDetailsDialogProps = {
   open: boolean;
@@ -66,16 +75,21 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                       <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Order Date</p>
+                      <p className="text-sm text-muted-foreground">
+                        Order Date
+                      </p>
                       <p className="font-medium">
                         {order.createdAt
-                          ? new Date(order.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
+                          ? new Date(order.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
                           : "N/A"}
                       </p>
                     </div>
@@ -104,34 +118,90 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                   <Package className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-semibold">Order Items</h3>
                   <span className="text-sm text-muted-foreground">
-                    ({order.items?.length || 0} items)
+                    ({order.items?.length || 0})
                   </span>
                 </div>
-                
-                <div className="space-y-3">
-                  {order.items?.map((item: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.productName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Qty: {item.quantity} × {formatMoney(item.unitPrice, order.currency)}
-                        </p>
-                      </div>
-                      <div className="font-semibold">
-                        {formatMoney(item.unitPrice * item.quantity, order.currency)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Table className="w-full text-sm">
+                  <TableHeader className="text-muted-foreground uppercase text-xs">
+                    <TableRow>
+                      <TableHead className="text-left px-4">Product</TableHead>
+                      <TableHead className="text-center px-4">
+                        Quantity
+                      </TableHead>
+                      <TableHead className="text-right px-4">
+                        Unit Price
+                      </TableHead>
+                      <TableHead className="text-right px-4">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {order.items?.map((item: any, idx: number) => (
+                      <TableRow
+                        key={idx}
+                        className="border-t border-border hover:bg-muted/30"
+                      >
+                        <TableCell className="px-4 py-2 font-medium">
+                          {item.productName}
+                        </TableCell>
+                        <TableCell className="text-center px-4 py-2">
+                          {item.quantity}
+                        </TableCell>
+                        <TableCell className="text-right px-4 py-2">
+                          {formatMoney(item.unitPrice, order.currency)}
+                        </TableCell>
+                        <TableCell className="text-right px-4 py-2 font-semibold">
+                          {formatMoney(
+                            item.unitPrice * item.quantity,
+                            order.currency
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-right px-4 ">
+                        Subtotal
+                      </TableCell>
+                      <TableCell className="text-right px-4">
+                        {formatMoney(order.subtotal, order.currency)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-right px-4 ">
+                        shipping
+                      </TableCell>
+                      <TableCell className="text-right px-4">
+                        {formatMoney(order.shippingAmount, order.currency)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-right px-4 ">
+                        Tax
+                      </TableCell>
+                      <TableCell className="text-right px-4">
+                        {formatMoney(order.taxAmount, order.currency)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        colSpan={3}
+                        className="text-right px-4 font-semibold"
+                      >
+                        Total
+                      </TableCell>
+                      <TableCell className="text-right px-4 font-bold">
+                        {formatMoney(order.totalAmount, order.currency)}
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
 
                 <Separator className="my-4" />
-                
+
                 {/* Order Total */}
-                <div className="flex justify-between items-center p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <span className="font-semibold text-lg">Total Amount</span>
-                  <span className="font-bold text-lg text-primary">
-                    {formatMoney(order.totalAmount, order.currency)}
-                  </span>
+                <div className="flex items-center p-3 ">
+                  {order.motes} Customer order notes will be displayed here
                 </div>
               </CardContent>
             </Card>
@@ -145,15 +215,27 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     {order.shippingAddress && (
                       <div>
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                            <Truck className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                          <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <CreditCard className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                           </div>
-                          <h3 className="font-semibold">Shipping Address</h3>
+                          <h3 className="font-semibold">Billing Address</h3>
                         </div>
-                        <div className="text-sm text-muted-foreground leading-relaxed p-3 bg-muted/30 rounded-lg">
-                          {Object.values(order.shippingAddress)
-                            .filter(Boolean)
-                            .join(", ")}
+
+                        <div className="text-sm text-muted-foreground leading-relaxed p-3 bg-muted/30 rounded-lg space-y-1">
+                          <p className="font-medium text-foreground">
+                            {order.shippingAddress.firstName}{" "}
+                            {order.shippingAddress.lastName}
+                          </p>
+                          <p>{order.shippingAddress.addressLine1}</p>
+                          {order.shippingAddress.addressLine2 && (
+                            <p>{order.shippingAddress.addressLine2}</p>
+                          )}
+                          <p>
+                            {order.shippingAddress.postalCode}{" "}
+                            {order.shippingAddress.city},{" "}
+                            {order.shippingAddress.state}
+                          </p>
+                          <p>{order.shippingAddress.country}</p>
                         </div>
                       </div>
                     )}
@@ -167,10 +249,22 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                           </div>
                           <h3 className="font-semibold">Billing Address</h3>
                         </div>
-                        <div className="text-sm text-muted-foreground leading-relaxed p-3 bg-muted/30 rounded-lg">
-                          {Object.values(order.billingAddress)
-                            .filter(Boolean)
-                            .join(", ")}
+
+                        <div className="text-sm text-muted-foreground leading-relaxed p-3 bg-muted/30 rounded-lg space-y-1">
+                          <p className="font-medium text-foreground">
+                            {order.billingAddress.firstName}{" "}
+                            {order.billingAddress.lastName}
+                          </p>
+                          <p>{order.billingAddress.addressLine1}</p>
+                          {order.billingAddress.addressLine2 && (
+                            <p>{order.billingAddress.addressLine2}</p>
+                          )}
+                          <p>
+                            {order.billingAddress.postalCode}{" "}
+                            {order.billingAddress.city},{" "}
+                            {order.billingAddress.state}
+                          </p>
+                          <p>{order.billingAddress.country}</p>
                         </div>
                       </div>
                     )}
@@ -181,17 +275,15 @@ export const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4 border-t">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={() => window.print()}
               >
                 Print Order
               </Button>
               <DialogClose asChild>
-                <Button className="flex-1">
-                  Close
-                </Button>
+                <Button className="flex-1">Close</Button>
               </DialogClose>
             </div>
           </div>
