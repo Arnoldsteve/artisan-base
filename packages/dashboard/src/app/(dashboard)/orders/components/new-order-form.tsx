@@ -18,12 +18,17 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Textarea,
 } from "@repo/ui";
 import { toast } from "sonner";
 import { Loader2, X, PlusCircle, MinusCircle } from "lucide-react";
 import { productService } from "@/services/product-service";
 import { orderService } from "@/services/order-service";
 import { formatMoney } from "@/utils/money";
+import { TAX_RATE } from "@/constants/tax";
+import { FREE_SHIPPING_THRESHOLD } from "@/constants/shipping";
+import { shippingOptions } from "@/utils/shupping-options";
+
 
 /**
  * OrderItemState combines Product info with quantity for local state.
@@ -97,7 +102,7 @@ function OrderItemsInput({
   );
 
   return (
-    <Card>
+    <Card className="rounded-sm">
       <CardHeader>
         <CardTitle>Order Items</CardTitle>
       </CardHeader>
@@ -190,131 +195,61 @@ function OrderItemsInput({
 }
 
 /**
- * Subcomponent for customer details input.
- */
-function CustomerDetailsForm({
-  customerFirstName,
-  setCustomerFirstName,
-  customerLastName,
-  setCustomerLastName,
-  customerEmail,
-  setCustomerEmail,
-  shippingAddress,
-  setShippingAddress,
-  billingAddress,
-  setBillingAddress,
-}: {
-  customerFirstName: string;
-  setCustomerFirstName: React.Dispatch<React.SetStateAction<string>>;
-  customerLastName: string;
-  setCustomerLastName: React.Dispatch<React.SetStateAction<string>>;
-  customerEmail: string;
-  setCustomerEmail: React.Dispatch<React.SetStateAction<string>>;
-  shippingAddress: AddressDto;
-  setShippingAddress: React.Dispatch<React.SetStateAction<AddressDto>>;
-  billingAddress: AddressDto | undefined;
-  setBillingAddress: React.Dispatch<
-    React.SetStateAction<AddressDto | undefined>
-  >;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Customer Details</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="customer-first-name">First Name</Label>
-          <Input
-            id="customer-first-name"
-            value={customerFirstName}
-            onChange={(e) => setCustomerFirstName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="customer-last-name">Last Name</Label>
-          <Input
-            id="customer-last-name"
-            value={customerLastName}
-            onChange={(e) => setCustomerLastName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="customer-email">Email Address</Label>
-          <Input
-            id="customer-email"
-            type="email"
-            value={customerEmail}
-            onChange={(e) => setCustomerEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="shipping-address">Shipping Address</Label>
-          <Input
-            id="shipping-address"
-            value={shippingAddress.addressLine1}
-            onChange={(e) =>
-              setShippingAddress({
-                ...shippingAddress,
-                addressLine1: e.target.value,
-              })
-            }
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="billing-address">Billing Address</Label>
-          <Input
-            id="billing-address"
-            value={billingAddress?.addressLine1}
-            onChange={(e) =>
-              setBillingAddress({
-                ...billingAddress,
-                addressLine1: e.target.value,
-                firstName: billingAddress?.firstName ?? "",
-                lastName: billingAddress?.lastName ?? "",
-                addressLine2: billingAddress?.addressLine2 ?? "",
-                city: billingAddress?.city ?? "",
-                state: billingAddress?.state ?? "",
-                postalCode: billingAddress?.postalCode ?? "",
-                country: billingAddress?.country ?? "",
-              })
-            }
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-/**
  * Subcomponent for order summary and submission.
  */
+
 function OrderSummary({
   totalAmount,
   formError,
   isSubmitting,
+  shippingAmount = 0,
 }: {
   totalAmount: number;
   formError: string | null;
   isSubmitting: boolean;
+  shippingAmount?: number;
 }) {
+  const taxAmount = totalAmount * TAX_RATE;
+  const effectiveShipping =
+    totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : shippingAmount;
+  const finalTotal = totalAmount + taxAmount + effectiveShipping;
+
   return (
-    <Card>
+    <Card className="rounded-sm">
       <CardHeader>
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between font-bold text-lg">
-          <span>Total</span>
-          <span>{formatMoney(totalAmount)}</span>
+        <div className="space-y-2 text-lg">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>{formatMoney(totalAmount)}</span>
+          </div>
+
+          <div className="flex justify-between text-muted-foreground">
+            <span>Tax (16%)</span>
+            <span>{formatMoney(taxAmount)}</span>
+          </div>
+
+          <div className="flex justify-between text-muted-foreground">
+            <span>Shipping</span>
+            <span>
+              {effectiveShipping === 0
+                ? "FREE"
+                : formatMoney(effectiveShipping)}
+            </span>
+          </div>
+
+          <div className="flex justify-between font-bold border-t pt-2">
+            <span>Total</span>
+            <span>{formatMoney(finalTotal)}</span>
+          </div>
         </div>
+
         {formError && (
           <p className="text-sm text-destructive mt-4">{formError}</p>
         )}
+
         <Button type="submit" className="w-full mt-6" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Create Order
@@ -435,6 +370,8 @@ function CustomerForm({
   setLastName,
   email,
   setEmail,
+  phoneNumber,
+  setPhoneNumber,
 }: {
   firstName: string;
   setFirstName: (v: string) => void;
@@ -442,9 +379,21 @@ function CustomerForm({
   setLastName: (v: string) => void;
   email: string;
   setEmail: (v: string) => void;
+  phoneNumber: string;
+  setPhoneNumber: (v: string) => void;
 }) {
   return (
     <div className="grid gap-2">
+       <div>
+        <Label htmlFor="customer-email">Email</Label>
+        <Input
+          id="customer-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label htmlFor="customer-firstName">First Name</Label>
@@ -465,16 +414,15 @@ function CustomerForm({
           />
         </div>
       </div>
-      <div>
-        <Label htmlFor="customer-email">Email</Label>
-        <Input
-          id="customer-email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
+        <div>
+          <Label htmlFor="customer-lastName">Phone Number</Label>
+          <Input
+            id="customer-phoneNumber"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            required
+          />
+        </div>
     </div>
   );
 }
@@ -487,6 +435,7 @@ export function NewOrderForm() {
   const [customerFirstName, setCustomerFirstName] = useState("");
   const [customerLastName, setCustomerLastName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
   const [shippingAddress, setShippingAddress] = useState<AddressDto>({
     firstName: "",
     lastName: "",
@@ -517,7 +466,10 @@ export function NewOrderForm() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const totalAmount = useMemo(() => {
-    return items.reduce((total, item) => Number(total) + Number(item.price) * item.quantity, 0);
+    return items.reduce(
+      (total, item) => Number(total) + Number(item.price) * item.quantity,
+      0
+    );
   }, [items]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -525,6 +477,7 @@ export function NewOrderForm() {
     setFormError(null);
     if (items.length === 0) {
       setFormError("Please add at least one product to the order.");
+      toast.error("Please add at least one product to the order.");
       return;
     }
     setIsSubmitting(true);
@@ -533,6 +486,7 @@ export function NewOrderForm() {
         email: customerEmail,
         firstName: customerFirstName,
         lastName: customerLastName,
+        phoneNumber: customerPhoneNumber
       },
       shippingAddress: { ...shippingAddress },
       billingAddress: billingSameAsShipping
@@ -546,10 +500,11 @@ export function NewOrderForm() {
       shippingAmount,
       notes,
     };
+    console.log("Order Data:", orderData);
     try {
-      const newOrder = await orderService.createOrder(orderData);
-      toast.success(`Order #${newOrder.orderNumber} created successfully!`);
-      router.push(`/dashboard/orders/${newOrder.id}`);
+      // const newOrder = await orderService.createOrder(orderData);
+      // toast.success(`Order #${newOrder.orderNumber} created successfully!`);
+      // router.push(`/dashboard/orders/${newOrder.id}`);
     } catch (error) {
       setFormError((error as Error).message);
     } finally {
@@ -561,7 +516,7 @@ export function NewOrderForm() {
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-2 space-y-6">
         <OrderItemsInput items={items} setItems={setItems} />
-        <Card>
+        <Card className="rounded-sm">
           <CardHeader>
             <CardTitle>Shipping Address</CardTitle>
           </CardHeader>
@@ -597,9 +552,54 @@ export function NewOrderForm() {
             )}
           </CardContent>
         </Card>
+        <Card className="rounded-sm">
+          <CardHeader>
+            <CardTitle>Shipping Method</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {shippingOptions.map((option) => {
+              const isFree =
+                totalAmount >= FREE_SHIPPING_THRESHOLD &&
+                option.id === "standard";
+              const cost = isFree ? 0 : option.price;
+              const isSelected = shippingAmount === cost;
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setShippingAmount(cost)}
+                  className={`w-full text-left p-4 rounded-xl border transition-all duration-200
+            ${
+              isSelected
+                ? "border-primary bg-accent/30"
+                : "border-muted hover:border-primary/40"
+            }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">{option.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {option.description} • {option.estimatedDays}
+                      </p>
+                      {option.cutoff && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {option.cutoff}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right font-medium">
+                      {isFree ? "FREE" : formatMoney(option.price)}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </CardContent>
+        </Card>
       </div>
       <div className="space-y-6">
-        <Card>
+        <Card className="rounded-sm">
           <CardHeader>
             <CardTitle>Customer Details</CardTitle>
           </CardHeader>
@@ -611,27 +611,16 @@ export function NewOrderForm() {
               setLastName={setCustomerLastName}
               email={customerEmail}
               setEmail={setCustomerEmail}
+              phoneNumber={customerPhoneNumber}
+              setPhoneNumber={setCustomerPhoneNumber}
             />
           </CardContent>
         </Card>
-        <div>
-          <Label htmlFor="shipping-amount">Shipping Amount</Label>
-          <Input
-            id="shipping-amount"
-            type="number"
-            value={shippingAmount ?? ""}
-            onChange={(e) =>
-              setShippingAmount(
-                e.target.value ? parseFloat(e.target.value) : undefined
-              )
-            }
-            min={0}
-            step={0.01}
-          />
-        </div>
+
         <div>
           <Label htmlFor="order-notes">Notes</Label>
-          <Input
+          <Textarea
+            className="bg-white"
             id="order-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -639,6 +628,7 @@ export function NewOrderForm() {
         </div>
         <OrderSummary
           totalAmount={totalAmount}
+          shippingAmount={shippingAmount ?? 0}
           formError={formError}
           isSubmitting={isSubmitting}
         />

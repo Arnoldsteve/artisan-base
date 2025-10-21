@@ -3,15 +3,11 @@ import { NewOrderForm } from "../components/new-order-form";
 
 export default function NewOrderPage() {
   return (
-    <div className="p-4 md:p-8 lg:p-10">
-      <PageHeader
-        title="Create New Order"
-        description="Manually create a new order for a customer."
-      />
-      
-      <div className="mt-8">
+    <>
+      <PageHeader title="Create New Order" />
+      <div className="p-4 md:p-8 lg:p-10">
         <NewOrderForm />
       </div>
-    </div>
+    </>
   );
 }
