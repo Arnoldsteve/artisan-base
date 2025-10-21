@@ -29,7 +29,7 @@ export const Orders: React.FC = () => {
   console.log("Orders component loaded", orders);
   
   return (
-    <Card>
+    <>
       <CardHeader>
         <CardTitle>Order History</CardTitle>
         <CardDescription>View and track your past orders</CardDescription>
@@ -53,6 +53,6 @@ export const Orders: React.FC = () => {
         loading={loadingOrder}
       />
 
-    </Card>
+    </>
   );
 };

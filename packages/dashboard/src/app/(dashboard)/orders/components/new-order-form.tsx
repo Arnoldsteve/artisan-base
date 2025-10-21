@@ -21,7 +21,7 @@ import {
   Textarea,
 } from "@repo/ui";
 import { toast } from "sonner";
-import { Loader2, X, PlusCircle, MinusCircle } from "lucide-react";
+import { Loader2, X, PlusCircle, MinusCircle, Trash } from "lucide-react";
 import { productService } from "@/services/product-service";
 import { orderService } from "@/services/order-service";
 import { formatMoney } from "@/utils/money";
@@ -143,7 +143,16 @@ function OrderItemsInput({
           ) : (
             items.map((item) => (
               <div key={item.id} className="flex items-center gap-4">
-                <div className="flex-1 font-medium">{item.name}</div>
+                <div className="flex-1 flex-col font-medium">
+                  {item.name}
+                  <Button
+                    className="ml-2 text-sm p-0"
+                    type="button"
+                    variant="ghost">
+                      <Trash className="h-4 w-4 color-red-500" />
+                    delete
+                    </Button>
+                </div>
                 <div className="flex items-center gap-2">
                   <Button
                     type="button"
