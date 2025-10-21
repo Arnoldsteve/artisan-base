@@ -10,6 +10,7 @@ import {
   IsEnum,
   IsArray,
   IsNumber,
+  isNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -17,12 +18,12 @@ class CustomerDto {
   @IsEmail()
   email: string;
 
-  // @IsOptional()
   @IsString()
+  @IsNotEmpty()
   firstName: string;
 
-  // @IsOptional()
   @IsString()
+  @IsNotEmpty()
   lastName: string;
 
   @IsOptional()

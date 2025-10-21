@@ -10,18 +10,15 @@ import {
   UpdatePaymentStatusDto,
 } from './dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { OrderRepository } from './order.repository'; // <-- IMPORT THE CLASS
+import { OrderRepository } from './order.repository'; 
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   constructor(
-    // INJECT THE CLASS DIRECTLY. NO MORE @Inject() decorator or string token.
     private readonly orderRepository: OrderRepository,
   ) {}
 
   async createManualOrder(dto: CreateManualOrderDto) {
-    // The service's job is simply to pass the DTO along.
-    // The repository handles all the complex logic.
     return this.orderRepository.createManualOrder(dto);
   }
 
@@ -42,7 +39,7 @@ export class OrderService {
   }
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto) {
-    await this.findOne(id); // Ensure order exists
+    await this.findOne(id); 
     return this.orderRepository.updateStatus(id, updateOrderDto);
   }
 
@@ -50,7 +47,7 @@ export class OrderService {
     id: string,
     updatePaymentStatusDto: UpdatePaymentStatusDto,
   ) {
-    await this.findOne(id); // Ensure order exists
+    await this.findOne(id);
     return this.orderRepository.updatePaymentStatus(id, updatePaymentStatusDto);
   }
 }

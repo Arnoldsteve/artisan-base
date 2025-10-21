@@ -1,5 +1,3 @@
-// File: packages/api/src/dashboard/customer/dto/index.ts
-
 import { Type } from 'class-transformer';
 import { 
   IsString, 
@@ -12,13 +10,7 @@ import {
 } from 'class-validator';
 
 // ============================================================================
-// Address DTO (for nesting)
-// ============================================================================
 
-/**
- * Data Transfer Object for creating a new address for a customer.
- * This will be nested inside the CreateCustomerDto.
- */
 export class CreateCustomerAddressDto {
   @IsString()
   @IsNotEmpty()
@@ -62,14 +54,7 @@ export class CreateCustomerAddressDto {
 }
 
 
-// ============================================================================
-// Customer DTOs
-// ============================================================================
 
-/**
- * Data Transfer Object for creating a new customer.
- * It now includes an optional array of addresses.
- */
 export class CreateCustomerDto {
   @IsEmail()
   @IsNotEmpty()

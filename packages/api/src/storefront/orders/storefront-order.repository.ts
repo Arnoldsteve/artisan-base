@@ -12,7 +12,6 @@ import { Decimal } from '@prisma/client/runtime/library'; // Import Decimal for 
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontOrderRepository implements IStorefrontOrderRepository {
-  // This will hold the client once it's initialized for the request
   private prismaClient: PrismaClient | null = null;
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
@@ -58,7 +57,7 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
             `Insufficient inventory for product: ${product.name}`,
           );
         }
-        const unitPrice = product.price; // product.price is Decimal
+        const unitPrice = product.price; 
         subtotal = subtotal.plus(unitPrice.mul(item.quantity));
         return {
           quantity: item.quantity,
@@ -74,7 +73,6 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
       }),
     );
 
-    // --- Tax and Shipping calculations ---
     const TAX_RATE = 0.16; // Example: 16% VAT (could be env/config later)
     const taxAmount = subtotal.mul(TAX_RATE);
 

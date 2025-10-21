@@ -11,7 +11,6 @@ export class ProductService {
    * @returns A list of products matching the search term.
    */
   async searchProducts(searchTerm: string): Promise<Product[]> {
-    // This now leverages the centralized cache in apiClient
     const response = await apiClient.get<PaginatedResponse<Product>>(
       "dashboard/products",
       { page: 1, limit: 5, search: searchTerm }
@@ -46,7 +45,6 @@ export class ProductService {
     await apiClient.delete(`dashboard/products/${id}`);
   }
 
-  // New method to assign categories to a product
   async assignCategories(productId: string, dto: AssignCategoriesToProductDto): Promise<void> {
     await apiClient.patch(`/dashboard/products/${productId}/categories`, dto);
   }

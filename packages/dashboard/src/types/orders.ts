@@ -1,4 +1,5 @@
 import { Decimal } from 'decimal.js';
+import { Currency } from './currency';
 
 export type OrderStatus =
   | "PENDING"
@@ -51,7 +52,7 @@ export interface CustomerDetailsDto {
   email: string;
   firstName: string;
   lastName?: string;
-  phone?: string;
+  phoneNumber?: string;
 }
 
 export interface AddressDto {
@@ -71,6 +72,7 @@ export interface CreateOrderDto {
   billingAddress?: AddressDto;
   items: ManualOrderItemDto[];
   shippingAmount?: number; 
+  currency: Currency;
   notes?: string;
 }
 

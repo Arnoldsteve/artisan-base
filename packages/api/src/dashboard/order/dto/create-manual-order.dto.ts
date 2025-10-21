@@ -14,14 +14,13 @@ import {
 } from 'class-validator';
 import { Currency } from '../../../../generated/tenant';
 
-// A DTO for a single line item in the order
 class ManualOrderItemDto {
   @IsString()
   @IsNotEmpty()
   productId: string;
 
   @IsString()
-  @IsOptional() // A variant might not be chosen
+  @IsOptional()
   variantId?: string;
 
   @IsInt()
@@ -29,7 +28,6 @@ class ManualOrderItemDto {
   quantity: number;
 }
 
-// A DTO for the customer's details
 class CustomerDetailsDto {
   @IsEmail()
   email: string;
@@ -41,9 +39,12 @@ class CustomerDetailsDto {
   @IsString()
   @IsOptional()
   lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
 }
 
-// A DTO for an address block (reusable for shipping/billing)
 class AddressDto {
   @IsString()
   @IsNotEmpty()
@@ -78,7 +79,6 @@ class AddressDto {
   country: string;
 }
 
-// The main DTO for the entire request
 export class CreateManualOrderDto {
   @IsObject()
   @ValidateNested()
@@ -100,14 +100,14 @@ export class CreateManualOrderDto {
   @ValidateNested({ each: true })
   @Type(() => ManualOrderItemDto)
   items: ManualOrderItemDto[];
-  
+
   @IsNumber()
-  @IsOptional() // Manually entered shipping cost
+  @IsOptional()
   shippingAmount?: number;
 
-  @IsEnum(Currency) 
-  currency: Currency; 
-  
+  @IsEnum(Currency)
+  currency: Currency;
+
   @IsString()
   @IsOptional()
   notes?: string;

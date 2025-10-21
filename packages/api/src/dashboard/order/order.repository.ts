@@ -24,7 +24,6 @@ export class OrderRepository implements IOrderRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  // This will hold the client once it's initialized for the request
   private prismaClient: PrismaClient | null = null;
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
@@ -51,7 +50,6 @@ export class OrderRepository implements IOrderRepository {
       shippingAmount,
     } = dto;
     return prisma.$transaction(async (tx) => {
-      // 1. Find or create the customer
       const customerRecord = await tx.customer.upsert({
         where: { email: customer.email },
         update: { firstName: customer.firstName, lastName: customer.lastName },
@@ -81,7 +79,7 @@ export class OrderRepository implements IOrderRepository {
             `Product with ID ${item.productId} not found.`,
           );
         let stock = product.inventoryQuantity;
-        let price = product.price; // price is already a Decimal
+        let price = product.price; 
         let variantName: string | null = null;
         let variantSku: string | null = null;
         if (item.variantId) {
@@ -95,7 +93,7 @@ export class OrderRepository implements IOrderRepository {
               `Variant ${variant.id} does not belong to product ${product.id}.`,
             );
           stock = variant.inventoryQuantity;
-          price = variant.price ?? product.price; // price is already a Decimal
+          price = variant.price ?? product.price; 
           variantName = variant.name;
           variantSku = variant.sku;
         }
@@ -118,9 +116,14 @@ export class OrderRepository implements IOrderRepository {
           image: (product.images as any)?.[0]?.url ?? null,
         });
       }
+
+
+      const TAX_RATE = 0.16; 
+      const taxAmount = subtotal.mul(TAX_RATE);
+
       const finalShipping = new Decimal(shippingAmount ?? 0);
-      const finalTax = new Decimal(0);
-      const totalAmount = subtotal.plus(finalShipping).plus(finalTax);
+      const totalAmount = subtotal.plus(taxAmount).plus(finalShipping);
+
       const lastOrder = await tx.order.findFirst({
         orderBy: { orderSequence: 'desc' },
       });
@@ -133,13 +136,13 @@ export class OrderRepository implements IOrderRepository {
           customerId: customerRecord.id,
           subtotal,
           shippingAmount: finalShipping,
-          taxAmount: finalTax,
+          taxAmount,
           totalAmount,
+          currency: dto.currency || "KES",
           notes,
           shippingAddress: shippingAddress as any,
           billingAddress: (billingAddress ?? shippingAddress) as any,
           items: { create: orderItemsData },
-          currency: dto.currency,
         },
         include: { items: true, customer: true },
       });
@@ -161,7 +164,6 @@ export class OrderRepository implements IOrderRepository {
     });
   }
 
- // ... inside your OrderRepository class ...
 
 async findAll(paginationQuery: PaginationQueryDto) {
   const now = Date.now();
@@ -175,24 +177,19 @@ async findAll(paginationQuery: PaginationQueryDto) {
   
   const prisma = await this.getPrisma();
 
-  // --- THIS IS THE FIX ---
-  // The paginate helper will now receive an enhanced `include` object.
   const result = await paginate(
     prisma.order,
     {
       page: paginationQuery.page,
       limit: paginationQuery.limit,
       search: paginationQuery.search,
-      // You can add searchable fields for orders here if needed
       searchableFields: ['orderNumber'], 
     },
     {
       orderBy: { orderSequence: 'desc' },
       include: {
-        // 1. CONTINUE to include the count of items efficiently.
         _count: { select: { items: true } },
 
-        // 2. ADD this to also fetch the related customer's data.
         customer: {
           select: {
             id: true,
@@ -209,7 +206,6 @@ async findAll(paginationQuery: PaginationQueryDto) {
   return result;
 }
 
-// ... rest of your repository
 
   async findOne(id: string) {
     const now = Date.now();

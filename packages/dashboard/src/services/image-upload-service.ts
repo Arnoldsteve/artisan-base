@@ -1,16 +1,13 @@
 import { apiClient } from "@/lib/client-api";
 import { Product } from "@/types/products";
 
-// Define the shape of the data returned by the get-url endpoint
 interface SignedUrlResponse {
   signedUrl: string; // The URL to upload the file to
   path: string;      // The path of the file in Supabase storage
   fileId: string;    // The unique ID for the image record
 }
 
-/**
- * ImageUploadService handles the API communication for the two-step image upload process.
- */
+
 export class ImageUploadService {
   /**
    * STEP 1: Asks the backend for a secure, one-time URL to upload a file to.
@@ -66,7 +63,6 @@ export class ImageUploadService {
     productId: string,
     imageId: string,
   ): Promise<Product> {
-    // This endpoint now matches the new controller path
     const endpoint = `/dashboard/storage/products/${productId}/images/${imageId}`;
     return apiClient.delete<Product>(endpoint);
   }

@@ -29,7 +29,6 @@ import { TAX_RATE } from "@/constants/tax";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/shipping";
 import { shippingOptions } from "@/utils/shupping-options";
 
-
 /**
  * OrderItemState combines Product info with quantity for local state.
  */
@@ -384,7 +383,7 @@ function CustomerForm({
 }) {
   return (
     <div className="grid gap-2">
-       <div>
+      <div>
         <Label htmlFor="customer-email">Email</Label>
         <Input
           id="customer-email"
@@ -414,15 +413,15 @@ function CustomerForm({
           />
         </div>
       </div>
-        <div>
-          <Label htmlFor="customer-lastName">Phone Number</Label>
-          <Input
-            id="customer-phone"
-            value={phone}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            required
-          />
-        </div>
+      <div>
+        <Label htmlFor="customer-lastName">Phone Number</Label>
+        <Input
+          id="customer-phone"
+          value={phone}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          required
+        />
+      </div>
     </div>
   );
 }
@@ -435,7 +434,7 @@ export function NewOrderForm() {
   const [customerFirstName, setCustomerFirstName] = useState("");
   const [customerLastName, setCustomerLastName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [customerPhone, setCustomerPhoneNumber] = useState("");
+  const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
   const [shippingAddress, setShippingAddress] = useState<AddressDto>({
     firstName: "",
     lastName: "",
@@ -472,6 +471,19 @@ export function NewOrderForm() {
     );
   }, [items]);
 
+  // Automatically default to "standard" shipping when items are added
+  useEffect(() => {
+    const standardOption = shippingOptions.find((opt) => opt.id === "standard");
+    if (!standardOption) return;
+
+    if (
+      totalAmount > 0 &&
+      (shippingAmount === undefined || shippingAmount === 0)
+    ) {
+      setShippingAmount(standardOption.price);
+    }
+  }, [totalAmount, shippingAmount]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
@@ -486,7 +498,7 @@ export function NewOrderForm() {
         email: customerEmail,
         firstName: customerFirstName,
         lastName: customerLastName,
-        phone: customerPhone
+        phoneNumber: customerPhoneNumber,
       },
       shippingAddress: { ...shippingAddress },
       billingAddress: billingSameAsShipping
@@ -498,6 +510,7 @@ export function NewOrderForm() {
         quantity: item.quantity,
       })),
       shippingAmount,
+      currency: "KES",
       notes,
     };
     console.log("Order Data:", orderData);
@@ -611,7 +624,7 @@ export function NewOrderForm() {
               setLastName={setCustomerLastName}
               email={customerEmail}
               setEmail={setCustomerEmail}
-              phone={customerPhone}
+              phone={customerPhoneNumber}
               setPhoneNumber={setCustomerPhoneNumber}
             />
           </CardContent>

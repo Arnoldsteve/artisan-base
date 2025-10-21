@@ -5,7 +5,7 @@ export const customerFormSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
   lastName: z.string().min(1, { message: "Last name is required." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z
+  phoneNumber: z
     .string()
     .min(5, "Phone number is too short")
     .max(20, "Phone number is too long")
