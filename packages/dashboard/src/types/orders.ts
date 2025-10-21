@@ -51,7 +51,7 @@ export interface CustomerDetailsDto {
   email: string;
   firstName: string;
   lastName?: string;
-  phoneNumber?: string;
+  phone?: string;
 }
 
 export interface AddressDto {

@@ -42,7 +42,7 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
       firstName: customer?.firstName || '',
       lastName: customer?.lastName || '',
       email: customer?.email || '',
-      phone: customer?.phone || '',
+      phoneNumber: customer?.phone || '',
     },
   });
 
@@ -53,7 +53,7 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
         firstName: customer?.firstName || '',
         lastName: customer?.lastName || '',
         email: customer?.email || '',
-        phone: customer?.phone || '',
+        phoneNumber: customer?.phone || '',
       });
     }
   }, [customer, isOpen, form]);
@@ -117,7 +117,7 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
             />
             <FormField
               control={form.control}
-              name="phone"
+              name="phoneNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone</FormLabel>

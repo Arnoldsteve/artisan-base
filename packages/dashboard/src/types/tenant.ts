@@ -20,7 +20,6 @@ export interface CreateTenantResponse {
     url: string;
 }
 
-// New type for the availability check response from the backend
 export interface AvailabilityResponse {
     isAvailable: boolean;
     suggestions: string[];

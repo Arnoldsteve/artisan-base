@@ -370,7 +370,7 @@ function CustomerForm({
   setLastName,
   email,
   setEmail,
-  phoneNumber,
+  phone,
   setPhoneNumber,
 }: {
   firstName: string;
@@ -379,7 +379,7 @@ function CustomerForm({
   setLastName: (v: string) => void;
   email: string;
   setEmail: (v: string) => void;
-  phoneNumber: string;
+  phone: string;
   setPhoneNumber: (v: string) => void;
 }) {
   return (
@@ -417,8 +417,8 @@ function CustomerForm({
         <div>
           <Label htmlFor="customer-lastName">Phone Number</Label>
           <Input
-            id="customer-phoneNumber"
-            value={phoneNumber}
+            id="customer-phone"
+            value={phone}
             onChange={(e) => setPhoneNumber(e.target.value)}
             required
           />
@@ -435,7 +435,7 @@ export function NewOrderForm() {
   const [customerFirstName, setCustomerFirstName] = useState("");
   const [customerLastName, setCustomerLastName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
+  const [customerPhone, setCustomerPhoneNumber] = useState("");
   const [shippingAddress, setShippingAddress] = useState<AddressDto>({
     firstName: "",
     lastName: "",
@@ -486,7 +486,7 @@ export function NewOrderForm() {
         email: customerEmail,
         firstName: customerFirstName,
         lastName: customerLastName,
-        phoneNumber: customerPhoneNumber
+        phone: customerPhone
       },
       shippingAddress: { ...shippingAddress },
       billingAddress: billingSameAsShipping
@@ -502,9 +502,9 @@ export function NewOrderForm() {
     };
     console.log("Order Data:", orderData);
     try {
-      // const newOrder = await orderService.createOrder(orderData);
-      // toast.success(`Order #${newOrder.orderNumber} created successfully!`);
-      // router.push(`/dashboard/orders/${newOrder.id}`);
+      const newOrder = await orderService.createOrder(orderData);
+      toast.success(`Order #${newOrder.orderNumber} created successfully!`);
+      router.push(`/dashboard/orders/${newOrder.id}`);
     } catch (error) {
       setFormError((error as Error).message);
     } finally {
@@ -611,7 +611,7 @@ export function NewOrderForm() {
               setLastName={setCustomerLastName}
               email={customerEmail}
               setEmail={setCustomerEmail}
-              phoneNumber={customerPhoneNumber}
+              phone={customerPhone}
               setPhoneNumber={setCustomerPhoneNumber}
             />
           </CardContent>

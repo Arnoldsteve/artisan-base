@@ -3,8 +3,8 @@ export interface Category {
   name: string;
   slug: string;
   description: string | null;
-  isActive: boolean;       // <-- useful for dashboard filters
-  isFeatured: boolean;     // <-- e.g., highlight certain categories
+  isActive: boolean;       
+  isFeatured: boolean;   
   createdAt: string;
   updatedAt: string;
 }

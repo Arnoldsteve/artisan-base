@@ -1,7 +1,5 @@
-// types/table-meta.ts
 import { Table } from "@tanstack/react-table";
 
-// Define specific meta interfaces for each entity type
 
 export interface ProductTableMeta<TData = any> {
   openDeleteDialog: (product: TData) => void;
@@ -16,7 +14,6 @@ export interface ProductTableMeta<TData = any> {
 export interface CategoryTableMeta<TData = any> {
   openDeleteDialog: (category: TData) => void;
   openEditSheet: (category: TData) => void;
-  // Add other category-specific actions as needed
   // viewCategoryProducts?: (category: TData) => void;
 }
 
@@ -24,7 +21,6 @@ export interface CustomerTableMeta<TData = any> {
   viewCustomerDetails: (customer: TData) => void;
   openDeleteDialog: (customer: TData) => void;
   openEditSheet: (customer: TData) => void;
-  // Add other customer-specific actions
 }
 
 export interface OrderTableMeta<TData = any> {
@@ -42,7 +38,6 @@ export interface UserTableMeta<TData = any> {
   // handleUserRoleChanged?: (userId: string, role: string) => void;
 }
 
-// Generic type for table with meta
 export type TableWithMeta<TData, TMeta> = Table<TData> & {
   options: {
     meta?: TMeta;
