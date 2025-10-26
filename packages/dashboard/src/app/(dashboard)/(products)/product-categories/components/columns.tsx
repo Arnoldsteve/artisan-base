@@ -1,7 +1,13 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown, Trash, Pencil, Package } from "lucide-react";
+import {
+  MoreHorizontal,
+  ArrowUpDown,
+  Trash,
+  Pencil,
+  Package,
+} from "lucide-react";
 import { Button } from "@repo/ui";
 import { Badge } from "@repo/ui";
 import { Checkbox } from "@repo/ui";
@@ -15,11 +21,9 @@ import {
 import { Category } from "@/types/categories";
 import { CategoryTableMeta, TableWithMeta } from "@/types/table-meta";
 
-// REMOVE the global module declaration completely
-// No more: declare module "@tanstack/react-table" { ... }
-
-export const columns: ColumnDef<Category & { _count?: { products: number } }>[] = [
-  // Column for row selection
+export const columns: ColumnDef<
+  Category & { _count?: { products: number } }
+>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -46,7 +50,6 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     enableHiding: false,
   },
 
-  // Column for Category Name
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -62,11 +65,11 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
       const category = row.original;
       return (
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-md bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+          <div className="h-6 w-6 rounded-md bg-blue-500 flex items-center justify-center text-white font-medium">
             {category.name.charAt(0).toUpperCase()}
           </div>
           <span
-            className="font-medium"
+            className="font-sm"
             data-testid={`category-name-${category.id}`}
           >
             {category.name}
@@ -76,7 +79,6 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     },
   },
 
-  // Column for Description
   {
     accessorKey: "description",
     header: "Description",
@@ -85,7 +87,10 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
       return (
         <div className="max-w-xs">
           {description ? (
-            <span className="text-sm text-gray-600 line-clamp-2" title={description}>
+            <span
+              className="text-xs text-gray-600 line-clamp-2"
+              title={description}
+            >
               {description}
             </span>
           ) : (
@@ -96,7 +101,6 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     },
   },
 
-  // Column for Product Count
   {
     id: "productsCount",
     header: "Products",
@@ -104,17 +108,13 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     cell: ({ row }) => {
       const count = row.original._count?.products || 0;
       return (
-        <div className="flex items-center gap-2">
-          <Package className="h-4 w-4 text-gray-500" />
-          <Badge variant="secondary">
-            {count} product{count !== 1 ? 's' : ''}
-          </Badge>
+        <div className="flex items-center text-xs gap-2">
+          {count} product{count !== 1 ? "s" : ""}
         </div>
       );
     },
   },
 
-  // Column for Created Date
   {
     accessorKey: "createdAt",
     header: ({ column }) => (
@@ -129,7 +129,7 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-xs text-gray-600">
           {date.toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
@@ -140,14 +140,15 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
     },
   },
 
-  // Column for Actions
   {
     id: "actions",
     cell: ({ row, table }) => {
       const category = row.original;
-      // Type assertion for the table with CategoryTableMeta
-      const typedTable = table as TableWithMeta<Category & { _count?: { products: number } }, CategoryTableMeta<Category & { _count?: { products: number } }>>;
-      
+      const typedTable = table as TableWithMeta<
+        Category & { _count?: { products: number } },
+        CategoryTableMeta<Category & { _count?: { products: number } }>
+      >;
+
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -166,13 +167,18 @@ export const columns: ColumnDef<Category & { _count?: { products: number } }>[] 
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => window.open(`/product-categories/${category.id}`, '_blank')}
+                onClick={() =>
+                  window.open(`/product-categories/${category.id}`, "_blank")
+                }
               >
                 <Package className="w-4 h-4 mr-2 text-green-600" />
                 View Products
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => typedTable.options.meta?.openDeleteDialog(category)}
+              <DropdownMenuItem
+                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() =>
+                  typedTable.options.meta?.openDeleteDialog(category)
+                }
               >
                 <Trash className="w-4 h-4 mr-2 text-red-600" />
                 Delete

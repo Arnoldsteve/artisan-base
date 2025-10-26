@@ -20,4 +20,3 @@ export function PageHeader({ title, description, children }: PageHeaderProps) {
     </div>
   );
 }
-// REFACTOR: Updated to match Header component styling - full width navbar style

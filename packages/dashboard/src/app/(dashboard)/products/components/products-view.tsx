@@ -27,7 +27,7 @@ import { EditProductSheet } from "./edit-product-sheet";
 import { DeleteProductDialog } from "./delete-product-dialog";
 import { BulkDeleteAlertDialog } from "./bulk-delete-alert-dialog";
 import { DataTableViewOptions } from "./data-table-view-options";
-import { Button } from "@repo/ui";
+import { Button, Card } from "@repo/ui";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
@@ -223,7 +223,6 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     <div>
       <PageHeader
         title="Products"
-        description="Manage all products for your store."
       >
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>

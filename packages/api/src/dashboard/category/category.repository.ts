@@ -13,22 +13,18 @@ import { ICategoryRepository } from './interfaces/category-repository.interface'
 import slugify from 'slugify';
 import { PrismaClient } from '../../../generated/tenant';
 
-const CACHE_TTL = 10 * 1000; // 10 seconds for demo
+const CACHE_TTL = 10 * 1000; 
 
 @Injectable({ scope: Scope.REQUEST })
 export class CategoryRepository implements ICategoryRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  // This will hold the client once it's initialized for the request
+
   private prismaClient: PrismaClient | null = null;
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request.
-   */
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
       this.prismaClient = await this.tenantPrismaService.getClient();
@@ -53,7 +49,7 @@ export class CategoryRepository implements ICategoryRepository {
     return category;
   }
 
-  async findAll(pagination?: PaginationQueryDto): Promise<any> {
+  async findAll(paginationQuery?: PaginationQueryDto): Promise<any> {
     const now = Date.now();
     if (this.findAllCache && this.findAllCache.expires > now) {
       return this.findAllCache.data;
@@ -63,11 +59,11 @@ export class CategoryRepository implements ICategoryRepository {
     const result = await paginate(
       prisma.category,
       {
-      page: pagination?.page,
-      limit: pagination?.limit
+      page: paginationQuery?.page,
+      limit: paginationQuery?.limit,
       },
       {
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
           include: { 
             _count: { 
               select: { products: true

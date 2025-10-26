@@ -151,7 +151,6 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
     <>
       <PageHeader
         title="Orders"
-        description="View and manage all customer orders."
       >
         <Link href="/orders/new">
           <Button>Create Order</Button>

@@ -26,7 +26,7 @@ export function DataTable<TData>({ table, totalCount  }: DataTableProps<TData>) 
     <div>
       {/* Table */}
       <div className="rounded-md border bg-[#fff]">
-        <Table>
+        <Table className="text-sm">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

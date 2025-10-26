@@ -34,10 +34,10 @@ import { PaginatedResponse } from "@/types/shared";
 import { CategoryTableMeta } from "@/types/table-meta";
 
 interface CategoriesViewProps {
-  initialData: PaginatedResponse<Category & { _count?: { products: number } }>;
+  initialCategoryData: PaginatedResponse<Category & { _count?: { products: number } }>;
 }
 
-export function CategoriesView({ initialData }: CategoriesViewProps) {
+export function CategoriesView({ initialCategoryData }: CategoriesViewProps) {
   // --- Table State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -49,48 +49,62 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
   });
 
   // --- UI State for Modals/Sheets ---
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null
+  );
   const [categoryToEdit, setCategoryToEdit] = useState<Category | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
-  const { data: paginatedResponse, isLoading, isError } = useCategories(
-    pageIndex + 1,
-    pageSize,
-    "",
-    initialData
-  );
-  
+  const {
+    data: paginatedResponse,
+    isLoading,
+    isError,
+    isFetching,
+  } = useCategories(pageIndex + 1, pageSize, "", initialCategoryData);
+
   const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
   const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
   // --- Memoized Data ---
-  const categories = useMemo(() => paginatedResponse?.data || [], [paginatedResponse]);
+  const categories = useMemo(
+    () => paginatedResponse?.data || [],
+    [paginatedResponse]
+  );
   const totalCategories = paginatedResponse?.meta?.total ?? 0;
-  const selectedCategoryIds = useMemo(() => Object.keys(rowSelection), [rowSelection]);
+  const selectedCategoryIds = useMemo(
+    () => Object.keys(rowSelection),
+    [rowSelection]
+  );
   const numSelected = selectedCategoryIds.length;
 
   // --- Action Handlers ---
-  const openDeleteDialog = (category: Category & { _count?: { products: number } }) => {
+  const openDeleteDialog = (
+    category: Category & { _count?: { products: number } }
+  ) => {
     // Convert back to base Category type for the delete dialog
     setCategoryToDelete(category as Category);
   };
-  
-  const openEditSheet = (category: Category & { _count?: { products: number } }) => { 
+
+  const openEditSheet = (
+    category: Category & { _count?: { products: number } }
+  ) => {
     // Convert back to base Category type for the edit sheet
-    setCategoryToEdit(category as Category); 
-    setIsSheetOpen(true); 
+    setCategoryToEdit(category as Category);
+    setIsSheetOpen(true);
   };
-  
-  const openAddSheet = () => { 
-    setCategoryToEdit(null); 
-    setIsSheetOpen(true); 
+
+  const openAddSheet = () => {
+    setCategoryToEdit(null);
+    setIsSheetOpen(true);
   };
 
   // --- Create the meta object with proper typing ---
-  const tableMeta: CategoryTableMeta<Category & { _count?: { products: number } }> = {
+  const tableMeta: CategoryTableMeta<
+    Category & { _count?: { products: number } }
+  > = {
     openDeleteDialog,
     openEditSheet,
   };
@@ -117,7 +131,7 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: tableMeta, // Now properly typed
+    meta: tableMeta,
   });
 
   // --- Mutation Handlers ---
@@ -129,16 +143,23 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
     }
   };
 
-  const handleSaveChanges = (formData: { id?: string; name: string; description?: string }) => {
+  const handleSaveChanges = (formData: {
+    id?: string;
+    name: string;
+    description?: string;
+  }) => {
     const categoryData = {
       name: formData.name,
       description: formData.description || "",
     };
 
     if (formData.id) {
-      updateCategory({ id: formData.id, data: categoryData }, {
-        onSuccess: () => setIsSheetOpen(false),
-      });
+      updateCategory(
+        { id: formData.id, data: categoryData },
+        {
+          onSuccess: () => setIsSheetOpen(false),
+        }
+      );
     } else {
       createCategory(categoryData, {
         onSuccess: () => setIsSheetOpen(false),
@@ -147,7 +168,7 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
   };
 
   const handleBulkDelete = () => {
-    const promises = selectedCategoryIds.map(id => deleteCategory(id));
+    const promises = selectedCategoryIds.map((id) => deleteCategory(id));
     toast.promise(Promise.all(promises), {
       loading: `Deleting ${numSelected} categories...`,
       success: () => {
@@ -155,34 +176,36 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
         setIsBulkDeleteDialogOpen(false);
         return `${numSelected} categories deleted.`;
       },
-      error: "Failed to delete one or more categories."
+      error: "Failed to delete one or more categories.",
     });
   };
 
   // --- Render Logic ---
-  if (isLoading && !initialData) {
+  if ( isFetching || (isLoading && !initialCategoryData)) {
     return <DataTableSkeleton />;
   }
   if (isError) {
-    return <div className="p-8 text-red-500">Failed to load categories data.</div>;
+    return (
+      <div className="p-8 text-red-500">Failed to load categories data.</div>
+    );
   }
 
   return (
     <div>
-      <PageHeader title="Product Categories" description="Manage your product categories">
+      <PageHeader
+        title="Product Categories"
+      >
         <Button onClick={openAddSheet}>Add Category</Button>
       </PageHeader>
-      
+
       <DataTableViewOptions table={table} />
-      
+
       <DataTable table={table} totalCount={totalCategories} />
-      
+
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">
           <div className="flex items-center justify-between">
-            <div className="text-sm">
-              {numSelected} category(ies) selected.
-            </div>
+            <div className="text-sm">{numSelected} category(ies) selected.</div>
             <Button
               variant="destructive"
               onClick={() => setIsBulkDeleteDialogOpen(true)}
@@ -200,7 +223,7 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
         categoryName={categoryToDelete?.name || ""}
         isPending={isDeleting}
       />
-      
+
       <EditCategorySheet
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
@@ -208,7 +231,7 @@ export function CategoriesView({ initialData }: CategoriesViewProps) {
         onSave={handleSaveChanges}
         isPending={isCreating || isUpdating}
       />
-      
+
       {/* <BulkDeleteCategoriesDialog
         isOpen={isBulkDeleteDialogOpen}
         onClose={() => setIsBulkDeleteDialogOpen(false)}

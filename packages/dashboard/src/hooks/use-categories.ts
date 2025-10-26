@@ -21,7 +21,7 @@ export function useCategories(
     queryKey: [...CATEGORIES_QUERY_KEY, { page, limit, search }],
     queryFn: () => categoryService.getCategories(page, limit, search),
     enabled: !isAuthLoading && isAuthenticated,
-    initialData,
+    initialData: page === 1 ? initialData : undefined,
   });
 }
 

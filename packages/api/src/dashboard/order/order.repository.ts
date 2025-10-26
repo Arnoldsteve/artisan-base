@@ -17,7 +17,7 @@ import { IOrderRepository } from './interfaces/order-repository.interface';
 import { Decimal } from '@prisma/client/runtime/library';
 import { PrismaClient } from '../../../generated/tenant';
 
-const CACHE_TTL = 10 * 1000; // 10 seconds for demo
+const CACHE_TTL = 10 * 1000;
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderRepository implements IOrderRepository {
@@ -170,11 +170,7 @@ async findAll(paginationQuery: PaginationQueryDto) {
   if (this.findAllCache && this.findAllCache.expires > now) {
     return this.findAllCache.data;
   }
-  
-  Logger.log(
-    `Fetching orders with pagination: ${JSON.stringify(paginationQuery)}`,
-  );
-  
+    
   const prisma = await this.getPrisma();
 
   const result = await paginate(
