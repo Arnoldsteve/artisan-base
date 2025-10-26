@@ -1,7 +1,15 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown, Trash, Upload, Copy, Pencil, Tag } from "lucide-react";
+import {
+  MoreHorizontal,
+  ArrowUpDown,
+  Trash,
+  Upload,
+  Copy,
+  Pencil,
+  Tag,
+} from "lucide-react";
 import { Button } from "@repo/ui";
 import { Badge } from "@repo/ui";
 import { Checkbox } from "@repo/ui";
@@ -53,12 +61,15 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row, table }) => {
       const product = row.original;
       // Type assertion for the table with ProductTableMeta
-      const typedTable = table as TableWithMeta<Product, ProductTableMeta<Product>>;
-      
+      const typedTable = table as TableWithMeta<
+        Product,
+        ProductTableMeta<Product>
+      >;
+
       return (
         <div className="flex items-center gap-3">
-          <Avatar 
-            className="h-10 w-10 rounded-md cursor-pointer"
+          <Avatar
+            className="h-6 w-8 rounded-md cursor-pointer"
             onClick={() => typedTable.options.meta?.openImagePreview(product)}
           >
             <AvatarImage
@@ -70,10 +81,10 @@ export const columns: ColumnDef<Product>[] = [
               {product.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium">{product.name}</span>
+          <span className="font-sm">{product.name}</span>
         </div>
       );
-    }
+    },
   },
 
   {
@@ -90,9 +101,13 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const isActive = row.getValue("isActive");
       return (
-        <Badge variant={isActive ? "default" : "secondary"}>
+        <span
+          className={`text-xs font-medium ${
+            isActive ? "text-green-600" : "text-orange-500"
+          }`}
+        >
           {isActive ? "Active" : "Draft"}
-        </Badge>
+        </span>
       );
     },
     // Add a filter function for our new dropdown
@@ -156,8 +171,11 @@ export const columns: ColumnDef<Product>[] = [
     id: "actions",
     cell: ({ row, table }) => {
       const product = row.original;
-      const typedTable = table as TableWithMeta<Product, ProductTableMeta<Product>>;
-      
+      const typedTable = table as TableWithMeta<
+        Product,
+        ProductTableMeta<Product>
+      >;
+
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -176,26 +194,34 @@ export const columns: ColumnDef<Product>[] = [
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => typedTable.options.meta?.handleDuplicateProduct(product)}
+                onClick={() =>
+                  typedTable.options.meta?.handleDuplicateProduct(product)
+                }
               >
                 <Copy className="w-5 h-5 text-green-600" />
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => typedTable.options.meta?.handleImageUpload(product)}
+                onClick={() =>
+                  typedTable.options.meta?.handleImageUpload(product)
+                }
               >
                 <Upload className="w-5 h-5" />
                 Upload Images
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => typedTable.options.meta?.handleCategoryChange(product)}
+                onClick={() =>
+                  typedTable.options.meta?.handleCategoryChange(product)
+                }
               >
                 <Tag className="w-5 h-5" />
                 Assign Categories
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => typedTable.options.meta?.openDeleteDialog(product)}
+                onClick={() =>
+                  typedTable.options.meta?.openDeleteDialog(product)
+                }
               >
                 <Trash className="w-5 h-5 text-red-600" />
                 Delete

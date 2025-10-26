@@ -42,10 +42,10 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-    const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-      pageIndex: 1,
-      pageSize: 10,
-    });
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   // --- Modal/Dialog UI State ---
   const [orderToEdit, setOrderToEdit] = useState<Order | null>(null);
@@ -58,13 +58,14 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
     data: paginatedResponse,
     isLoading,
     isError,
+    isFetching,
   } = useOrders(pageIndex + 1, pageSize, "", initialOrderData);
 
-    console.log("Order data from product view: ", paginatedResponse);
-
+  console.log("Order data from product view: ", paginatedResponse);
 
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
-  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } = useBatchDeleteOrders();
+  const { mutate: batchDeleteOrders, isPending: isBatchDeleting } =
+    useBatchDeleteOrders();
 
   // --- Memoized Data ---
   const orders = useMemo(
@@ -91,17 +92,24 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
       paginatedResponse?.meta?.totalPages ??
       (totalOrders > 0 ? Math.ceil(totalOrders / pageSize) : 1),
     manualPagination: true,
-    state: { sorting, columnVisibility, rowSelection, columnFilters },
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+      pagination: { pageIndex, pageSize },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: tableMeta, 
+    meta: tableMeta,
   });
 
   const selectedOrderIds = useMemo(() => {
@@ -132,7 +140,7 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
   };
 
   // --- Render Logic ---
-  if (isLoading && !initialOrderData) {
+   if (isFetching || (isLoading  && !initialOrderData)) {
     return <DataTableSkeleton />;
   }
   if (isError) {

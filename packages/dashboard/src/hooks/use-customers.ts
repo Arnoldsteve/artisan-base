@@ -24,7 +24,6 @@ export function useCustomers(
     queryFn: () => customerService.getAll(page, limit, search),
     enabled: !isAuthLoading && isAuthenticated,
     initialData: page === 1 ? initialData : undefined,
-    staleTime: 0,
   });
 }
 

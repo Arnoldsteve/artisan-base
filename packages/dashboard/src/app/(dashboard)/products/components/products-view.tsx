@@ -48,7 +48,7 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 1,
+    pageIndex: 0,
     pageSize: 10,
   });
 
@@ -77,8 +77,8 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     data: paginatedResponse,
     isLoading,
     isError,
-    // isFetching,
-  } = useProducts(pageIndex + 1, pageSize, "", initialProductData);
+    isFetching,
+  } = useProducts(pageIndex + 1 , pageSize, "", initialProductData);
 
   // console.log("product data from product view: ", paginatedResponse);
 
@@ -211,12 +211,11 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     });
   };
 
-  // --- Render Logic ---
-  if (isLoading && !initialProductData) {
-    return <DataTableSkeleton />;
-  }
+ if (isFetching || (isLoading && !initialProductData)) {
+  return <DataTableSkeleton />;
+}
+
   if (isError) {
-    // console.error("Error loading product data:", error);
     return <div className="p-8 text-red-500">Failed to load product data.</div>;
   }
 
