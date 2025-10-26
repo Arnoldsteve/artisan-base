@@ -137,33 +137,24 @@ export const OrdersList: React.FC<OrdersListProps> = ({
                   {/* subtital */}
                   <div className="flex items-center justify-between font-semibold text-foreground">
                     <span>SubTotal:</span>
-                    <span>
-                      {formatMoney(order.subtotal, order.currency)}
-                    </span>
+                    <span>{formatMoney(order.subtotal, order.currency)}</span>
                   </div>
 
-                  {/* Shipping */}
-                  {order.shippingAmount > 0 && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span>Shipping:</span>
-                      </div>
-                      <div>
-                        {formatMoney(order.shippingAmount, order.currency)}
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span>Shipping:</span>
                     </div>
-                  )}
-                  {/* Tax */}
-                  {order.taxAmount > 0 && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span>Tax:</span>
-                      </div>
-                      <div>{formatMoney(order.taxAmount, order.currency)}</div>
+                    <div>
+                      {formatMoney(order.shippingAmount, order.currency)}
                     </div>
-                  )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span>Tax:</span>
+                    </div>
+                    <div>{formatMoney(order.taxAmount, order.currency)}</div>
+                  </div>
 
-                  {/* Total */}
                   <div className="flex items-center justify-between font-semibold text-foreground">
                     <span>Total:</span>
                     <span>
@@ -175,7 +166,6 @@ export const OrdersList: React.FC<OrdersListProps> = ({
             </div>
             <Separator className="my-3" />
 
-            {/* Footer with pricing summary */}
             <div className="p-3 pt-0">
               <div className="flex items-center justify-end">
                 <Button
@@ -196,7 +186,6 @@ export const OrdersList: React.FC<OrdersListProps> = ({
         </Card>
       ))}
 
-      {/* Load More / Pagination could go here */}
       {orders.length >= 10 && (
         <div className="text-center py-4">
           <Button variant="outline" size="sm">

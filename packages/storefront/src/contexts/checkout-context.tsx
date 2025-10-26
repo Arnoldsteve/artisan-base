@@ -159,9 +159,10 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         // paymentMethod: state.selectedPaymentMethod?.id,
         currency: "KES",
         notes: undefined,
-        // shippingAmount: state.selectedShippingOption?.price || 0,
+        shippingAmount: state.selectedShippingOption?.price || 0,
       };
       // Call backend API
+      console.log("Order payload from checkout context:", payload);
       const response = await apiClient.post<any>(
         "/api/v1/storefront/orders",
         payload
@@ -185,8 +186,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
       clearCart();
-      nextStep();
-      router.push("/checkout/confirmation");
+      // nextStep();
+      // router.push("/checkout/confirmation");
     } catch (e: any) {
       setError(e.message || "Failed to submit order. Please try again.");
     } finally {

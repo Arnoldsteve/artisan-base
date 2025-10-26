@@ -16,15 +16,15 @@ import { IAuthRepository } from './interfaces/auth-repository.interface';
       // You can even configure this part using the ConfigService for more power
       // but for now, this is fine.
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '7d' },
     }),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     { provide: 'AuthRepository', useClass: AuthRepository },
-    JwtStrategy, // <-- ADD JwtStrategy HERE
+    JwtStrategy, 
   ],
-  exports: [JwtStrategy, PassportModule], // <-- Export for other modules if needed
+  exports: [JwtStrategy, PassportModule],   
 })
 export class AuthModule {}

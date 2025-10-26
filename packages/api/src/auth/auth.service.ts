@@ -21,16 +21,13 @@ export class AuthService {
   async signUp(signUpDto: SignUpDto) {
     const { email, password, firstName, lastName } = signUpDto;
 
-    // Check if user already exists
     const existingUser = await this.authRepository.findUserByEmail(email);
     if (existingUser) {
       throw new ConflictException('Email already in use.');
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user
     const user = await this.authRepository.createUser({
       email,
       hashedPassword,
@@ -53,35 +50,28 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // 1. Find the user
     const user = await this.authRepository.findUserByEmail(email);
 
-    // 2. Validate credentials
     if (!user || !(await bcrypt.compare(password, user.hashedPassword))) {
       throw new UnauthorizedException(
         'Invalid credentials. Please check your email and password.',
       );
     }
 
-    // 3. Fetch all tenants owned by this user.
     const organizations = await this.authRepository.findTenantsByOwnerId(
       user.id,
     );
 
-    // 4. Generate JWT payload
     const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
     };
 
-    // 5. Sign the token
     const accessToken = this.jwtService.sign(payload);
 
-    // 6. Prepare user data for response
     const { hashedPassword: _, ...userWithoutPassword } = user;
 
-    // 7. Return the enhanced response object
     return {
       message: 'Login successful',
       accessToken,

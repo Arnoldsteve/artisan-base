@@ -30,9 +30,7 @@ export class AuthRepository implements IAuthRepository {
   async getProfile(userId: string): Promise<UserProfileResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      // Use `include` to fetch the full related tenant objects
       include: {
-        // --- FIX 1: Use the correct relation name ---
         ownedTenant: {
           select: {
             id: true,
@@ -52,13 +50,11 @@ export class AuthRepository implements IAuthRepository {
       user: {
         id: user.id,
         email: user.email,
-        // No need for nullish coalescing here as the DTO now accepts null
         firstName: user.firstName,
         lastName: user.lastName,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
-      // Use the correct property from the user object
       organizations: user.ownedTenant || [],
     };
   }

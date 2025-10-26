@@ -1,4 +1,4 @@
-import { Currency } from '../../../../generated/tenant';
+import { Currency, PaymentProvider } from '../../../../generated/tenant';
 import {
   IsEmail,
   IsNotEmpty,
@@ -64,6 +64,10 @@ export class CreateStorefrontOrderDto {
 
   @IsEnum(Currency)
   currency: Currency;
+
+  @IsOptional()
+  @IsEnum(PaymentProvider)
+  paymentMethod?: PaymentProvider;
 
   @IsOptional()
   @IsString()

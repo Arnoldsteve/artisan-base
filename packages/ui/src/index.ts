@@ -28,3 +28,4 @@ export * from "./components/ui/popover";
 export * from "./components/ui/accordion";
 export * from "./components/ui/skeleton";
 export * from "./components/ui/separator";
+export * from "./components/ui/pagination"

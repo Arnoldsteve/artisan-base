@@ -29,24 +29,18 @@ export class BillingService {
     @Inject(REQUEST) private readonly request: RequestWithTenant,
   ) {}
 
-  /**
-   * Delegates the work of fetching the subscription to the repository.
-   */
   async getSubscription(): Promise<TenantSubscription | null> {
     const { id: tenantId } = this.request.tenant;
     return this.billingRepository.getSubscription(tenantId);
   }
 
-  /**
-   * Creates a Stripe Checkout session. This method orchestrates the flow
-   * but does not contain the final database transaction logic.
-   */
   async createCheckoutSession(dto: CreateCheckoutDto): Promise<{ checkoutUrl: string }> {
     const { id: tenantId } = this.request.tenant;
+    // Logger.log("tenantId in billing service", tenantId);
     
     // The service is responsible for validating the plan
     const planToSubscribe = await this.plansService.findPlanById(dto.planId);
-    Logger.log("planToSubscribe from billing service", planToSubscribe)
+    // Logger.log("planToSubscribe from billing service", planToSubscribe)
     if (!planToSubscribe || !planToSubscribe.providerPlanId) {
       throw new NotFoundException(`Plan with ID '${dto.planId}' not found or not configured for payment.`);
     }
@@ -95,10 +89,7 @@ export class BillingService {
     return { checkoutUrl: session.url };
   }
 
-  /**
-   * Processes webhook data, prepares a standardized object, and delegates
-   * the final database transaction to the repository.
-   */
+  
   async fulfillSubscription(session: Stripe.Checkout.Session): Promise<void> {
     const tenantId = session.client_reference_id;
     const stripeSubscriptionId = session.subscription as string;
