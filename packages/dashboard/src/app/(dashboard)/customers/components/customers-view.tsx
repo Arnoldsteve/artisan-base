@@ -193,7 +193,6 @@ export function CustomersView({ initialCustomerData }: CustomersViewProps) {
     <div>
       <PageHeader
         title="Customers"
-        description="View and manage your customers."
       >
         <Button onClick={openAddSheet} disabled={isCreating || isUpdating}>
           <Plus className="mr-2 h-4 w-4" /> Add Customer

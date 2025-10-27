@@ -4,14 +4,30 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@repo/ui": ["../ui/src"],
-      "@repo/ui/*": ["../ui/src/*"],
-      "@/lib/utils": ["../ui/src/lib/utils.ts"],
-      "@/components/ui/*": ["../ui/src/components/ui/*"],
-      "@/hooks/use-mobile": ["../ui/src/hooks/use-mobile.tsx"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@repo/ui": [
+        "../ui/src"
+      ],
+      "@repo/ui/*": [
+        "../ui/src/*"
+      ],
+      "@/lib/utils": [
+        "../ui/src/lib/utils.ts"
+      ],
+      "@/components/ui/*": [
+        "../ui/src/components/ui/*"
+      ],
+      "@/hooks/use-mobile": [
+        "../ui/src/hooks/use-mobile.tsx"
+      ]
     },
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom", 
+      "dom.iterable",
+      "esnext"
+    ],
     "resolveJsonModule": true,
     "plugins": [
       {
@@ -20,12 +36,10 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "next-env.d.ts", 
+    "**/*.ts", 
+    "**/*.tsx", 
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

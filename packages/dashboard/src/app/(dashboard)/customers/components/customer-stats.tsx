@@ -2,21 +2,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { DollarSign, Hash, ShoppingBag } from "lucide-react";
-// import { CustomerOrder } from "@/types/customers";
 import { Decimal } from "decimal.js";
 import { formatMoney } from "@/utils/money";
 import { Order } from "@/types/orders";
 
-// interface CustomerStatsProps {
-//   orders: CustomerOrder[]; // <-- THE FIX: Expect an array of CustomerOrder
-// }
 
 interface CustomerStatsProps {
   orders: Order[];
 }
 
 export function CustomerStats({ orders }: CustomerStatsProps) {
-  // Use Decimal methods for precise financial calculations
   const lifetimeValue = orders.reduce(
     (sum, order) => sum.plus(order.totalAmount),
     new Decimal(0)

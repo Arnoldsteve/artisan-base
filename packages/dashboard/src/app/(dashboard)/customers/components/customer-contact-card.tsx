@@ -1,4 +1,3 @@
-// src/app/dashboard/customers/[customerId]/components/customer-contact-card.tsx
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
@@ -7,8 +6,6 @@ import { Customer } from "@/types/customers";
 import { Mail, Phone } from "lucide-react";
 
 export function CustomerContactCard({ customer }: { customer: Customer }) {
-  // ✅ THE FIX: Safely get the default address.
-  // Check if the addresses array exists and has at least one item.
   const defaultAddress =
     customer.addresses && customer.addresses.length > 0
       ? customer.addresses[0]
@@ -24,13 +21,12 @@ export function CustomerContactCard({ customer }: { customer: Customer }) {
             </div>
             <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{customer.phone || 'N/A'}</span>
+                <span>{customer.phoneNumber || 'N/A'}</span>
             </div>
             <Separator />
             <div>
                 <h4 className="font-semibold mb-2">Default Address</h4>
                 <div className="text-muted-foreground">
-                    {/* ✅ THE FIX: Conditionally render the address only if it exists. */}
                     {defaultAddress ? (
                         <>
                             <p>{defaultAddress.firstName} {defaultAddress.lastName}</p>
