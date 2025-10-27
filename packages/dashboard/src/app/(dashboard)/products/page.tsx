@@ -3,7 +3,6 @@ import { ProductsView } from "./components/products-view";
 import { PaginatedResponse } from "@/types/shared";
 import { Product } from "@/types/products";
 import { PageHeader } from "@/components/shared/page-header";
-import { Button } from "@repo/ui/components/ui/button";
 
 export default async function ProductsPage() {
   let initialData: PaginatedResponse<Product>;
@@ -34,12 +33,6 @@ export default async function ProductsPage() {
   return (
     <>
       <PageHeader title="Products" />
-       {/* <PageHeader
-              title="Products"
-              description="Manage all products for your store."
-            >
-              <Button onClick={()=> alert("page header add button action")}>Add Product</Button>
-            </PageHeader> */}
 
       <div className="p-4 md:p-8 lg:p-10">
         <ProductsView initialProductData={initialData} />

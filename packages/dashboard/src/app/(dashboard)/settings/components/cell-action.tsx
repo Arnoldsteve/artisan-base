@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { MoreHorizontal, Edit, Trash } from 'lucide-react';
 
-import { Button } from '@repo/ui';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui';
+import { Button } from '@repo/ui/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui/components/ui/dropdown-menu';
 import { AlertModal } from '@/components/modals/alert-modal';
 import { DashboardUserData } from '@/types/users';
 

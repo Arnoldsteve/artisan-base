@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
-  Package ,
-  ShoppingCart ,
+  Package,
+  ShoppingCart,
   Command,
   Users,
   GalleryVerticalEnd,
   BarChart3,
   PieChart,
   Settings2,
-  LayoutDashboard ,
-} from "lucide-react"
+  LayoutDashboard,
+} from "lucide-react";
 
-import { NavMain } from "./nav-main"
-import { NavProjects } from "./nav-projects"
-import { NavUser } from "./nav-user"
-import { TeamSwitcher } from "./team-switcher"
+import { NavMain } from "./nav-main";
+import { NavProjects } from "./nav-projects";
+import { NavUser } from "./nav-user";
+import { TeamSwitcher } from "./team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@repo/ui"
+} from "@repo/ui/components/ui/sidebar";
 
 // This is sample data.
 const data = {
@@ -54,7 +54,7 @@ const data = {
     {
       title: "Dashboard",
       url: "#",
-      icon: LayoutDashboard ,
+      icon: LayoutDashboard,
       isActive: true,
       items: [
         {
@@ -66,7 +66,7 @@ const data = {
     {
       title: "Orders",
       url: "#",
-      icon: ShoppingCart ,
+      icon: ShoppingCart,
       items: [
         {
           title: "All Orders",
@@ -77,7 +77,7 @@ const data = {
     {
       title: "Products",
       url: "#",
-      icon: Package ,
+      icon: Package,
       items: [
         {
           title: "All Products",
@@ -98,15 +98,9 @@ const data = {
           title: "All Customers",
           url: "/customers",
         },
-        { title: "Loyal Customers", 
-          url: "/loyal-customers" 
-        },
-        { title: "Big Spenders", 
-          url: "big-spenders" 
-        },
-        { title: "At Risk", 
-          url: "at-risk" 
-        },
+        { title: "Loyal Customers", url: "/loyal-customers" },
+        { title: "Big Spenders", url: "big-spenders" },
+        { title: "At Risk", url: "at-risk" },
       ],
     },
     {
@@ -141,12 +135,12 @@ const data = {
           title: "Reports",
           url: "/reports",
         },
-        { 
+        {
           title: "Sales & Marketing",
-          url: "#" 
+          url: "#",
         },
-      ],  
-    }
+      ],
+    },
   ],
   projects: [
     {
@@ -155,7 +149,7 @@ const data = {
       icon: Users,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -168,9 +162,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser/>
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

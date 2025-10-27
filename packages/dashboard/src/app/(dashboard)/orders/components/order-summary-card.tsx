@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { Badge } from "@repo/ui";
 import { Order } from "@/types/orders";
 import { User, Calendar } from "lucide-react";
@@ -7,7 +12,6 @@ import {
   getPaymentStatusColor,
 } from "@/utils/status-colors";
 import { formatMoney } from "@/utils/money";
-
 
 export function OrderSummaryCard({ order }: { order: Order }) {
   return (

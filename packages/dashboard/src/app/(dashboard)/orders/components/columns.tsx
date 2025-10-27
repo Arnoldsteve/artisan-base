@@ -2,16 +2,16 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Button } from "@repo/ui";
-import { Badge } from "@repo/ui";
-import { Checkbox } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/dropdown-menu";
 import { Order, OrderStatus, PaymentStatus } from "@/types/orders";
 import Link from "next/link";
 import {
@@ -132,9 +132,7 @@ export const columns: ColumnDef<Order>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="text-right">
-        {formatDate(row.getValue('createdAt'))}
-      </div>
+      <div className="text-right">{formatDate(row.getValue("createdAt"))}</div>
     ),
   },
   {
@@ -143,7 +141,7 @@ export const columns: ColumnDef<Order>[] = [
       const order = row.original;
       const customer = order.customer;
       const typedTable = table as TableWithMeta<Order, OrderTableMeta<Order>>;
-      
+
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -156,16 +154,10 @@ export const columns: ColumnDef<Order>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href={`/orders/${order.id}`}>
-                  View Order Details
-                </Link>
+                <Link href={`/orders/${order.id}`}>View Order Details</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild disabled={!customer}>
-                <Link
-                  href={
-                    customer ? `/customers/${customer.id}` : "#"
-                  }
-                >
+                <Link href={customer ? `/customers/${customer.id}` : "#"}>
                   View Customer
                 </Link>
               </DropdownMenuItem>

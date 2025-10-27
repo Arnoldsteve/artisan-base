@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import {
   Table,
   TableBody,
@@ -6,10 +11,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/table";
 import { OrderItem } from "@/types/orders";
 import Image from "next/image";
-import { url } from "inspector";
 import { formatMoney } from "@/utils/money";
 
 export function OrderItemsTable({ items }: { items: OrderItem[] }) {
@@ -34,8 +38,11 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
               <TableRow key={item.id}>
                 <TableCell>
                   <Image
-                    src={item.image?.url ?? `https://picsum.photos/400/400?random=${item.id}`}
-                    alt={item.productName || 'Product Image'}
+                    src={
+                      item.image?.url ??
+                      `https://picsum.photos/400/400?random=${item.id}`
+                    }
+                    alt={item.productName || "Product Image"}
                     width={64}
                     height={64}
                     className="rounded-md"

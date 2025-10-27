@@ -8,16 +8,15 @@ import {
   Pencil,
   Package,
 } from "lucide-react";
-import { Button } from "@repo/ui";
-import { Badge } from "@repo/ui";
-import { Checkbox } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/dropdown-menu";
 import { Category } from "@/types/categories";
 import { CategoryTableMeta, TableWithMeta } from "@/types/table-meta";
 

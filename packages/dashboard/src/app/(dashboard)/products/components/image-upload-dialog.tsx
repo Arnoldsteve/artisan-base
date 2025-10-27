@@ -8,8 +8,8 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-} from "@repo/ui";
-import { Button } from "@repo/ui";
+} from "@repo/ui/components/ui/dialog";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   useUploadProductImages,
   useDeleteProductImage,
@@ -32,7 +32,11 @@ interface ImageUploadDialogProps {
   product: Product | null;
 }
 
-export function ImageUploadDialog({ isOpen, onClose,  product }: ImageUploadDialogProps) {
+export function ImageUploadDialog({
+  isOpen,
+  onClose,
+  product,
+}: ImageUploadDialogProps) {
   // State for new files to be uploaded
   const [newFiles, setNewFiles] = useState<File[]>([]);
   // State for previewing all images (existing + new)
@@ -69,7 +73,10 @@ export function ImageUploadDialog({ isOpen, onClose,  product }: ImageUploadDial
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      setNewFiles((prevFiles) => [...prevFiles, ...Array.from(event.target.files!)]);
+      setNewFiles((prevFiles) => [
+        ...prevFiles,
+        ...Array.from(event.target.files!),
+      ]);
     }
     // Clear the input value to allow selecting the same file again
     event.target.value = "";
@@ -167,7 +174,8 @@ export function ImageUploadDialog({ isOpen, onClose,  product }: ImageUploadDial
             disabled={isUploading || newFiles.length === 0}
           >
             {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Upload {newFiles.length > 0 ? `${newFiles.length} New` : ""} Image(s)
+            Upload {newFiles.length > 0 ? `${newFiles.length} New` : ""}{" "}
+            Image(s)
           </Button>
         </DialogFooter>
       </DialogContent>

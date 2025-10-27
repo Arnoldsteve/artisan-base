@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
-import { Table } from '@tanstack/react-table';
-import { Input } from '@repo/ui';
-import { Button } from '@repo/ui';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui';
-import { Product } from '@/types/products';
+import { Table } from "@tanstack/react-table";
+import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@repo/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
+import { Product } from "@/types/products";
 
 interface DataTableViewOptionsProps {
   table: Table<Product>;
@@ -15,14 +21,20 @@ export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
     <div className="flex items-center gap-4 py-4">
       <Input
         placeholder="Filter by name... "
-        value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-        onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
+        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+        onChange={(event) =>
+          table.getColumn("name")?.setFilterValue(event.target.value)
+        }
         className="max-w-sm"
       />
-      
+
       <Select
-        value={(table.getColumn('isActive')?.getFilterValue() as string) ?? 'all'}
-        onValueChange={(value) => table.getColumn('isActive')?.setFilterValue(value)}
+        value={
+          (table.getColumn("isActive")?.getFilterValue() as string) ?? "all"
+        }
+        onValueChange={(value) =>
+          table.getColumn("isActive")?.setFilterValue(value)
+        }
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Filter by status" />
@@ -33,7 +45,7 @@ export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
           <SelectItem value="false">Draft</SelectItem>
         </SelectContent>
       </Select>
-      
+
       {/* Optional: Add a clear filters button */}
       <Button variant="outline" onClick={() => table.resetColumnFilters()}>
         Clear Filters

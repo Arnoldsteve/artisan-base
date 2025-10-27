@@ -1,11 +1,27 @@
-'use client';
+"use client";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@repo/ui";
-import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@repo/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/ui/form";
 
 // Define the shape of the data for this specific form
 interface ProfileInfoFormProps {
@@ -18,8 +34,12 @@ interface ProfileInfoFormProps {
 
 // Define the validation schema using Zod
 const formSchema = z.object({
-  firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
-  lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
+  firstName: z
+    .string()
+    .min(2, { message: "First name must be at least 2 characters." }),
+  lastName: z
+    .string()
+    .min(2, { message: "Last name must be at least 2 characters." }),
 });
 
 export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
@@ -36,7 +56,7 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
   // Mock submission handler
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // Simulate an API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Updated Profile Info:", values);
     toast.success("Your profile has been updated.");
   };
@@ -78,13 +98,13 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
                 )}
               />
             </div>
-             <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  {/* Email is typically not editable */}
-                  <Input readOnly disabled value={initialData.email} />
-                </FormControl>
-              </FormItem>
+            <FormItem>
+              <FormLabel>Email Address</FormLabel>
+              <FormControl>
+                {/* Email is typically not editable */}
+                <Input readOnly disabled value={initialData.email} />
+              </FormControl>
+            </FormItem>
           </CardContent>
           <CardFooter className="border-t px-6 py-4">
             <Button type="submit" disabled={isSubmitting || !isDirty}>

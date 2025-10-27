@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,19 +9,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/dropdown-menu";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@repo/ui";
-import {
-  ChevronDown,
-  User,
-  CreditCard,
-  Settings,
-  LogOut,
-} from "lucide-react";
+} from "@repo/ui/components/ui/avatar";
+import { ChevronDown, User, CreditCard, Settings, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useEffect, useState } from "react";
@@ -78,7 +72,10 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={avatarSrc} alt={`${user.firstName ?? ""} ${user.lastName ?? ""}`} />
+              <AvatarImage
+                src={avatarSrc}
+                alt={`${user.firstName ?? ""} ${user.lastName ?? ""}`}
+              />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col space-y-1">

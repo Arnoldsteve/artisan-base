@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Table } from '@tanstack/react-table';
-import { Input } from '@repo/ui';
-import { Button } from '@repo/ui';
-import { Category } from '@/types/categories';
+import { Table } from "@tanstack/react-table";
+import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@repo/ui/components/ui/button";
+import { Category } from "@/types/categories";
 
 interface DataTableViewOptionsProps {
   table: Table<Category>;
@@ -15,18 +15,15 @@ export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
       {/* Filter by category name */}
       <Input
         placeholder="Filter by category name..."
-        value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
         onChange={(event) =>
-          table.getColumn('name')?.setFilterValue(event.target.value)
+          table.getColumn("name")?.setFilterValue(event.target.value)
         }
         className="max-w-sm"
       />
 
       {/* Clear filters button */}
-      <Button
-        variant="outline"
-        onClick={() => table.resetColumnFilters()}
-      >
+      <Button variant="outline" onClick={() => table.resetColumnFilters()}>
         Clear Filters
       </Button>
     </div>

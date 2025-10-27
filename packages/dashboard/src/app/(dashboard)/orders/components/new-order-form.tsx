@@ -11,15 +11,15 @@ import {
 } from "@/types/orders";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
-  Button,
-  Input,
-  Label,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Textarea,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Textarea } from "@repo/ui/components/ui/textarea";
+import { Label } from "@repo/ui/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, X, PlusCircle, MinusCircle, Trash } from "lucide-react";
 import { productService } from "@/services/product-service";
@@ -148,10 +148,11 @@ function OrderItemsInput({
                   <Button
                     className="ml-2 text-sm p-0"
                     type="button"
-                    variant="ghost">
-                      <Trash className="h-4 w-4 color-red-500" />
+                    variant="ghost"
+                  >
+                    <Trash className="h-4 w-4 color-red-500" />
                     delete
-                    </Button>
+                  </Button>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -284,7 +285,7 @@ function AddressForm({
           <Input
             id={`${prefix}-firstName`}
             value={address.firstName}
-             placeholder="e.g. Steve"
+            placeholder="e.g. Steve"
             onChange={(e) =>
               setAddress({ ...address, firstName: e.target.value })
             }
@@ -343,7 +344,7 @@ function AddressForm({
           <Input
             id={`${prefix}-state`}
             value={address.state}
-             placeholder="e.g. Mombasa County"
+            placeholder="e.g. Mombasa County"
             onChange={(e) => setAddress({ ...address, state: e.target.value })}
             required
           />

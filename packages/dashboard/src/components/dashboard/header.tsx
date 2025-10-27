@@ -1,16 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import { UserNav } from "@/components/dashboard/user-nav";
-import { Input } from "@repo/ui";
-import { useAuthContext } from "@/contexts/auth-context";
+import { Input } from "@repo/ui/components/ui/input";
 
 export function Header() {
-
   return (
     <div className="border-b border-border bg-background">
       <div className="flex h-16 items-center px-4">
-
         <div className="ml-auto flex items-center space-x-4">
           <div>
             <Input

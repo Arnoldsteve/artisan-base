@@ -8,32 +8,23 @@ import { notFound } from "next/navigation";
 import { createServerApiClient } from "@/lib/server-api";
 import { CustomerDetails } from "@/types/customers";
 
-/**
- * This is the main Server Component for the Customer Detail page.
- * It fetches a single customer's complete data from the API.
- */
+
 export default async function CustomerDetailPage({
   params,
 }: {
   params: Promise<{ customerId: string }>;
 }) {
-  // Await the params
   const resolvedParams = await params;
 
-  // Create a new, authenticated API client for this server-side request
   const serverApi = await createServerApiClient();
 
   let customer: CustomerDetails;
 
   try {
-    // --- THIS IS THE FIX ---
-    // Fetch the specific customer by their ID from your live API.
-    // The backend should return the customer with their related orders and addresses.
     customer = await serverApi.get<CustomerDetails>(
       `/dashboard/customers/${resolvedParams.customerId}`
     );
   } catch (error) {
-    // If the API returns a 404 or any other error, trigger Next.js's notFound.
     console.error(
       `Failed to fetch customer ${resolvedParams.customerId}:`,
       error
@@ -41,7 +32,6 @@ export default async function CustomerDetailPage({
     notFound();
   }
 
-  // The customer object now contains the real orders from the database
   const customerOrders = customer.orders || [];
 
   return (

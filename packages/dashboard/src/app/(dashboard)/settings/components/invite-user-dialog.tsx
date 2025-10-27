@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
-import { Button } from '@repo/ui';
+import { Button } from "@repo/ui";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@repo/ui';
+} from "@repo/ui/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -20,25 +20,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@repo/ui';
-import { Input } from '@repo/ui';
+} from "@repo/ui/components/ui/form";
+import { Input } from "@repo/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui';
-import { TenantRole } from '@/types/roles';
+} from "@repo/ui/components/ui/select";
+import { TenantRole } from "@/types/roles";
 import {
   inviteMemberSchema,
   InviteMemberSchema,
-} from '@/validation-schemas/inviteMemberSchema';
+} from "@/validation-schemas/inviteMemberSchema";
 
 interface InviteUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (data: InviteMemberSchema) => void; 
+  onSuccess: (data: InviteMemberSchema) => void;
 }
 
 export function InviteUserDialog({
@@ -49,15 +49,15 @@ export function InviteUserDialog({
   const form = useForm<InviteMemberSchema>({
     resolver: zodResolver(inviteMemberSchema),
     defaultValues: {
-      userName: '',
-      email: '',
+      userName: "",
+      email: "",
       role: TenantRole.VIEWER,
     },
   });
 
   const onSubmit = (values: InviteMemberSchema) => {
     toast.success(`Invitation sent to ${values.email}`);
-    onSuccess(values); 
+    onSuccess(values);
     form.reset();
   };
 
@@ -73,25 +73,20 @@ export function InviteUserDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
             {/* Username */}
-            <FormField 
-              control={form.control} 
+            <FormField
+              control={form.control}
               name="userName"
               render={({ field }) => (
-                <FormItem>  
+                <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="johndoe"
-                      {...field}
-                    />
+                    <Input placeholder="johndoe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
 
             {/* Email field */}
             <FormField
@@ -128,7 +123,8 @@ export function InviteUserDialog({
                     <SelectContent>
                       {Object.values(TenantRole).map((role) => (
                         <SelectItem key={role} value={role}>
-                          {role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()}
+                          {role.charAt(0).toUpperCase() +
+                            role.slice(1).toLowerCase()}
                         </SelectItem>
                       ))}
                     </SelectContent>

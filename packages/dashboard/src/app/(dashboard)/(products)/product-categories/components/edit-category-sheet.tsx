@@ -11,7 +11,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/sheet";
 import {
   Form,
   FormControl,
@@ -20,14 +20,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/ui";
-import { Input } from "@repo/ui";
-import { Textarea } from "@repo/ui";
-import { Button } from "@repo/ui";
+} from "@repo/ui/components/ui/form";
+import { Input } from "@repo/ui/components/ui/input";
+import { Textarea } from "@repo/ui/components/ui/textarea";
+import { Button } from "@repo/ui/components/ui/button";
 import { Category } from "@/types/categories";
-import { CategoryFormData, categoryFormSchema } from "@/validation-schemas/categories";
+import {
+  CategoryFormData,
+  categoryFormSchema,
+} from "@/validation-schemas/categories";
 import { on } from "events";
-
 
 interface EditCategorySheetProps {
   isOpen: boolean;
@@ -45,7 +47,7 @@ export function EditCategorySheet({
   isPending,
 }: EditCategorySheetProps) {
   const isEditing = !!category;
-  
+
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
@@ -74,7 +76,6 @@ export function EditCategorySheet({
   const onSubmit = (data: CategoryFormData) => {
     onSave(data);
   };
-
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -131,7 +132,8 @@ export function EditCategorySheet({
                       />
                     </FormControl>
                     <FormDescription>
-                      Optional description to help customers understand this category.
+                      Optional description to help customers understand this
+                      category.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -141,9 +143,13 @@ export function EditCategorySheet({
               {/* Auto-generated slug preview */}
               {form.watch("name") && (
                 <div className="bg-gray-50 p-3 rounded-md">
-                  <FormLabel className="text-xs text-gray-600">URL Slug Preview:</FormLabel>
+                  <FormLabel className="text-xs text-gray-600">
+                    URL Slug Preview:
+                  </FormLabel>
                   <code className="text-xs text-gray-800 block mt-1">
-                    /categories/{form.watch("name")
+                    /categories/
+                    {form
+                      .watch("name")
                       .toLowerCase()
                       .trim()
                       .replace(/\s+/g, "-")

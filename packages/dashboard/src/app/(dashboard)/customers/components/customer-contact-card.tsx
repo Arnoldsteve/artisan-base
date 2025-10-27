@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
-import { Separator } from "@repo/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import { Separator } from "@repo/ui/components/ui/separator";
 import { Customer } from "@/types/customers";
 import { Mail, Phone } from "lucide-react";
 

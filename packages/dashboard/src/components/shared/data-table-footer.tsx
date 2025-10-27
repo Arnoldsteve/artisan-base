@@ -10,7 +10,6 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { Button } from "@repo/ui";
 
 interface DataTablePaginationProps<TData> {
   table: TanstackTable<TData>;

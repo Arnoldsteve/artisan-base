@@ -1,9 +1,8 @@
-// src/app/dashboard/orders/error.tsx
 'use client'; 
 
 import { useEffect } from 'react';
-import { Button } from '@repo/ui';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@repo/ui';
+import { Button } from '@repo/ui/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@repo/ui/components/ui/card';
 
 export default function Error({
   error,

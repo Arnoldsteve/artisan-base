@@ -1,7 +1,15 @@
 "use client";
 
 import { Table } from "@tanstack/react-table";
-import { Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui";
+import { Input } from "@repo/ui/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
+import { Button } from "@repo/ui/components/ui/button";
 import { Order, OrderStatus, PaymentStatus } from "@/types/orders";
 
 interface OrdersTableViewOptionsProps {
@@ -31,7 +39,9 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
       {/* 🔍 Search input */}
       <Input
         placeholder="Search by order # or customer..."
-        value={(table.getColumn("orderNumber")?.getFilterValue() as string) ?? ""}
+        value={
+          (table.getColumn("orderNumber")?.getFilterValue() as string) ?? ""
+        }
         onChange={(event) =>
           table.getColumn("orderNumber")?.setFilterValue(event.target.value)
         }
@@ -42,7 +52,9 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
       <Select
         value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
         onValueChange={(value) =>
-          table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
+          table
+            .getColumn("status")
+            ?.setFilterValue(value === "all" ? "" : value)
         }
       >
         <SelectTrigger className="w-[180px]">
@@ -60,9 +72,14 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
 
       {/* 💳 Payment status filter */}
       <Select
-        value={(table.getColumn("paymentStatus")?.getFilterValue() as string) ?? "all"}
+        value={
+          (table.getColumn("paymentStatus")?.getFilterValue() as string) ??
+          "all"
+        }
         onValueChange={(value) =>
-          table.getColumn("paymentStatus")?.setFilterValue(value === "all" ? "" : value)
+          table
+            .getColumn("paymentStatus")
+            ?.setFilterValue(value === "all" ? "" : value)
         }
       >
         <SelectTrigger className="w-[180px]">

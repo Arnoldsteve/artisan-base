@@ -7,8 +7,9 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from "@repo/ui";
-import { Button, Badge } from "@repo/ui";
+} from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Subscription } from "@/types/billing";
 
 // Import the specific hook for fetching the subscription
@@ -21,7 +22,6 @@ interface BillingCurrentPlanProps {
 export function BillingCurrentPlan({
   subscription: initialSubscriptionData, // Rename for clarity
 }: BillingCurrentPlanProps) {
-  
   // --- THIS IS THE FIX ---
   // The hook becomes the single source of truth for the component's data.
   // - On initial render, `subscription` will be `initialSubscriptionData`.
@@ -33,7 +33,6 @@ export function BillingCurrentPlan({
     isError,
     error,
   } = useBillingSubscription(initialSubscriptionData);
-
 
   if (isLoading) {
     return (
@@ -70,7 +69,9 @@ export function BillingCurrentPlan({
           <CardDescription>You are not subscribed to any plan.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Please choose a plan to get started.</p>
+          <p className="text-muted-foreground">
+            Please choose a plan to get started.
+          </p>
         </CardContent>
       </Card>
     );
@@ -80,7 +81,9 @@ export function BillingCurrentPlan({
   const { plan, status, currentPeriodEnd } = subscription;
 
   const handleManageBilling = () => {
-    alert("This will redirect to the Stripe Customer Portal in a real application.");
+    alert(
+      "This will redirect to the Stripe Customer Portal in a real application."
+    );
   };
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
@@ -111,7 +114,7 @@ export function BillingCurrentPlan({
             variant={status === "ACTIVE" ? "default" : "destructive"}
             className="capitalize"
           >
-            {status.toLowerCase().replace('_', ' ')}
+            {status.toLowerCase().replace("_", " ")}
           </Badge>
         </div>
       </CardHeader>

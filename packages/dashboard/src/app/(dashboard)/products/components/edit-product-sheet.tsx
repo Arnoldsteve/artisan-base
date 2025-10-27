@@ -9,10 +9,6 @@ import {
   ProductFormData,
 } from "@/validation-schemas/products";
 import {
-  Button,
-  Textarea,
-  Input,
-  Label,
   Sheet,
   SheetClose,
   SheetContent,
@@ -20,18 +16,26 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+} from "@repo/ui/components/ui/sheet";
+
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Textarea } from "@repo/ui/components/ui/textarea";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from "@repo/ui/components/ui/select";
+import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/form";
 
 interface EditProductSheetProps {
   isOpen: boolean;
@@ -41,21 +45,27 @@ interface EditProductSheetProps {
   isPending: boolean;
 }
 
-export function EditProductSheet({ isOpen, onClose, product, onSave, isPending }: EditProductSheetProps) {
+export function EditProductSheet({
+  isOpen,
+  onClose,
+  product,
+  onSave,
+  isPending,
+}: EditProductSheetProps) {
   const isNewProduct = !product?.id;
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     // Initialize with empty defaults; the useEffect will populate it.
     defaultValues: {
-      name: '',
-      slug: '',
+      name: "",
+      slug: "",
       price: 0,
       inventoryQuantity: 0,
-      sku: '',
+      sku: "",
       isActive: true,
       isFeatured: false,
-      description: '',
+      description: "",
     },
   });
 
@@ -67,31 +77,32 @@ export function EditProductSheet({ isOpen, onClose, product, onSave, isPending }
         // We are EDITING. The `product` prop is provided.
         form.reset({
           id: product.id,
-          name: product.name || '',
-          slug: product.slug || '',
+          name: product.name || "",
+          slug: product.slug || "",
           // Check if price is a Decimal object before calling .toNumber()
-          price: (product.price && typeof product.price.toNumber === 'function') 
-                 ? product.price.toNumber() 
-                 : (product.price as unknown as number) || 0,
+          price:
+            product.price && typeof product.price.toNumber === "function"
+              ? product.price.toNumber()
+              : (product.price as unknown as number) || 0,
           inventoryQuantity: product.inventoryQuantity || 0,
-          sku: product.sku || '',
+          sku: product.sku || "",
           isActive: product.isActive ?? true,
           isFeatured: product.isFeatured ?? false,
-          description: product.description || '',
+          description: product.description || "",
         });
       } else {
         // We are CREATING. The `product` prop is null.
         // Reset to default empty values.
         form.reset({
           id: undefined,
-          name: '',
+          name: "",
           // slug: '',
           price: 0,
           inventoryQuantity: 0,
-          sku: '',
+          sku: "",
           isActive: true,
           isFeatured: false,
-          description: '',
+          description: "",
         });
       }
     }

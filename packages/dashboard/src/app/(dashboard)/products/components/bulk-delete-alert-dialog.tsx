@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   AlertDialog,
@@ -9,8 +9,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@repo/ui';
-import { Button } from '@repo/ui';
+} from "@repo/ui/components/ui/alert-dialog";
+import { Button } from "@repo/ui/components/ui/button";
 
 interface BulkDeleteAlertDialogProps {
   isOpen: boolean;
@@ -34,16 +34,29 @@ export function BulkDeleteAlertDialog({
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the selected
-            <span className="font-semibold text-foreground"> {selectedCount} product(s)</span>.
+            This action cannot be undone. This will permanently delete the
+            selected
+            <span className="font-semibold text-foreground">
+              {" "}
+              {selectedCount} product(s)
+            </span>
+            .
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose} disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={onClose} disabled={isPending}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction asChild>
-             <Button onClick={onConfirm} disabled={isPending} variant="destructive">
-                {isPending ? "Deleting..." : `Yes, delete ${selectedCount} product(s)`}
-             </Button>
+            <Button
+              onClick={onConfirm}
+              disabled={isPending}
+              variant="destructive"
+            >
+              {isPending
+                ? "Deleting..."
+                : `Yes, delete ${selectedCount} product(s)`}
+            </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -61,7 +61,7 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
     isFetching,
   } = useOrders(pageIndex + 1, pageSize, "", initialOrderData);
 
-  console.log("Order data from product view: ", paginatedResponse);
+  // console.log("Order data from product view: ", paginatedResponse);
 
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
   const { mutate: batchDeleteOrders, isPending: isBatchDeleting } =
@@ -140,7 +140,7 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
   };
 
   // --- Render Logic ---
-   if (isFetching || (isLoading  && !initialOrderData)) {
+  if (isFetching || (isLoading && !initialOrderData)) {
     return <DataTableSkeleton />;
   }
   if (isError) {
@@ -149,9 +149,7 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
 
   return (
     <>
-      <PageHeader
-        title="Orders"
-      >
+      <PageHeader title="Orders">
         <Link href="/orders/new">
           <Button>Create Order</Button>
         </Link>

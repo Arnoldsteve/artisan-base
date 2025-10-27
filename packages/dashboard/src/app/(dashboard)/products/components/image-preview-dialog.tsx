@@ -6,8 +6,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@repo/ui";
-import { Button } from "@repo/ui";
+} from "@repo/ui/components/ui/dialog";
+import { Button } from "@repo/ui/components/ui/button";
 import { Product } from "@/types/products";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -18,14 +18,19 @@ interface ImagePreviewDialogProps {
   product: Product | null;
 }
 
-export function ImagePreviewDialog({ isOpen, onClose, product }: ImagePreviewDialogProps) {
+export function ImagePreviewDialog({
+  isOpen,
+  onClose,
+  product,
+}: ImagePreviewDialogProps) {
   const images = product?.images || [];
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (!product) return null;
 
   const nextImage = () => setCurrentIndex((prev) => (prev + 1) % images.length);
-  const prevImage = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  const prevImage = () =>
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -37,7 +42,9 @@ export function ImagePreviewDialog({ isOpen, onClose, product }: ImagePreviewDia
         "
       >
         <DialogHeader>
-          <DialogTitle className="truncate">{product.name} - Images</DialogTitle>
+          <DialogTitle className="truncate">
+            {product.name} - Images
+          </DialogTitle>
         </DialogHeader>
 
         {images.length > 0 ? (

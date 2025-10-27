@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@repo/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
+import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { DollarSign, Users, ShoppingBag, Package } from "lucide-react";
 import { DashboardKPI } from "@/types/dashboard";
 import { formatMoney } from "@/utils/money";

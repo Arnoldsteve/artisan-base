@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { DollarSign, Hash, ShoppingBag } from "lucide-react";
 import { Decimal } from "decimal.js";
 import { formatMoney } from "@/utils/money";

@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Customer } from '@/types/customers'; 
-import { Button, Input, Label } from '@repo/ui';
+import { Button } from '@repo/ui/components/ui/button';
+import { Input } from '@repo/ui/components/ui/input';
 import {
   Sheet,
   SheetClose,
@@ -13,7 +14,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from '@repo/ui';
+} from '@repo/ui/components/ui/sheet';
 import {
   Form,
   FormControl,
@@ -21,7 +22,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@repo/ui';
+} from '@repo/ui/components/ui/form';
 import { CustomerFormData, customerFormSchema } from '@/validation-schemas/customers';
 
 interface EditCustomerSheetProps {
@@ -42,7 +43,7 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
       firstName: customer?.firstName || '',
       lastName: customer?.lastName || '',
       email: customer?.email || '',
-      phoneNumber: customer?.phone || '',
+      phoneNumber: customer?.phoneNumber || '',
     },
   });
 
@@ -53,7 +54,7 @@ export function EditCustomerSheet({ isOpen, onClose, customer, onSave, isPending
         firstName: customer?.firstName || '',
         lastName: customer?.lastName || '',
         email: customer?.email || '',
-        phoneNumber: customer?.phone || '',
+        phoneNumber: customer?.phoneNumber || '',
       });
     }
   }, [customer, isOpen, form]);

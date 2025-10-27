@@ -6,17 +6,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Skeleton,
+} from "@repo/ui/components/ui/card";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  Avatar,
-  AvatarFallback,
-  Badge,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/table";
+import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { RecentOrdersResponse } from "@/types/dashboard";
 import { formatMoney } from "@/utils/money";
 
@@ -60,7 +61,11 @@ interface RecentOrdersProps {
  * A component that renders the "Recent Orders" card with a table.
  * It handles its own loading and error states.
  */
-export function RecentOrders({ ordersData, isLoading, isError }: RecentOrdersProps) {
+export function RecentOrders({
+  ordersData,
+  isLoading,
+  isError,
+}: RecentOrdersProps) {
   // --- Loading State ---
   if (isLoading) {
     return <RecentOrdersSkeleton />;
@@ -74,7 +79,9 @@ export function RecentOrders({ ordersData, isLoading, isError }: RecentOrdersPro
           <CardTitle>Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-destructive">Failed to load recent orders.</p>
+          <p className="text-sm text-destructive">
+            Failed to load recent orders.
+          </p>
         </CardContent>
       </Card>
     );
@@ -121,7 +128,13 @@ export function RecentOrders({ ordersData, isLoading, isError }: RecentOrdersPro
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={order.paymentStatus === "PENDING" ? "outline" : "default"}>
+                    <Badge
+                      variant={
+                        order.paymentStatus === "PENDING"
+                          ? "outline"
+                          : "default"
+                      }
+                    >
                       {order.paymentStatus}
                     </Badge>
                   </TableCell>

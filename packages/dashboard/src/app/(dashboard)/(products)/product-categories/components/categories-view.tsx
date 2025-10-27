@@ -15,14 +15,10 @@ import {
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { Category } from "@/types/categories";
-
-// UI Components
 import { EditCategorySheet } from "./edit-category-sheet";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
-import { Button } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
-
-// You'll need to create these hooks similar to products
 import {
   useCategories,
   useDeleteCategory,
@@ -34,7 +30,9 @@ import { PaginatedResponse } from "@/types/shared";
 import { CategoryTableMeta } from "@/types/table-meta";
 
 interface CategoriesViewProps {
-  initialCategoryData: PaginatedResponse<Category & { _count?: { products: number } }>;
+  initialCategoryData: PaginatedResponse<
+    Category & { _count?: { products: number } }
+  >;
 }
 
 export function CategoriesView({ initialCategoryData }: CategoriesViewProps) {
@@ -181,7 +179,7 @@ export function CategoriesView({ initialCategoryData }: CategoriesViewProps) {
   };
 
   // --- Render Logic ---
-  if ( isFetching || (isLoading && !initialCategoryData)) {
+  if (isFetching || (isLoading && !initialCategoryData)) {
     return <DataTableSkeleton />;
   }
   if (isError) {
@@ -192,9 +190,7 @@ export function CategoriesView({ initialCategoryData }: CategoriesViewProps) {
 
   return (
     <div>
-      <PageHeader
-        title="Product Categories"
-      >
+      <PageHeader title="Product Categories">
         <Button onClick={openAddSheet}>Add Category</Button>
       </PageHeader>
 

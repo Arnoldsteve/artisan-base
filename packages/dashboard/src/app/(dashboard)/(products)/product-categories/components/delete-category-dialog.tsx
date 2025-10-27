@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/alert-dialog";
 
 interface DeleteCategoryDialogProps {
   isOpen: boolean;
@@ -32,9 +32,9 @@ export function DeleteCategoryDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the category "{categoryName}".
-            All products in this category will become uncategorized.
-            This action cannot be undone.
+            This will permanently delete the category "{categoryName}". All
+            products in this category will become uncategorized. This action
+            cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

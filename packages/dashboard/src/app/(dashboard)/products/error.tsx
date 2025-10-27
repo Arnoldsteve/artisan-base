@@ -2,8 +2,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@repo/ui';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@repo/ui';
+import { Button } from '@repo/ui/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@repo/ui/components/ui/card';
 
 export default function Error({
   error,
@@ -13,7 +13,6 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error(error);
   }, [error]);
 
@@ -25,13 +24,11 @@ export default function Error({
             </CardHeader>
             <CardContent>
                 <p>An unexpected error occurred while loading the product data. You can try again.</p>
-                {/* For debugging, you can uncomment this in development */}
                 <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
             </CardContent>
             <CardFooter>
                  <Button
                     onClick={
-                    // Attempt to recover by trying to re-render the segment
                     () => reset()
                     }
                 >

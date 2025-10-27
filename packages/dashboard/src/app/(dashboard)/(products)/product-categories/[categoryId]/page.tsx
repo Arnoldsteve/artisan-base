@@ -1,15 +1,20 @@
 import Link from "next/link";
-import { Button } from "@repo/ui";
-import { Badge } from "@repo/ui";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@repo/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Badge } from "@repo/ui/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { createServerApiClient } from "@/lib/server-api";
 import { Category } from "@/types/categories";
 import { Product } from "@/types/products";
@@ -24,11 +29,11 @@ export default async function CategoryProductsPage({
   // Await the params and searchParams
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  
+
   let category: Category | null = null;
   let products: Product[] = [];
   let totalProducts = 0;
-  
+
   const currentPage = parseInt(resolvedSearchParams.page || "1");
   const itemsPerPage = 20;
   const searchQuery = resolvedSearchParams.search || "";
@@ -46,12 +51,14 @@ export default async function CategoryProductsPage({
     const res = await serverApi.get<{
       data: { categoryId: string; product: Product; productId: string }[];
       totalCount?: number;
-    }>(`/dashboard/product-categories/by-category/${resolvedParams["category-id"]}?${queryParams}`);
+    }>(
+      `/dashboard/product-categories/by-category/${resolvedParams["category-id"]}?${queryParams}`
+    );
 
     console.log("Fetched products on server:", res);
 
     // Handle API response
-    const entries = Array.isArray(res) ? res : res?.data ?? [];
+    const entries = Array.isArray(res) ? res : (res?.data ?? []);
     products = entries.map((entry: any) => entry.product);
     totalProducts = res?.totalCount || products.length;
 
@@ -68,11 +75,10 @@ export default async function CategoryProductsPage({
         category = {
           id: resolvedParams["category-id"],
           name: "Category Products",
-          description: "Products for this category"
+          description: "Products for this category",
         } as Category;
       }
     }
-
   } catch (error) {
     console.error("Failed to fetch category/products:", error);
   }
@@ -133,7 +139,9 @@ export default async function CategoryProductsPage({
             </div>
             <Button type="submit">Search</Button>
             {searchQuery && (
-              <Link href={`/product-categories/${resolvedParams["category-id"]}`}>
+              <Link
+                href={`/product-categories/${resolvedParams["category-id"]}`}
+              >
                 <Button variant="outline">Clear</Button>
               </Link>
             )}
@@ -146,9 +154,12 @@ export default async function CategoryProductsPage({
         <div>
           {searchQuery ? (
             <span>
-              Found {totalProducts} product{totalProducts !== 1 ? 's' : ''} 
+              Found {totalProducts} product{totalProducts !== 1 ? "s" : ""}
               {totalProducts > 0 && (
-                <> (showing {startItem}-{endItem})</>
+                <>
+                  {" "}
+                  (showing {startItem}-{endItem})
+                </>
               )}
             </span>
           ) : (
@@ -157,7 +168,7 @@ export default async function CategoryProductsPage({
             </span>
           )}
         </div>
-        
+
         {totalPages > 1 && (
           <div className="text-sm text-gray-600">
             Page {currentPage} of {totalPages}
@@ -186,7 +197,10 @@ export default async function CategoryProductsPage({
                       {product.name}
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-xs truncate" title={product.description}>
+                      <div
+                        className="max-w-xs truncate"
+                        title={product.description}
+                      >
                         {product.description}
                       </div>
                     </TableCell>
@@ -227,10 +241,9 @@ export default async function CategoryProductsPage({
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-gray-500">
-              {searchQuery 
+              {searchQuery
                 ? `No products found matching "${searchQuery}"`
-                : "No products found in this category"
-              }
+                : "No products found in this category"}
             </p>
           </CardContent>
         </Card>
@@ -239,18 +252,14 @@ export default async function CategoryProductsPage({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Link 
-            href={`/dashboard/product-categories/${resolvedParams["category-id"]}?page=${Math.max(1, currentPage - 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+          <Link
+            href={`/dashboard/product-categories/${resolvedParams["category-id"]}?page=${Math.max(1, currentPage - 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`}
           >
-            <Button 
-              variant="outline" 
-              disabled={currentPage <= 1}
-              size="sm"
-            >
+            <Button variant="outline" disabled={currentPage <= 1} size="sm">
               Previous
             </Button>
           </Link>
-          
+
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNum;
@@ -263,11 +272,11 @@ export default async function CategoryProductsPage({
               } else {
                 pageNum = currentPage - 2 + i;
               }
-              
+
               return (
-                <Link 
+                <Link
                   key={pageNum}
-                  href={`/product-categories/${resolvedParams["category-id"]}?page=${pageNum}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+                  href={`/product-categories/${resolvedParams["category-id"]}?page=${pageNum}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`}
                 >
                   <Button
                     variant={currentPage === pageNum ? "default" : "outline"}
@@ -280,12 +289,12 @@ export default async function CategoryProductsPage({
               );
             })}
           </div>
-          
-          <Link 
-            href={`/product-categories/${resolvedParams["category-id"]}?page=${Math.min(totalPages, currentPage + 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+
+          <Link
+            href={`/product-categories/${resolvedParams["category-id"]}?page=${Math.min(totalPages, currentPage + 1)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`}
           >
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               disabled={currentPage >= totalPages}
               size="sm"
             >

@@ -8,11 +8,11 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-  Button,
-  Checkbox,
-  Badge,
-  Input,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/sheet";
+import { Input } from "@repo/ui/components/ui/input";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
+import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { Category } from "@/types/categories";
 import { Product } from "@/types/products";
@@ -127,7 +127,8 @@ export function CategoryAssignmentSheet({
         <SheetHeader>
           <SheetTitle>Assign Categories</SheetTitle>
           <SheetDescription>
-            Assign categories to <span className="font-semibold">{product?.name}</span>
+            Assign categories to{" "}
+            <span className="font-semibold">{product?.name}</span>
           </SheetDescription>
         </SheetHeader>
 

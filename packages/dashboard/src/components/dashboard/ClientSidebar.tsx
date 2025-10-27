@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarProvider, SidebarInset } from "@repo/ui";
+import { SidebarProvider, SidebarInset } from "@repo/ui/components/ui/sidebar";
 import { AppSidebar } from "../sidebar/app-sidebar";
 import { useEffect, useState } from "react";
 

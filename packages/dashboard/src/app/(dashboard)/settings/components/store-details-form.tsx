@@ -1,18 +1,35 @@
-'use client';
+"use client";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@repo/ui";
-import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@repo/ui";
-
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@repo/ui/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/ui/form";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
 interface StoreDetailsFormProps {
   initialData: { name: string };
 }
 
 const formSchema = z.object({
-  name: z.string().min(3, { message: "Store name must be at least 3 characters." }),
+  name: z
+    .string()
+    .min(3, { message: "Store name must be at least 3 characters." }),
 });
 
 export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
@@ -25,7 +42,7 @@ export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // Mock an API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Updated Store Details:", values);
     toast.success("Store details have been updated.");
   };

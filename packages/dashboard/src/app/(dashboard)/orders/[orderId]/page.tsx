@@ -9,28 +9,26 @@ import { OrderSummaryCard } from "../components/order-summary-card";
 import { notFound } from "next/navigation";
 import { formatMoney } from "@/utils/money";
 
-
-/**
- * OrderDetailPage displays the details of a single order.
- * It fetches data on the server using a request-specific, authenticated API client.
- */
 export default async function OrderDetailPage({
   params,
-}:{ params: Promise<{orderId:string}>
+}: {
+  params: Promise<{ orderId: string }>;
 }) {
-  const resolvedParams = await params
+  const resolvedParams = await params;
 
-  // 2. CREATE A NEW, AUTHENTICATED API CLIENT FOR THIS REQUEST
   const serverApi = await createServerApiClient();
 
   let order: Order;
 
   try {
-    // 3. USE THE NEW SERVER CLIENT TO FETCH DATA
-    order = await serverApi.get<Order>(`/dashboard/orders/${resolvedParams.orderId}`);
+    order = await serverApi.get<Order>(
+      `/dashboard/orders/${resolvedParams.orderId}`
+    );
   } catch (error) {
-    console.error(`Failed to fetch order ${resolvedParams.orderId} on the server:`, error);
-    // If the API call fails (e.g., returns 404), trigger Next.js's 404 page.
+    console.error(
+      `Failed to fetch order ${resolvedParams.orderId} on the server:`,
+      error
+    );
     notFound();
   }
 
@@ -49,7 +47,6 @@ export default async function OrderDetailPage({
             <CardContent className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                {/* Use a helper to format Decimal to currency string */}
                 <span>{formatMoney(Number(order.subtotal))}</span>
               </div>
               <div className="flex justify-between">
@@ -69,18 +66,10 @@ export default async function OrderDetailPage({
           </Card>
         </div>
         <div className="space-y-6">
-         <OrderActions
+          <OrderActions
             orderId={order.id}
             initialStatus={order.status}
             initialPaymentStatus={order.paymentStatus}
-            onUpdateStatusClick={() => {
-              console.log("Update status clicked", order.id);
-              // TODO: open modal or call API
-            }}
-            onUpdatePaymentStatusClick={() => {
-              console.log("Update payment status clicked", order.id);
-              // TODO: open modal or call API
-            }}
           />
           <OrderSummaryCard order={order} />
         </div>

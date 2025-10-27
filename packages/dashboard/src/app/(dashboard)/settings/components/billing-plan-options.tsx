@@ -7,9 +7,8 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from "@repo/ui";
-import { Button } from "@repo/ui";
-// Import the spinner icon
+} from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Plan } from "@/types/billing";
 
@@ -46,7 +45,6 @@ const getFeatureText = (features: any): string[] => {
   if (features.dedicatedAccountManager) text.push("Dedicated Account Manager");
   return text;
 };
-
 
 export function BillingPlanOptions({
   availablePlans: propPlans,

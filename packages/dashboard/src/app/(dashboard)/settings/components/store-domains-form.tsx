@@ -1,11 +1,27 @@
-'use client';
+"use client";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@repo/ui";
-import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@repo/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@repo/ui/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
 
 interface StoreDomainsFormProps {
   initialData: {
@@ -16,7 +32,7 @@ interface StoreDomainsFormProps {
 
 const formSchema = z.object({
   // You might add validation for a valid domain name here later
-  customDomain: z.string().optional().or(z.literal('')),
+  customDomain: z.string().optional().or(z.literal("")),
 });
 
 export function StoreDomainsForm({ initialData }: StoreDomainsFormProps) {
@@ -28,7 +44,7 @@ export function StoreDomainsForm({ initialData }: StoreDomainsFormProps) {
   const { isSubmitting, isDirty } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Updated Domain Info:", values);
     toast.success("Domain settings have been saved.");
   };
@@ -46,11 +62,19 @@ export function StoreDomainsForm({ initialData }: StoreDomainsFormProps) {
               <FormLabel>Subdomain</FormLabel>
               <FormControl>
                 <div className="flex items-center">
-                  <Input disabled value={initialData.subdomain} className="rounded-r-none" />
-                  <span className="px-4 h-10 flex items-center bg-muted border border-l-0 rounded-r-md text-sm text-muted-foreground">.yourplatform.com</span>
+                  <Input
+                    disabled
+                    value={initialData.subdomain}
+                    className="rounded-r-none"
+                  />
+                  <span className="px-4 h-10 flex items-center bg-muted border border-l-0 rounded-r-md text-sm text-muted-foreground">
+                    .yourplatform.com
+                  </span>
                 </div>
               </FormControl>
-              <p className="text-xs text-muted-foreground mt-1">The subdomain cannot be changed after creation.</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                The subdomain cannot be changed after creation.
+              </p>
             </FormItem>
             <FormField
               control={form.control}
@@ -61,7 +85,9 @@ export function StoreDomainsForm({ initialData }: StoreDomainsFormProps) {
                   <FormControl>
                     <Input placeholder="e.g., www.mystore.com" {...field} />
                   </FormControl>
-                  <p className="text-xs text-muted-foreground mt-1">Point your domain's CNAME record to your subdomain.</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Point your domain's CNAME record to your subdomain.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

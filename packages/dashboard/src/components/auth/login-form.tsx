@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Input, Label } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
 import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
 import { useAuthContext } from "@/contexts/auth-context";
@@ -10,22 +12,13 @@ import { useFormHandler } from "@/hooks/use-form-handler"; // <-- IMPORT THE NEW
 export function LoginForm() {
   const { login } = useAuthContext();
 
-  // --- Form State ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { isLoading, error, handleSubmit } = useFormHandler(login, {
+    successMessage: "Login successful! Redirecting...",
+    onSuccessRedirect: "/home",
+  });
 
-  // --- Form Submission Logic (handled by the hook) ---
-  const { isLoading, error, handleSubmit } = useFormHandler(
-    // 1. Pass the async function to be executed on submit
-    login, 
-    // 2. Pass the options for what to do on success
-    {
-      successMessage: "Login successful! Redirecting...",
-      onSuccessRedirect: "/home",
-    }
-  );
-
-  // The wrapper function that collects form data and calls the hook's handleSubmit
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     handleSubmit({ email, password });

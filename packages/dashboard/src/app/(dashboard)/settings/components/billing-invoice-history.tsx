@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,8 +14,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui";
-import { Button } from "@repo/ui"; // Import Spinner
+} from "@repo/ui/components/ui/table";
+import { Button } from "@repo/ui/components/ui/button";
 import { Download } from "lucide-react";
 import { Invoice } from "@/types/billing";
 
@@ -32,14 +32,11 @@ export function BillingInvoiceHistory({
   invoices: propInvoices,
 }: BillingInvoiceHistoryProps) {
   // Call the specific hook to get invoice data, hydrated by server props
-  const {
-    data: invoices,
-    isLoading,
-    error,
-  } = useBillingInvoices(propInvoices);
+  const { data: invoices, isLoading, error } = useBillingInvoices(propInvoices);
 
   // Call the specific hook to get the download mutation function and its state
-  const { mutate: downloadInvoice, isPending: isDownloading } = useDownloadInvoice();
+  const { mutate: downloadInvoice, isPending: isDownloading } =
+    useDownloadInvoice();
 
   if (error) {
     return (

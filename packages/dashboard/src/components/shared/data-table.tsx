@@ -8,9 +8,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui";
-import { Button } from "@repo/ui";
-import { Skeleton } from "@repo/ui";
+} from "@repo/ui/components/ui/table";
+import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { DataTablePagination } from "./data-table-footer";
 
 // --- The Main DataTable Component ---
@@ -21,7 +20,7 @@ interface DataTableProps<TData> {
   totalCount: number;
 }
 
-export function DataTable<TData>({ table, totalCount  }: DataTableProps<TData>) {
+export function DataTable<TData>({ table, totalCount }: DataTableProps<TData>) {
   return (
     <div>
       {/* Table */}
@@ -138,4 +137,3 @@ export function DataTableSkeleton() {
     </div>
   );
 }
-

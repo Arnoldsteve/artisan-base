@@ -1,30 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Input, Label } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
 import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
 import { useAuthContext } from "@/contexts/auth-context";
-import { useFormHandler } from "@/hooks/use-form-handler"; // <-- IMPORT GENERIC HOOK
+import { useFormHandler } from "@/hooks/use-form-handler";
 
 export function SignupForm() {
   const { signUp } = useAuthContext();
 
-  // --- Form State ---
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState(""); // Also good to add lastName
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // --- Form Submission Logic (handled by the hook) ---
-  const { isLoading, error, handleSubmit } = useFormHandler(
-    signUp,
-    {
-      successMessage: "Account created! Please create your first store to continue.",
-      // After signup, redirect to a page to create the first tenant/store
-      onSuccessRedirect: "/setup-organization", 
-    }
-  );
+  const { isLoading, error, handleSubmit } = useFormHandler(signUp, {
+    successMessage:
+      "Account created! Please create your first store to continue.",
+    onSuccessRedirect: "/setup-organization",
+  });
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

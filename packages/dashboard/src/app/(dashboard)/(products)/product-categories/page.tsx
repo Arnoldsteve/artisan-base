@@ -8,7 +8,6 @@ export default async function ProductCategoriesPage() {
   let initialData: PaginatedResponse<Category>;
 
   try {
-    // Create server API client
     const serverApi = await createServerApiClient();
 
     // Fetch categories with product counts

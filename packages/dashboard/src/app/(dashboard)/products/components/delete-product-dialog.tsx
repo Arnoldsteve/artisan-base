@@ -1,4 +1,3 @@
-// src/components/dashboard/products/delete-product-dialog.tsx
 "use client";
 
 import {
@@ -10,8 +9,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@repo/ui";
-import { Button } from "@repo/ui";
+} from "@repo/ui/components/ui/alert-dialog";
+import { Button } from "@repo/ui/components/ui/button";
 
 interface DeleteProductDialogProps {
   isOpen: boolean;

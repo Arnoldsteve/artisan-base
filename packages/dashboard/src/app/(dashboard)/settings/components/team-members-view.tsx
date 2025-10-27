@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
-import { Button } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
 import { Plus } from "lucide-react";
 import { DataTable } from "@/components/shared/data-table";
 import { columns } from "./columns";
@@ -28,7 +28,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
       name: data.email.split("@")[0],
       email: data.email,
       role: data.role,
-      isActive: true, 
+      isActive: true,
       createdAt: new Date().toLocaleDateString(),
     };
     setUsers((current) => [newUser, ...current]);

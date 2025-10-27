@@ -1,3 +1,4 @@
+'use client';
 // This is your new public API export file
 
 export * from "./components/ui/button";

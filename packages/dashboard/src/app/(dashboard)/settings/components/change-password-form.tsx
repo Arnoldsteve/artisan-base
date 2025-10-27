@@ -4,8 +4,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@repo/ui";
-import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@repo/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
+import {Input} from "@repo/ui/components/ui/input";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@repo/ui/components/ui/form";
+
 
 // Zod schema with a refinement to ensure the new passwords match
 const formSchema = z.object({

@@ -10,23 +10,24 @@ import {
   Pencil,
   Tag,
 } from "lucide-react";
-import { Button } from "@repo/ui";
-import { Badge } from "@repo/ui";
-import { Checkbox } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@repo/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui";
+} from "@repo/ui/components/ui/dropdown-menu";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@repo/ui/components/ui/avatar";
 import { Product } from "@/types/products";
 import { formatMoney } from "@/utils/money";
 import { ProductTableMeta, TableWithMeta } from "@/types/table-meta";
 
-// REMOVE the global module declaration completelyREMOVE the global module declaration completely
-// No more: declare module "@tanstack/react-table" { ... }
 
 export const columns: ColumnDef<Product>[] = [
   {
