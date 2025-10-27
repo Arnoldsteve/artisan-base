@@ -2,7 +2,12 @@
 
 import { createServerApiClient } from "@/lib/server-api";
 import { PageHeader } from "@/components/shared/page-header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/ui/tabs";
 
 // Main section components
 import { TeamMembersView } from "./team-members-view";
@@ -18,7 +23,6 @@ import { BillingInvoiceHistory } from "./billing-invoice-history";
 import { ProfileResponse, User } from "@/types/users";
 import { Tenant } from "@/types/tenant";
 import { Plan, Subscription, Invoice } from "@/types/billing";
-import { TeamMember } from "@/types/team";
 
 // ------------------ ProfileSettings ------------------
 interface ProfileSettingsProps {
@@ -98,47 +102,22 @@ export function BillingSettings({
 export async function SettingsPageContent() {
   const serverApi = await createServerApiClient();
 
-  // Default empty states
   let profileData: ProfileResponse = {} as ProfileResponse;
-  // let plans: Plan[] = [];
-  // let subscription: Subscription | null = null;
-  // let invoices: Invoice[] = [];
-  // let teamMembers: TeamMember[] = [];
 
   try {
     const results = await Promise.allSettled([
       serverApi.get<{ data: ProfileResponse }>("/auth/profile"),
-      // serverApi.get<{ data: Plan[] }>("/dashboard/billing/plans"),
-      // serverApi.get<{ data: Subscription }>("/dashboard/billing/subscription"),
-      // serverApi.get<{ data: Invoice[] }>("/dashboard/billing/invoices"),
-      // serverApi.get<{ data: TeamMember[] }>("/dashboard/team"),
     ]);
 
     if (results[0].status === "fulfilled") profileData = results[0].value.data;
-    // if (results[1].status === "fulfilled") plans = results[1].value.data;
-    // if (results[2].status === "fulfilled") subscription = results[2].value.data;
-    // if (results[2].status === "fulfilled") invoices = results[2].value.data;
-    // if (results[3].status === "fulfilled") teamMembers = results[3].value.data;
   } catch (error) {
     console.error("Failed to fetch settings data on server:", error);
   }
 
   return (
     <div className="p-4 md-p-8 lg-p-10">
-      <PageHeader
-        title="Settings"
-        description="Manage your account, store, and billing settings."
-      />
-
-      <Tabs defaultValue="billing" className="mt-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="profile" className="mt-4">
-          <ProfileSettings user={profileData?.user ?? null} />
-        </TabsContent>
-      </Tabs>
+      <PageHeader title="Settings" />
+      <ProfileSettings user={profileData?.user ?? null} />
     </div>
   );
 }
