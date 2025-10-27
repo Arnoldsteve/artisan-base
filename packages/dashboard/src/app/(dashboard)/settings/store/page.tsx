@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 
 export default function StorePage() {
   const { tenants, isLoading } = useAuthContext();
+
   if (isLoading) {
     return <p>Loading store information...</p>;
   }
@@ -21,7 +22,7 @@ export default function StorePage() {
   return (
     <>
       <PageHeader title="Store Settings" />
-      <StoreSettings tenant={activeTenant} />;
+      <StoreSettings tenant={activeTenant} />
     </>
   );
 }
