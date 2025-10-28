@@ -32,11 +32,12 @@ export default async function OrderDetailPage({
     notFound();
   }
 
-  console.log("Fetched order on server:", order);
+  // console.log("Fetched order on server:", order);
 
   return (
-    <div className="p-4 md:p-8 lg:p-10">
+    <>
       <PageHeader title={`Order ${order.orderNumber}`} />
+    <div className="p-4 md:p-8 lg:p-10">
       <div className="mt-4 grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <OrderItemsTable items={order.items || []} />
@@ -75,5 +76,7 @@ export default async function OrderDetailPage({
         </div>
       </div>
     </div>
+    
+    </>
   );
 }

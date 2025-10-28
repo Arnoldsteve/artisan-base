@@ -35,6 +35,8 @@ export default async function CustomerDetailPage({
   const customerOrders = customer.orders || [];
 
   return (
+    <>
+    <PageHeader title={`${customer.firstName} ${customer.lastName}`}/>
     <div className="p-4 md:p-8 lg:p-10">
       <PageHeader title={`${customer.firstName} ${customer.lastName}`}>
         <Link href={`/customers/${customer.id}/edit`}>
@@ -54,5 +56,6 @@ export default async function CustomerDetailPage({
         </div>
       </div>
     </div>
+    </>
   );
 }
