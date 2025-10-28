@@ -6,38 +6,33 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
+import { useFormHandler } from "@/hooks/use-form-handler";
+import { authService } from "@/services/auth-service";
 
-export default function ForgotPassword() {
+export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setMessage("");
-
-    try {
-      // Simulate sending reset request
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setMessage(
-        "If an account exists with that email, a reset link has been sent."
-      );
-    } catch (error) {
-      setMessage("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
+  const { isLoading, error, handleSubmit } = useFormHandler(
+    authService.forgotPassword,
+    {
+      successMessage:
+        "If an account exists with that email, a reset link has been sent. The link will expire in 30 minutes.",
     }
+  );
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSubmit({ email });
   };
 
   return (
     <CardWrapper
       headerLabel="Reset your password"
       backButtonLabel="Back to login"
-      backButtonHref="/"
+      backButtonHref="/auth/login"
     >
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
         className="space-y-5 px-1 sm:px-2 md:px-0 text-center"
       >
         <p className="text-sm text-muted-foreground">
@@ -61,9 +56,9 @@ export default function ForgotPassword() {
           />
         </div>
 
-        {message && (
-          <p className="text-sm bg-muted/50 p-3 rounded-md text-center">
-            {message}
+        {error && (
+          <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+            {error}
           </p>
         )}
 

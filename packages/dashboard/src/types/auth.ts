@@ -1,5 +1,5 @@
-import { User } from './users'; 
-import { Tenant } from './tenant'; 
+import { User } from "./users";
+import { Tenant } from "./tenant";
 
 export interface LoginDto {
   email: string;
@@ -17,11 +17,20 @@ export interface LoginResponse {
   message: string;
   accessToken: string;
   user: User;
-  organizations: Tenant[]; 
+  organizations: Tenant[];
 }
 
 export interface SignUpResponse {
   message: string;
   accessToken: string;
   user: User;
+}
+
+export interface ForgotPassword {
+  email: string;
+}
+
+export interface ResetPassword {
+  token : string,
+  newPassword: string
 }
