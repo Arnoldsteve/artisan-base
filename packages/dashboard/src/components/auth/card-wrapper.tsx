@@ -28,14 +28,20 @@ export function CardWrapper({
   backButtonAction,
 }: CardWrapperProps) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      <Card className="w-[450px] shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Your App</CardTitle>
-          <CardDescription>{headerLabel}</CardDescription>
+    <div className="flex items-center justify-center min-h-screen bg-muted/40 p-4">
+      <Card className="w-full max-w-[380px] sm:max-w-[420px] md:max-w-[450px] shadow-lg rounded-2xl">
+        <CardHeader className="text-center space-y-1">
+          <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">
+            Artisan Base
+          </CardTitle>
+          <CardDescription className="text-sm sm:text-base text-muted-foreground">
+            {headerLabel}
+          </CardDescription>
         </CardHeader>
-        <CardContent>{children}</CardContent>
-        <CardFooter>
+
+        <CardContent className="px-4 sm:px-6">{children}</CardContent>
+
+        <CardFooter className="px-4 sm:px-6">
           {backButtonHref ? (
             <Button variant="link" className="w-full font-normal" asChild>
               <Link href={backButtonHref}>{backButtonLabel}</Link>

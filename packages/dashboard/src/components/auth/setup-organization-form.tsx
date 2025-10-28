@@ -61,7 +61,6 @@ export function SetupOrganizationForm() {
     handleSubmit({ storeName, subdomain });
   };
 
-  // --- THIS IS THE FIX ---
   // Define SubdomainFeedback as a proper component (capitalized).
   // It has implicit access to all the state and hooks from SetupOrganizationForm.
   function SubdomainFeedback() {

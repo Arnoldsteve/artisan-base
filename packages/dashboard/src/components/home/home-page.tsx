@@ -30,11 +30,9 @@ export default function HomePage() {
 
   return (
     <>
-      {/* PageHeader spans full width automatically */}
       <PageHeader title="Dashboard Overview">
       </PageHeader>
 
-      {/* Content area with padding */}
       <div className="px-8 space-y-4">
         <DashboardKpiCards
           kpis={kpis}

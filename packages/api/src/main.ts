@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,7 +11,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000', 
       'http://localhost:3002', 
-      'https://artisan-base-storefront.vercel.app'
+      'https://artisan-base-storefront.vercel.app',
+      'https://artisan-base-dashboard.vercel.app'
     ],
     methods: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
     // allowedHeaders: 'Content-Type, Accept, Authorization, x-tenant-id',
@@ -27,7 +29,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true, // <-- Add this property
+      transform: true,
     }),
   );
   app.use(cookieParser());

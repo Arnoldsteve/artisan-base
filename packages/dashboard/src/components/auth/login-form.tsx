@@ -7,7 +7,7 @@ import { Label } from "@repo/ui/components/ui/label";
 import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
 import { useAuthContext } from "@/contexts/auth-context";
-import { useFormHandler } from "@/hooks/use-form-handler"; // <-- IMPORT THE NEW HOOK
+import { useFormHandler } from "@/hooks/use-form-handler"; 
 
 export function LoginForm() {
   const { login } = useAuthContext();
@@ -28,7 +28,7 @@ export function LoginForm() {
     <CardWrapper
       headerLabel="Welcome back! Please sign in to continue."
       backButtonLabel="Don't have an account? Create one"
-      backButtonHref="/signup"
+      backButtonHref="/auth/signup"
     >
       <form onSubmit={handleFormSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -43,7 +43,16 @@ export function LoginForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <a
+              href="/auth/forgot-password"
+              className="text-xs sm:text-sm text-primary hover:underline"
+            >
+              {" "}
+              Forgot password?
+            </a>
+          </div>
           <Input
             id="password"
             type="password"
