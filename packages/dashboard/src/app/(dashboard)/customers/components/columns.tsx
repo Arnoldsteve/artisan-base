@@ -11,7 +11,6 @@ import { formatMoney } from '@/utils/money';
 import { formatDate } from '@/utils/date';
 import { CustomerTableMeta, TableWithMeta } from '@/types/table-meta';
 
-// Define the shape of our customer data for the table
 export type CustomerColumn = {
   id: string;
   name: string;

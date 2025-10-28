@@ -102,22 +102,26 @@ export function BillingSettings({
 export async function SettingsPageContent() {
   const serverApi = await createServerApiClient();
 
-  let profileData: ProfileResponse = {} as ProfileResponse;
+  let user: User | null = null;
 
   try {
-    const results = await Promise.allSettled([
-      serverApi.get<{ data: ProfileResponse }>("/auth/profile"),
-    ]);
+    const response = await serverApi.get<{ data: ProfileResponse }>(
+      "/auth/profile"
+    );
+    // console.log("Server response", response);
 
-    if (results[0].status === "fulfilled") profileData = results[0].value.data;
+    user = (response as any).user ?? null;
+    // console.log("User data", user);
   } catch (error) {
     console.error("Failed to fetch settings data on server:", error);
   }
 
   return (
-    <div className="p-4 md-p-8 lg-p-10">
-      <PageHeader title="Settings" />
-      <ProfileSettings user={profileData?.user ?? null} />
-    </div>
+    <>
+      <PageHeader title={`${user?.firstName} ${user?.lastName}`} />
+      <div className="p-4 md:p-8 lg:p-10">
+        <ProfileSettings user={user} />
+      </div>
+    </>
   );
 }

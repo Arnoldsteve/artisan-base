@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { Product } from "@/types/products";
+import { Card } from "@repo/ui/components/ui/card";
 
 interface DataTableViewOptionsProps {
   table: Table<Product>;
@@ -18,7 +19,7 @@ interface DataTableViewOptionsProps {
 
 export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
   return (
-    <div className="flex items-center gap-4 py-4">
+    <Card className="flex flex-wrap items-center rounded-sm shadow-none gap-4 py-4 px-4 my-8">
       <Input
         placeholder="Filter by name... "
         value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -50,6 +51,6 @@ export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
       <Button variant="outline" onClick={() => table.resetColumnFilters()}>
         Clear Filters
       </Button>
-    </div>
+    </Card>
   );
 }

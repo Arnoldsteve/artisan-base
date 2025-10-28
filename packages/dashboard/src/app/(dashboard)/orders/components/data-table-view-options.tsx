@@ -11,6 +11,7 @@ import {
 } from "@repo/ui/components/ui/select";
 import { Button } from "@repo/ui/components/ui/button";
 import { Order, OrderStatus, PaymentStatus } from "@/types/orders";
+import { Card } from "@repo/ui/components/ui/card";
 
 interface OrdersTableViewOptionsProps {
   table: Table<Order>;
@@ -35,8 +36,8 @@ const PAYMENT_STATUSES: PaymentStatus[] = [
 
 export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-4 py-4">
-      {/* 🔍 Search input */}
+    <Card className="flex flex-wrap items-center rounded-sm shadow-none gap-4 py-4 px-4 my-8">
+      {/* Search input */}
       <Input
         placeholder="Search by order # or customer..."
         value={
@@ -48,7 +49,7 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
         className="max-w-sm"
       />
 
-      {/* 📦 Order status filter */}
+      {/* Order status filter */}
       <Select
         value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
         onValueChange={(value) =>
@@ -70,7 +71,7 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
         </SelectContent>
       </Select>
 
-      {/* 💳 Payment status filter */}
+      {/* Payment status filter */}
       <Select
         value={
           (table.getColumn("paymentStatus")?.getFilterValue() as string) ??
@@ -95,10 +96,10 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
         </SelectContent>
       </Select>
 
-      {/* 🧹 Clear filters */}
+      {/* Clear filters */}
       <Button variant="outline" onClick={() => table.resetColumnFilters()}>
         Clear Filters
       </Button>
-    </div>
+    </Card>
   );
 }
