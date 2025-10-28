@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,13 +26,7 @@ import {
 
 export default function ResetPassword() {
   const searchParams = useSearchParams();
-  const [token, setToken] = useState<string | null>(null);
-
-   useEffect(() => {
-    const token = searchParams.get("token");
-    console.log("Token from URL:", token);
-    setToken(token);
-  }, [searchParams]);
+  const token = searchParams.get("token");
 
   const form = useForm<ResetPasswordSchema>({
     resolver: zodResolver(resetPasswordSchema),
@@ -44,13 +37,14 @@ export default function ResetPassword() {
     },
   });
 
-  const { isLoading, error, handleSubmit: handleReset } = useFormHandler(
-    authService.resetPassword,
-    {
-      successMessage: "Password has been reset successfully! You can now log in.",
-      onSuccessRedirect: "/auth/login",
-    }
-  );
+  const {
+    isLoading,
+    error,
+    handleSubmit: handleReset,
+  } = useFormHandler(authService.resetPassword, {
+    successMessage: "Password has been reset successfully! You can now log in.",
+    onSuccessRedirect: "/auth/login",
+  });
 
   const onSubmit = (data: ResetPasswordSchema) => {
     if (!token) {
@@ -68,7 +62,7 @@ export default function ResetPassword() {
     <CardWrapper
       headerLabel="Reset your password"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref="/"
     >
       <Form {...form}>
         <form
@@ -80,7 +74,9 @@ export default function ResetPassword() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm sm:text-base">New Password</FormLabel>
+                <FormLabel className="text-sm sm:text-base">
+                  New Password
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
@@ -100,7 +96,9 @@ export default function ResetPassword() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm sm:text-base">Confirm New Password</FormLabel>
+                <FormLabel className="text-sm sm:text-base">
+                  Confirm New Password
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
