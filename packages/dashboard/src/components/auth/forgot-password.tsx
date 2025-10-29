@@ -29,7 +29,7 @@ export function ForgotPasswordPage() {
     <CardWrapper
       headerLabel="Reset your password"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref="/"
     >
       <form
         onSubmit={handleFormSubmit}

@@ -46,7 +46,7 @@ export function ChangePasswordForm() {
   };
 
   return (
-    <Card>
+    <Card className="rounded-sm shadow-xs">
       <CardHeader>
         <CardTitle>Change Password</CardTitle>
         <CardDescription>

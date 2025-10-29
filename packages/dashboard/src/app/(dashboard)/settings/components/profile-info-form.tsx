@@ -62,7 +62,7 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
   };
 
   return (
-    <Card className="bg-[#ffffff]">
+    <Card className="bg-[#ffffff] rounded-sm shadow-xs">
       <CardHeader>
         <CardTitle>Personal Information</CardTitle>
         <CardDescription>Update your first and last name.</CardDescription>
