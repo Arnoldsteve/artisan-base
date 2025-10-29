@@ -48,7 +48,7 @@ export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
   };
 
   return (
-    <Card>
+    <Card className="rounded-sm shadow-xs bg-[#fff]">
       <CardHeader>
         <CardTitle>Store Details</CardTitle>
         <CardDescription>Update the name of your store.</CardDescription>

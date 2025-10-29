@@ -19,7 +19,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/ui";
+} from "@repo/ui/components/ui/form";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 
@@ -50,7 +50,7 @@ export function StoreDomainsForm({ initialData }: StoreDomainsFormProps) {
   };
 
   return (
-    <Card>
+    <Card  className="rounded-sm shadow-xs bg-[#fff]">
       <CardHeader>
         <CardTitle>Domains</CardTitle>
         <CardDescription>Manage your store's domains.</CardDescription>
