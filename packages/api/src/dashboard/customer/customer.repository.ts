@@ -7,7 +7,7 @@ import { ICustomerRepository } from './interfaces/customer-repository.interface'
 import { PrismaClient, Customer, Order, Address } from '../../../generated/tenant';
 import { Decimal } from '@prisma/client/runtime/library';
 
-const CACHE_TTL = 10 * 1000; // 10 seconds for demo
+const CACHE_TTL = 10 * 1000;
 
 // Define a type for the rich Customer object returned by our specific query
 type CustomerWithRelations = Customer & {

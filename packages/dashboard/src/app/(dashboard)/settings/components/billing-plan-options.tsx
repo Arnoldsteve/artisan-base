@@ -91,7 +91,7 @@ export function BillingPlanOptions({
   }
 
   return (
-    <Card>
+    <Card className="rounded-sm shadow-xs bg-[#fff]">
       <CardHeader>
         <CardTitle>Upgrade Your Plan</CardTitle>
         <CardDescription>
@@ -104,7 +104,7 @@ export function BillingPlanOptions({
           const isThisPlanPending = isPending && variables === plan.id;
 
           return (
-            <Card key={plan.id} className="flex flex-col">
+            <Card key={plan.id} className="flex flex-col rounded-sm shadow-xs bg-[#fff]">
               <CardHeader>
                 <CardTitle>{plan.name}</CardTitle>
                 <CardDescription className="flex items-baseline gap-2">

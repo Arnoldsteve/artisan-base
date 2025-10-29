@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto'; // <-- IMPORT
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AssignCategoryDto } from '../product-category/dto/assign-category.dto';

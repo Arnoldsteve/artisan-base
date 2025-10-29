@@ -14,6 +14,8 @@ import { Subscription } from "@/types/billing";
 
 // Import the specific hook for fetching the subscription
 import { useBillingSubscription } from "@/hooks/use-billing";
+import { formatMoney } from "@/utils/money";
+import { formatDate } from "@/utils/date";
 
 interface BillingCurrentPlanProps {
   subscription?: Subscription | null;
@@ -86,20 +88,12 @@ export function BillingCurrentPlan({
     );
   };
 
-  const formattedDate = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(currentPeriodEnd));
+  const formattedDate = formatDate(currentPeriodEnd);
 
-  // NOTE: Prisma Decimal is a string, so we must parse it to a number for formatting.
-  const price = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(parseFloat(plan.price));
+  const price = formatMoney(plan.price, "USD");
 
   return (
-    <Card>
+    <Card className="rounded-sm shadow-xs bg-[#fff]">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>

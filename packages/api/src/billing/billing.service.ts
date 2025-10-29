@@ -1,4 +1,10 @@
-import { Injectable, Inject, Scope, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Scope,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { RequestWithTenant } from '../common/interfaces/request-with-tenant.interface';
@@ -34,24 +40,28 @@ export class BillingService {
     return this.billingRepository.getSubscription(tenantId);
   }
 
-  async createCheckoutSession(dto: CreateCheckoutDto): Promise<{ checkoutUrl: string }> {
+  async createCheckoutSession(
+    dto: CreateCheckoutDto,
+  ): Promise<{ checkoutUrl: string }> {
     const { id: tenantId } = this.request.tenant;
     // Logger.log("tenantId in billing service", tenantId);
-    
+
     // The service is responsible for validating the plan
     const planToSubscribe = await this.plansService.findPlanById(dto.planId);
     // Logger.log("planToSubscribe from billing service", planToSubscribe)
     if (!planToSubscribe || !planToSubscribe.providerPlanId) {
-      throw new NotFoundException(`Plan with ID '${dto.planId}' not found or not configured for payment.`);
+      throw new NotFoundException(
+        `Plan with ID '${dto.planId}' not found or not configured for payment.`,
+      );
     }
 
-    Logger.debug("log before finding tenant")
+    Logger.debug('log before finding tenant');
     let tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       include: { owner: true },
     });
-    Logger.log("tenant from billing service", tenant)
-    
+    Logger.log('tenant from billing service', tenant);
+
     if (!tenant) {
       throw new NotFoundException(`Authenticated tenant could not be found.`);
     }
@@ -89,20 +99,25 @@ export class BillingService {
     return { checkoutUrl: session.url };
   }
 
-  
   async fulfillSubscription(session: Stripe.Checkout.Session): Promise<void> {
     const tenantId = session.client_reference_id;
     const stripeSubscriptionId = session.subscription as string;
-    
+
     if (!tenantId || !stripeSubscriptionId) {
-      this.logger.error(`Webhook Error: Missing tenantId or subscriptionId in session`, session);
+      this.logger.error(
+        `Webhook Error: Missing tenantId or subscriptionId in session`,
+        session,
+      );
       return;
     }
 
-    this.logger.log(`Fulfilling subscription for tenant: ${tenantId}, Stripe Sub ID: ${stripeSubscriptionId}`);
-    
-    const subscriptionDetails: Stripe.Subscription = await this.stripeService.getSubscription(stripeSubscriptionId);
-    
+    this.logger.log(
+      `Fulfilling subscription for tenant: ${tenantId}, Stripe Sub ID: ${stripeSubscriptionId}`,
+    );
+
+    const subscriptionDetails: Stripe.Subscription =
+      await this.stripeService.getSubscription(stripeSubscriptionId);
+
     const priceId = subscriptionDetails.items.data[0].price.id;
 
     const plan = await this.prisma.subscriptionPlan.findUnique({
@@ -110,7 +125,9 @@ export class BillingService {
     });
 
     if (!plan) {
-      this.logger.error(`Webhook Error: Could not find internal plan matching Stripe Price ID: ${priceId}`);
+      this.logger.error(
+        `Webhook Error: Could not find internal plan matching Stripe Price ID: ${priceId}`,
+      );
       return;
     }
 
@@ -119,10 +136,14 @@ export class BillingService {
       planId: plan.id,
       provider: 'STRIPE',
       providerSubscriptionId: subscriptionDetails.id,
-      currentPeriodStart: new Date((subscriptionDetails as any).current_period_start * 1000),
-      currentPeriodEnd: new Date((subscriptionDetails as any).current_period_end * 1000),
+      currentPeriodStart: new Date(
+        (subscriptionDetails as any).current_period_start * 1000,
+      ),
+      currentPeriodEnd: new Date(
+        (subscriptionDetails as any).current_period_end * 1000,
+      ),
       payment: {
-        amount: plan.price.toString(), 
+        amount: plan.price.toString(),
         currency: (session.currency || 'usd').toUpperCase(),
         providerTransactionId: session.payment_intent as string,
       },
@@ -131,14 +152,17 @@ export class BillingService {
     // 2. Delegate the entire database transaction to the repository.
     await this.billingRepository.fulfillSubscription(tenantId, fulfillmentData);
 
-    this.logger.log(`Successfully fulfilled subscription for tenant: ${tenantId}`);
+    this.logger.log(
+      `Successfully fulfilled subscription for tenant: ${tenantId}`,
+    );
   }
-
 
   async getInvoicesForCurrentTenant(): Promise<any[]> {
-    this.logger.log(`Fetching invoices for tenant: ${this.request.tenant.id}`);
-    // In a real app, you would fetch this from Stripe or another provider.
-    return []; // Return an empty array for now
+    const { id: tenantId } = this.request.tenant;
+    this.logger.log(`Fetching invoices for tenant: ${tenantId}`);
+
+    const invoices =
+      await this.billingRepository.getInvoicesForTenant(tenantId);
+    return invoices;
   }
 }
-

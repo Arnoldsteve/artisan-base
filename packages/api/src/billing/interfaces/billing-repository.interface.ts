@@ -1,9 +1,6 @@
 import { TenantSubscription } from '@prisma/client/management';
 
-/**
- * Defines the standardized data structure needed to fulfill a subscription.
- * The service layer is responsible for creating this object from webhook data.
- */
+
 export interface FulfillSubscriptionData {
   planId: string;
   provider: string;
@@ -17,17 +14,24 @@ export interface FulfillSubscriptionData {
   };
 }
 
-export interface IBillingRepository {
-  /**
-   * Finds a tenant's subscription by their ID.
-   */
-  getSubscription(tenantId: string): Promise<TenantSubscription | null>;
+export interface InvoiceRecord {
+  id: string;
+  invoiceNumber: string;
+  amount: string;
+  currency: string;
+  status: string;
+  provider: string;
+  providerTransactionId: string;
+  billingPeriodStart: Date;
+  billingPeriodEnd: Date;
+  issuedAt: Date;
+  planName: string;
+}
 
-  /**
-   * Performs a transaction to create/update a subscription, create a payment log,
-   * and update the tenant's status.
-   */
+export interface IBillingRepository {
+  getSubscription(tenantId: string): Promise<TenantSubscription | null>;
   fulfillSubscription(tenantId: string, data: FulfillSubscriptionData): Promise<void>;
+  getInvoicesForTenant(tenantId: string): Promise<InvoiceRecord[]>;
 }
 
 export const IBillingRepository = Symbol('IBillingRepository');

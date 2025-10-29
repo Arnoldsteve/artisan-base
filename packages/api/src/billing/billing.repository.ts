@@ -60,4 +60,32 @@ export class BillingRepository implements IBillingRepository {
       });
     });
   }
+
+
+  async getInvoicesForTenant(tenantId: string): Promise<any[]> {
+  const payments = await this.prisma.subscriptionPayment.findMany({
+    where: { tenantId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      subscription: {
+        include: { plan: true },
+      },
+    },
+  });
+
+  return payments.map((p, index) => ({
+    id: p.id,
+    invoiceNumber: `INV-${new Date(p.createdAt).getFullYear()}-${String(index + 1).padStart(4, '0')}`,
+    amount: p.amount.toString(),
+    currency: p.currency,
+    status: p.status,
+    provider: p.provider,
+    providerTransactionId: p.providerTransactionId,
+    billingPeriodStart: p.subscription.currentPeriodStart,
+    billingPeriodEnd: p.subscription.currentPeriodEnd,
+    issuedAt: p.createdAt,
+    planName: p.subscription.plan.name,
+  }));
+}
+
 }

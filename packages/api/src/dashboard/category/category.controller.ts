@@ -31,10 +31,6 @@ export class CategoryController {
 
   @Post()
   create(@Body(ValidationPipe) createCategoryDto: CreateCategoryDto) {
-    Logger.log(
-      `Creating category with data: ${JSON.stringify(createCategoryDto)}`,
-      'CategoryController',
-    );
     return this.categoryService.create(createCategoryDto);
   }
 

@@ -52,7 +52,7 @@ export function BillingInvoiceHistory({
   }
 
   return (
-    <Card>
+    <Card className="rounded-sm shadow-xs bg-[#fff]">
       <CardHeader>
         <CardTitle>Invoice History</CardTitle>
         <CardDescription>View and download your past invoices.</CardDescription>

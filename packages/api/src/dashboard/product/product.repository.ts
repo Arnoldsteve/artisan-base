@@ -31,19 +31,6 @@ export class ProductRepository implements IProductRepository {
     return this.prismaClient;
   }
 
-  // async create(dto: CreateProductDto) {
-  //   try {
-  //     const prisma = await this.getPrisma();
-  //     const product = await prisma.product.create({ data: dto });
-  //     this.invalidateCache();
-  //     return product;
-  //   } catch (err) {
-  //     if (err.code === 'P2002' && err.meta?.target?.includes('slug')) {
-  //       throw new Error('Slug already exists');
-  //     }
-  //     throw err;
-  //   }
-  // }
   async create(dto: CreateProductDto) {
     try {
       const prisma = await this.getPrisma();
