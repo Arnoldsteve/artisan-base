@@ -1,5 +1,5 @@
-import { IsEmail, IsOptional, IsString, IsEnum } from 'class-validator';
-import { TenantRole } from 'generated/tenant';
+import { IsEmail, IsOptional, IsString, IsEnum, MinLength } from 'class-validator';
+import { DashboardUserRole } from 'generated/tenant';
 
 export class CreateDashboardUserDto {
   @IsEmail()
@@ -13,6 +13,11 @@ export class CreateDashboardUserDto {
   @IsString()
   lastName?: string;
 
-  @IsEnum(TenantRole)
-  role: TenantRole = TenantRole.STAFF;
+  @IsEnum(DashboardUserRole)
+  role: DashboardUserRole = DashboardUserRole.STAFF;
+
+  // Temporary direct password creation field
+  @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters long.' })
+  password: string;
 }

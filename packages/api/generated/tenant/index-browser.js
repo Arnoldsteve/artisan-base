@@ -348,7 +348,7 @@ exports.PaymentProvider = exports.$Enums.PaymentProvider = {
   CRYPTO: 'CRYPTO'
 };
 
-exports.TenantRole = exports.$Enums.TenantRole = {
+exports.DashboardUserRole = exports.$Enums.DashboardUserRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
   MANAGER: 'MANAGER',

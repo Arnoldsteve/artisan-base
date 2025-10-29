@@ -24,7 +24,7 @@ import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 
 @Controller('dashboard/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@UseInterceptors(TransformResponseInterceptor)
+// @UseInterceptors(TransformResponseInterceptor)
 export class DashboardUsersController {
   constructor(private readonly usersService: DashboardUsersService) {}
 
