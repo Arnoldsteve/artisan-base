@@ -8,7 +8,7 @@ import { DataTable } from "@/components/shared/data-table";
 import { columns } from "./columns";
 import { InviteUserDialog } from "./invite-user-dialog";
 import { UserTableMeta } from "@/types/table-meta";
-import { TenantRole } from "@/types/roles";
+import { DashboardUserRole } from "@/types/roles";
 import { DashboardUserData } from "@/types/users";
 import { PageHeader } from "@/components/shared/page-header";
 
@@ -21,7 +21,7 @@ export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
   const [users, setUsers] = useState(initialUsers);
 
   // --- Local State Handlers ---
-  const handleUserInvited = (data: { email: string; role: TenantRole }) => {
+  const handleUserInvited = (data: { email: string; role: DashboardUserRole }) => {
     // Create a new user object for our mock state
     const newUser: DashboardUserData = {
       id: `user_${Math.random().toString(36).substr(2, 9)}`,

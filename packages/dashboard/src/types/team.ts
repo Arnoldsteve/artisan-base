@@ -1,4 +1,4 @@
-import { TenantRole } from "./roles";
+import { DashboardUserRole } from "./roles";
 import { Tenant } from "./tenant";
 
 export interface TeamMember {
@@ -6,7 +6,7 @@ export interface TeamMember {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  role: TenantRole;         
+  role: DashboardUserRole;         
   isActive: boolean;
   avatarUrl?: string | null;
   createdAt: string;       

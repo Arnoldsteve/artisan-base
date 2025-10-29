@@ -1,7 +1,7 @@
 import { createServerApiClient } from "@/lib/server-api";
 import { PageHeader } from "@/components/shared/page-header";
-import { TeamMembersView } from "../components/team-members-view";
 import { TeamMember } from "@/types/team";
+import { TeamMembersView } from "./components/team-members-view";
 
 export default async function TeamPage() {
   const api = await createServerApiClient();
@@ -9,7 +9,7 @@ export default async function TeamPage() {
   let teamMembers: TeamMember[] = [];
 
   try {
-    const response = await api.get<{ data: TeamMember[] }>("/dashboard/team");
+    const response = await api.get<{ data: TeamMember[] }>("/dashboard/users");
     teamMembers = response.data || [];
   } catch (error) {
     console.error("Failed to load team members:", error);

@@ -1,4 +1,4 @@
-import { TenantRole } from './roles';
+import { DashboardUserRole } from './roles';
 import { Tenant } from './tenant';
 
 export interface User {
@@ -7,7 +7,7 @@ export interface User {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  role?: TenantRole ; 
+  role?: DashboardUserRole ; 
 }
 
 
@@ -20,7 +20,8 @@ export type DashboardUserData = {
   id: string;
   name: string | null;
   email: string;
-  role: TenantRole;
+  password?:string;
+  role: DashboardUserRole;
   isActive: boolean;
   createdAt: string;
 };

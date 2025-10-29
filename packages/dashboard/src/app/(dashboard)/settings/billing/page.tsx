@@ -2,9 +2,9 @@
 
 import { createServerApiClient } from "@/lib/server-api";
 import { PageHeader } from "@/components/shared/page-header";
-import { BillingCurrentPlan } from "../components/billing-current-plan";
-import { BillingPlanOptions } from "../components/billing-plan-options";
-import { BillingInvoiceHistory } from "../components/billing-invoice-history";
+import { BillingCurrentPlan } from "./components/billing-current-plan";
+import { BillingPlanOptions } from "./components/billing-plan-options";
+import { BillingInvoiceHistory } from "./components/billing-invoice-history";
 
 export default async function BillingPage() {
   const api = await createServerApiClient();

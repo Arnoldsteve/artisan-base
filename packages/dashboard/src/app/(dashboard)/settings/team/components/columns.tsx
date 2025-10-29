@@ -4,9 +4,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
-import { CellAction } from "./cell-action";
 import { UserTableMeta, TableWithMeta } from "@/types/table-meta";
 import { DashboardUserData } from "@/types/users";
+import { CellAction } from "./cell-action";
 
 // REMOVE the global module declaration completely
 // No more: declare module '@tanstack/react-table' { ... }
@@ -56,19 +56,14 @@ export const columns: ColumnDef<DashboardUserData>[] = [
     header: "Role",
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
-      const variant: "default" | "secondary" | "outline" =
-        role === "OWNER"
-          ? "default"
-          : role === "ADMIN"
-            ? "secondary"
-            : "outline";
       return (
-        <Badge variant={variant} className="capitalize">
+        <span className="capitalize text-sm">
           {role.toLowerCase()}
-        </Badge>
+        </span>
       );
     },
   },
+
   {
     accessorKey: "isActive",
     header: "Status",
@@ -84,11 +79,32 @@ export const columns: ColumnDef<DashboardUserData>[] = [
   {
     accessorKey: "createdAt",
     header: "Date Added",
+    cell: ({ row }) => {
+      const createdAt = row.getValue("createdAt") as string | Date;
+      const date = new Date(createdAt);
+      // Format the date as you like
+      const formatted = date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      const time = date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return (
+        <div>
+          <div>{formatted}</div>
+          <div className="text-xs text-muted-foreground">{time}</div>
+        </div>
+      );
+    },
   },
+
   {
     id: "actions",
     cell: ({ row, table }) => {
-      // Type assertion for the table with UserTableMeta
       const typedTable = table as TableWithMeta<
         DashboardUserData,
         UserTableMeta<DashboardUserData>

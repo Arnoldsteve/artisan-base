@@ -4,7 +4,7 @@ export enum PlatformUserRole {
   STAFF = 'STAFF',
 }
 
-export enum TenantRole  {
+export enum DashboardUserRole  {
   OWNER = "OWNER",
   ADMIN = "ADMIN",
   MANAGER = "MANAGER",

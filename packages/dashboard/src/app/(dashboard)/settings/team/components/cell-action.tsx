@@ -17,7 +17,6 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ data, onUserDeleted }) => {
   const [open, setOpen] = useState(false);
   
-  // This is now a simple synchronous function
   const onDeleteConfirm = () => {
     toast.success(`User "${data.email}" has been deleted.`);
     onUserDeleted(data.id); 

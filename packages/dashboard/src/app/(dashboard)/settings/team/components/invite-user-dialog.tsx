@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/ui/select";
-import { TenantRole } from "@/types/roles";
+import { DashboardUserRole } from "@/types/roles";
 import {
   inviteMemberSchema,
   InviteMemberSchema,
@@ -51,7 +51,7 @@ export function InviteUserDialog({
     defaultValues: {
       userName: "",
       email: "",
-      role: TenantRole.VIEWER,
+      role: DashboardUserRole.VIEWER,
     },
   });
 
@@ -121,7 +121,7 @@ export function InviteUserDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(TenantRole).map((role) => (
+                      {Object.values(DashboardUserRole).map((role) => (
                         <SelectItem key={role} value={role}>
                           {role.charAt(0).toUpperCase() +
                             role.slice(1).toLowerCase()}

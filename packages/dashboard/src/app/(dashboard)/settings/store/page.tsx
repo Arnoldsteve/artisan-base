@@ -3,10 +3,10 @@
 import React from "react";
 import { useAuthContext } from "@/contexts/auth-context";
 import { PageHeader } from "@/components/shared/page-header";
-import { StoreDetailsForm } from "../components/store-details-form";
-import { StoreDomainsForm } from "../components/store-domains-form";
-import { StoreDangerZone } from "../components/store-danger-zone";
 import { Tenant } from "@/types/tenant";
+import { StoreDetailsForm } from "./components/store-details-form";
+import { StoreDomainsForm } from "./components/store-domains-form";
+import { StoreDangerZone } from "./components/store-danger-zone";
 
 export default function StorePage() {
   const { tenants, isLoading } = useAuthContext();
@@ -31,7 +31,6 @@ export default function StorePage() {
     <>
       <PageHeader title="Store Settings" />
       <div className="px-8 space-y-6">
-        {/* Responsive layout — stacked on small, 2 columns on md+ */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StoreDetailsForm initialData={{ name: tenant.name }} />
           <StoreDomainsForm
