@@ -8,9 +8,6 @@ import { UserTableMeta, TableWithMeta } from "@/types/table-meta";
 import { DashboardUserData } from "@/types/users";
 import { CellAction } from "./cell-action";
 
-// REMOVE the global module declaration completely
-// No more: declare module '@tanstack/react-table' { ... }
-
 export const columns: ColumnDef<DashboardUserData>[] = [
   {
     id: "select",

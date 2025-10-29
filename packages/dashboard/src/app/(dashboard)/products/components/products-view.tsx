@@ -181,7 +181,6 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
 
   const handleSaveChanges = (formData: ProductFormData) => {
     if (formData.id) {
-      // update product → can be partial
       const { id, ...updateData } = formData;
       updateProduct(
         { id, data: updateData },
@@ -190,7 +189,6 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
         }
       );
     } else {
-      // create product → must match CreateProductDto
       const { id, ...createData } = formData;
       createProduct(createData as CreateProductDto, {
         onSuccess: () => setIsSheetOpen(false),

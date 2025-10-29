@@ -1,79 +1,143 @@
 "use client";
 
-import React, { useState } from "react";
-import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
+import React, { useMemo, useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  PaginationState,
+} from "@tanstack/react-table";
 import { Button } from "@repo/ui/components/ui/button";
-import { Plus } from "lucide-react";
-import { DataTable } from "@/components/shared/data-table";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { columns } from "./columns";
-import { InviteUserDialog } from "./invite-user-dialog";
 import { UserTableMeta } from "@/types/table-meta";
 import { DashboardUserRole } from "@/types/roles";
-import { DashboardUserData } from "@/types/users";
+import { CreateDashboardUserDto, DashboardUserData } from "@/types/users";
 import { PageHeader } from "@/components/shared/page-header";
+import { PaginatedResponse } from "@/types/shared";
+import {
+  useCreateDashboardUser,
+  useDashboardUsers,
+  useDeleteDashboardUser,
+  useUpdateDashboardUser,
+} from "@/hooks/use-dashboard-users";
+import { EditAddUserSheet } from "./edit-add-user-sheet";
+import { DashboardUserFormData } from "@/validation-schemas/dashboardUserSchema";
 
 interface TeamMembersViewProps {
-  initialUsers: DashboardUserData[];
+  initialUsersData: PaginatedResponse<DashboardUserData>;
 }
 
-export function TeamMembersView({ initialUsers }: TeamMembersViewProps) {
+export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
+  const [users, setUsers] = useState(initialUsersData);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [users, setUsers] = useState(initialUsers);
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
-  // --- Local State Handlers ---
-  const handleUserInvited = (data: { email: string; role: DashboardUserRole }) => {
-    // Create a new user object for our mock state
-    const newUser: DashboardUserData = {
-      id: `user_${Math.random().toString(36).substr(2, 9)}`,
-      name: data.email.split("@")[0],
-      email: data.email,
-      role: data.role,
-      isActive: true,
-      createdAt: new Date().toLocaleDateString(),
-    };
-    setUsers((current) => [newUser, ...current]);
-    setIsInviteDialogOpen(false); // Also close dialog on success
+  // --- UI State for Modals/Sheets ---
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [dashboardUserToDelete, setDashboardUserToDelete] =
+    useState<DashboardUserData | null>(null);
+  const [dashboardUserToEdit, setDashboardUserToEdit] =
+    useState<DashboardUserData | null>(null);
+
+  const {
+    data: paginatedResponse,
+    isLoading,
+    isError,
+    isFetching,
+  } = useDashboardUsers(pageIndex + 1, pageSize, "", initialUsersData);
+
+  const { mutate: createDashboardUser, isPending: isCreating } =
+    useCreateDashboardUser();
+  const { mutate: updateDashboardUser, isPending: isUpdating } =
+    useUpdateDashboardUser();
+  const { mutate: deleteDashboardUser, isPending: isDeleting } =
+    useDeleteDashboardUser();
+
+  const dashboardUsers = useMemo(
+    () => paginatedResponse?.data || [],
+    [paginatedResponse]
+  );
+
+  const totalDashboardUsers = paginatedResponse?.meta?.total ?? 0;
+ 
+
+  const openAddSheet = () => {
+    // setUsers(null);
+    setIsSheetOpen(true);
+  };
+
+  const openEditSheet = () => {
+    setUsers(initialUsersData);
+    setIsSheetOpen(true);
   };
 
   const handleUserDeleted = (userId: string) => {
-    setUsers((current) => current.filter((u) => u.id !== userId));
+    // setUsers((current) => current.filter((u) => u.id !== userId));
   };
 
-  // --- Create the meta object with proper typing ---
   const tableMeta: UserTableMeta<DashboardUserData> = {
     handleUserDeleted,
-    // You can add handleUserUpdated here in the future
+    openEditSheet,
   };
 
-  // Create the table instance
   const table = useReactTable({
-    data: users,
+    data: dashboardUsers,
     columns,
+    pageCount:
+      paginatedResponse?.meta?.totalPages ??
+      (totalDashboardUsers > 0 ? Math.ceil(totalDashboardUsers / pageSize) : 1),
+    manualPagination: true,
+    // state: {
+    //   pagination {pageIndex, pageSize},
+    // }
     getCoreRowModel: getCoreRowModel(),
-    // Pass the properly typed meta object
     meta: tableMeta,
   });
+
+  const handleSaveChanges = (formData: DashboardUserFormData) => {
+    if (formData.id) {
+      const { id, ...updateData } = formData;
+      updateDashboardUser(
+        { id, data: updateData },
+        {
+          onSuccess: () => setIsSheetOpen(false),
+        }
+      );
+    } else {
+      const { id, ...createData } = formData;
+      (createDashboardUser(createData as CreateDashboardUserDto),
+        {
+          onSuccess: () => setIsSheetOpen(false),
+        });
+    }
+  };
+
+  if (isFetching || (isLoading && !initialUsersData)) {
+    return <DataTableSkeleton />;
+  }
+
+  if (isError) {
+    return <div className="p-8 text-red-500">Failed to load product data.</div>;
+  }
 
   return (
     <>
       <PageHeader title="Team Members">
-        <Button onClick={() => setIsInviteDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Invite User
-        </Button>
+        <Button onClick={openAddSheet}> Invite User</Button>
       </PageHeader>
 
-      <div className="px-8 space-y-4">
-        <div className=" bg-[#fff] mt-4">
-          <DataTable table={table} totalCount={0} />
-        </div>
+      <DataTable table={table} totalCount={totalDashboardUsers} />
 
-        <InviteUserDialog
-          isOpen={isInviteDialogOpen}
-          onClose={() => setIsInviteDialogOpen(false)}
-          onSuccess={handleUserInvited}
-        />
-      </div>
+      <EditAddUserSheet
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        dashboardUser={dashboardUserToEdit}
+        onSave={handleSaveChanges}
+        isPending={isCreating || isUpdating}
+      />
     </>
   );
 }

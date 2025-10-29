@@ -35,11 +35,8 @@ export default async function TeamPage() {
           />
         ) : (
           <p className="text-muted-foreground">
-            {/* Could not load team members. Please try again later. */}
+            Could not load team members. Please try again later.
 
-            {/* Decy statement */}
-
-            The team members ui coming soon
           </p>
         )}
       </div>
