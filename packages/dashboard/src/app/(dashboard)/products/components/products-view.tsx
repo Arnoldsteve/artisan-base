@@ -101,15 +101,14 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
 
   // --- Action Handlers ---
   const openDeleteDialog = (product: Product) => setProductToDelete(product);
-
-  const openEditSheet = (product: Product) => {
-    setProductToEdit(product);
-    setIsSheetOpen(true);
-  };
   const openAddSheet = () => {
     setProductToEdit(null);
     setIsSheetOpen(true);
   };
+  const openEditSheet = (product: Product) => {
+    setProductToEdit(product);
+    setIsSheetOpen(true);
+  };  
   const handleCategoryChange = (product: Product) => {
     setProductForCategory(product);
     setIsCategorySheetOpen(true);

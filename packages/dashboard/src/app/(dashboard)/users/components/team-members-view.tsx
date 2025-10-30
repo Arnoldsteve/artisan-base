@@ -67,12 +67,10 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
     // setUsers(null);
     setIsSheetOpen(true);
   };
-
-  const openEditSheet = () => {
-    setUsers(initialUsersData);
+  const openEditSheet = (user: DashboardUser) => {
+    setDashboardUserToEdit(user);
     setIsSheetOpen(true);
   };
-
   const handleUserDeleted = (userId: string) => {
     // setUsers((current) => current.filter((u) => u.id !== userId));
   };

@@ -1,50 +1,79 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { MoreHorizontal, Edit, Trash } from 'lucide-react';
+import { useState } from "react";
+import { toast } from "sonner";
+import { MoreHorizontal, Edit, Trash } from "lucide-react";
 
-import { Button } from '@repo/ui/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui/components/ui/dropdown-menu';
-import { AlertModal } from '@/components/modals/alert-modal';
-import { DashboardUser } from '@/types/users';
+import { Button } from "@repo/ui/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/ui/dropdown-menu";
+
+import { DashboardUser } from "@/types/users";
+import { ConfirmActionModal } from "@/components/modals/confirm-action-modal";
 
 interface CellActionProps {
   data: DashboardUser;
-  onUserDeleted: (userId: string) => void;
+  onEditUser: (user: DashboardUser) => void;
+  onDeleteUser: (userId: string) => void; // renamed for clarity
+  isDeleting?: boolean; // pass from parent for consistency
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data, onUserDeleted }) => {
-  const [open, setOpen] = useState(false);
-  
-  const onDeleteConfirm = () => {
-    toast.success(`User "${data.email}" has been deleted.`);
-    onUserDeleted(data.id); 
-    setOpen(false);
+export const CellAction: React.FC<CellActionProps> = ({
+  data,
+  onEditUser,
+  onDeleteUser,
+  isDeleting = false,
+}) => {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const canPerformAction = data.role !== "STAFF";
+
+  const handleConfirmDelete = () => {
+    onDeleteUser(data.id);
+    setIsDeleteOpen(false);
+    toast.success(`User "${data.firstName}" has been deleted.`);
   };
-  
-  const canPerformAction = data.role !== 'OWNER';
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onDeleteConfirm}
-        loading={false} // No loading state needed for mock data
+      <ConfirmActionModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        loading={isDeleting}
+        title={`Delete user "${data.firstName} ${data.lastName}"?`}
+        description="This action will permanently remove the user and all related data. It cannot be undone."
+        actionLabel="Delete"
+        variant="destructive"
       />
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => toast.info("Edit functionality coming soon.")}>
+
+          <DropdownMenuItem onClick={() => onEditUser(data)}>
             <Edit className="mr-2 h-4 w-4" /> Edit User
           </DropdownMenuItem>
+
           <DropdownMenuSeparator />
+
           {canPerformAction && (
-             <DropdownMenuItem onClick={() => setOpen(true)} className="text-red-600 focus:text-red-600">
+            <DropdownMenuItem
+              onClick={() => setIsDeleteOpen(true)}
+              className="text-red-600 focus:text-red-600"
+            >
               <Trash className="mr-2 h-4 w-4" /> Delete
             </DropdownMenuItem>
           )}

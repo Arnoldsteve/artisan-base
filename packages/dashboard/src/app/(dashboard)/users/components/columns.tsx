@@ -110,7 +110,8 @@ export const columns: ColumnDef<DashboardUser>[] = [
       return (
         <CellAction
           data={row.original}
-          onUserDeleted={typedTable.options.meta!.handleUserDeleted}
+          onEditUser={typedTable.options.meta!.openEditSheet}
+          onDeleteUser={typedTable.options.meta!.handleUserDeleted}
         />
       );
     },

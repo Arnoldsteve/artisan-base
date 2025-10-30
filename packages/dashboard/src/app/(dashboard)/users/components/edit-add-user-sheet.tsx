@@ -75,7 +75,7 @@ export function EditAddUserSheet({
           id: dashboardUser.id,
           email: dashboardUser.email,
           password: dashboardUser.password,
-          firstName: dashboardUser.lastName,
+          firstName: dashboardUser.firstName,
           lastName: dashboardUser.lastName,
           role: dashboardUser.role,
         });
