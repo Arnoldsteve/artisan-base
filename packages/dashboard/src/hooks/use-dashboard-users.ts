@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PaginatedResponse } from "@/types/shared";
 import {
   CreateDashboardUserDto,
-  DashboardUserData,
+  DashboardUser,
   UpdateDashboardUserDto,
 } from "@/types/users";
 import { toast } from "sonner";
@@ -16,11 +16,11 @@ export function useDashboardUsers(
   page = 1,
   limit = 10,
   search = "",
-  initialData?: PaginatedResponse<DashboardUserData>
+  initialData?: PaginatedResponse<DashboardUser>
 ) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
-  return useQuery<PaginatedResponse<DashboardUserData>>({
+  return useQuery<PaginatedResponse<DashboardUser>>({
     queryKey: [...DASHBOARD_USER_QUERY_KEY, { page, limit, search }],
     queryFn: () => dashboardUserService.getAll(page, limit, search),
     enabled: !isAuthLoading && isAuthenticated,
@@ -32,11 +32,13 @@ export function useDashboardUsers(
 export function useCreateDashboardUser() {
   const queryClient = useQueryClient();
 
-  return useMutation<DashboardUserData, Error, CreateDashboardUserDto>({
+  return useMutation<DashboardUser, Error, CreateDashboardUserDto>({
     mutationFn: (data: CreateDashboardUserDto) =>
       dashboardUserService.create(data),
     onSuccess: (newUser) => {
-      toast.success(`User "${newUser.name || newUser.email}" created successfully.`);
+      toast.success(
+        `User "${[newUser.firstName, newUser.lastName].filter(Boolean).join(" ") || newUser.email}" created successfully.`
+      );
       queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
     },
     onError: (error: Error) => {
@@ -44,7 +46,6 @@ export function useCreateDashboardUser() {
     },
   });
 }
-
 
 /** Update user */
 export function useUpdateDashboardUser() {
@@ -54,7 +55,9 @@ export function useUpdateDashboardUser() {
     mutationFn: ({ id, data }: { id: string; data: UpdateDashboardUserDto }) =>
       dashboardUserService.update(id, data),
     onSuccess: (updatedUser) => {
-      toast.success(`User "${updatedUser.name || updatedUser.email}" updated successfully.`);
+      toast.success(
+        `User "${[updatedUser.firstName, updatedUser.lastName].filter(Boolean).join(" ") || updatedUser.email} updated successfully.`
+      );
       queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
     },
     onError: (error: Error) => {

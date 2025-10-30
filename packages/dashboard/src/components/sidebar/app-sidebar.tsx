@@ -117,10 +117,6 @@ const data = {
           url: "/settings/store",
         },
         {
-          title: "Team",
-          url: "/settings/team",
-        },
-        {
           title: "Billing",
           url: "/settings/billing",
         },
@@ -145,7 +141,7 @@ const data = {
   projects: [
     {
       name: "Users",
-      url: "#",
+      url: "/users",
       icon: Users,
     },
   ],

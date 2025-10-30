@@ -5,10 +5,10 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { UserTableMeta, TableWithMeta } from "@/types/table-meta";
-import { DashboardUserData } from "@/types/users";
+import { DashboardUser } from "@/types/users";
 import { CellAction } from "./cell-action";
 
-export const columns: ColumnDef<DashboardUserData>[] = [
+export const columns: ColumnDef<DashboardUser>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -33,7 +33,7 @@ export const columns: ColumnDef<DashboardUserData>[] = [
     header: "User",
     cell: ({ row }) => {
       const user = row.original;
-      const name = user.name || user.email;
+     const name = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
       const fallback = name.substring(0, 2).toUpperCase();
       return (
         <div className="flex items-center gap-3">
@@ -103,8 +103,8 @@ export const columns: ColumnDef<DashboardUserData>[] = [
     id: "actions",
     cell: ({ row, table }) => {
       const typedTable = table as TableWithMeta<
-        DashboardUserData,
-        UserTableMeta<DashboardUserData>
+        DashboardUser,
+        UserTableMeta<DashboardUser>
       >;
 
       return (

@@ -11,7 +11,7 @@ import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { columns } from "./columns";
 import { UserTableMeta } from "@/types/table-meta";
 import { DashboardUserRole } from "@/types/roles";
-import { CreateDashboardUserDto, DashboardUserData } from "@/types/users";
+import { CreateDashboardUserDto, DashboardUser } from "@/types/users";
 import { PageHeader } from "@/components/shared/page-header";
 import { PaginatedResponse } from "@/types/shared";
 import {
@@ -24,7 +24,7 @@ import { EditAddUserSheet } from "./edit-add-user-sheet";
 import { DashboardUserFormData } from "@/validation-schemas/dashboardUserSchema";
 
 interface TeamMembersViewProps {
-  initialUsersData: PaginatedResponse<DashboardUserData>;
+  initialUsersData: PaginatedResponse<DashboardUser>;
 }
 
 export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
@@ -38,9 +38,9 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
   // --- UI State for Modals/Sheets ---
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [dashboardUserToDelete, setDashboardUserToDelete] =
-    useState<DashboardUserData | null>(null);
+    useState<DashboardUser | null>(null);
   const [dashboardUserToEdit, setDashboardUserToEdit] =
-    useState<DashboardUserData | null>(null);
+    useState<DashboardUser | null>(null);
 
   const {
     data: paginatedResponse,
@@ -62,7 +62,6 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
   );
 
   const totalDashboardUsers = paginatedResponse?.meta?.total ?? 0;
- 
 
   const openAddSheet = () => {
     // setUsers(null);
@@ -78,7 +77,7 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
     // setUsers((current) => current.filter((u) => u.id !== userId));
   };
 
-  const tableMeta: UserTableMeta<DashboardUserData> = {
+  const tableMeta: UserTableMeta<DashboardUser> = {
     handleUserDeleted,
     openEditSheet,
   };

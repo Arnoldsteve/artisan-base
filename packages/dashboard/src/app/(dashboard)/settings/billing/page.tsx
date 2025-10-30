@@ -19,9 +19,9 @@ export default async function BillingPage() {
   const subscription = subscriptionRes.data || null;
   const invoices = invoicesRes.data || [];
 
-  console.log("plans data from the plans", plans);
-  console.log("plans data from the subscription", subscription);
-  console.log("plans data from the invoices", invoices);
+  // console.log("plans data from the plans", plans);
+  // console.log("plans data from the subscription", subscription);
+  // console.log("plans data from the invoices", invoices);
 
   return (
     <>

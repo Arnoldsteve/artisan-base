@@ -1,10 +1,10 @@
 
 import { PageHeader } from "@/components/shared/page-header";
-import { BillingCurrentPlan } from "./billing-current-plan";
-import { BillingPlanOptions } from "./billing-plan-options";
-import { BillingInvoiceHistory } from "./billing-invoice-history";
 
 import { Plan, Subscription, Invoice } from "@/types/billing";
+import { BillingCurrentPlan } from "../billing/components/billing-current-plan";
+import { BillingPlanOptions } from "../billing/components/billing-plan-options";
+import { BillingInvoiceHistory } from "../billing/components/billing-invoice-history";
 
 
 interface BillingSettingsProps {

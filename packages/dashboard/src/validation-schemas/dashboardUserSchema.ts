@@ -1,14 +1,16 @@
 import { z } from "zod";
 import { DashboardUserRole } from "@/types/roles";
 
-export const inviteMemberSchema = z.object({
+export const DashboardUserSchema = z.object({
   id: z.string().optional(),
   firstName: z
     .string()
-    .min(2, { message: "firstName must be at least 2 characters." }),
+    .min(2, { message: "firstName must be at least 2 characters." })
+    .optional(),
   lastName: z
     .string()
-    .min(2, { message: "lastName must be at least 2 characters." }),
+    .min(2, { message: "lastName must be at least 2 characters." })
+    .optional(),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z
     .string()
@@ -17,7 +19,7 @@ export const inviteMemberSchema = z.object({
   role: z.nativeEnum(DashboardUserRole, {
     errorMap: () => ({ message: "Please select a role." }),
   }),
-  isActive: z.boolean().default(true),
+  // isActive: z.boolean(),
 });
 
-export type DashboardUserFormData = z.infer<typeof inviteMemberSchema>;
+export type DashboardUserFormData = z.infer<typeof DashboardUserSchema>;

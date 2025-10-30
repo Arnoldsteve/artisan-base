@@ -219,9 +219,7 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
 
   return (
     <div>
-      <PageHeader
-        title="Products"
-      >
+      <PageHeader title="Products">
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>
 

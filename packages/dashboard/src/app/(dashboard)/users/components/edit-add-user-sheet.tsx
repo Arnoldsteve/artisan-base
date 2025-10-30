@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 import { Button } from "@repo/ui/components/ui/button";
 import {
@@ -33,17 +32,18 @@ import {
 } from "@repo/ui/components/ui/select";
 
 import {
-  inviteMemberSchema,
+  DashboardUserSchema,
   DashboardUserFormData,
 } from "@/validation-schemas/dashboardUserSchema";
 import { DashboardUserRole } from "@/types/roles";
 import { DashboardUser } from "@/types/users";
+import { capitalizeFirstLetter } from "@/utils/string-utils";
 
 interface EditAddUserSheetProps {
   isOpen: boolean;
   onClose: () => void;
   dashboardUser: Partial<DashboardUser> | null;
-  onSave: (dashboardUser: DashboardUser) => void;
+  onSave: (dashboardUser: DashboardUserFormData) => void;
   isPending?: boolean;
 }
 
@@ -57,13 +57,13 @@ export function EditAddUserSheet({
   const isNewDashboardUser = !dashboardUser?.id;
 
   const form = useForm<DashboardUserFormData>({
-    resolver: zodResolver(inviteMemberSchema),
+    resolver: zodResolver(DashboardUserSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       password: "",
-      role: DashboardUserRole.VIEWER,
+      role: DashboardUserRole.STAFF,
     },
   });
 
@@ -78,7 +78,6 @@ export function EditAddUserSheet({
           firstName: dashboardUser.lastName,
           lastName: dashboardUser.lastName,
           role: dashboardUser.role,
-          isActive: dashboardUser.isActive,
         });
       } else {
         form.reset({
@@ -88,7 +87,6 @@ export function EditAddUserSheet({
           firstName: "",
           lastName: "",
           role: DashboardUserRole.STAFF,
-          isActive: true,
         });
       }
     }
@@ -117,8 +115,7 @@ export function EditAddUserSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 py-4"
           >
-            {/* Username */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gape-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -126,7 +123,16 @@ export function EditAddUserSheet({
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isPending} />
+                      <Input
+                        type="text"
+                        placeholder="Enter first name"
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(capitalizeFirstLetter(e.target.value))
+                        }
+                        disabled={isPending}
+                        className="text-sm sm:text-base"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -140,7 +146,16 @@ export function EditAddUserSheet({
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isPending} />
+                      <Input
+                        type="text"
+                        placeholder="Enter last name"
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(capitalizeFirstLetter(e.target.value))
+                        }
+                        disabled={isPending}
+                        className="text-sm sm:text-base"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -148,7 +163,6 @@ export function EditAddUserSheet({
               />
             </div>
 
-            {/* Email */}
             <FormField
               control={form.control}
               name="email"
@@ -156,16 +170,39 @@ export function EditAddUserSheet({
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} disabled={isPending} />
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      {...field}
+                      disabled={isPending}
+                      className="text-sm sm:text-base"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Intial */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Enter user's password"
+                      {...field}
+                      disabled={isPending}
+                      className="text-sm sm:text-base"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            {/* Role */}
             <FormField
               control={form.control}
               name="role"

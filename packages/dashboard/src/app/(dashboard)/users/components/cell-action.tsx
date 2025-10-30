@@ -7,10 +7,10 @@ import { MoreHorizontal, Edit, Trash } from 'lucide-react';
 import { Button } from '@repo/ui/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui/components/ui/dropdown-menu';
 import { AlertModal } from '@/components/modals/alert-modal';
-import { DashboardUserData } from '@/types/users';
+import { DashboardUser } from '@/types/users';
 
 interface CellActionProps {
-  data: DashboardUserData;
+  data: DashboardUser;
   onUserDeleted: (userId: string) => void;
 }
 

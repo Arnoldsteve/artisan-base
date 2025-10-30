@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/client-api";
-import { CreateDashboardUserDto, DashboardUserData, UpdateDashboardUserDto } from "@/types/users";
+import { CreateDashboardUserDto, DashboardUser, UpdateDashboardUserDto } from "@/types/users";
 import { PaginatedResponse } from "@/types/shared";
 
 export class DashboardUserService {
@@ -7,24 +7,24 @@ export class DashboardUserService {
     page = 1,
     limit = 10,
     search?: string
-  ): Promise<PaginatedResponse<DashboardUserData>> {
-    return apiClient.get<PaginatedResponse<DashboardUserData>>("dashboard/users", {
+  ): Promise<PaginatedResponse<DashboardUser>> {
+    return apiClient.get<PaginatedResponse<DashboardUser>>("dashboard/users", {
       page,
       limit,
       search,
     });
   }
 
-  async getById(id: string): Promise<DashboardUserData> {
-    return apiClient.get<DashboardUserData>(`dashboard/users/${id}`);
+  async getById(id: string): Promise<DashboardUser> {
+    return apiClient.get<DashboardUser>(`dashboard/users/${id}`);
   }
 
-  async create(data: CreateDashboardUserDto): Promise<DashboardUserData> {
-    return apiClient.post<DashboardUserData>("dashboard/users", data);
+  async create(data: CreateDashboardUserDto): Promise<DashboardUser> {
+    return apiClient.post<DashboardUser>("dashboard/users", data);
   }
 
-  async update(id: string, data: UpdateDashboardUserDto): Promise<DashboardUserData> {
-    return apiClient.patch<DashboardUserData>(`dashboard/users/${id}`, data);
+  async update(id: string, data: UpdateDashboardUserDto): Promise<DashboardUser> {
+    return apiClient.patch<DashboardUser>(`dashboard/users/${id}`, data);
   }
 
   async delete(id: string): Promise<void> {

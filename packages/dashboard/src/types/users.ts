@@ -33,7 +33,6 @@ export interface CreateDashboardUserDto {
   email: string;
   password?: string; 
   role: DashboardUserRole;
-  isActive?: boolean; 
 }
 
 export interface UpdateDashboardUserDto {
@@ -42,5 +41,4 @@ export interface UpdateDashboardUserDto {
   email?: string;
   password?: string; 
   role?: DashboardUserRole;
-  isActive?: boolean;
 }
