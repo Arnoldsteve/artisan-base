@@ -10,11 +10,9 @@ export default async function ProductCategoriesPage() {
   try {
     const serverApi = await createServerApiClient();
 
-    // Fetch categories with product counts
     initialData = await serverApi.get<
       PaginatedResponse<Category & { _count?: { products: number } }>
     >("/dashboard/categories", { page: 1, limit: 10 });
-    // console.log("Fetched initial categories on server:", initialData);
   } catch (err) {
     console.error("Failed to fetch initial categories on server:", err);
     initialData = {

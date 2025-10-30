@@ -10,7 +10,6 @@ export default async function TeamPage() {
   try {
     const serverApi = await createServerApiClient();
 
-    // Fetch team members (users)
     const response = await serverApi.get<PaginatedResponse<DashboardUser>>(
       "/dashboard/users",
       { page: 1, limit: 10 }
