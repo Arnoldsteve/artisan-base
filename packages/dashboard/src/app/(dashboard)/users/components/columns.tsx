@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { UserTableMeta, TableWithMeta } from "@/types/table-meta";
 import { DashboardUser } from "@/types/users";
 import { CellAction } from "./cell-action";
+import { formatDate } from "@/utils/date";
 
 export const columns: ColumnDef<DashboardUser>[] = [
   {
@@ -33,7 +34,10 @@ export const columns: ColumnDef<DashboardUser>[] = [
     header: "User",
     cell: ({ row }) => {
       const user = row.original;
-     const name = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
+      const name =
+        user.firstName && user.lastName
+          ? `${user.firstName} ${user.lastName}`
+          : user.email;
       const fallback = name.substring(0, 2).toUpperCase();
       return (
         <div className="flex items-center gap-3">
@@ -53,11 +57,7 @@ export const columns: ColumnDef<DashboardUser>[] = [
     header: "Role",
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
-      return (
-        <span className="capitalize text-sm">
-          {role.toLowerCase()}
-        </span>
-      );
+      return <span className="capitalize text-sm">{role.toLowerCase()}</span>;
     },
   },
 
@@ -75,44 +75,36 @@ export const columns: ColumnDef<DashboardUser>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Date Added",
+    header: "Member Since",
     cell: ({ row }) => {
       const createdAt = row.getValue("createdAt") as string | Date;
-      const date = new Date(createdAt);
-      // Format the date as you like
-      const formatted = date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-      const time = date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+
+      const formattedDate = formatDate(createdAt);
+      const formattedTime = formatDate(createdAt, { includeTime: true })
+        .replace(formattedDate + ", ", "")
+        .trim();
 
       return (
         <div>
-          <div>{formatted}</div>
-          <div className="text-xs text-muted-foreground">{time}</div>
+          <div>{formattedDate}</div>
+          <div className="text-xs text-muted-foreground">{formattedTime}</div>
         </div>
       );
     },
   },
-
   {
-  id: "actions",
-  cell: ({ row, table }) => {
-    const user = row.original;
-    const meta = table.options.meta as UserTableMeta<DashboardUser>;
+    id: "actions",
+    cell: ({ row, table }) => {
+      const user = row.original;
+      const meta = table.options.meta as UserTableMeta<DashboardUser>;
 
-    return (
-      <CellAction
-        data={user}
-        onEditUser={meta.openEditSheet}
-        onDeleteUser={meta.openDeleteDialog}
-      />
-    );
+      return (
+        <CellAction
+          data={user}
+          onEditUser={meta.openEditSheet}
+          onDeleteUser={meta.openDeleteDialog}
+        />
+      );
+    },
   },
-}
-
 ];

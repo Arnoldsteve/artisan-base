@@ -41,30 +41,6 @@ export default async function OrderDetailPage({
       <div className="mt-4 grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <OrderItemsTable items={order.items || []} />
-          <Card>
-            <CardHeader>
-              <CardTitle>Financials</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{formatMoney(Number(order.subtotal))}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>{formatMoney(Number(order.shippingAmount))}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Taxes</span>
-                <span>{formatMoney(Number(order.taxAmount))}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span>{formatMoney(Number(order.totalAmount))}</span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
         <div className="space-y-6">
           <OrderActions
