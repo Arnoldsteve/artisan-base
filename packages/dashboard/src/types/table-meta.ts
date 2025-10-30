@@ -31,12 +31,13 @@ export interface OrderTableMeta<TData = any> {
 }
 
 export interface UserTableMeta<TData = any> {
-  handleUserDeleted: (userId: string) => void;
+  openDeleteDialog: (dashboardUser: TData) => void; 
   openEditSheet: (dashboardUser: TData) => void;
   // Add other user management actions as needed
   // handleUserUpdated?: (user: TData) => void;
   // handleUserRoleChanged?: (userId: string, role: string) => void;
 }
+
 
 export type TableWithMeta<TData, TMeta> = Table<TData> & {
   options: {

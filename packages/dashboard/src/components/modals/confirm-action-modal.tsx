@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Button } from '@repo/ui/components/ui/button';
+import { useEffect, useState } from "react";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,21 +11,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@repo/ui/components/ui/alert-dialog';
-
-type ActionVariant = 'default' | 'destructive' | 'warning' | 'primary';
+} from "@repo/ui/components/ui/alert-dialog";
 
 interface ConfirmActionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
-
   title: string;
   description?: string;
   actionLabel?: string;
-  cancelLabel?: string;
-  variant?: ActionVariant;
+  variant?: "default" | "destructive";
 }
 
 export const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
@@ -34,29 +30,13 @@ export const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
   onConfirm,
   loading = false,
   title,
-  description = 'This action cannot be undone.',
-  actionLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  variant = 'default',
+  description,
+  actionLabel = "Continue",
+  variant = "default",
 }) => {
   const [isMounted, setIsMounted] = useState(false);
-
   useEffect(() => setIsMounted(true), []);
   if (!isMounted) return null;
-
-  // choose button variant styling
-  const getButtonVariant = () => {
-    switch (variant) {
-      case 'destructive':
-        return 'destructive';
-      case 'warning':
-        return 'outline'; // or a custom color
-      case 'primary':
-        return 'default';
-      default:
-        return 'secondary';
-    }
-  };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -67,19 +47,15 @@ export const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
             <AlertDialogDescription>{description}</AlertDialogDescription>
           )}
         </AlertDialogHeader>
-
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading} onClick={onClose}>
-            {cancelLabel}
-          </AlertDialogCancel>
-
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button
-              variant={getButtonVariant()}
-              disabled={loading}
+              variant={variant}
               onClick={onConfirm}
+              disabled={loading}
             >
-              {loading ? `${actionLabel}...` : actionLabel}
+              {loading ? "Processing..." : actionLabel}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>

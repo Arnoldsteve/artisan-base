@@ -10,7 +10,6 @@ import { Button } from "@repo/ui/components/ui/button";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { columns } from "./columns";
 import { UserTableMeta } from "@/types/table-meta";
-import { DashboardUserRole } from "@/types/roles";
 import { CreateDashboardUserDto, DashboardUser } from "@/types/users";
 import { PageHeader } from "@/components/shared/page-header";
 import { PaginatedResponse } from "@/types/shared";
@@ -22,6 +21,8 @@ import {
 } from "@/hooks/use-dashboard-users";
 import { EditAddUserSheet } from "./edit-add-user-sheet";
 import { DashboardUserFormData } from "@/validation-schemas/dashboardUserSchema";
+import { ConfirmActionModal } from "@/components/modals/confirm-action-modal";
+import { toast } from "sonner";
 
 interface TeamMembersViewProps {
   initialUsersData: PaginatedResponse<DashboardUser>;
@@ -29,7 +30,6 @@ interface TeamMembersViewProps {
 
 export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
   const [users, setUsers] = useState(initialUsersData);
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -37,11 +37,10 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
 
   // --- UI State for Modals/Sheets ---
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [dashboardUserToDelete, setDashboardUserToDelete] =
-    useState<DashboardUser | null>(null);
-  const [dashboardUserToEdit, setDashboardUserToEdit] =
-    useState<DashboardUser | null>(null);
+  const [userToDelete, setUserToDelete] = useState<DashboardUser | null>(null);
+  const [userToEdit, setUserToEdit] = useState<DashboardUser | null>(null);
 
+  // --- Data Hooks ---
   const {
     data: paginatedResponse,
     isLoading,
@@ -56,6 +55,7 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
   const { mutate: deleteDashboardUser, isPending: isDeleting } =
     useDeleteDashboardUser();
 
+  // --- Derived Data ---
   const dashboardUsers = useMemo(
     () => paginatedResponse?.data || [],
     [paginatedResponse]
@@ -63,21 +63,32 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
 
   const totalDashboardUsers = paginatedResponse?.meta?.total ?? 0;
 
+  // --- Actions ---
   const openAddSheet = () => {
-    // setUsers(null);
+    setUserToEdit(null);
     setIsSheetOpen(true);
   };
+
   const openEditSheet = (user: DashboardUser) => {
-    setDashboardUserToEdit(user);
+    setUserToEdit(user);
     setIsSheetOpen(true);
   };
-  const handleUserDeleted = (userId: string) => {
-    // setUsers((current) => current.filter((u) => u.id !== userId));
+
+  const openDeleteDialog = (user: DashboardUser) => {
+    setUserToDelete(user);
+  };
+
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      deleteDashboardUser(userToDelete.id, {
+        onSuccess: () => setUserToDelete(null),
+      });
+    }
   };
 
   const tableMeta: UserTableMeta<DashboardUser> = {
-    handleUserDeleted,
     openEditSheet,
+    openDeleteDialog,
   };
 
   const table = useReactTable({
@@ -87,9 +98,6 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
       paginatedResponse?.meta?.totalPages ??
       (totalDashboardUsers > 0 ? Math.ceil(totalDashboardUsers / pageSize) : 1),
     manualPagination: true,
-    // state: {
-    //   pagination {pageIndex, pageSize},
-    // }
     getCoreRowModel: getCoreRowModel(),
     meta: tableMeta,
   });
@@ -105,25 +113,25 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
       );
     } else {
       const { id, ...createData } = formData;
-      (createDashboardUser(createData as CreateDashboardUserDto),
-        {
-          onSuccess: () => setIsSheetOpen(false),
-        });
+      createDashboardUser(createData as CreateDashboardUserDto, {
+        onSuccess: () => setIsSheetOpen(false),
+      });
     }
   };
 
+  // --- Loading / Error UI ---
   if (isFetching || (isLoading && !initialUsersData)) {
     return <DataTableSkeleton />;
   }
 
   if (isError) {
-    return <div className="p-8 text-red-500">Failed to load product data.</div>;
+    return <div className="p-8 text-red-500">Failed to load user data.</div>;
   }
 
   return (
     <>
       <PageHeader title="Team Members">
-        <Button onClick={openAddSheet}> Invite User</Button>
+        <Button onClick={openAddSheet}>Invite User</Button>
       </PageHeader>
 
       <DataTable table={table} totalCount={totalDashboardUsers} />
@@ -131,9 +139,20 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
       <EditAddUserSheet
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
-        dashboardUser={dashboardUserToEdit}
+        dashboardUser={userToEdit}
         onSave={handleSaveChanges}
         isPending={isCreating || isUpdating}
+      />
+
+      <ConfirmActionModal
+        isOpen={!!userToDelete}
+        onClose={() => setUserToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        loading={isDeleting}
+        title={`Delete user "${userToDelete?.firstName} ${userToDelete?.lastName}"?`}
+        description="This action will permanently remove the user and all related data. It cannot be undone."
+        actionLabel="Delete"
+        variant="destructive"
       />
     </>
   );

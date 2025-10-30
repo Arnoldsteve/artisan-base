@@ -100,20 +100,19 @@ export const columns: ColumnDef<DashboardUser>[] = [
   },
 
   {
-    id: "actions",
-    cell: ({ row, table }) => {
-      const typedTable = table as TableWithMeta<
-        DashboardUser,
-        UserTableMeta<DashboardUser>
-      >;
+  id: "actions",
+  cell: ({ row, table }) => {
+    const user = row.original;
+    const meta = table.options.meta as UserTableMeta<DashboardUser>;
 
-      return (
-        <CellAction
-          data={row.original}
-          onEditUser={typedTable.options.meta!.openEditSheet}
-          onDeleteUser={typedTable.options.meta!.handleUserDeleted}
-        />
-      );
-    },
+    return (
+      <CellAction
+        data={user}
+        onEditUser={meta.openEditSheet}
+        onDeleteUser={meta.openDeleteDialog}
+      />
+    );
   },
+}
+
 ];
