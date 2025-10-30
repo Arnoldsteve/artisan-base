@@ -84,6 +84,7 @@ export function CustomersView({ initialCustomerData }: CustomersViewProps) {
           `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
           customer.email,
         email: customer.email,
+        phone: customer.phoneNumber || "",
         orderCount: (customer as any)._count?.orders ?? 0,
         totalSpent: parseFloat((customer as any).totalSpent) || 0,
         createdAt: new Date(customer.createdAt).toLocaleDateString(),

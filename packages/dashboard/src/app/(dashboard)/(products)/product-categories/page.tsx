@@ -31,7 +31,7 @@ export default async function ProductCategoriesPage() {
   return (
     <>
       <PageHeader title="Product Categories" />
-      <div className="p-4 md:p-8 lg:p-10">
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0">
         <CategoriesView initialCategoryData={initialData} />
       </div>
     </>

@@ -43,14 +43,14 @@ export const CellAction: React.FC<CellActionProps> = ({
 
         <DropdownMenuSeparator />
 
-        {canPerformAction && (
+        {/* {canPerformAction && ( */}
           <DropdownMenuItem
             onClick={() => onDeleteUser(data)}
             className="text-red-600 focus:text-red-600"
           >
             <Trash className="mr-2 h-4 w-4" /> Delete
           </DropdownMenuItem>
-        )}
+        {/* )} */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
