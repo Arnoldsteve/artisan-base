@@ -8,7 +8,7 @@ import { IProductRepository } from './interfaces/product-repository.interface';
 import { PrismaClient } from '../../../generated/tenant';
 import slugify from 'slugify';
 
-const CACHE_TTL = 10 * 1000; // 10 seconds for demo
+const CACHE_TTL = 10 * 1000;
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductRepository implements IProductRepository {
@@ -61,31 +61,65 @@ export class ProductRepository implements IProductRepository {
     }
   }
 
+  // async findAll(pagination: PaginationQueryDto) {
+  //   const now = Date.now();
+  //   if (this.findAllCache && this.findAllCache.expires > now) {
+  //     return this.findAllCache.data;
+  //   }
+
+  //   const prisma = await this.getPrisma();
+  //   const result = await paginate(
+  //     prisma.product,
+  //     {
+  //       page: pagination.page,
+  //       limit: pagination.limit,
+  //     },
+  //     {
+  //       orderBy: { createdAt: 'desc' },
+  //       include: {
+  //         categories: {
+  //           include: {
+  //             category: true
+  //           }
+  //         }
+  //       }
+  //     },
+  //   );
+  //   this.findAllCache = { data: result, expires: now + CACHE_TTL };
+  //   return result;
+  // }
+
   async findAll(pagination: PaginationQueryDto) {
     const now = Date.now();
-    if (this.findAllCache && this.findAllCache.expires > now) {
-      return this.findAllCache.data;
-    }
-    
+    const { page, limit, search } = pagination;
+
     const prisma = await this.getPrisma();
+
+    const where =
+      search && search.trim().length > 0
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { description: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {};
+
     const result = await paginate(
       prisma.product,
+      { page, limit },
       {
-        page: pagination.page,
-        limit: pagination.limit,
-      },
-      {
+        where,
         orderBy: { createdAt: 'desc' },
         include: {
           categories: {
-            include: {
-              category: true
-            }
-          }
-        }
+            include: { category: true },
+          },
+          // images: true, // Add this if your frontend expects product.images[0].url
+        },
       },
     );
-    this.findAllCache = { data: result, expires: now + CACHE_TTL };
+
     return result;
   }
 
@@ -95,24 +129,24 @@ export class ProductRepository implements IProductRepository {
     if (cached && cached.expires > now) {
       return cached.data;
     }
-    
+
     const prisma = await this.getPrisma();
     const product = await prisma.product.findUnique({
       where: { id },
       include: {
         categories: {
           include: {
-            category: true
-          }
-        }
-      }
+            category: true,
+          },
+        },
+      },
     });
     if (product) {
       this.findOneCache.set(id, { data: product, expires: now + CACHE_TTL });
     }
     return product;
   }
-  
+
   async update(id: string, dto: UpdateProductDto) {
     const prisma = await this.getPrisma();
 
@@ -146,7 +180,6 @@ export class ProductRepository implements IProductRepository {
     return product;
   }
 
-
   async remove(id: string) {
     const prisma = await this.getPrisma();
     const product = await prisma.product.delete({ where: { id } });
@@ -161,24 +194,24 @@ export class ProductRepository implements IProductRepository {
   }
 
   async assignCategories(productId: string, categoryIds: string[]) {
-  const prisma = await this.getPrisma();
-  
-  // Remove existing categories
-  await prisma.productCategory.deleteMany({
-    where: { productId }
-  });
-  
-  // Add new categories
-  if (categoryIds.length > 0) {
-    await prisma.productCategory.createMany({
-      data: categoryIds.map(categoryId => ({
-        productId,
-        categoryId
-      }))
+    const prisma = await this.getPrisma();
+
+    // Remove existing categories
+    await prisma.productCategory.deleteMany({
+      where: { productId },
     });
+
+    // Add new categories
+    if (categoryIds.length > 0) {
+      await prisma.productCategory.createMany({
+        data: categoryIds.map((categoryId) => ({
+          productId,
+          categoryId,
+        })),
+      });
+    }
+
+    this.invalidateCache(productId);
+    return this.findOne(productId);
   }
-  
-  this.invalidateCache(productId);
-  return this.findOne(productId);
-}
 }
