@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/products";
 import {
@@ -56,18 +56,32 @@ function OrderItemsInput({
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const debouncedSearchTerm = useDebounce(searchTerm, 200);
+  const debouncedSearchTerm = useDebounce(searchTerm, 100);
+
+  const cache = useRef<Record<string, Product[]>>({});
 
   useEffect(() => {
     if (!debouncedSearchTerm) {
       setSearchResults([]);
       return;
     }
+
+    if (cache.current[debouncedSearchTerm]) {
+      setSearchResults(cache.current[debouncedSearchTerm]);
+      return;
+    }
+
     setIsSearching(true);
     productService
       .searchProducts(debouncedSearchTerm)
-      .then(setSearchResults)
-      .catch(() => toast.error("Failed to search for products."))
+      .then((res) => {
+        cache.current[debouncedSearchTerm] = res;
+        setSearchResults(res);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Search failed.");
+      })
       .finally(() => setIsSearching(false));
   }, [debouncedSearchTerm]);
 
