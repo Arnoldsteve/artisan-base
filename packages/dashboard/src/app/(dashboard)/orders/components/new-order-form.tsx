@@ -28,6 +28,8 @@ import { formatMoney } from "@/utils/money";
 import { TAX_RATE } from "@/constants/tax";
 import { FREE_SHIPPING_THRESHOLD } from "@/constants/shipping";
 import { shippingOptions } from "@/utils/shupping-options";
+import Image from "next/image";
+import { Separator } from "@repo/ui";
 
 /**
  * OrderItemState combines Product info with quantity for local state.
@@ -64,6 +66,7 @@ function OrderItemsInput({
 
   const handleAddItem = useCallback(
     (product: Product) => {
+      console.log("product detail", product);
       if (product.inventoryQuantity <= 0) {
         toast.error(`Product '${product.name}' is out of stock.`);
         return;
@@ -141,62 +144,80 @@ function OrderItemsInput({
               No items added to the order.
             </p>
           ) : (
-            items.map((item) => (
-              <div key={item.id} className="flex items-center gap-4">
-                <div className="flex-1 flex-col font-medium">
-                  {item.name}
-                  <Button
-                    className="ml-2 text-sm p-0"
-                    type="button"
-                    variant="ghost"
-                  >
-                    <Trash className="h-4 w-4 color-red-500" />
-                    delete
-                  </Button>
+            items.map((item, index) => (
+              <div key={item.id}>
+                <div className="flex items-center justify-between gap-4 py-1">
+                  <div>
+                    <Image
+                      src={
+                        item.images?.[0]?.url ||
+                        `https://picsum.photos/400/400?random=${item.id}`
+                      }
+                      alt={item.name}
+                      width={90}
+                      height={90}
+                      className="rounded object-cover"
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm">{item.name}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-1">
+                      {item.description}
+                    </p>
+                    <div className="text-sm text-muted-foreground">
+                      {formatMoney(item.price, "KES")} per unit
+                    </div>
+                    <p className="text-sm text-orange-500">Few units left</p>
+                  </div>
+
+                  <div className="hidden md:block font-semibold text-right min-w-[100px]">
+                    {formatMoney(Number(item.price) * item.quantity, "KES")}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() =>
-                      handleQuantityChange(item.id, item.quantity - 1)
-                    }
-                    aria-label="Decrease quantity"
-                  >
-                    <MinusCircle className="h-4 w-4" />
-                  </Button>
-                  <Input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        item.id,
-                        parseInt(e.target.value, 10) || 0
-                      )
-                    }
-                    className="w-16 h-8 text-center"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() =>
-                      handleQuantityChange(item.id, item.quantity + 1)
-                    }
-                    aria-label="Increase quantity"
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
+
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      // onClick={() => removeFromCart(item.id)}
+                      className="text-red-500 flex items-center gap-1"
+                    >
+                      <Trash className="h-3 w-3 text-red-500" />
+                      Remove
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() =>
+                        handleQuantityChange(item.id, item.quantity - 1)
+                      }
+                      disabled={item.quantity <= 1}
+                    >
+                      -
+                    </Button>
+                    <span className="px-2">{item.quantity}</span>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() =>
+                        handleQuantityChange(item.id, item.quantity + 1)
+                      }
+                      disabled={item.quantity >= item.inventoryQuantity}
+                    >
+                      +
+                    </Button>
+                  </div>
                 </div>
-                <div className="w-24 text-right">
-                  {formatMoney(Number(item.price) * item.quantity)}
-                </div>
+                {index < items.length - 1 && <Separator className="my-2" />}
               </div>
             ))
           )}
+          <Separator/>
         </div>
       </CardContent>
     </Card>
