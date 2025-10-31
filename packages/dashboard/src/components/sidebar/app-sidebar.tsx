@@ -25,6 +25,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@repo/ui/components/ui/sidebar";
+import { title } from "process";
 
 // This is sample data.
 const data = {
@@ -68,10 +69,14 @@ const data = {
       url: "#",
       icon: ShoppingCart,
       items: [
+        {title: "New Order", 
+          url: "/orders/new"
+        },
         {
           title: "All Orders",
           url: "/orders",
         },
+        
       ],
     },
     {

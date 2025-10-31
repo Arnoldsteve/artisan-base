@@ -149,11 +149,6 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
 
   return (
     <>
-      <PageHeader title="Orders">
-        <Link href="/orders/new">
-          <Button>Create Order</Button>
-        </Link>
-      </PageHeader>
       <div>
         <OrdersTableViewOptions table={table} />
         <DataTable table={table} totalCount={totalOrders} />
