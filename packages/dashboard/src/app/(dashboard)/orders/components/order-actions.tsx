@@ -1,10 +1,12 @@
 "use client";
 
+import ReactDOMServer from "react-dom/server";
 import { useState } from "react";
 import { Order, OrderStatus, PaymentStatus } from "@/types/orders";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { toast } from "sonner";
 import { UpdateOrderStatusModal } from "../[orderId]/components/update-order-status";
+import { InvoiceDocument } from "../[orderId]/components/invoice-document";
 
 interface OrderActionsProps {
   order: Order;
@@ -18,28 +20,55 @@ export function OrderActions({ order }: OrderActionsProps) {
   const handleUpdatePaymentStatus = () => setIsPaymentModalOpen(true);
 
   const handlePrintInvoice = () => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      toast.error("Please allow popups to print invoice");
-      return;
-    }
+    try {
+      // Render invoice as HTML string
+      const invoiceHTML = ReactDOMServer.renderToString(
+        <InvoiceDocument order={order} />
+      );
 
-    printWindow.document.write(`
+      // Collect existing CSS from the page (Tailwind styles, etc.)
+      const styles = Array.from(
+        document.querySelectorAll('link[rel="stylesheet"], style')
+      )
+        .map((node) => node.outerHTML)
+        .join("\n");
+
+      // Create print window
+      const printWindow = window.open("", "_blank", "width=900,height=700");
+      if (!printWindow) {
+        toast.error("Please allow popups to print invoice");
+        return;
+      }
+
+      // Write content into print window
+      printWindow.document.write(`
       <html>
         <head>
           <title>Invoice #${order.orderNumber}</title>
+          ${styles}
+          <style>
+            @media print {
+              body { margin: 1.5rem; }
+            }
+          </style>
         </head>
         <body>
-          <h1>Invoice for Order #${order.orderNumber}</h1>
-          <p>Customer: ${order.customerName ?? "N/A"}</p>
-          <p>Email: ${order.customerEmail ?? "N/A"}</p>
-          <p>Total: $${order.total.toFixed(2)}</p>
+          ${invoiceHTML}
         </body>
       </html>
     `);
-    printWindow.document.close();
-    printWindow.onload = () => printWindow.print();
-    toast.success("Opening print dialog...");
+      printWindow.document.close();
+
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+
+      toast.success("Opening print dialog...");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate invoice for printing.");
+    }
   };
 
   const handleEditOrder = () => toast.info("Edit order feature coming soon!");
