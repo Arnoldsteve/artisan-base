@@ -21,30 +21,33 @@ import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-interface UpdateOrderStatusModalProps {
-  type: "order" | "payment";
-  isOpen: boolean;
-  onClose: () => void;
-  orderId: string;
-  currentStatus: OrderStatus | PaymentStatus;
-  onSubmit?: (newStatus: OrderStatus | PaymentStatus) => void;
-}
+// ✅ Discriminated union props type
+type UpdateOrderStatusModalProps =
+  | {
+      type: "order";
+      isOpen: boolean;
+      onClose: () => void;
+      orderId: string;
+      currentStatus: OrderStatus;
+      onSubmit?: (newStatus: OrderStatus) => void;
+    }
+  | {
+      type: "payment";
+      isOpen: boolean;
+      onClose: () => void;
+      orderId: string;
+      currentStatus: PaymentStatus;
+      onSubmit?: (newStatus: PaymentStatus) => void;
+    };
 
-export function UpdateOrderStatusModal({
-  type,
-  isOpen,
-  onClose,
-  orderId,
-  currentStatus,
-  onSubmit,
-}: UpdateOrderStatusModalProps) {
+export function UpdateOrderStatusModal(props: UpdateOrderStatusModalProps) {
+  const { type, isOpen, onClose, orderId, currentStatus, onSubmit } = props;
+
   const [status, setStatus] = useState(currentStatus);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setStatus(currentStatus);
-    }
+    if (isOpen) setStatus(currentStatus);
   }, [isOpen, currentStatus]);
 
   const handleSubmit = async () => {
@@ -61,9 +64,10 @@ export function UpdateOrderStatusModal({
         } status updated successfully to ${status}`
       );
 
-      onSubmit?.(status);
+      // Call callback safely
+      onSubmit?.(status as any);
       onClose();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update status. Try again.");
     } finally {
       setLoading(false);
@@ -104,9 +108,7 @@ export function UpdateOrderStatusModal({
         <div className="flex flex-col gap-4 py-2">
           <Select
             value={status}
-            onValueChange={(value) =>
-              setStatus(value as OrderStatus | PaymentStatus)
-            }
+            onValueChange={(value) => setStatus(value as typeof status)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />

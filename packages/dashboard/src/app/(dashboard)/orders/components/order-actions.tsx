@@ -1,59 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import { OrderStatus, PaymentStatus } from "@/types/orders";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@repo/ui/components/ui/card";
-import { Button } from "@repo/ui/components/ui/button";
+import { Order, OrderStatus, PaymentStatus } from "@/types/orders";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { toast } from "sonner";
 import { UpdateOrderStatusModal } from "../[orderId]/components/update-order-status";
 
 interface OrderActionsProps {
-  orderId: string;
-  initialStatus: OrderStatus;
-  initialPaymentStatus: PaymentStatus;
+  order: Order;
 }
 
-export function OrderActions({
-  orderId,
-  initialStatus,
-  initialPaymentStatus,
-}: OrderActionsProps) {
-  const [openModal, setOpenModal] = useState<null | "order" | "payment">(null);
+export function OrderActions({ order }: OrderActionsProps) {
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
-  const handleUpdateStatus = () => setOpenModal("order");
-  const handleUpdatePaymentStatus = () => setOpenModal("payment");
+  const handleUpdateStatus = () => setIsOrderModalOpen(true);
+  const handleUpdatePaymentStatus = () => setIsPaymentModalOpen(true);
 
   const handlePrintInvoice = () => {
-    toast.info("Printing invoice feature is not yet implemented.");
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow popups to print invoice");
+      return;
+    }
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice #${order.orderNumber}</title>
+        </head>
+        <body>
+          <h1>Invoice for Order #${order.orderNumber}</h1>
+          <p>Customer: ${order.customerName ?? "N/A"}</p>
+          <p>Email: ${order.customerEmail ?? "N/A"}</p>
+          <p>Total: $${order.total.toFixed(2)}</p>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = () => printWindow.print();
+    toast.success("Opening print dialog...");
   };
 
-  const handleEditOrder = () => {
-    toast.info("Edit order feature coming soon!");
-  };
-
-  const handleSendEmail = () => {
-    console.log("Send email clicked", orderId);
-    toast.info("Send email feature coming soon!");
-  };
-
-  const handleAddInternalNote = () => {
-    console.log("Add internal note clicked", orderId);
+  const handleEditOrder = () => toast.info("Edit order feature coming soon!");
+  const handleSendEmail = () => toast.info("Send email feature coming soon!");
+  const handleAddInternalNote = () =>
     toast.info("Add internal note feature coming soon!");
-  };
-
-  const handleViewActivity = () => {
-    console.log("View activity clicked", orderId);
+  const handleViewActivity = () =>
     toast.info("View activity/timeline feature coming soon!");
+  const handleRefundReturn = () =>
+    toast.info("Refund/return order feature coming soon!");
+
+  const handleOrderStatusSubmit = (newStatus: OrderStatus) => {
+    console.log("Order status updated:", newStatus);
+    toast.success(`Order status updated to ${newStatus}`);
   };
 
-  const handleRefundReturn = () => {
-    console.log("Refund/return clicked", orderId);
-    toast.info("Refund/return order feature coming soon!");
+  const handlePaymentStatusSubmit = (newStatus: PaymentStatus) => {
+    console.log("Payment status updated:", newStatus);
+    toast.success(`Payment status updated to ${newStatus}`);
   };
 
   return (
@@ -62,11 +67,13 @@ export function OrderActions({
         <CardHeader>
           <CardTitle>Actions</CardTitle>
         </CardHeader>
+
         <CardContent>
           <div className="flex flex-wrap items-start justify-end gap-3">
-            <Button variant="outline" size="sm" onClick={handleUpdateStatus}>
+            <Button size="sm" onClick={handleUpdateStatus}>
               Update Status
             </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -74,24 +81,30 @@ export function OrderActions({
             >
               Update Payment Status
             </Button>
+
             <Button variant="outline" size="sm" onClick={handlePrintInvoice}>
               Print Invoice
             </Button>
+
             <Button variant="outline" size="sm" onClick={handleEditOrder}>
               Edit Order
             </Button>
-            <Button variant="outline" size="sm" onClick={handleSendEmail}>
+
+            <Button size="sm" onClick={handleSendEmail}>
               Send Email
             </Button>
-            <Button variant="outline" size="sm" onClick={handleAddInternalNote}>
+
+            <Button size="sm" onClick={handleAddInternalNote}>
               Add Internal Note
             </Button>
-            <Button variant="secondary" size="sm" onClick={handleViewActivity}>
+
+            <Button size="sm" onClick={handleViewActivity}>
               View Activity/Timeline
             </Button>
+
             <Button
-              variant="destructive"
               size="sm"
+              variant="destructive"
               onClick={handleRefundReturn}
             >
               Refund/Return Order
@@ -100,14 +113,23 @@ export function OrderActions({
         </CardContent>
       </Card>
 
+      {/* ✅ Modals */}
       <UpdateOrderStatusModal
-        type={openModal === "order" ? "order" : "payment"}
-        isOpen={!!openModal}
-        onClose={() => setOpenModal(null)}
-        orderId={orderId}
-        currentStatus={
-          openModal === "order" ? initialStatus : initialPaymentStatus
-        }
+        type="order"
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        orderId={order.id}
+        currentStatus={order.status}
+        onSubmit={handleOrderStatusSubmit}
+      />
+
+      <UpdateOrderStatusModal
+        type="payment"
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        orderId={order.id}
+        currentStatus={order.paymentStatus}
+        onSubmit={handlePaymentStatusSubmit}
       />
     </>
   );
