@@ -168,7 +168,17 @@ function OrderItemsInput({
                     <div className="text-sm text-muted-foreground">
                       {formatMoney(item.price, "KES")} per unit
                     </div>
-                    <p className="text-sm text-orange-500">Few units left</p>
+                    <p
+                      className={`text-sm font-medium ${
+                        item.inventoryQuantity <= 2
+                          ? "text-red-500"
+                          : item.inventoryQuantity <= 5
+                            ? "text-yellow-500"
+                            : "text-green-500"
+                      }`}
+                    >
+                      {item.inventoryQuantity} units left
+                    </p>
                   </div>
 
                   <div className="hidden md:block font-semibold text-right min-w-[100px]">
@@ -217,7 +227,7 @@ function OrderItemsInput({
               </div>
             ))
           )}
-          <Separator/>
+          <Separator />
         </div>
       </CardContent>
     </Card>
