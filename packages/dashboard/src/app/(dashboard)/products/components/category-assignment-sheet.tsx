@@ -119,7 +119,7 @@ export function CategoryAssignmentSheet({
     })
     .filter(Boolean);
 
-  console.log("selected category", selectedCategories);
+  // console.log("selected category", selectedCategories);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

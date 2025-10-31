@@ -73,7 +73,6 @@ function OrderItemsInput({
 
   const handleAddItem = useCallback(
     (product: Product) => {
-      console.log("product detail", product);
       if (product.inventoryQuantity <= 0) {
         toast.error(`Product '${product.name}' is out of stock.`);
         return;
