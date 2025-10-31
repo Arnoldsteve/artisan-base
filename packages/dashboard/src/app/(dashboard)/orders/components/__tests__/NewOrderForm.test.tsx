@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { NewOrderForm } from "../NewOrderForm";
 import { productService } from "@/services/product-service";
 import { orderService } from "@/services/order-service";
+import { NewOrderForm } from "../new-order-form";
 
 jest.mock("@/services/product-service");
 jest.mock("@/services/order-service");

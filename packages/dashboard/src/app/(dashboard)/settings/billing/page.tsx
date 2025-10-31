@@ -1,5 +1,3 @@
-// src/app/(dashboard)/settings/billing/page.tsx
-
 import { createServerApiClient } from "@/lib/server-api";
 import { PageHeader } from "@/components/shared/page-header";
 import { BillingCurrentPlan } from "./components/billing-current-plan";

@@ -38,16 +38,18 @@ export default async function OrderDetailPage({
     <>
       <PageHeader title={`Order ${order.orderNumber}`} />
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
-        <div className="mt-4 grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            <OrderItemsTable items={order.items || []} />
-          </div>
           <div className="space-y-6">
             <OrderActions
               orderId={order.id}
               initialStatus={order.status}
               initialPaymentStatus={order.paymentStatus}
             />
+            </div>
+        <div className="mt-4 grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <OrderItemsTable items={order.items || []} />
+          </div>
+          <div className="space-y-6">
             <OrderSummaryCard order={order} />
           </div>
         </div>
