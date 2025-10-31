@@ -16,12 +16,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandEmpty,
+} from "@repo/ui/components/ui/command";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 import { Label } from "@repo/ui/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, X, PlusCircle, MinusCircle, Trash } from "lucide-react";
+import { Loader2, Trash } from "lucide-react";
 import { productService } from "@/services/product-service";
 import { orderService } from "@/services/order-service";
 import { formatMoney } from "@/utils/money";
@@ -103,6 +110,16 @@ function OrderItemsInput({
     [setItems]
   );
 
+  const handleRemoveItem = useCallback(
+    (productId: string) => {
+      setItems((currentItems) =>
+        currentItems.filter((item) => item.id !== productId)
+      );
+      toast.success("Product removed from order.");
+    },
+    [setItems]
+  );
+
   return (
     <Card className="rounded-sm">
       <CardHeader>
@@ -121,20 +138,43 @@ function OrderItemsInput({
             <Loader2 className="absolute right-3 top-9 h-5 w-5 animate-spin text-muted-foreground" />
           )}
           {searchResults.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
-              <ul>
-                {searchResults.map((product) => (
-                  <li key={product.id}>
-                    <button
-                      type="button"
-                      onClick={() => handleAddItem(product)}
-                      className="w-full text-left px-4 py-2 hover:bg-muted"
-                    >
-                      {product.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <div className="absolute z-10 w-full mt-1 border rounded-md shadow-lg bg-background">
+              <Command>
+                <CommandList>
+                  {isSearching && <CommandEmpty>Searching...</CommandEmpty>}
+                  {!isSearching && searchResults.length === 0 && (
+                    <CommandEmpty>No products found.</CommandEmpty>
+                  )}
+                  <CommandGroup heading="Products">
+                    {searchResults.map((product) => (
+                      <CommandItem
+                        key={product.id}
+                        onSelect={() => handleAddItem(product)}
+                        className="flex items-center gap-3 py-2 px-3"
+                      >
+                        <Image
+                          src={
+                            product.images?.[0]?.url ||
+                            `https://picsum.photos/80/80?random=${product.id}`
+                          }
+                          alt={product.name}
+                          width={40}
+                          height={40}
+                          className="rounded object-cover"
+                        />
+                        <div className="flex flex-col items-start">
+                          <span className="text-sm font-medium">
+                            {product.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatMoney(product.price, "KES")}
+                          </span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
             </div>
           )}
         </div>
@@ -191,7 +231,7 @@ function OrderItemsInput({
                     <Button
                       size="sm"
                       variant="ghost"
-                      // onClick={() => removeFromCart(item.id)}
+                      onClick={() => handleRemoveItem(item.id)}
                       className="text-red-500 flex items-center gap-1"
                     >
                       <Trash className="h-3 w-3 text-red-500" />
