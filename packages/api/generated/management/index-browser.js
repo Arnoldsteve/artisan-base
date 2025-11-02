@@ -148,6 +148,19 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  familyId: 'familyId',
+  parentTokenId: 'parentTokenId',
+  revoked: 'revoked',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SubscriptionPlanScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -248,6 +261,7 @@ exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
 exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   User: 'User',
+  RefreshToken: 'RefreshToken',
   SubscriptionPlan: 'SubscriptionPlan',
   TenantSubscription: 'TenantSubscription',
   SubscriptionPayment: 'SubscriptionPayment',
