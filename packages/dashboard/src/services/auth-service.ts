@@ -19,7 +19,7 @@ export class AuthService {
   }
 
   async forgotPassword(data: ForgotPassword): Promise<{ message: string }> {
-    console.log("User account email", data)
+    console.log("User account email", data);
     return apiClient.post<{ message: string }>("/auth/forgot-password", data);
   }
 
@@ -31,9 +31,9 @@ export class AuthService {
     return apiClient.get<ProfileResponse>("/auth/profile");
   }
 
-  async logout(): Promise<void> {
+  async logout(refreshToken: string): Promise<void> {
     try {
-      await apiClient.post("/auth/logout");
+      await apiClient.post("/auth/logout", { refreshToken });
     } catch (error) {
       console.warn(
         "Server logout failed, proceeding with client-side cleanup.",

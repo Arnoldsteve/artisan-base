@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   Inject,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { IAuthRepository } from './interfaces/auth-repository.interface';
 import { SignUpDto } from './dto/signup.dto';
@@ -165,9 +166,13 @@ export class AuthService {
   }
 
   // ------------------- LOGOUT -------------------
-  async logout(refreshToken: string) {
-    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
-    await this.authRepository.revokeRefreshTokenByHash(tokenHash);
-    return { message: 'Logged out successfully' };
+ async logout(refreshToken: string) {
+  if (!refreshToken) {
+    throw new BadRequestException('Refresh token is required');
   }
+  const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+  await this.authRepository.revokeRefreshTokenByHash(tokenHash);
+  return { message: 'Logged out successfully' };
+}
+
 }
