@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-// --- THIS IS THE FIX ---
-// Import the INSTANCE (authService), not the CLASS (AuthService)
 import { authService } from '@/services/auth-service';
 import { apiClient } from '@/lib/client-api';
 import Cookies from 'js-cookie';
@@ -30,13 +28,11 @@ export function useAuth() {
         setToken(tokenFromCookie);
         setTenantId(tenantIdFromCookie);
         try {
-          // --- FIX APPLIED HERE ---
-          // Use the lowercase instance `authService`
           const profile = await authService.getProfile();
           setUser(profile.user);
           setTenants(profile.organizations);
         } catch (error) {
-          // ... error handling
+          console.log(error)
         }
       }
       setIsLoading(false);
@@ -61,8 +57,6 @@ export function useAuth() {
   }, []);
 
   const login = useCallback(async (data: LoginDto) => {
-    // --- FIX APPLIED HERE ---
-    // Use the lowercase instance `authService`
     const response = await authService.login(data);
     const { user: loggedInUser, accessToken, organizations } = response;
     

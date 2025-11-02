@@ -11,8 +11,6 @@ import {
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Subscription } from "@/types/billing";
-
-// Import the specific hook for fetching the subscription
 import { useBillingSubscription } from "@/hooks/use-billing";
 import { formatMoney } from "@/utils/money";
 import { formatDate } from "@/utils/date";
@@ -22,13 +20,8 @@ interface BillingCurrentPlanProps {
 }
 
 export function BillingCurrentPlan({
-  subscription: initialSubscriptionData, // Rename for clarity
+  subscription: initialSubscriptionData, 
 }: BillingCurrentPlanProps) {
-  // --- THIS IS THE FIX ---
-  // The hook becomes the single source of truth for the component's data.
-  // - On initial render, `subscription` will be `initialSubscriptionData`.
-  // - After a successful refetch (triggered by invalidateQueries),
-  //   this hook will re-render the component and `subscription` will be the NEW data.
   const {
     data: subscription,
     isLoading,

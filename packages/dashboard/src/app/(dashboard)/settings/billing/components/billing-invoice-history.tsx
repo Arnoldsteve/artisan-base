@@ -19,8 +19,6 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Download } from "lucide-react";
 import { Invoice } from "@/types/billing";
 
-// --- THIS IS THE FIX ---
-// Import the new, specific hooks for invoices
 import { useBillingInvoices, useDownloadInvoice } from "@/hooks/use-billing";
 import { formatMoney } from "@/utils/money";
 
@@ -31,10 +29,8 @@ interface BillingInvoiceHistoryProps {
 export function BillingInvoiceHistory({
   invoices: propInvoices,
 }: BillingInvoiceHistoryProps) {
-  // Call the specific hook to get invoice data, hydrated by server props
   const { data: invoices, isLoading, error } = useBillingInvoices(propInvoices);
 
-  // Call the specific hook to get the download mutation function and its state
   const { mutate: downloadInvoice, isPending: isDownloading } =
     useDownloadInvoice();
 

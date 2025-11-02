@@ -45,8 +45,27 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   ownedTenant    Tenant[]
+  refreshTokens  RefreshToken[]
 
   @@map("users")
+}
+
+model RefreshToken {
+  id            String   @id @default(cuid())
+  userId        String
+  tokenHash     String
+  ipAddress     String?          
+  userAgent     String?           
+  familyId      String?           
+  parentTokenId String?          
+  revoked       Boolean  @default(false)
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
 }
 
 model SubscriptionPlan {
