@@ -21,16 +21,19 @@ export class AuthService {
   ) {}
 
   // ------------------- SIGNUP -------------------
-  async signUp(signUpDto: SignUpDto) {
+  async signUp(signUpDto: SignUpDto, ipAddress?: string, userAgent?: string) {
     const { email, password, firstName, lastName } = signUpDto;
 
+    // Check if user already exists
     const existingUser = await this.authRepository.findUserByEmail(email);
     if (existingUser) {
       throw new ConflictException('Email already in use.');
     }
 
+    // Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create new user
     const user = await this.authRepository.createUser({
       email,
       hashedPassword,
@@ -38,14 +41,19 @@ export class AuthService {
       lastName,
     });
 
+    // Remove password from response
     const { hashedPassword: _, ...userWithoutPassword } = user;
 
-    // Create JWT Access Token
+    // Create short-lived Access Token (15 min)
     const payload = { email: user.email, sub: user.id };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
 
-    // Create Refresh Token
-    const { refreshToken } = await this.createAndStoreRefreshToken(user.id);
+    // Create and store Refresh Token (with IP & user-agent tracking)
+    const { refreshToken } = await this.createAndStoreRefreshToken(
+      user.id,
+      ipAddress,
+      userAgent,
+    );
 
     return {
       message: 'Signup successful',

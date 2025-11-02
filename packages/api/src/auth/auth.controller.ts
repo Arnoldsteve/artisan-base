@@ -24,9 +24,11 @@ export class AuthController {
   // ------------------- SIGNUP -------------------
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body() signUpDto: SignUpDto) {
+  async signUp(@Body() signUpDto: SignUpDto, @Req() req) {
+    const ipAddress = req.ip || req.headers['x-forwarded-for'];
+    const userAgent = req.headers['user-agent'];
     this.logger.log(`Signup attempt for email: ${signUpDto.email}`);
-    return this.authService.signUp(signUpDto);
+    return this.authService.signUp(signUpDto, ipAddress, userAgent);
   }
 
   // ------------------- LOGIN -------------------
