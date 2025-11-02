@@ -12,8 +12,6 @@ import { TenantSubscription } from '@prisma/client/management';
 import { StripeService } from '../shared/payment-providers/stripe/stripe.service';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import Stripe from 'stripe';
-
-// Import the repository interface and token
 import { IBillingRepository } from './interfaces/billing-repository.interface';
 // We also inject the plans service to look up plans by ID
 import { PlatformPlansService } from '../platform/plans/platform-plans.service';

@@ -7,6 +7,8 @@ import { UserProfileResponseDto } from './dto/user-profile.dto';
 export class AuthRepository implements IAuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  /* ---------- user methods ---------- */
+
   async findUserByEmail(email: string) {
     return this.prisma.user.findUnique({ where: { email } });
   }
@@ -45,7 +47,7 @@ export class AuthRepository implements IAuthRepository {
       throw new NotFoundException('User not found');
     }
 
-    // --- FIX 2 & 5: Map the data to the DTO shape ---
+    // Map to DTO shape
     return {
       user: {
         id: user.id,
@@ -57,5 +59,80 @@ export class AuthRepository implements IAuthRepository {
       },
       organizations: user.ownedTenant || [],
     };
+  }
+
+  /* ---------- refresh token methods ---------- */
+  // Note: repository expects the token **already hashed** when creating
+
+  async createRefreshToken(data: {
+    userId: string;
+    tokenHash: string;
+    ipAddress?: string | null;
+    userAgent?: string | null;
+    familyId?: string | null;
+    parentTokenId?: string | null;
+    expiresAt: Date;
+  }) {
+    return this.prisma.refreshToken.create({
+      data: {
+        userId: data.userId,
+        tokenHash: data.tokenHash,
+        ipAddress: data.ipAddress ?? null,
+        userAgent: data.userAgent ?? null,
+        familyId: data.familyId ?? null,
+        parentTokenId: data.parentTokenId ?? null,
+        expiresAt: data.expiresAt,
+      },
+    });
+  }
+
+  async findRefreshTokenByHash(tokenHash: string) {
+    return this.prisma.refreshToken.findFirst({
+      where: { tokenHash },
+    });
+  }
+
+  async findRefreshTokenById(id: string) {
+    return this.prisma.refreshToken.findUnique({ where: { id } });
+  }
+
+  async revokeRefreshTokenById(id: string) {
+    return this.prisma.refreshToken.update({
+      where: { id },
+      data: { revoked: true },
+    });
+  }
+
+  async revokeRefreshTokenByHash(tokenHash: string) {
+    return this.prisma.refreshToken.updateMany({
+      where: { tokenHash },
+      data: { revoked: true },
+    });
+  }
+
+  async revokeAllRefreshTokensForUser(userId: string) {
+    return this.prisma.refreshToken.updateMany({
+      where: { userId },
+      data: { revoked: true },
+    });
+  }
+
+  async deleteExpiredTokens() {
+    return this.prisma.refreshToken.deleteMany({
+      where: {
+        expiresAt: { lt: new Date() },
+      },
+    });
+  }
+
+  async findActiveRefreshTokensForUser(userId: string) {
+    return this.prisma.refreshToken.findMany({
+      where: {
+        userId,
+        revoked: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }
