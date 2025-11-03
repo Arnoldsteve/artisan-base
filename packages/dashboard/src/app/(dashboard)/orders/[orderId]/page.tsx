@@ -29,9 +29,6 @@ export default async function OrderDetailPage({
     notFound();
   }
 
-  console.log("Fetched order on server:", order);
-  
-
   return (
     <>
       <PageHeader title={`Order ${order.orderNumber}`} />

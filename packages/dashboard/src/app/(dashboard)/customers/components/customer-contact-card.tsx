@@ -21,7 +21,7 @@ export function CustomerContactCard({ customer }: { customer: Customer }) {
             </div>
             <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{customer.phoneNumber || 'N/A'}</span>
+                <span>{customer.phone || 'N/A'}</span>
             </div>
             <Separator />
             <div>

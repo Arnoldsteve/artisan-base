@@ -106,12 +106,11 @@ export class CustomerRepository implements ICustomerRepository {
     });
 
     const result = {
-      ...paginatedResult, // Keep the original meta object
-      data: customersWithStats, // Replace the data array with our transformed version
+      ...paginatedResult, 
+      data: customersWithStats, 
     };
 
     this.findAllCache = { data: result, expires: now + CACHE_TTL };
-    this.logger.log(`Fetched ${result.data.length} customers with pagination`);
     return result;
   }
 

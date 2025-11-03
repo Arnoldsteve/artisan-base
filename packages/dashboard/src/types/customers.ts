@@ -21,7 +21,7 @@ export interface Customer {
   email: string;
   firstName?: string ;
   lastName?: string ;
-  phoneNumber?: string ;
+  phone?: string ;
   createdAt: string; 
   updatedAt: string; 
   addresses?: CustomerAddress[];

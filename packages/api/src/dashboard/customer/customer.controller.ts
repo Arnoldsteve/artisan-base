@@ -46,6 +46,7 @@ export class CustomerController {
     @Param('id') id: string,
     @Body(ValidationPipe) updateCustomerDto: UpdateCustomerDto,
   ) {
+    Logger.log("update customer data", updateCustomerDto)
     return this.customerService.update(id, updateCustomerDto);
   }
 

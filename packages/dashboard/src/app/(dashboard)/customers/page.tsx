@@ -13,7 +13,7 @@ export default async function CustomersPage() {
     initialData = await serverApi.get<PaginatedResponse<Customer>>(
       "/dashboard/customers"
     );
-    // console.log("Fetched initial data on the server:", initialData);
+    console.log("Fetched initial data on the server:", initialData);
   } catch (error) {
     console.error("Failed to fetch initial customers on the server:", error);
     // On error, create a default paginated structure so the client component doesn't break.
