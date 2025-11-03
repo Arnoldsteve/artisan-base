@@ -26,7 +26,6 @@ export class OrderController {
 
   @Post()
   createManualOrder(@Body(ValidationPipe) createManualOrderDto: CreateManualOrderDto) {
-    Logger.log('Creating manual order with DTO at controller:', createManualOrderDto);
     return this.orderService.createManualOrder(createManualOrderDto);
   }
 

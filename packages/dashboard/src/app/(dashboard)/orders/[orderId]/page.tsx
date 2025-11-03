@@ -30,6 +30,7 @@ export default async function OrderDetailPage({
   }
 
   console.log("Fetched order on server:", order);
+  
 
   return (
     <>

@@ -39,7 +39,7 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
                 <TableCell>
                   <Image
                     src={
-                      item.image?.url ??
+                      item.product?.images?.[0]?.url ?? 
                       `https://picsum.photos/400/400?random=${item.id}`
                     }
                     alt={item.productName || "Product Image"}

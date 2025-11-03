@@ -61,34 +61,6 @@ export class ProductRepository implements IProductRepository {
     }
   }
 
-  // async findAll(pagination: PaginationQueryDto) {
-  //   const now = Date.now();
-  //   if (this.findAllCache && this.findAllCache.expires > now) {
-  //     return this.findAllCache.data;
-  //   }
-
-  //   const prisma = await this.getPrisma();
-  //   const result = await paginate(
-  //     prisma.product,
-  //     {
-  //       page: pagination.page,
-  //       limit: pagination.limit,
-  //     },
-  //     {
-  //       orderBy: { createdAt: 'desc' },
-  //       include: {
-  //         categories: {
-  //           include: {
-  //             category: true
-  //           }
-  //         }
-  //       }
-  //     },
-  //   );
-  //   this.findAllCache = { data: result, expires: now + CACHE_TTL };
-  //   return result;
-  // }
-
   async findAll(pagination: PaginationQueryDto) {
     const now = Date.now();
     const { page, limit, search } = pagination;
@@ -115,7 +87,6 @@ export class ProductRepository implements IProductRepository {
           categories: {
             include: { category: true },
           },
-          // images: true, // Add this if your frontend expects product.images[0].url
         },
       },
     );

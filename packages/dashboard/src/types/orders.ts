@@ -1,5 +1,6 @@
-import { Decimal } from 'decimal.js';
-import { Currency } from './currency';
+import { Decimal } from "decimal.js";
+import { Currency } from "./currency";
+import { Product } from "./products";
 
 export type OrderStatus =
   | "PENDING"
@@ -12,20 +13,20 @@ export type OrderStatus =
 export type PaymentStatus = "PENDING" | "PAID" | "REFUNDED" | "FAILED";
 
 export interface OrderCustomer {
-  id: string; 
+  id: string;
   firstName: string | null;
   lastName: string | null;
   email: string;
 }
 
-
 export interface OrderItem {
   id: string;
   productId: string | null;
   productName: string;
+  product: Product | null;
   quantity: number;
-  unitPrice: Decimal; 
-  image: {url: string} | null;
+  unitPrice: Decimal;
+  image: { url: string } | null;
 }
 
 export interface Order {
@@ -33,11 +34,11 @@ export interface Order {
   orderNumber: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
-  totalAmount: Decimal; 
-  subtotal: Decimal;    
-  shippingAmount: Decimal; 
-  taxAmount: Decimal;      
-  createdAt: string; 
+  totalAmount: Decimal;
+  subtotal: Decimal;
+  shippingAmount: Decimal;
+  taxAmount: Decimal;
+  createdAt: string;
   customer: OrderCustomer | null;
   items: OrderItem[];
 }
@@ -71,7 +72,7 @@ export interface CreateOrderDto {
   shippingAddress: AddressDto;
   billingAddress?: AddressDto;
   items: ManualOrderItemDto[];
-  shippingAmount?: number; 
+  shippingAmount?: number;
   currency: Currency;
   notes?: string;
 }

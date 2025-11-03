@@ -28,10 +28,6 @@ export class OrderRepository implements IOrderRepository {
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request.
-   */
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
       this.prismaClient = await this.tenantPrismaService.getClient();
@@ -79,7 +75,7 @@ export class OrderRepository implements IOrderRepository {
             `Product with ID ${item.productId} not found.`,
           );
         let stock = product.inventoryQuantity;
-        let price = product.price; 
+        let price = product.price;
         let variantName: string | null = null;
         let variantSku: string | null = null;
         if (item.variantId) {
@@ -93,7 +89,7 @@ export class OrderRepository implements IOrderRepository {
               `Variant ${variant.id} does not belong to product ${product.id}.`,
             );
           stock = variant.inventoryQuantity;
-          price = variant.price ?? product.price; 
+          price = variant.price ?? product.price;
           variantName = variant.name;
           variantSku = variant.sku;
         }
@@ -117,8 +113,7 @@ export class OrderRepository implements IOrderRepository {
         });
       }
 
-
-      const TAX_RATE = 0.16; 
+      const TAX_RATE = 0.16;
       const taxAmount = subtotal.mul(TAX_RATE);
 
       const finalShipping = new Decimal(shippingAmount ?? 0);
@@ -138,7 +133,7 @@ export class OrderRepository implements IOrderRepository {
           shippingAmount: finalShipping,
           taxAmount,
           totalAmount,
-          currency: dto.currency || "KES",
+          currency: dto.currency || 'KES',
           notes,
           shippingAddress: shippingAddress as any,
           billingAddress: (billingAddress ?? shippingAddress) as any,
@@ -164,44 +159,42 @@ export class OrderRepository implements IOrderRepository {
     });
   }
 
+  async findAll(paginationQuery: PaginationQueryDto) {
+    const now = Date.now();
+    if (this.findAllCache && this.findAllCache.expires > now) {
+      return this.findAllCache.data;
+    }
 
-async findAll(paginationQuery: PaginationQueryDto) {
-  const now = Date.now();
-  if (this.findAllCache && this.findAllCache.expires > now) {
-    return this.findAllCache.data;
-  }
-    
-  const prisma = await this.getPrisma();
+    const prisma = await this.getPrisma();
 
-  const result = await paginate(
-    prisma.order,
-    {
-      page: paginationQuery.page,
-      limit: paginationQuery.limit,
-      search: paginationQuery.search,
-      searchableFields: ['orderNumber'], 
-    },
-    {
-      orderBy: { orderSequence: 'desc' },
-      include: {
-        _count: { select: { items: true } },
+    const result = await paginate(
+      prisma.order,
+      {
+        page: paginationQuery.page,
+        limit: paginationQuery.limit,
+        search: paginationQuery.search,
+        searchableFields: ['orderNumber'],
+      },
+      {
+        orderBy: { orderSequence: 'desc' },
+        include: {
+          _count: { select: { items: true } },
 
-        customer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+          customer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
       },
-    },
-  );
+    );
 
-  this.findAllCache = { data: result, expires: now + CACHE_TTL };
-  return result;
-}
-
+    this.findAllCache = { data: result, expires: now + CACHE_TTL };
+    return result;
+  }
 
   async findOne(id: string) {
     const now = Date.now();
@@ -209,14 +202,41 @@ async findAll(paginationQuery: PaginationQueryDto) {
     if (cached && cached.expires > now) {
       return cached.data;
     }
+
     const prisma = await this.getPrisma();
+
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { items: true },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                categories: {
+                  include: { category: true },
+                },
+              },
+            },
+          },
+        },
+        customer: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
+        },
+        payments: true,
+      },
     });
-    if (order) {
-      this.findOneCache.set(id, { data: order, expires: now + CACHE_TTL });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID '${id}' not found.`);
     }
+
+    this.findOneCache.set(id, { data: order, expires: now + CACHE_TTL });
     return order;
   }
 
