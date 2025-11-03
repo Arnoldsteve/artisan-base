@@ -16,6 +16,7 @@ export interface SignUpDto {
 export interface LoginResponse {
   message: string;
   accessToken: string;
+  refreshToken: string;
   user: User;
   organizations: Tenant[];
 }
@@ -23,6 +24,7 @@ export interface LoginResponse {
 export interface SignUpResponse {
   message: string;
   accessToken: string;
+  refreshToken: string;
   user: User;
 }
 

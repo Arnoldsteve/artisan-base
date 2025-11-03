@@ -14,21 +14,21 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [token, setToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null); // <-- new
+  const [refreshToken, setRefreshToken] = useState<string | null>(null); 
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadUserFromCookies() {
       const tokenFromCookie = Cookies.get('accessToken');
-      const refreshTokenFromCookie = Cookies.get('refreshToken'); // <-- new
+      const refreshTokenFromCookie = Cookies.get('refreshToken'); 
       const tenantIdFromCookie = Cookies.get('selectedOrgSubdomain');
 
       if (tokenFromCookie && tenantIdFromCookie) {
         apiClient.setAuthToken(tokenFromCookie);
         apiClient.setTenantId(tenantIdFromCookie);
         setToken(tokenFromCookie);
-        setRefreshToken(refreshTokenFromCookie); // <-- new
+        setRefreshToken(refreshTokenFromCookie ?? null); 
         setTenantId(tenantIdFromCookie);
         try {
           const profile = await authService.getProfile();
@@ -45,20 +45,20 @@ export function useAuth() {
 
   const signUp = useCallback(async (data: SignUpDto) => {
     const response = await authService.signUp(data);
-    const { user: signedUpUser, accessToken, refreshToken: rt } = response;
+    const { user: signedUpUser, accessToken, refreshToken } = response;
 
     setUser(signedUpUser);
     setToken(accessToken);
-    setRefreshToken(rt); // <-- new
+    setRefreshToken(refreshToken); 
     apiClient.setAuthToken(accessToken);
 
     Cookies.set('accessToken', accessToken, { expires: 1, secure: true, sameSite: 'lax' });
-    Cookies.set('refreshToken', rt, { expires: 30, secure: true, sameSite: 'lax' }); // <-- new
+    Cookies.set('refreshToken', refreshToken, { expires: 30, secure: true, sameSite: 'lax' }); 
   }, []);
 
   const login = useCallback(async (data: LoginDto) => {
     const response = await authService.login(data);
-    const { user: loggedInUser, accessToken, refreshToken: rt, organizations } = response;
+    const { user: loggedInUser, accessToken, refreshToken, organizations } = response;
 
     const selectedTenant = organizations[0]?.subdomain;
     if (!selectedTenant) {
@@ -68,21 +68,21 @@ export function useAuth() {
     setUser(loggedInUser);
     setTenants(organizations);
     setToken(accessToken);
-    setRefreshToken(rt); // <-- new
+    setRefreshToken(refreshToken); 
     setTenantId(selectedTenant);
 
     apiClient.setAuthToken(accessToken);
     apiClient.setTenantId(selectedTenant);
 
     Cookies.set('accessToken', accessToken, { expires: 1, secure: true, sameSite: 'lax' });
-    Cookies.set('refreshToken', rt, { expires: 30, secure: true, sameSite: 'lax' }); // <-- new
+    Cookies.set('refreshToken', refreshToken, { expires: 30, secure: true, sameSite: 'lax' }); 
     Cookies.set('selectedOrgSubdomain', selectedTenant, { expires: 1, secure: true, sameSite: 'lax' });
   }, []);
 
   const logout = useCallback(async () => {
     try {
       if (refreshToken) {
-        await authService.logout(refreshToken); // <-- send refresh token to backend
+        await authService.logout(refreshToken); 
       }
     } catch (error) {
       console.warn("Server logout failed, proceeding with client-side cleanup.", error);
@@ -90,7 +90,7 @@ export function useAuth() {
 
     setUser(null);
     setToken(null);
-    setRefreshToken(null); // <-- clear
+    setRefreshToken(null); 
     setTenantId(null);
     setTenants([]);
 
@@ -98,7 +98,7 @@ export function useAuth() {
     apiClient.setTenantId(null);
 
     Cookies.remove('accessToken');
-    Cookies.remove('refreshToken'); // <-- remove
+    Cookies.remove('refreshToken'); 
     Cookies.remove('selectedOrgSubdomain');
     
     window.location.href = '/';
@@ -115,7 +115,7 @@ export function useAuth() {
     user, 
     tenants,
     token,
-    refreshToken, // <-- expose if needed
+    refreshToken, 
     tenantId, 
     isLoading, 
     isAuthenticated: !isLoading && !!user,
