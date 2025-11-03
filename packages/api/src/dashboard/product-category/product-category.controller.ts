@@ -13,6 +13,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ProductCategoryService } from './product-category.service';
 import { AssignCategoryDto } from './dto/assign-category.dto';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 @Controller({
   path: 'dashboard/product-categories',
@@ -43,8 +44,12 @@ export class ProductCategoryController {
     return this.service.getCategoriesForProduct(productId);
   }
 
-  @Get('by-category/:categoryId')
-  getProductsForCategory(@Param('categoryId') categoryId: string) {
-    return this.service.getProductsForCategory(categoryId);
-  }
+@Get('by-category/:categoryId')
+getProductsForCategory(
+  @Param('categoryId') categoryId: string,
+  @Query(ValidationPipe) paginationQuery: PaginationQueryDto,
+) {
+  return this.service.getProductsForCategory(categoryId, paginationQuery);
+}
+
 }

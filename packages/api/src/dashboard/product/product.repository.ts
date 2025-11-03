@@ -15,15 +15,10 @@ export class ProductRepository implements IProductRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
-  // This will hold the client once it's initialized
   private prismaClient: PrismaClient | null = null;
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request
-   */
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
       this.prismaClient = await this.tenantPrismaService.getClient();
@@ -35,18 +30,15 @@ export class ProductRepository implements IProductRepository {
     try {
       const prisma = await this.getPrisma();
 
-      // Generate base slug from product name
       let baseSlug = slugify(dto.name, { lower: true, strict: true });
       let slug = baseSlug;
       let counter = 1;
 
-      // Keep checking until we find a unique slug
       while (await prisma.product.findUnique({ where: { slug } })) {
         slug = `${baseSlug}-${counter}`;
         counter++;
       }
 
-      // Create product with unique slug
       const product = await prisma.product.create({
         data: { ...dto, slug },
       });

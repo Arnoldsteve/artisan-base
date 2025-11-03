@@ -1,5 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import { ProductCategoryRepository } from './product-category.repository';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductCategoryService {
@@ -17,7 +18,7 @@ export class ProductCategoryService {
     return this.repository.getCategoriesForProduct(productId);
   }
 
-  getProductsForCategory(categoryId: string) {
-    return this.repository.getProductsForCategory(categoryId);
+  getProductsForCategory(categoryId: string, paginationQuery: PaginationQueryDto,) {
+    return this.repository.getProductsForCategory(categoryId, paginationQuery);
   }
 }

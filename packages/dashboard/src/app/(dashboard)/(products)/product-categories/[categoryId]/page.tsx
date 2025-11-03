@@ -1,57 +1,68 @@
+// page.tsx
 import { createServerApiClient } from "@/lib/server-api";
 import { Category } from "@/types/categories";
 import { Product } from "@/types/products";
 import CategoryProductsClient from "./components/CategoryProductsClient";
 import { PageHeader } from "@/components/shared/page-header";
+import { PaginatedResponse } from "@/types/shared";
 
 export default async function CategoryProductsPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ categoryId: string }>;
-  searchParams: Promise<{ page?: string; search?: string }>;
 }) {
   const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
-
   const categoryId = resolvedParams["categoryId"];
-  const currentPage = parseInt(resolvedSearchParams.page || "1");
-  const searchQuery = resolvedSearchParams.search || "";
-  const itemsPerPage = 20;
 
   let category: Category | null = null;
   let products: Product[] = [];
-  let totalProducts = 0;
+  let initialProductData: PaginatedResponse<Product>;
 
   try {
     const serverApi = await createServerApiClient();
 
-    const queryParams = new URLSearchParams({
-      page: currentPage.toString(),
-      limit: itemsPerPage.toString(),
-      ...(searchQuery && { search: searchQuery }),
-    });
+    // Fetch category + products in one call
+    const response = await serverApi.get<{
+      data: Array<{
+        productId: string;
+        categoryId: string;
+        product: Product;
+        category: Category;
+      }>;
+      meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        prev: number | null;
+        next: number | null;
+      };
+    }>(`/dashboard/product-categories/by-category/${categoryId}`);
 
-    const res = await serverApi.get<{
-      data: { categoryId: string; product: Product; productId: string }[];
-      totalCount?: number;
-    }>(
-      `/dashboard/product-categories/by-category/${categoryId}?${queryParams}`
-    );
+    if (response.data.length > 0) {
+      category = response.data[0].category;
+    }
 
-    const entries = Array.isArray(res) ? res : (res?.data ?? []);
-    products = entries.map((entry: any) => entry.product);
-    totalProducts = res?.totalCount || products.length;
-    console.log("products", products);
+    products = response.data.map((item) => item.product);
 
-    // Fetch category details
-    const categoryRes = await serverApi.get<Category>(
-      `/dashboard/categories/${categoryId}`
-    );
-    category = categoryRes;
-    console.log("category", category);
+    initialProductData = {
+      data: products,
+      meta: response.meta,
+    };
+
   } catch (error) {
-    console.error("Failed to fetch category/products:", error);
+    console.error("❌ Failed to fetch category/products:", error);
+    initialProductData = {
+      data: [],
+      meta: {
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+        prev: null,
+        next: null,
+      },
+    };
   }
 
   return (
@@ -60,10 +71,7 @@ export default async function CategoryProductsPage({
       <div className="px-4 md:px-4 lg:px-8 md:mt-0">
         <CategoryProductsClient
           category={category}
-          products={products}
-          totalProducts={totalProducts}
-          searchQuery={searchQuery}
-          categoryId={categoryId}
+          initialProductData={initialProductData}
         />
       </div>
     </>
