@@ -48,7 +48,7 @@ export async function refreshAccessToken(): Promise<string | null> {
       Cookies.remove('refreshToken');
       Cookies.remove('selectedOrgSubdomain');
       // Optional: redirect to login
-      // window.location.href = '/login';
+      window.location.href = '/';
     }
     
     return null;

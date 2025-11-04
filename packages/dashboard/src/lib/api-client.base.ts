@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { refreshAccessToken } from "./refresh-token";
+import Cookies from "js-cookie";
 
 export class ApiError extends Error {
   constructor(
@@ -16,6 +17,11 @@ export class ApiError extends Error {
 export class BaseApiClient {
   protected client: AxiosInstance;
   private accessToken?: string | null;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (token: string) => void;
+    reject: (error: any) => void;
+  }> = [];
 
   constructor(
     baseURL: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
@@ -42,18 +48,60 @@ export class BaseApiClient {
 
         // Only retry once to prevent infinite loops
         if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
+          // Check if refresh token exists before attempting refresh
+          const refreshToken = Cookies.get('refreshToken');
+          
+          if (!refreshToken) {
+            console.error('No refresh token available');
+            // Clear all auth data and reject
+            this.clearAuthData();
+            return Promise.reject(error);
+          }
 
-          const newToken = await refreshAccessToken();
-          console.log("newToken", newToken)
-          if (newToken) {
-            // Save new token
-            this.accessToken = newToken;
-            // Update header for future requests
-            this.client.defaults.headers["Authorization"] = `Bearer ${newToken}`;
-            // Retry the failed request with the new token
-            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-            return this.client(originalRequest);
+          // If already refreshing, queue this request
+          if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            })
+              .then((token) => {
+                originalRequest.headers["Authorization"] = `Bearer ${token}`;
+                return this.client(originalRequest);
+              })
+              .catch((err) => Promise.reject(err));
+          }
+
+          originalRequest._retry = true;
+          this.isRefreshing = true;
+
+          try {
+            const newToken = await refreshAccessToken();
+            console.log("newToken", newToken);
+            
+            if (newToken) {
+              // Save new token
+              this.accessToken = newToken;
+              // Update header for future requests
+              this.client.defaults.headers["Authorization"] = `Bearer ${newToken}`;
+              // Retry the failed request with the new token
+              originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+              
+              // Process all queued requests with the new token
+              this.processQueue(null, newToken);
+              
+              return this.client(originalRequest);
+            } else {
+              // Refresh failed, process queue with error
+              this.processQueue(new Error('Token refresh failed'), null);
+              this.clearAuthData();
+              return Promise.reject(error);
+            }
+          } catch (refreshError) {
+            console.error('Token refresh error:', refreshError);
+            this.processQueue(refreshError, null);
+            this.clearAuthData();
+            return Promise.reject(refreshError);
+          } finally {
+            this.isRefreshing = false;
           }
         }
 
@@ -67,6 +115,25 @@ export class BaseApiClient {
         return Promise.reject(apiError);
       }
     );
+  }
+
+  // Process queued requests after token refresh
+  private processQueue(error: any = null, token: string | null = null): void {
+    this.failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error);
+      } else if (token) {
+        prom.resolve(token);
+      }
+    });
+    this.failedQueue = [];
+  }
+
+  // Clear auth data from cookies
+  private clearAuthData(): void {
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    Cookies.remove('selectedOrgSubdomain');
   }
 
   // ✅ Optional method to update token manually (after login)
