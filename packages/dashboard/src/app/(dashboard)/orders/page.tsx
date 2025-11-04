@@ -14,6 +14,7 @@ export default async function OrdersPage() {
       "/dashboard/orders",
       { page: 1, limit: 10 }
     );
+    // console.log("Failed to fetch initial orders on the server:", initialData);
   } catch (error) {
     console.error("Failed to fetch initial orders on the server:", error);
 

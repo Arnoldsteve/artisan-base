@@ -8,6 +8,7 @@ import {
   CustomerDetailsDto,
   AddressDto,
   ManualOrderItemDto,
+  Order,
 } from "@/types/orders";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
@@ -535,7 +536,7 @@ function CustomerForm({
 /**
  * Main NewOrderForm component, orchestrating subcomponents and business logic.
  */
-export function NewOrderForm() {
+export function NewOrderForm({ initialOrder }: { initialOrder?: Order }) {
   const router = useRouter();
   const [customerFirstName, setCustomerFirstName] = useState("");
   const [customerLastName, setCustomerLastName] = useState("");
