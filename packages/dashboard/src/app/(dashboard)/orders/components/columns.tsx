@@ -153,6 +153,11 @@ export const columns: ColumnDef<Order>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+               <DropdownMenuItem
+                // onClick={() => typedTable.options.meta?.openDeleteDialog(order)}
+              >
+                Edit Order
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/orders/${order.id}`}>View Order Details</Link>
               </DropdownMenuItem>

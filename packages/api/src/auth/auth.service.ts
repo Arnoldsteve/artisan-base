@@ -80,7 +80,7 @@ export class AuthService {
     );
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1m' });
 
     // Create Refresh Token and save in DB
     const { refreshToken } = await this.createAndStoreRefreshToken(
@@ -137,6 +137,11 @@ export class AuthService {
     ipAddress?: string,
     userAgent?: string,
   ) {
+    // ✅ Add validation
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
     const storedToken =
       await this.authRepository.findRefreshTokenByHash(tokenHash);
@@ -166,13 +171,12 @@ export class AuthService {
   }
 
   // ------------------- LOGOUT -------------------
- async logout(refreshToken: string) {
-  if (!refreshToken) {
-    throw new BadRequestException('Refresh token is required');
+  async logout(refreshToken: string) {
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    await this.authRepository.revokeRefreshTokenByHash(tokenHash);
+    return { message: 'Logged out successfully' };
   }
-  const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
-  await this.authRepository.revokeRefreshTokenByHash(tokenHash);
-  return { message: 'Logged out successfully' };
-}
-
 }

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { refreshAccessToken } from "./refresh-token";
 
-// The custom error class is shared logic.
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -13,30 +13,51 @@ export class ApiError extends Error {
   }
 }
 
-// This is the core, reusable class.
 export class BaseApiClient {
   protected client: AxiosInstance;
+  private accessToken?: string | null;
 
   constructor(
     baseURL: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
     initialConfig: { token?: string | null; tenantId?: string | null } = {}
   ) {
+    this.accessToken = initialConfig.token;
+
     this.client = axios.create({
       baseURL: `${baseURL}/api/v1`,
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
-        // Set headers from constructor - perfect for the server client
-        ...(initialConfig.token && { Authorization: `Bearer ${initialConfig.token}` }),
+        ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
         ...(initialConfig.tenantId && { "x-tenant-id": initialConfig.tenantId }),
       },
       withCredentials: true,
     });
 
-    // Shared error handling for both client and server!
+    // ✅ Response interceptor for automatic token refresh
     this.client.interceptors.response.use(
-      (response: AxiosResponse) => response, // Pass through successful responses
-      (error) => {
+      (response: AxiosResponse) => response,
+      async (error) => {
+        const originalRequest = error.config;
+
+        // Only retry once to prevent infinite loops
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+
+          const newToken = await refreshAccessToken();
+          console.log("newToken", newToken)
+          if (newToken) {
+            // Save new token
+            this.accessToken = newToken;
+            // Update header for future requests
+            this.client.defaults.headers["Authorization"] = `Bearer ${newToken}`;
+            // Retry the failed request with the new token
+            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+            return this.client(originalRequest);
+          }
+        }
+
+        // Normal error handling
         const apiError = new ApiError(
           error.response?.data?.message || error.message,
           error.response?.status || 500,
@@ -48,15 +69,23 @@ export class BaseApiClient {
     );
   }
 
-  // All request methods are shared.
+  // ✅ Optional method to update token manually (after login)
+  setAccessToken(token: string | null) {
+    this.accessToken = token;
+    if (token) {
+      this.client.defaults.headers["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete this.client.defaults.headers["Authorization"];
+    }
+  }
+
+  // --- Standard request methods ---
   async request<T>(config: AxiosRequestConfig): Promise<T> {
     try {
       const response = await this.client.request<T>(config);
       return response.data;
     } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
+      if (error instanceof ApiError) throw error;
       throw new ApiError("An unknown network error occurred", 0);
     }
   }
@@ -70,7 +99,7 @@ export class BaseApiClient {
   }
 
   async patch<T>(url: string, data?: any): Promise<T> {
-    return this.request<T>({ method: 'patch', url, data });
+    return this.request<T>({ method: "patch", url, data });
   }
 
   async delete<T>(url: string): Promise<T> {
