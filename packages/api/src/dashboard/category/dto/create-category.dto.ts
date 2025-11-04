@@ -11,6 +11,10 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   @Length(2, 500)
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return undefined;
+    const trimmed = value.trim();
+    return trimmed === '' ? undefined : trimmed;
+  })
   description?: string;
 }

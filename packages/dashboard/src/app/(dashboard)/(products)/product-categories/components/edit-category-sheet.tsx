@@ -72,9 +72,15 @@ export function EditCategorySheet({
       }
     }
   }, [category, isOpen, form]);
-
   const onSubmit = (data: CategoryFormData) => {
-    onSave(data);
+    const payload = {
+      ...data,
+      description: data.description?.trim() || undefined, 
+    };
+
+    console.log("payload",payload)
+    // return;
+    onSave(payload);
   };
 
   return (

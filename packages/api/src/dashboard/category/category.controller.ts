@@ -31,6 +31,8 @@ export class CategoryController {
 
   @Post()
   create(@Body(ValidationPipe) createCategoryDto: CreateCategoryDto) {
+      console.log('Received:', createCategoryDto);
+
     return this.categoryService.create(createCategoryDto);
   }
 
