@@ -5,7 +5,7 @@ type SubmitFn = (data: any) => Promise<any>;
 
 export function useAuthForm(submitFn: SubmitFn, onSuccessRedirect: string) {
   const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (data: any) => {
@@ -26,5 +26,5 @@ export function useAuthForm(submitFn: SubmitFn, onSuccessRedirect: string) {
     }
   };
 
-  return { error, loading, handleSubmit };
+  return { error, isLoading, handleSubmit };
 }

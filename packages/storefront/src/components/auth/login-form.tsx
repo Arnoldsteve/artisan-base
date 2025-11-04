@@ -1,24 +1,18 @@
 "use client";
-
 import { useState } from "react";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
-import { CardWrapper } from "./card-wrapper";
-import { Loader2 } from "lucide-react";
-import { useAuthContext } from "@/contexts/auth-context";
-import { useFormHandler } from "@/hooks/use-form-handler"; 
+import { useAuthForm } from "@/hooks/use-auth-form";
+import { login } from "@/services/auth-service";
 import Link from "next/link";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { Label } from "@repo/ui/components/ui/label";
+import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@repo/ui/components/ui/button";
+import { CardWrapper } from "./card-wrapper";
 
-export function LoginForm() {
-  const { login } = useAuthContext();
-
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { isLoading, error, handleSubmit } = useFormHandler(login, {
-    successMessage: "Login successful! Redirecting...",
-    onSuccessRedirect: "/home",
-  });
+  const { error, isLoading, handleSubmit } = useAuthForm(login, "/account");
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,15 +25,13 @@ export function LoginForm() {
       backButtonLabel="Don't have an account? Create one"
       backButtonHref="/auth/signup"
     >
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-8">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
-            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
             required
             autoFocus
           />
@@ -56,11 +48,9 @@ export function LoginForm() {
             </Link>
           </div>
           <Input
-            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
             required
           />
         </div>
