@@ -1,215 +1,316 @@
+<div align="center">
+
 # ArtisanBase 🎨
 
-> **Empowering artisans with professional e-commerce solutions**
+**Empowering artisans with professional e-commerce solutions**
 
-ArtisanBase is a modern, full-stack SaaS platform that enables independent artisans and craftspeople to launch professional online storefronts without the technical complexity. Built with enterprise-grade architecture, it provides secure, isolated environments for each creator while maintaining simplicity and ease of use.
+Build and launch your online store without technical complexity
 
-![ArtisanBase Platform](https://via.placeholder.com/800x400/667eea/ffffff?text=ArtisanBase+Platform+Screenshot)
-*Professional storefronts tailored for artisans and creators*
+<br>
+
+[![Storefront](https://img.shields.io/badge/🛍️_Storefront-Live_Demo-4285F4?style=for-the-badge&logo=vercel&logoColor=white)](https://artisan-base-storefront.vercel.app)
+[![Dashboard](https://img.shields.io/badge/⚙️_Dashboard-Live_Demo-34A853?style=for-the-badge&logo=vercel&logoColor=white)](https://artisan-base-dashboard.vercel.app)
+[![Docs](https://img.shields.io/badge/📖_Documentation-Read-FF6B6B?style=for-the-badge)](https://docs.artisanbase.com)
+
+</div>
+
+<br>
+
+<p align="center">
+  <img src="https://via.placeholder.com/1100x450/667eea/ffffff?text=ArtisanBase+Platform+Preview" alt="ArtisanBase Platform" />
+</p>
 
 ---
 
-## ✨ Why ArtisanBase?
+## 🌟 Overview
 
-**For Artisans:** Focus on your craft, not on technology. Get a professional online presence with zero technical knowledge required.
+ArtisanBase is a **full-stack multi-tenant SaaS platform** that enables independent artisans and craftspeople to launch professional online storefronts. Built with enterprise-grade architecture, it provides **secure, isolated environments** for each creator while maintaining simplicity and ease of use.
 
-**For Developers:** Experience modern full-stack architecture with multi-tenancy, advanced security patterns, and scalable design principles.
+<br>
+
+### Why ArtisanBase?
+
+<table>
+<tr>
+<td width="50%">
+
+**For Artisans**  
+Focus on your craft, not technology. Get a professional online presence with zero technical knowledge required.
+
+</td>
+<td width="50%">
+
+**For Developers**  
+Experience modern full-stack architecture with multi-tenancy, advanced security patterns, and scalable design.
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🚀 Key Features
+## 🚀 Live Demos
 
-### 🏪 **Multi-Tenant Architecture**
-- **Isolated Environments:** Each artisan receives a completely separate database schema
-- **Enterprise Security:** Data isolation at the database level ensures maximum security
-- **Scalable Design:** Handle thousands of stores without performance degradation
+<div align="center">
 
-### 🌐 **Professional Storefronts**
-- **SEO-Optimized:** Server-side rendered pages for maximum search visibility
-- **Mobile-First Design:** Responsive layouts that work beautifully on all devices
-- **Custom Branding:** Each store maintains its unique identity and style
+| 🛍️ Customer Storefront | ⚙️ Admin Dashboard |
+|:---:|:---:|
+| Browse products, shopping cart, mobile responsive | Analytics, inventory management, customization |
+| **[artisan-base-storefront.vercel.app](https://artisan-base-storefront.vercel.app)** | **[artisan-base-dashboard.vercel.app](https://artisan-base-dashboard.vercel.app)** |
 
-### 🔐 **Enterprise-Grade Security**
-- **JWT Authentication:** Secure, stateless authentication with httpOnly cookies
-- **Protected Dashboards:** Role-based access control for store management
-- **Data Encryption:** All sensitive data encrypted at rest and in transit
+<br>
 
-### ⚡ **Developer Experience**
-- **Type-Safe:** End-to-end TypeScript for reliability and developer productivity
-- **Modern Tooling:** Built with the latest frameworks and best practices
-- **Monorepo Architecture:** Organized codebase with shared libraries and utilities
+**[📖 Documentation](https://docs.artisanbase.com)** • **[🐛 Report Issues](https://github.com/Arnoldsteve/artisan-base/issues)** • **[💬 Discussions](https://github.com/Arnoldsteve/artisan-base/discussions)**
+
+</div>
+
+---
+
+## ✨ Key Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🏪 Multi-Tenant Architecture
+- Isolated database schemas per store
+- Enterprise-level data security
+- Handle thousands of stores seamlessly
+
+### 🔐 Enterprise Security
+- JWT authentication with httpOnly cookies
+- Role-based access control
+- End-to-end data encryption
+
+</td>
+<td width="50%">
+
+### 🌐 Professional Storefronts
+- SEO-optimized with server-side rendering
+- Mobile-first responsive design
+- Custom branding for each store
+
+### ⚡ Developer Experience
+- Full TypeScript type safety
+- Modern tooling and frameworks
+- Organized monorepo architecture
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend (`packages/web`)
-```
-Next.js 14+          App Router, SSR, and modern React patterns
-TypeScript           Type safety and enhanced developer experience
-Tailwind CSS         Utility-first styling with responsive design
-shadcn/ui           Beautiful, accessible component library
-React Hook Form      Performant forms with built-in validation
-Zod                 Runtime type validation and schema parsing
-```
-
-### Backend (`packages/api`)
-```
-NestJS              Scalable Node.js framework with dependency injection
-TypeScript          Type-safe server-side development
-Prisma ORM          Type-safe database access with migrations
-Passport.js         Flexible authentication middleware
-PostgreSQL          Robust relational database with JSON support
+### **Frontend**
+```plaintext
+Next.js 14+      App Router, SSR, modern React patterns
+TypeScript       Type safety across the stack
+Tailwind CSS     Utility-first styling
+shadcn/ui        Beautiful, accessible components
+React Hook Form  Performant form validation
+TanStack Query   Server state management
+Zod              Runtime type validation
 ```
 
-### Infrastructure & DevOps
+### **Backend**
+```plaintext
+NestJS           Scalable Node.js framework
+Prisma ORM       Type-safe database access
+Passport.js      Authentication middleware
+PostgreSQL       Robust relational database
 ```
-pnpm Workspaces     Efficient monorepo package management
-Turborepo           Build system optimization and caching
-Supabase            Managed PostgreSQL with real-time features
-Vercel              Serverless deployment and edge optimization
+
+### **DevOps & Infrastructure**
+```plaintext
+pnpm Workspaces  Monorepo package management
+Turborepo        Build optimization and caching
+Supabase         Managed PostgreSQL hosting
+Vercel           Edge deployment platform
 ```
 
 ---
 
 ## 🏗️ Architecture Highlights
 
-### **Schema-per-Tenant Multi-Tenancy**
-Revolutionary approach to data isolation where each store gets its own dedicated PostgreSQL schema (`tenant_[storeId]`). This provides:
-- **Maximum Security:** Complete data isolation between tenants
-- **Scalability:** Independent scaling and optimization per tenant
-- **Compliance:** Easy adherence to data protection regulations
+### **Schema-Per-Tenant Multi-Tenancy**
+
+Revolutionary data isolation where each store gets its own PostgreSQL schema (`tenant_[storeId]`):
+```
+tenant_001.products
+tenant_001.orders
+tenant_002.products
+tenant_002.orders
+```
+
+**Benefits:**
+- ✅ Maximum security through complete data isolation
+- ✅ Independent scaling per tenant
+- ✅ Simplified compliance with data regulations
+
+<br>
 
 ### **Dynamic Tenant Resolution**
-Custom `TenantPrismaService` factory creates request-scoped database connections:
+
+Request-scoped database connections with automatic tenant detection:
 ```typescript
-// Automatic tenant resolution from request context
 const tenantPrisma = await this.tenantPrismaService.getTenantClient(storeId);
 const products = await tenantPrisma.product.findMany();
 ```
 
-### **Seamless Development Experience**
-- **Proxy Architecture:** Next.js proxies API requests to eliminate CORS issues
-- **Hot Reloading:** Full-stack development with instant feedback
-- **Type Sharing:** Shared types and schemas across frontend and backend
+<br>
+
+### **Seamless Development**
+- Next.js proxies API requests (no CORS issues)
+- Hot reloading across the entire stack
+- Shared types and schemas between frontend and backend
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+ and pnpm
-- PostgreSQL database (we recommend Supabase)
-- Git
+### **Prerequisites**
+- Node.js 18+
+- pnpm package manager
+- PostgreSQL database (Supabase recommended)
 
-### Installation
+<br>
 
-1. **Clone and Install**
-   ```bash
-   git clone https://github.com/Arnoldsteve/artisan-base.git
-   cd artisan-base
-   pnpm install
-   ```
+### **Installation**
+```bash
+# Clone repository
+git clone https://github.com/Arnoldsteve/artisan-base.git
+cd artisan-base
 
-2. **Environment Setup**
-   ```bash
-   cd packages/api
-   cp .env.example .env
-   ```
-   
-   Update `.env` with your configuration:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://user:password@host:port/dbname"
-   
-   # Security
-   JWT_SECRET="your-super-secret-jwt-key-minimum-32-characters"
-   
-   # Optional: Environment
-   NODE_ENV="development"
-   ```
+# Install dependencies
+pnpm install
 
-3. **Database Setup**
-   ```bash
-   # Run migrations
-   pnpm exec prisma migrate dev
-   
-   # Generate Prisma client
-   pnpm exec prisma generate
-   ```
+# Setup environment
+cd packages/api
+cp .env.example .env
+# Edit .env with your configuration
 
-4. **Start Development**
-   ```bash
-   # From project root
-   pnpm dev
-   ```
-   
-   🎉 **Ready!** Visit http://localhost:3000
+# Setup database
+pnpm exec prisma migrate dev
+pnpm exec prisma generate
+
+# Start development servers
+cd ../..
+pnpm dev
+```
+
+**🎉 You're ready!**
+- Storefront: `http://localhost:3000`
+- Dashboard: `http://localhost:3001`
+- API: `http://localhost:4000`
 
 ---
 
 ## 📚 Project Structure
-
 ```
 artisan-base/
+│
 ├── packages/
-│   ├── api/                 # NestJS backend
+│   │
+│   ├── api/                    # NestJS Backend Server
 │   │   ├── src/
-│   │   │   ├── auth/        # Authentication modules
-│   │   │   ├── store/       # Store management
-│   │   │   ├── product/     # Product CRUD
-│   │   │   └── tenant/      # Multi-tenancy logic
-│   │   └── prisma/          # Database schema & migrations
-│   ├── web/                 # Next.js frontend
-│   │   ├── app/             # App Router pages
-│   │   ├── components/      # Reusable UI components
-│   │   └── lib/             # Utilities and configurations
-│   └── shared/              # Shared types and utilities
-├── turbo.json              # Turborepo configuration
-└── package.json            # Workspace configuration
+│   │   │   ├── auth/           # Authentication & authorization
+│   │   │   ├── store/          # Store management
+│   │   │   ├── product/        # Product CRUD operations
+│   │   │   └── tenant/         # Multi-tenancy logic
+│   │   └── prisma/             # Database schemas & migrations
+│   │
+│   ├── dashboard/              # Admin Dashboard (Next.js)
+│   │   ├── app/                # App Router pages
+│   │   ├── components/         # Admin UI components
+│   │   └── lib/                # Utilities & configurations
+│   │
+│   ├── storefront/             # Customer Storefront (Next.js)
+│   │   ├── app/                # App Router pages
+│   │   ├── components/         # Storefront UI components
+│   │   └── lib/                # Utilities & configurations
+│   │
+│   └── common/                 # Shared Resources
+│       ├── types/              # TypeScript type definitions
+│       ├── schemas/            # Zod validation schemas
+│       └── utils/              # Helper functions
+│
+├── turbo.json                  # Turborepo configuration
+└── package.json                # Workspace configuration
 ```
 
 ---
 
-## 🎯 Roadmap
+## 🗺️ Roadmap
 
-- [ ] **Dynamic Subdomains** - `artisan.artisanbase.com` routing
-- [ ] **Payment Integration** - Stripe/PayPal checkout flows
-- [ ] **Order Management** - Complete order lifecycle
-- [ ] **Analytics Dashboard** - Sales insights and reporting
-- [ ] **Theme Customization** - Visual store customization
-- [ ] **Mobile App** - React Native companion app
+<table>
+<tr>
+<td>
+
+- [ ] **Dynamic Subdomains** – Custom `store.artisanbase.com` URLs
+- [ ] **Payment Integration** – Stripe & PayPal checkout
+- [ ] **Order Management** – Complete order lifecycle
+- [ ] **Analytics Dashboard** – Sales insights & reporting
+- [ ] **Theme Customization** – Visual store builder
+
+</td>
+<td>
+
+- [ ] **Mobile App** – React Native companion
+- [ ] **Email Notifications** – Transactional emails
+- [ ] **Inventory Alerts** – Low stock warnings
+- [ ] **Multi-Currency** – International sales support
+- [ ] **Shipping Integration** – Real-time rates & tracking
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions from the community!
 
+**Getting Started:**
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** – see [LICENSE](LICENSE) for details.
+
+Free for personal and commercial use.
 
 ---
 
 ## 🙏 Acknowledgments
 
-Built with ❤️ for the artisan community. Special thanks to all the open-source projects that make this possible.
+Built with ❤️ for the artisan community.
+
+Special thanks to all the open-source projects and contributors who make this possible.
 
 ---
 
 <div align="center">
 
-**[Live Demo](https://artisanbase.vercel.app)** • **[Documentation](https://docs.artisanbase.com)** • **[Report Bug](https://github.com/Arnoldsteve/artisan-base/issues)**
+### Made with 🎨 by [Arnold Steve](https://github.com/Arnoldsteve)
 
-Made with 🎨 by [Arnold Steve](https://github.com/Arnoldsteve)
+<br>
+
+⭐ **Star this repo if you find it helpful!** ⭐
+
+<br>
+
+[![GitHub stars](https://img.shields.io/github/stars/Arnoldsteve/artisan-base?style=social)](https://github.com/Arnoldsteve/artisan-base)
+[![GitHub forks](https://img.shields.io/github/forks/Arnoldsteve/artisan-base?style=social)](https://github.com/Arnoldsteve/artisan-base/fork)
 
 </div>
