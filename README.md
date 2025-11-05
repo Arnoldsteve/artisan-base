@@ -10,7 +10,7 @@ Build and launch your online store without technical complexity
 
 [![Storefront](https://img.shields.io/badge/🛍️_Storefront-Live_Demo-4285F4?style=for-the-badge&logo=vercel&logoColor=white)](https://artisan-base-storefront.vercel.app)
 [![Dashboard](https://img.shields.io/badge/⚙️_Dashboard-Live_Demo-34A853?style=for-the-badge&logo=vercel&logoColor=white)](https://artisan-base-dashboard.vercel.app)
-[![Docs](https://img.shields.io/badge/📖_Documentation-Read-FF6B6B?style=for-the-badge)](https://docs.artisanbase.com)
+[![Docs](https://img.shields.io/badge/📖_Documentation-Read-FF6B6B?style=for-the-badge)](https://github.com/Arnoldsteve/artisan-base/tree/main/docs)
 
 </div>
 
@@ -60,7 +60,7 @@ Experience modern full-stack architecture with multi-tenancy, advanced security 
 
 <br>
 
-**[📖 Documentation](https://docs.artisanbase.com)** • **[🐛 Report Issues](https://github.com/Arnoldsteve/artisan-base/issues)** • **[💬 Discussions](https://github.com/Arnoldsteve/artisan-base/discussions)**
+**[📖 Documentation](https://github.com/Arnoldsteve/artisan-base/tree/main/docs)** • **[🐛 Report Issues](https://github.com/Arnoldsteve/artisan-base/issues)** • **[💬 Discussions](https://github.com/Arnoldsteve/artisan-base/discussions)**
 
 </div>
 
