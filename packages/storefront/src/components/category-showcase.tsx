@@ -19,9 +19,6 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Shop by Category
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Explore our curated collections of handcrafted products
-            </p>
           </div>
           <CategoriesLoading />
         </div>
@@ -37,9 +34,6 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Shop by Category
             </h2>
-            <p className="text-muted-foreground">
-              Explore our curated collections of handcrafted products
-            </p>
           </div>
 
           <div className="text-center py-12">
@@ -59,9 +53,6 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
           <h2 className="text-2xl font-bold text-foreground mb-1">
             Shop by Category
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Explore our curated collections of handcrafted products
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">

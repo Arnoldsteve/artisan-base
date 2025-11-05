@@ -18,16 +18,12 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (isLoading) {
     return (
-      <section className="py-4 bg-[#f4f4f4]">
+      <section className="py-4 bg-muted/40">
         <div className="container mx-auto px-4">
-          <div className="text-start mb-12">
+          <div className="text-start mb-6">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Discover our most popular handcrafted items, carefully selected
-              for their quality, beauty, and craftsmanship.
-            </p>
           </div>
           <ProductsLoading />
         </div>
@@ -37,16 +33,12 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (error) {
     return (
-      <section className="py-4 bg-[#f4f4f4]">
+      <section className="py-4 bg-muted/50">
         <div className="container mx-auto px-4">
-          <div className="text-start mb-12">
+          <div className="text-start mb-6">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Discover our most popular handcrafted items, carefully selected
-              for their quality, beauty, and craftsmanship.
-            </p>
           </div>
 
           <div className="text-center py-12">
@@ -64,16 +56,12 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (!products.length) {
     return (
-      <section className="py-4 bg-[#f4f4f4]">
+      <section className="py-4 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
               Featured Products
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Discover our most popular handcrafted items, carefully selected
-              for their quality, beauty, and craftsmanship.
-            </p>
           </div>
 
           <div className="text-center py-12">
@@ -87,16 +75,12 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
   }
 
   return (
-    <section className="py-4 bg-[#f4f4f4]">
+    <section className="py-4 bg-muted/100">
       <div className="container mx-auto px-2 md:px-4">
-        <div className="text-start mb-12">
+        <div className="text-start mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-1">
             Featured Products
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Discover our most popular handcrafted items, carefully selected for
-            their quality, beauty, and craftsmanship.
-          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">

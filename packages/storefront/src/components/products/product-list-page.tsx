@@ -75,7 +75,7 @@ export function ProductsContent() {
   }
 
   return (
-    <section className="py-4 bg-[#f4f4f4]">
+    <section className="py-4 bg-muted/50">
       <div className="container mx-auto px-2 md:px-4 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">

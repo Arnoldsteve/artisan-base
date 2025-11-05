@@ -3,7 +3,6 @@
 import { memo } from "react";
 import { Star, Quote } from "lucide-react";
 
-// OPTIMIZATION: Static data to avoid unnecessary API calls
 const testimonials = [
   {
     id: 1,
@@ -61,7 +60,13 @@ const testimonials = [
   },
 ];
 
-// OPTIMIZATION: Memoized component to prevent unnecessary re-renders
+const stats = [
+  { value: "10K+", label: "Happy Customers" },
+  { value: "500+", label: "Artisans" },
+  { value: "50K+", label: "Products Sold" },
+  { value: "4.9★", label: "Average Rating" },
+];
+
 export const Testimonials = memo(function Testimonials() {
   return (
     <section className="py-16 bg-background">
@@ -70,13 +75,8 @@ export const Testimonials = memo(function Testimonials() {
           <h2 className="text-2xl font-bold text-foreground mb-1">
             What Our Customers Say
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Don't just take our word for it. Here's what customers are saying
-            about our handcrafted products.
-          </p>
         </div>
 
-        {/* OPTIMIZATION: Grid layout with responsive design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial) => (
             <div
@@ -123,24 +123,15 @@ export const Testimonials = memo(function Testimonials() {
           ))}
         </div>
 
-        {/* Stats */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">10K+</div>
-            <div className="text-muted-foreground">Happy Customers</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">500+</div>
-            <div className="text-muted-foreground">Artisans</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">50K+</div>
-            <div className="text-muted-foreground">Products Sold</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">4.9★</div>
-            <div className="text-muted-foreground">Average Rating</div>
-          </div>
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {stats.map((stat, index) => (
+            <div key={index}>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {stat.value}
+              </div>
+              <div className="text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

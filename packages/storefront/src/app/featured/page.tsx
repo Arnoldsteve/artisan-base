@@ -14,7 +14,7 @@ export default function FeaturedPage() {
   if (isLoading) return <ProductsLoading />;
 
   return (
-    <section className="py-4 bg-[#f4f4f4]">
+    <section className="py-4 bg-muted/100">
       <div className="container mx-auto px-2 md:px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -23,9 +23,6 @@ export default function FeaturedPage() {
               Featured Items
             </h1>
           </div>
-          <p className="text-muted-foreground text-sm">
-            Discover our handpicked collection of exceptional artisan products
-          </p>
         </div>
 
         {products.length === 0 ? (

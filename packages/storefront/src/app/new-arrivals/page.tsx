@@ -15,16 +15,13 @@ export default function NewArrivalsPage() {
   if (isLoading) return <ProductsLoading />;
 
   return (
-    <section className="bg-[#f4f4f4]">
+    <section className="bg-muted/100">
       <div className="container mx-auto px-2 md:px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-bold text-foreground">New Arrivals</h1>
           </div>
-          <p className="text-muted-foreground text-sm">
-            Be the first to discover our latest handcrafted treasures
-          </p>
         </div>
 
         {products.length === 0 ? (
@@ -35,9 +32,6 @@ export default function NewArrivalsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-2">
               No new products available
             </h2>
-            <p className="text-muted-foreground">
-              Check back soon for fresh arrivals from our artisans.
-            </p>
           </div>
         ) : (
           <>
