@@ -13,7 +13,7 @@ export default function CategoryListPage() {
   if (categoriesLoading) return <CategoriesLoading />;
 
   return (
-    <section className="py-4 bg-[#f4f4f4]">
+    <section className="py-4 bg-muted/100">
       <div 
         className="container mx-auto px-4 py-8"
       >
@@ -21,9 +21,6 @@ export default function CategoryListPage() {
           <h1 className="text-2xl font-bold text-foreground mb-1">
             Product Categories
           </h1>
-          <p className="text-muted-foreground text-sm">
-            Browse our products by category
-          </p>
         </div>
 
         {categories.length === 0 ? (

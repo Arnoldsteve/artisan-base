@@ -76,16 +76,16 @@ export function ProductsContent() {
 
   return (
     <section className="py-4 bg-muted/50">
-      <div className="container mx-auto px-2 md:px-4 py-8">
+      <div className="container mx-auto px-2 md:px-4 py-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
           <div>
-            <h1 className="text-2xl font-bold text-foreground mb-1">
+            {/* <h1 className="text-2xl font-bold text-foreground mb-1">
               {searchQuery
                 ? `Search results for "${searchQuery}"`
                 : "All Products"}
-            </h1>
-            <p className="text-muted-foreground text-sm">
+            </h1> */}
+            <p className="text-2xl font-bold text-foreground mb-1">
               {products.length} product
               {products.length !== 1 ? "s" : ""} found
             </p>

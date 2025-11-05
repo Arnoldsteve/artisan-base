@@ -50,7 +50,7 @@ export default function CategoryDetailsPage({ initialCategory }: CategoryDetails
   const products = categoryData.products || [];
 
   return (
-    <section className="py-4 bg-[#f4f4f4]">
+    <section className="py-4 bg-muted/100">
       <div className="container mx-auto px-4 py-8">
         <CategoryCard category={category} />
 
