@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -26,11 +26,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@repo/ui/components/ui/form";
-import { capitalizeFirstLetter } from "@/utils/string-utils";
 
 export function SetupOrganizationForm() {
   const { logout } = useAuthContext();
-  const { mutateAsync: createTenant } = useCreateTenant();
+  const [creationStep, setCreationStep] = useState<string>("");
+  const { mutateAsync: createTenant, isPending } = useCreateTenant();
 
   const form = useForm<CreateTenantFormData>({
     resolver: zodResolver(createTenantSchema),
@@ -51,19 +51,38 @@ export function SetupOrganizationForm() {
   } = useSubdomainAvailability(subdomain);
 
   useEffect(() => {
-    const name = form.watch("storeName");
-    form.setValue("subdomain", slugify(name), { shouldValidate: true });
-  }, [form.watch("storeName")]);
+    const subscription = form.watch((value, { name }) => {
+      if (name === "storeName") {
+        form.setValue("subdomain", slugify(value.storeName || ""), {
+          shouldValidate: true,
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async (values: CreateTenantFormData) => {
-    if (availability && !availability.isAvailable) {
+    if (isPending) return;
+
+    const finalSubdomain = slugify(values.subdomain);
+    form.setValue("subdomain", finalSubdomain, { shouldValidate: true });
+
+    if (!availability?.isAvailable) {
       toast.error("Subdomain is already taken.");
       return;
     }
 
-    await createTenant(values);
-  };
+    setCreationStep("Creating your store...");
 
+    try {
+      await createTenant({ ...values, subdomain: finalSubdomain });
+    } catch (error) {
+      setCreationStep("");
+      console.error("Failed to create tenant:", error);
+    }
+  };
+  
   return (
     <CardWrapper
       headerLabel="Let's set up your first store."
@@ -90,7 +109,6 @@ export function SetupOrganizationForm() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="subdomain"
@@ -114,19 +132,20 @@ export function SetupOrganizationForm() {
               </FormItem>
             )}
           />
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={
-              isCheckingAvailability ||
-              !isValidFormat ||
-              !isValidLength ||
-              (availability && !availability.isAvailable)
-            }
-          >
-            Create Store
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {creationStep || "Creating Store..."}
+                <span className="ml-1 text-xs">
+                  (This may take up to 30 seconds)
+                </span>
+              </>
+            ) : (
+              "Create Store"
+            )}
           </Button>
+          ;
         </form>
       </Form>
     </CardWrapper>

@@ -23,7 +23,7 @@ export class BaseApiClient {
   ) {
     this.client = axios.create({
       baseURL: `${baseURL}/api/v1`,
-      timeout: 10000,
+      timeout: 60000,
       headers: {
         "Content-Type": "application/json",
         // Set headers from constructor - perfect for the server client

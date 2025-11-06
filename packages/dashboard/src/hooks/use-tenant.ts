@@ -3,10 +3,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { tenantService } from "@/services/tenant-service";
 import { toast } from "sonner";
-import { CreateTenantDto, CreateTenantResponse, AvailabilityResponse } from "@/types/tenant";
+import {
+  CreateTenantDto,
+  CreateTenantResponse,
+  AvailabilityResponse,
+} from "@/types/tenant";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useDebounce } from "./use-debounce";
-import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 const AVAILABILITY_QUERY_KEY = ["tenant-subdomain-availability"];
 
@@ -21,40 +25,48 @@ export function useSubdomainAvailability(subdomain: string) {
   const debouncedSubdomain = useDebounce(subdomain, 500);
 
   const isSubdomainValidLength = debouncedSubdomain.length > 2;
-  console.log("isSubdomainValidLength", isSubdomainValidLength);
-  
+
   const isSubdomainValidFormat = /^[a-z0-9-]+$/.test(debouncedSubdomain);
-  console.log("isSubdomainValidFormat", isSubdomainValidFormat);
-  
 
   const query = useQuery<AvailabilityResponse>({
     queryKey: [...AVAILABILITY_QUERY_KEY, debouncedSubdomain],
     queryFn: () => tenantService.checkSubdomainAvailability(debouncedSubdomain),
-    // enabled: isSubdomainValidLength && isSubdomainValidFormat,
-    
-    enabled: !isAuthLoading && isAuthenticated && isSubdomainValidLength && isSubdomainValidFormat,
+
+    enabled:
+      !isAuthLoading &&
+      isAuthenticated &&
+      isSubdomainValidLength &&
+      isSubdomainValidFormat,
   });
 
   return {
     ...query,
     isValidLength: isSubdomainValidLength,
     isValidFormat: isSubdomainValidFormat,
-    isLoading: query.isLoading && isSubdomainValidLength && isSubdomainValidFormat,
+    isLoading:
+      query.isLoading && isSubdomainValidLength && isSubdomainValidFormat,
   };
 }
 
 export function useCreateTenant() {
   const queryClient = useQueryClient();
   const { selectTenant } = useAuthContext();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: (data: CreateTenantDto) => tenantService.createTenant(data),
+    retry: false,
     onSuccess: (response: CreateTenantResponse) => {
-      toast.success(response.message || `Store "${response.tenant.name}" created successfully.`);
-      
+      toast.success(
+        response.message ||
+          `Store "${response.tenant.name}" created successfully.`
+      );
+
       selectTenant(response.tenant.subdomain);
 
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+
+      router.push("/home");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to create store.");
