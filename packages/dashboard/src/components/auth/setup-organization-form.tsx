@@ -1,125 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
-import { useCreateTenant, useSubdomainAvailability } from "@/hooks/use-tenant";
-import { useAuthContext } from "@/contexts/auth-context";
-import { useFormHandler } from "@/hooks/use-form-handler";
-import { CreateTenantDto } from "@/types/tenant";
-import { CardWrapper } from "./card-wrapper";
-import { slugify } from "@/utils/slugify";
-import { createTenantSchema } from "@/validation-schemas/tenant-schema";
 import { toast } from "sonner";
 
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
+import { CardWrapper } from "./card-wrapper";
+
+import { useCreateTenant, useSubdomainAvailability } from "@/hooks/use-tenant";
+import { useAuthContext } from "@/contexts/auth-context";
+import { slugify } from "@/utils/slugify";
+import {
+  createTenantSchema,
+  type CreateTenantFormData,
+} from "@/validation-schemas/tenant-schema";
+
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormControl,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/ui/form";
+import { capitalizeFirstLetter } from "@/utils/string-utils";
 
 export function SetupOrganizationForm() {
   const { logout } = useAuthContext();
-
-  const [storeName, setStoreName] = useState("");
-  const [subdomain, setSubdomain] = useState("");
-
   const { mutateAsync: createTenant } = useCreateTenant();
+
+  const form = useForm<CreateTenantFormData>({
+    resolver: zodResolver(createTenantSchema),
+    defaultValues: {
+      storeName: "",
+      subdomain: "",
+    },
+  });
+
+  const subdomain = form.watch("subdomain");
+
   const {
     data: availability,
     isLoading: isCheckingAvailability,
-    isValidLength,
     isValidFormat,
+    isValidLength,
     isError,
   } = useSubdomainAvailability(subdomain);
 
+  useEffect(() => {
+    const name = form.watch("storeName");
+    form.setValue("subdomain", slugify(name), { shouldValidate: true });
+  }, [form.watch("storeName")]);
 
-  const {
-    isLoading: isCreating,
-    error: formError,
-    handleSubmit,
-  } = useFormHandler<CreateTenantDto, any>(createTenant, {
-    successMessage: "Store created successfully! Redirecting...",
-    onSuccessRedirect: "/home",
-  });
+  const onSubmit = async (values: CreateTenantFormData) => {
+    if (availability && !availability.isAvailable) {
+      toast.error("Subdomain is already taken.");
+      return;
+    }
 
-  const handleStoreNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    setStoreName(newName);
-    setSubdomain(slugify(newName));
+    await createTenant(values);
   };
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-
-  const parsed = createTenantSchema.safeParse({ storeName, subdomain });
-
-  if (!parsed.success) {
-    // show the first validation error from zod
-    toast.error(parsed.error.issues[0].message);
-    return;
-  }
-
-  if (availability && !availability.isAvailable) {
-    toast.error("Subdomain is already taken.");
-    return;
-  }
-
-  handleSubmit(parsed.data); 
-};
-
-  // Define SubdomainFeedback as a proper component (capitalized).
-  // It has implicit access to all the state and hooks from SetupOrganizationForm.
-  function SubdomainFeedback() {
-    if (subdomain.length > 0 && !isValidLength) {
-      return (
-        <p className="text-destructive flex items-center">
-          <XCircle className="mr-2 h-3 w-3" />
-          Must be at least 3 characters.
-        </p>
-      );
-    }
-    if (subdomain.length > 0 && !isValidFormat) {
-      return (
-        <p className="text-destructive flex items-center">
-          <XCircle className="mr-2 h-3 w-3" />
-          Only letters, numbers, and hyphens allowed.
-        </p>
-      );
-    }
-    if (isCheckingAvailability) {
-      return (
-        <p className="text-muted-foreground flex items-center">
-          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-          Checking availability...
-        </p>
-      );
-    }
-    if (isError) {
-      return (
-        <p className="text-destructive flex items-center">
-          <XCircle className="mr-2 h-3 w-3" />
-          Could not check availability.
-        </p>
-      );
-    }
-    if (
-      availability &&
-      !isCheckingAvailability &&
-      isValidLength &&
-      isValidFormat
-    ) {
-      return availability.isAvailable ? (
-        <p className="text-green-600 flex items-center">
-          <CheckCircle className="mr-2 h-3 w-3" />
-          Subdomain is available!
-        </p>
-      ) : (
-        <p className="text-destructive flex items-center">
-          <XCircle className="mr-2 h-3 w-3" />
-          Subdomain is taken.
-        </p>
-      );
-    }
-    return null;
-  }
 
   return (
     <CardWrapper
@@ -127,71 +70,110 @@ export function SetupOrganizationForm() {
       backButtonLabel="Log out"
       backButtonAction={logout}
     >
-      <form onSubmit={handleFormSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="storeName">Store Name</Label>
-          <Input
-            id="storeName"
-            type="text"
-            value={storeName}
-            onChange={handleStoreNameChange}
-            disabled={isCreating}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="subdomain">Your Store's URL</Label>
-          <div className="flex items-center">
-            <Input
-              id="subdomain"
-              type="text"
-              value={subdomain}
-              onChange={(e) => setSubdomain(e.target.value)}
-              disabled={isCreating}
-              required
-            />
-            <span className="rounded-l-none border-l-0 bg-muted px-3 py-2 text-muted-foreground text-sm border-input">
-              .artisanbase.com
-            </span>
-          </div>
-          <div className="mt-2 text-xs h-4">
-            {/* Now we render it as a JSX component */}
-            <SubdomainFeedback />
-          </div>
-          {availability &&
-            !availability.isAvailable &&
-            availability.suggestions.length > 0 && (
-              <div className="mt-2 text-xs text-muted-foreground">
-                Suggestions: {availability.suggestions.join(", ")}
-              </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="storeName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Store Name</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="e.g. SaTechs Solutions"
+                    {...field}
+                    required
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-        </div>
-        {formError && (
-          <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-            {formError}
-          </p>
-        )}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={
-            isCreating ||
-            isCheckingAvailability ||
-            !isValidLength ||
-            !isValidFormat ||
-            (availability && !availability.isAvailable)
-          }
-        >
-          {isCreating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Store...
-            </>
-          ) : (
-            "Create Store"
-          )}
-        </Button>
-      </form>
+          />
+
+          <FormField
+            control={form.control}
+            name="subdomain"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Store's URL</FormLabel>
+                <div className="flex items-center">
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="satechs-solutions"
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                  <span className="rounded-l-none border-l-0 bg-muted px-3 py-2 text-sm text-muted-foreground">
+                    .artisanbase.com
+                  </span>
+                </div>
+                <SubdomainFeedback />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={
+              isCheckingAvailability ||
+              !isValidFormat ||
+              !isValidLength ||
+              (availability && !availability.isAvailable)
+            }
+          >
+            Create Store
+          </Button>
+        </form>
+      </Form>
     </CardWrapper>
   );
+
+  function SubdomainFeedback() {
+    if (!subdomain) return null;
+
+    if (!isValidLength)
+      return (
+        <p className="text-destructive flex items-center text-xs">
+          <XCircle className="mr-1 h-3 w-3" /> Must be at least 3 characters.
+        </p>
+      );
+
+    if (!isValidFormat)
+      return (
+        <p className="text-destructive flex items-center text-xs">
+          <XCircle className="mr-1 h-3 w-3" /> Only letters, numbers, hyphens.
+        </p>
+      );
+
+    if (isCheckingAvailability)
+      return (
+        <p className="text-muted-foreground flex items-center text-xs">
+          <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Checking...
+        </p>
+      );
+
+    if (isError)
+      return (
+        <p className="text-destructive flex items-center text-xs">
+          <XCircle className="mr-1 h-3 w-3" /> Error checking availability.
+        </p>
+      );
+
+    if (availability?.isAvailable)
+      return (
+        <p className="text-green-600 flex items-center text-xs">
+          <CheckCircle className="mr-1 h-3 w-3" /> Available!
+        </p>
+      );
+
+    return (
+      <p className="text-destructive flex items-center text-xs">
+        <XCircle className="mr-1 h-3 w-3" /> Taken.
+      </p>
+    );
+  }
 }

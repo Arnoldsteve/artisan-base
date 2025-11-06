@@ -14,10 +14,7 @@ export class TenantService {
 
  
   async checkSubdomainAvailability(subdomain: string): Promise<AvailabilityResponse> {
-    console.log("subdomain", subdomain);
-    
-    // return apiClient.get<AvailabilityResponse>("/tenants/availability", { subdomain });
-      return apiClient.get<AvailabilityResponse>(`/tenants/availability?subdomain=${subdomain}`);
+    return apiClient.get<AvailabilityResponse>(`/tenants/availability?subdomain=${subdomain}`);
 
   }
 

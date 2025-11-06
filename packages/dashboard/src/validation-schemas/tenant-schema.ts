@@ -11,4 +11,4 @@ export const createTenantSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Only letters, numbers and hyphens allowed."),
 });
 
-export type CreateTenantSchema = z.infer<typeof createTenantSchema>;
+export type CreateTenantFormData = z.infer<typeof createTenantSchema>;

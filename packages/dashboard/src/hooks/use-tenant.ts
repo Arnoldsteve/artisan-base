@@ -22,10 +22,6 @@ export function useSubdomainAvailability(subdomain: string) {
   // console.log("isAuthenticated", isAuthenticated);
   
   const debouncedSubdomain = useDebounce(subdomain, 500);
-    const lastLoggedRef = useRef<string>('');
-
-    // console.log("lastLoggedRef", lastLoggedRef)
-
 
   const isSubdomainValidLength = debouncedSubdomain.length > 2;
   console.log("isSubdomainValidLength", isSubdomainValidLength);
