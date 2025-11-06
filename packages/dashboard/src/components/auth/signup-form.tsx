@@ -1,32 +1,48 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
 import { CardWrapper } from "./card-wrapper";
 import { Loader2 } from "lucide-react";
 import { useAuthContext } from "@/contexts/auth-context";
 import { useFormHandler } from "@/hooks/use-form-handler";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/ui/form";
+
+import { capitalizeFirstLetter } from "@/utils/string-utils";
+import { SignupFormValues, signupSchema } from "@/validation-schemas/signup-schema";
 
 export function SignupForm() {
   const { signUp } = useAuthContext();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const { isLoading, error, handleSubmit } = useFormHandler(signUp, {
-    successMessage:
-      "Account created! Please create your first store to continue.",
-    onSuccessRedirect: "/setup-organization",
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
   });
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    handleSubmit({ firstName, lastName, email, password });
-  };
+  const { isLoading, error, handleSubmit } = useFormHandler(
+    async (values: SignupFormValues) => {
+      await signUp(values);
+    },
+    {
+      successMessage: "Account created! Let's set up your store.",
+      onSuccessRedirect: "/onboarding/create-store",
+    }
+  );
 
   return (
     <CardWrapper
@@ -34,69 +50,110 @@ export function SignupForm() {
       backButtonLabel="Already have an account? Login"
       backButtonHref="/"
     >
-      <form onSubmit={handleFormSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              disabled={isLoading}
-              required
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="John"
+                      value={field.value}
+                      onChange={(e) =>
+                        field.onChange(capitalizeFirstLetter(e.target.value))
+                      }
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Doe"
+                      value={field.value}
+                      onChange={(e) =>
+                        field.onChange(capitalizeFirstLetter(e.target.value))
+                      }
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            required
-            minLength={8}
-          />
-        </div>
 
-        {error && (
-          <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-            {error}
-          </p>
-        )}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    {...field}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Account...
-            </>
-          ) : (
-            "Create Account"
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="********"
+                    {...field}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {error && (
+            <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+              {error}
+            </p>
           )}
-        </Button>
-      </form>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating Account...
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </Button>
+        </form>
+      </Form>
     </CardWrapper>
   );
 }

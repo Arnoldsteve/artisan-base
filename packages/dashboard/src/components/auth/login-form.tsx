@@ -17,7 +17,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const { isLoading, error, handleSubmit } = useFormHandler(login, {
     successMessage: "Login successful! Redirecting...",
-    onSuccessRedirect: "/home",
+    // onSuccessRedirect: "/home",
   });
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {

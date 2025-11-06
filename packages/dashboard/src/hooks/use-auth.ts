@@ -83,46 +83,41 @@ export function useAuth() {
   }, []);
 
   const login = useCallback(async (data: LoginDto) => {
-    const response = await authService.login(data);
-    const {
-      user: loggedInUser,
-      accessToken,
-      refreshToken,
-      organizations,
-    } = response;
+  const response = await authService.login(data);
+  const { user: loggedInUser, accessToken, refreshToken, organizations } = response;
 
-    const selectedTenant = organizations[0]?.subdomain;
-    if (!selectedTenant) {
-      throw new Error(
-        "Login failed: No available organizations for this user."
-      );
-    }
+  console.log("logged user organisation", organizations)
 
-    setUser(loggedInUser);
-    setTenants(organizations);
-    setToken(accessToken);
-    setRefreshToken(refreshToken);
-    setTenantId(selectedTenant);
+  // Save tokens first so user is authenticated during onboarding too
+  Cookies.set("accessToken", accessToken, { expires: 1, sameSite: "lax" });
+  Cookies.set("refreshToken", refreshToken, { expires: 30, sameSite: "lax" });
 
-    apiClient.setAuthToken(accessToken);
-    apiClient.setTenantId(selectedTenant);
+  setUser(loggedInUser);
+  setToken(accessToken);
+  setRefreshToken(refreshToken);
+  apiClient.setAuthToken(accessToken);
 
-    Cookies.set("accessToken", accessToken, {
-      expires: 1,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
-    Cookies.set("refreshToken", refreshToken, {
-      expires: 30,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
-    Cookies.set("selectedOrgSubdomain", selectedTenant, {
-      expires: 1,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
-  }, []);
+  // ✅ Case 1: User has no tenant yet → go to setup flow
+  if (!organizations || organizations.length === 0) {
+    router.push("/onboarding/create-store");
+    return;
+  }
+
+  // ✅ Case 2: User has at least one tenant → continue
+  const selectedTenant = organizations[0].subdomain;
+
+  setTenants(organizations);
+  setTenantId(selectedTenant);
+  apiClient.setTenantId(selectedTenant);
+
+  Cookies.set("selectedOrgSubdomain", selectedTenant, {
+    expires: 1,
+    sameSite: "lax",
+  });
+
+  // Finally → go to dashboard
+  router.push("/home");
+}, []);
 
   const logout = useCallback(async () => {
     try {

@@ -5,7 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 // --- CORE MODULES ---
-import { PrismaModule } from './prisma/prisma.module'; // Provides global ManagementPrismaService
+import { PrismaModule } from './prisma/prisma.module'; 
 import { TenantMiddleware } from './tenant/middleware/tenant.middleware';
 
 // --- FEATURE MODULES ---
@@ -15,7 +15,7 @@ import { StorefrontModule } from './storefront/storefront.module';
 import { TenantContextService } from './common/tenant-context.service';
 import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
 import { SupabaseModule } from './supabase/supabase.module';
-import { PlatformPlansModule } from './platform/plans/platform-plans.module'; // 1. Import the new module
+import { PlatformPlansModule } from './platform/plans/platform-plans.module'; 
 import { DashboardModule } from './dashboard/dashboard.module';
 import { BillingModule } from './billing/billing.module';
 
@@ -38,15 +38,10 @@ import { BillingModule } from './billing/billing.module';
   providers: [
     AppService,
     TenantContextService,
-    // ** REMOVED **: TenantPrismaService is no longer provided here.
-    // It's now neatly encapsulated within TenantPrismaModule, which
-    // ProductModule imports directly.
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // The middleware setup remains the same, but you might need to ensure
-    // TenantMiddleware is available. Since PrismaModule is global, it will be.
     consumer
       .apply(TenantMiddleware, TenantContextMiddleware)
       .exclude(

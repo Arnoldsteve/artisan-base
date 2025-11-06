@@ -3,7 +3,6 @@ import { LoginForm } from '@/components/auth/login-form'; // Using Next.js path 
 
 export default function LoginPage() {
   return (
-    // This main element provides the centered layout with a background
     <main className="flex h-screen items-center justify-center bg-gray-100 dark:bg-gray-950">
       <LoginForm />
     </main>
