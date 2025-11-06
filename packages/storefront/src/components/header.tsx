@@ -118,12 +118,7 @@ export function Header() {
             className="flex items-center space-x-2"
             aria-label="Home"
           >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">
-                A
-              </span>
-            </div>
-            <span className="text-xl font-bold text-foreground">
+            <span className="text-xl font-bold text-blue-500">
               Artisan Base
             </span>
           </Link>

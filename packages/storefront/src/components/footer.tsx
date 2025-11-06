@@ -17,13 +17,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">
-                  A
-                </span>
-              </div>
-              <span className="text-xl font-bold text-foreground">
+            <div className="flex items-center space-x-2">              
+              <span className="text-xl font-bold text-blue-500">
                 Artisan Base
               </span>
             </div>

@@ -49,7 +49,7 @@ export const OrderSummary: React.FC = () => {
     !!selectedPaymentMethod;
 
   return (
-    <Card className="sticky top-8 mx-0">
+    <div className="sticky top-8 mx-0">
       <CardHeader>
         <CardTitle className="flex items-center">
           <ShoppingBag className="h-5 w-5 mr-2" />
@@ -138,6 +138,6 @@ export const OrderSummary: React.FC = () => {
           </Button>
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 };
