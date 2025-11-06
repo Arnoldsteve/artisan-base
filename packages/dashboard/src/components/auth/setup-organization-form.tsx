@@ -82,7 +82,7 @@ export function SetupOrganizationForm() {
       console.error("Failed to create tenant:", error);
     }
   };
-  
+
   return (
     <CardWrapper
       headerLabel="Let's set up your first store."
@@ -145,7 +145,6 @@ export function SetupOrganizationForm() {
               "Create Store"
             )}
           </Button>
-          ;
         </form>
       </Form>
     </CardWrapper>

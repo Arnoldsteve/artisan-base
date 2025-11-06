@@ -27,7 +27,6 @@ export class AuthController {
   async signUp(@Body() signUpDto: SignUpDto, @Req() req) {
     const ipAddress = req.ip || req.headers['x-forwarded-for'];
     const userAgent = req.headers['user-agent'];
-    this.logger.log(`Signup attempt for email: ${signUpDto.email}`);
     return this.authService.signUp(signUpDto, ipAddress, userAgent);
   }
 
@@ -36,13 +35,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto, @Req() req) {
     const ipAddress = req.ip || req.headers['x-forwarded-for'];
-  const tenantId = req.headers['x-tenant-id']; // <--- this is what you want
   const userAgent = req.headers['user-agent'];
-
-  this.logger.log(`Login attempt from IP: ${ipAddress}`);
-  this.logger.log(`User-Agent: ${userAgent}`);
-  this.logger.log(`Tenant-ID: ${tenantId || "None"}`);
-  this.logger.log(`Login attempt for email: ${loginDto.email}`);
     return this.authService.login(loginDto, ipAddress, userAgent);
   }
 

@@ -25,7 +25,7 @@ export class AuthRepository implements IAuthRepository {
   async findTenantsByOwnerId(ownerId: string) {
     return this.prisma.tenant.findMany({
       where: { ownerId },
-      select: { id: true, name: true, subdomain: true },
+      select: { id: true, name: true, subdomain: true, status: true },
     });
   }
 
@@ -38,6 +38,7 @@ export class AuthRepository implements IAuthRepository {
             id: true,
             name: true,
             subdomain: true,
+            status: true,
           },
         },
       },

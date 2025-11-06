@@ -31,9 +31,9 @@ export function CardWrapper({
     <div className="flex items-center justify-center min-h-screen bg-muted/40 p-4">
       <Card className="w-full max-w-[380px] sm:max-w-[420px] md:max-w-[450px] shadow-lg rounded-2xl">
         <CardHeader className="text-center space-y-1">
-          {/* <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-blue-500">
+          <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-blue-500">
             Artisan Base
-          </CardTitle> */}
+          </CardTitle>
           <CardDescription className="text-sm sm:text-base text-muted-foreground">
             {headerLabel}
           </CardDescription>

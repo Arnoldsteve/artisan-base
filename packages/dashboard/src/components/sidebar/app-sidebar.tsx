@@ -26,6 +26,7 @@ import {
   SidebarRail,
 } from "@repo/ui/components/ui/sidebar";
 import { title } from "process";
+import { useAuthContext } from "@/contexts/auth-context";
 
 // This is sample data.
 const data = {
@@ -69,14 +70,11 @@ const data = {
       url: "#",
       icon: ShoppingCart,
       items: [
-        {title: "New Order", 
-          url: "/orders/new"
-        },
+        { title: "New Order", url: "/orders/new" },
         {
           title: "All Orders",
           url: "/orders",
         },
-        
       ],
     },
     {
@@ -153,6 +151,18 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // const { user, tenants } = useAuthContext();
+  // const mappedTeams = tenants.map((tenant) => ({
+  //   name: tenant.name,
+  //   logo: GalleryVerticalEnd,
+  //   plan: "Active", 
+  // }));
+
+
+  // console.log("tenants from context:", tenants);
+  // console.log("mappedTeams", mappedTeams);
+
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
