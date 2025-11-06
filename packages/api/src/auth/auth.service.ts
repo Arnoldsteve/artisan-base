@@ -47,7 +47,7 @@ export class AuthService {
 
     // Create short-lived Access Token (15 min)
     const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '360m' });
 
     // Create and store Refresh Token (with IP & user-agent tracking)
     const { refreshToken } = await this.createAndStoreRefreshToken(

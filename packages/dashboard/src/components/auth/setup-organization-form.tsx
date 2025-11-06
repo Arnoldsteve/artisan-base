@@ -10,15 +10,10 @@ import { useAuthContext } from "@/contexts/auth-context";
 import { useFormHandler } from "@/hooks/use-form-handler";
 import { CreateTenantDto } from "@/types/tenant";
 import { CardWrapper } from "./card-wrapper";
+import { slugify } from "@/utils/slugify";
+import { createTenantSchema } from "@/validation-schemas/tenant-schema";
+import { toast } from "sonner";
 
-const slugify = (text: string) =>
-  text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
 
 export function SetupOrganizationForm() {
   const { logout } = useAuthContext();
@@ -34,6 +29,7 @@ export function SetupOrganizationForm() {
     isValidFormat,
     isError,
   } = useSubdomainAvailability(subdomain);
+
 
   const {
     isLoading: isCreating,
@@ -51,15 +47,23 @@ export function SetupOrganizationForm() {
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (availability && !availability.isAvailable) {
-      return;
-    }
-    if (!isValidLength || !isValidFormat) {
-      return;
-    }
-    handleSubmit({ storeName, subdomain });
-  };
+  event.preventDefault();
+
+  const parsed = createTenantSchema.safeParse({ storeName, subdomain });
+
+  if (!parsed.success) {
+    // show the first validation error from zod
+    toast.error(parsed.error.issues[0].message);
+    return;
+  }
+
+  if (availability && !availability.isAvailable) {
+    toast.error("Subdomain is already taken.");
+    return;
+  }
+
+  handleSubmit(parsed.data); 
+};
 
   // Define SubdomainFeedback as a proper component (capitalized).
   // It has implicit access to all the state and hooks from SetupOrganizationForm.

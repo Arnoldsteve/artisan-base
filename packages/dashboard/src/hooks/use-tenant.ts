@@ -16,19 +16,30 @@ const AVAILABILITY_QUERY_KEY = ["tenant-subdomain-availability"];
  * @param subdomain The subdomain string to check.
  */
 export function useSubdomainAvailability(subdomain: string) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+  // const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
+  // console.log("isAuthLoading", isAuthLoading);
+  // console.log("isAuthenticated", isAuthenticated);
+  
   const debouncedSubdomain = useDebounce(subdomain, 500);
     const lastLoggedRef = useRef<string>('');
 
+    // console.log("lastLoggedRef", lastLoggedRef)
+
 
   const isSubdomainValidLength = debouncedSubdomain.length > 2;
+  console.log("isSubdomainValidLength", isSubdomainValidLength);
+  
   const isSubdomainValidFormat = /^[a-z0-9-]+$/.test(debouncedSubdomain);
+  console.log("isSubdomainValidFormat", isSubdomainValidFormat);
+  
 
   const query = useQuery<AvailabilityResponse>({
     queryKey: [...AVAILABILITY_QUERY_KEY, debouncedSubdomain],
     queryFn: () => tenantService.checkSubdomainAvailability(debouncedSubdomain),
+    enabled: isSubdomainValidLength && isSubdomainValidFormat,
     
-    enabled: !isAuthLoading && isAuthenticated && isSubdomainValidLength && isSubdomainValidFormat,
+    // enabled: !isAuthLoading && isAuthenticated && isSubdomainValidLength && isSubdomainValidFormat,
   });
 
   return {

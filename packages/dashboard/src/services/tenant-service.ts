@@ -14,7 +14,11 @@ export class TenantService {
 
  
   async checkSubdomainAvailability(subdomain: string): Promise<AvailabilityResponse> {
-    return apiClient.get<AvailabilityResponse>("/tenants/availability", { subdomain });
+    console.log("subdomain", subdomain);
+    
+    // return apiClient.get<AvailabilityResponse>("/tenants/availability", { subdomain });
+      return apiClient.get<AvailabilityResponse>(`/tenants/availability?subdomain=${subdomain}`);
+
   }
 
   // You can add other tenant-related service methods here in the future,

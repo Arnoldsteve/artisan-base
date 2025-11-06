@@ -26,6 +26,24 @@ import { UserPayload } from 'src/common/interfaces/user-payload.interface';
 export class TenantController {
   constructor(private readonly tenantService: TenantService) {}
 
+  @Get('availability')
+  @HttpCode(HttpStatus.OK)
+  async checkSubdomainAvailability(
+    @Query(new ValidationPipe())
+    query: CheckSubdomainDto,
+  ) {
+    const { subdomain } = query;
+
+    const isAvailable =
+      await this.tenantService.isSubdomainAvailable(subdomain);
+    let suggestions: string[] = [];
+    if (!isAvailable) {
+      suggestions =
+        await this.tenantService.suggestAlternativeSubdomains(subdomain);
+    }
+    return { isAvailable, suggestions };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getTenantMetadata(
@@ -40,7 +58,9 @@ export class TenantController {
     const isAdmin = user.role?.includes('PLATFORM_ADMIN'); // Assumes roles are in the JWT
 
     if (!isOwner && !isAdmin) {
-      throw new ForbiddenException('You do not have permission to access this resource.');
+      throw new ForbiddenException(
+        'You do not have permission to access this resource.',
+      );
     }
 
     // 3. Return the data
@@ -49,24 +69,6 @@ export class TenantController {
       success: true,
       tenant,
     };
-  }
-  
-  @Get('availability')
-  @HttpCode(HttpStatus.OK)
-  async checkSubdomainAvailability(
-    @Query(new ValidationPipe({ transform: true, whitelist: true }))
-    query: CheckSubdomainDto,
-  ) {
-    const { subdomain } = query; // <-- Destructure the validated and transformed subdomain
-
-    const isAvailable =
-      await this.tenantService.isSubdomainAvailable(subdomain);
-    let suggestions: string[] = [];
-    if (!isAvailable) {
-      suggestions =
-        await this.tenantService.suggestAlternativeSubdomains(subdomain);
-    }
-    return { isAvailable, suggestions };
   }
 
   @Post()
