@@ -12,6 +12,7 @@ import {
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card } from "@repo/ui/components/ui/card";
+import { toast } from "sonner";
 
 export function HeroSearch() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,7 +36,19 @@ export function HeroSearch() {
   ];
 
   const handleSearch = () => {
-    console.log("Searching for:", searchQuery, "in", selectedCategory);
+    if (!searchQuery.trim() && selectedCategory === "all") {
+      toast.info("Search Coming Soon", {
+        description: "You'll soon be able to browse all products easily.",
+      });
+    } else if (!searchQuery.trim()) {
+      toast.info(`Category filter "${selectedCategory}" is coming soon`, {
+        description: "You'll be able to browse products by category shortly.",
+      });
+    } else {
+      toast.info(`Searching for "${searchQuery}"`, {
+        description: "Hold on… search is being connected.",
+      });
+    }
   };
 
   return (

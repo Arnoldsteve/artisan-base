@@ -1,5 +1,3 @@
-// REFACTOR: Header component with reactive navigation and improved accessibility
-
 "use client";
 
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
@@ -41,14 +39,12 @@ export function Header() {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // OPTIMIZATION: Debounced search to reduce API calls
   const debouncedQuery = useDebounce(searchQuery, 300);
   const { data: searchResults = [], isLoading: isSearching } = useProductSearch(
     debouncedQuery,
     5
   );
 
-  // OPTIMIZATION: Memoized search results to prevent unnecessary re-renders
   const filteredResults = useMemo(() => {
     if (!debouncedQuery.trim()) return [];
     return searchResults.slice(0, 5);
