@@ -25,16 +25,13 @@ export class AuthService {
   async signUp(signUpDto: SignUpDto, ipAddress?: string, userAgent?: string) {
     const { email, password, firstName, lastName } = signUpDto;
 
-    // Check if user already exists
     const existingUser = await this.authRepository.findUserByEmail(email);
     if (existingUser) {
       throw new ConflictException('Email already in use.');
     }
 
-    // Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const user = await this.authRepository.createUser({
       email,
       hashedPassword,
@@ -42,12 +39,10 @@ export class AuthService {
       lastName,
     });
 
-    // Remove password from response
     const { hashedPassword: _, ...userWithoutPassword } = user;
 
-    // Create short-lived Access Token (15 min)
     const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '360m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
 
     // Create and store Refresh Token (with IP & user-agent tracking)
     const { refreshToken } = await this.createAndStoreRefreshToken(
@@ -80,7 +75,7 @@ export class AuthService {
     );
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '360m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
 
     // Create Refresh Token and save in DB
     const { refreshToken } = await this.createAndStoreRefreshToken(
@@ -137,7 +132,6 @@ export class AuthService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    // ✅ Add validation
     if (!refreshToken) {
       throw new BadRequestException('Refresh token is required');
     }
