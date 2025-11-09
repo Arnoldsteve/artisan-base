@@ -69,7 +69,7 @@ const stats = [
 
 export const Testimonials = memo(function Testimonials() {
   return (
-    <section className="py-16 bg-background">
+    <section className="py-16 bg-background bg-muted/100">
       <div className="container mx-auto px-4">
         <div className="text-start mb-12">
           <h2 className="text-2xl font-bold text-foreground mb-1">
