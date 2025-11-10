@@ -1,12 +1,9 @@
-// REFACTOR: Cookie Policy page with optimized loading and caching
-
 import { Suspense } from "react";
 import { LegalContentService } from "@/services/legal-content.service";
 import { LegalDocumentLayout } from "@/components/legal/legal-document-layout";
 import { LegalDocumentContent } from "@/components/legal/legal-document-content";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// OPTIMIZATION: Async component for better performance
 async function CookiePolicyContent() {
   const legalService = LegalContentService.getInstance();
   const document = await legalService.getDocument("cookies");
@@ -19,7 +16,6 @@ async function CookiePolicyContent() {
   );
 }
 
-// OPTIMIZATION: Loading skeleton for better UX
 function CookiePolicySkeleton() {
   return (
     <div className="min-h-screen bg-background">
@@ -61,7 +57,6 @@ export default function CookiePolicyPage() {
   );
 }
 
-// OPTIMIZATION: Metadata for SEO
 export const metadata = {
   title: "Cookie Policy - Artisan Base",
   description:

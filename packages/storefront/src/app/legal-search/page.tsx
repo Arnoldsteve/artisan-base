@@ -1,5 +1,3 @@
-// REFACTOR: Comprehensive legal search page with advanced functionality
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,8 +18,18 @@ import {
   SortDesc,
   ExternalLink,
   BookOpen,
+  Settings2,
+  ListChecks,
 } from "lucide-react";
 import Link from "next/link";
+import { Label } from "@repo/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
 
 export default function LegalSearchPage() {
   const [query, setQuery] = useState("");
@@ -148,7 +156,7 @@ export default function LegalSearchPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24 self-start h-fit">
             {/* Search Input */}
             <Card>
               <CardHeader>
@@ -219,20 +227,24 @@ export default function LegalSearchPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Sort Field</label>
-                  <select
+                  <Label className="text-sm font-medium">Sort Field</Label>
+                  <Select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="w-full p-2 border rounded text-sm"
+                    onValueChange={(value) => setSortBy(value as any)}
                   >
-                    <option value="relevance">Relevance</option>
-                    <option value="document">Document</option>
-                    <option value="section">Section</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="document">Document</SelectItem>
+                      <SelectItem value="section">Section</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Order</label>
+                  <Label className="text-sm font-medium">Order</Label>
                   <div className="flex gap-2">
                     <Button
                       variant={sortOrder === "desc" ? "default" : "outline"}
@@ -355,38 +367,56 @@ export default function LegalSearchPage() {
                 <CardHeader>
                   <CardTitle className="text-lg">Search Tips</CardTitle>
                 </CardHeader>
+
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+                    {/* Column 1 */}
                     <div>
-                      <h4 className="font-medium mb-2">
-                        Effective Search Terms
-                      </h4>
-                      <ul className="space-y-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ListChecks className="h-4 w-4 text-primary" />
+                        <h4 className="font-medium text-foreground">
+                          Effective Search Terms
+                        </h4>
+                      </div>
+                      <ul className="space-y-2 list-disc list-inside">
                         <li>
-                          • Use specific terms like "privacy", "cookies",
-                          "terms"
+                          Use specific terms like "privacy", "cookies", "terms"
                         </li>
                         <li>
-                          • Include legal concepts like "GDPR", "CCPA",
+                          Include legal concepts like "GDPR", "CCPA",
                           "liability"
                         </li>
                         <li>
-                          • Search for processes like "returns", "refunds",
+                          Search for processes like "returns", "refunds",
                           "shipping"
                         </li>
                       </ul>
                     </div>
+
+                    {/* Column 2 */}
                     <div>
-                      <h4 className="font-medium mb-2">Advanced Features</h4>
-                      <ul className="space-y-1">
-                        <li>• Filter by specific documents</li>
-                        <li>• Sort by relevance, document, or section</li>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Settings2 className="h-4 w-4 text-primary" />
+                        <h4 className="font-medium text-foreground">
+                          Advanced Features
+                        </h4>
+                      </div>
+                      <ul className="space-y-2 list-disc list-inside">
+                        <li>Filter by specific documents</li>
+                        <li>Sort by relevance, document, or section</li>
                         <li>
-                          • Click "View Section" to jump directly to content
+                          Click "View Section" to jump directly to content
                         </li>
                       </ul>
                     </div>
                   </div>
+
+                  <Separator className="my-4" />
+
+                  <p className="text-xs text-muted-foreground">
+                    Tip: You can combine filters and keywords to refine your
+                    results faster.
+                  </p>
                 </CardContent>
               </Card>
             )}

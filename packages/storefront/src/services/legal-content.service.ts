@@ -1,5 +1,3 @@
-// REFACTOR: Centralized legal content service with caching and search functionality
-
 import { LegalDocument, LegalDocumentType, LegalSearchResult, LegalNavigation } from '@/types/legal';
 
 // OPTIMIZATION: In-memory cache for legal documents to reduce loading time
