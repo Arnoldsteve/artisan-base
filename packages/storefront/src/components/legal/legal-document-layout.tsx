@@ -120,7 +120,7 @@ export function LegalDocumentLayout({
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24 self-start h-fit">
             {/* Navigation */}
             <LegalNavigationComponent navigation={navigation} />
 
