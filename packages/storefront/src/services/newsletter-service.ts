@@ -1,4 +1,3 @@
-// services/newsletter-service.ts
 import { apiClient } from "@/lib/api-client";
 
 export interface NewsletterPayload {

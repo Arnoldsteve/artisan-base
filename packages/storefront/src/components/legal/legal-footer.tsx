@@ -1,5 +1,3 @@
-// REFACTOR: Legal footer component with contact information and support access
-
 import { LegalContactInfo } from "@/types/legal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

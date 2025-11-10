@@ -1,4 +1,3 @@
-// REFACTOR: Legal navigation component with accessibility and performance optimization"use client";
 'use client'
 
 
@@ -12,7 +11,6 @@ interface LegalNavigationProps {
   navigation: LegalNavigationType;
 }
 
-// OPTIMIZATION: Icon mapping for better performance and maintainability
 const iconMap = {
   privacy: Shield,
   terms: FileText,

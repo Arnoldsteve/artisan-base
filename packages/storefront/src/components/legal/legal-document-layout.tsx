@@ -1,5 +1,3 @@
-// REFACTOR: Reusable legal document layout component for consistent structure
-
 "use client";
 
 import { ReactNode } from "react";

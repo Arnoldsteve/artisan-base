@@ -1,4 +1,3 @@
-// REFACTOR: Legal search component with debounced search and optimized results
 'use client'
 
 import { useState, useCallback, useMemo } from "react";
@@ -14,7 +13,6 @@ interface LegalSearchProps {
   results?: LegalSearchResult[];
 }
 
-// OPTIMIZATION: Debounce hook for better performance
 function useDebounce<T extends (...args: any[]) => any>(
   callback: T,
   delay: number

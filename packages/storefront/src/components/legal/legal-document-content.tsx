@@ -1,5 +1,3 @@
-// REFACTOR: Legal document content component with optimized rendering and accessibility
-
 import { LegalSection } from "@/types/legal";
 import { Separator } from "@/components/ui/separator";
 
@@ -8,7 +6,6 @@ interface LegalDocumentContentProps {
 }
 
 export function LegalDocumentContent({ sections }: LegalDocumentContentProps) {
-  // OPTIMIZATION: Memoized section rendering for better performance
   const renderSection = (section: LegalSection, index: number) => {
     const isLast = index === sections.length - 1;
 
@@ -19,11 +16,8 @@ export function LegalDocumentContent({ sections }: LegalDocumentContentProps) {
         </h2>
 
         <div className="prose prose-gray max-w-none">
-          {/* OPTIMIZATION: Split content into paragraphs for better readability */}
           {section.content.split("\n\n").map((paragraph, pIndex) => {
             if (paragraph.trim() === "") return null;
-
-            // Check if paragraph starts with bullet points
             if (paragraph.includes("•")) {
               const lines = paragraph.split("\n");
               const title = lines[0];

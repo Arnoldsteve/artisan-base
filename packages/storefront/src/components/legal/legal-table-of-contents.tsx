@@ -1,4 +1,3 @@
-// REFACTOR: Table of contents component with smooth scrolling and performance optimization
 'use client'
 
 import { useCallback, useEffect, useState } from "react";
@@ -13,7 +12,6 @@ interface LegalTableOfContentsProps {
 export function LegalTableOfContents({ sections }: LegalTableOfContentsProps) {
   const [activeSection, setActiveSection] = useState<string>("");
 
-  // OPTIMIZATION: Intersection Observer for active section detection
   useEffect(() => {
     const observerOptions = {
       rootMargin: "-20% 0px -80% 0px",
