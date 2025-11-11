@@ -131,7 +131,9 @@ export function TeamMembersWrapper({
   return (
     <>
       <PageHeader title="Team Members">
-        <Button onClick={openAddSheet}>Invite User</Button>
+        <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
+          Invite User
+        </Button>
       </PageHeader>
 
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">

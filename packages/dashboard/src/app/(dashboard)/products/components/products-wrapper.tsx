@@ -219,7 +219,9 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   return (
     <>
       <PageHeader title="Products">
-        <Button onClick={openAddSheet}>Add Product</Button>
+        <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
+          Add Product
+        </Button>
       </PageHeader>
 
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">

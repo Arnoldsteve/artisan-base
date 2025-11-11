@@ -151,7 +151,9 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
     <>
       <PageHeader title="Order">
         <Link href="/orders/new">
-          <Button>New Order</Button>
+          <Button variant={"outline"} size={"sm"}>
+            New Order
+          </Button>
         </Link>
       </PageHeader>
 

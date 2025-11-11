@@ -195,7 +195,12 @@ export function CustomersWrapper({
   return (
     <>
       <PageHeader title="Customers">
-        <Button onClick={openAddSheet} disabled={isCreating || isUpdating}>
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          onClick={openAddSheet}
+          disabled={isCreating || isUpdating}
+        >
           Add Customer
         </Button>
       </PageHeader>

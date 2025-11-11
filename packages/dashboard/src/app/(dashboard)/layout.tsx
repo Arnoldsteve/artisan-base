@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { ClientSidebarLayout } from "@/components/dashboard/ClientSidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
@@ -9,10 +9,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  if (!isLoading && !isAuthenticated) {
-    router.push("/");
-    return null; 
-  }
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (

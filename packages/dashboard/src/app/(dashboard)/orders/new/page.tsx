@@ -8,7 +8,10 @@ export default function NewOrderPage() {
     <>
       <PageHeader title="Create New Order">
         <Link href="/orders">
-          <Button> Order List</Button>
+          <Button variant={"outline"} size={"sm"}>
+            {" "}
+            Order List
+          </Button>
         </Link>
       </PageHeader>
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">

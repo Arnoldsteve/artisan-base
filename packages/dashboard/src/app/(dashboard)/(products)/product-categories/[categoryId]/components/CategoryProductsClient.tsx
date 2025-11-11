@@ -7,6 +7,7 @@ import { ProductsWrapper } from "@/app/(dashboard)/products/components/products-
 import { PaginatedResponse } from "@/types/shared";
 import { Product } from "@/types/products";
 import { Card } from "@repo/ui/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 
 interface CategoryProductsClientProps {
   category: Category | null;
@@ -18,20 +19,22 @@ export default function CategoryProductsClient({
   initialProductData,
 }: CategoryProductsClientProps) {
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
+    <>
+      <PageHeader title={category?.name ?? "Category"}>
+        <Link href="/product-categories">
+          <Button variant={"outline"} size={"sm"}>Categories List</Button>
+        </Link>
+      </PageHeader>
+
+      {/* <div className="px-4 md:px-4 lg:px-8 md:mt-0"> */}
+        <Card className="p-6">
           {category?.description && (
             <p className="text-gray-600 mt-1">{category.description}</p>
           )}
-      </Card>
-      
-      <div>
-        <Link href="/product-categories">
-          <Button variant="outline">Back to Categories</Button>
-        </Link>
-      </div>
+        </Card>
+      {/* </div> */}
 
       <ProductsWrapper initialProductData={initialProductData} />
-    </div>
+    </>
   );
 }
