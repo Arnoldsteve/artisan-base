@@ -1,23 +1,21 @@
 import { createServerApiClient } from "@/lib/server-api";
-import { CustomersView } from "./components/customers-view";
+import { CustomersWrapper } from "./components/customers-wrapper";
 import { Customer } from "@/types/customers";
 import { PaginatedResponse } from "@/types/shared";
 import { PageHeader } from "@/components/shared/page-header";
 
 export default async function CustomersPage() {
-  let initialData: PaginatedResponse<Customer>;
+  let initialCustomerData: PaginatedResponse<Customer>;
 
   try {
     const serverApi = await createServerApiClient();
 
-    initialData = await serverApi.get<PaginatedResponse<Customer>>(
+    initialCustomerData = await serverApi.get<PaginatedResponse<Customer>>(
       "/dashboard/customers"
     );
-    // console.log("Fetched initial data on the server:", initialData);
   } catch (error) {
     console.error("Failed to fetch initial customers on the server:", error);
-    // On error, create a default paginated structure so the client component doesn't break.
-    initialData = {
+    initialCustomerData = {
       data: [],
       meta: {
         total: 0,
@@ -29,12 +27,13 @@ export default async function CustomersPage() {
       },
     };
   }
+  return  <CustomersWrapper initialCustomerData={initialCustomerData} />
 
   return (
     <>
       <PageHeader title="Customers" />
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
-        <CustomersView initialCustomerData={initialData} />
+        <CustomersWrapper initialCustomerData={initialCustomerData} />
       </div>
     </>
   );

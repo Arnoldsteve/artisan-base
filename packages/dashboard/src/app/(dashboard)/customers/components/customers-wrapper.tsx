@@ -38,11 +38,13 @@ import { CustomerFormData } from "@/validation-schemas/customers";
 import { PaginatedResponse } from "@/types/shared";
 import { CustomerTableMeta } from "@/types/table-meta";
 
-interface CustomersViewProps {
+interface CustomersWrapperProps {
   initialCustomerData: PaginatedResponse<Customer>;
 }
 
-export function CustomersView({ initialCustomerData }: CustomersViewProps) {
+export function CustomersWrapper({
+  initialCustomerData,
+}: CustomersWrapperProps) {
   const router = useRouter();
 
   // --- Component State ---
@@ -178,7 +180,7 @@ export function CustomersView({ initialCustomerData }: CustomersViewProps) {
   };
 
   // --- Render Logic ---
-  if ( isFetching|| (isLoading && !paginatedResponse)) {
+  if (isFetching || (isLoading && !paginatedResponse)) {
     return <DataTableSkeleton />;
   }
 
@@ -192,19 +194,19 @@ export function CustomersView({ initialCustomerData }: CustomersViewProps) {
 
   return (
     <div>
-      <PageHeader
-        title="Customers"
-      >
+      <PageHeader title="Customers">
         <Button onClick={openAddSheet} disabled={isCreating || isUpdating}>
-          <Plus className="mr-2 h-4 w-4" /> Add Customer
+          Add Customer
         </Button>
       </PageHeader>
 
-      <div className="flex items-center py-4">
-        <DataTableViewOptions table={table} />
-      </div>
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+        <div className="flex items-center py-4">
+          <DataTableViewOptions table={table} />
+        </div>
 
-      <DataTable table={table} totalCount={totalCustomers} />
+        <DataTable table={table} totalCount={totalCustomers} />
+      </div>
 
       <div
         className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? "translate-y-0" : "translate-y-24"}`}
