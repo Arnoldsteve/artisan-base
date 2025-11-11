@@ -1,8 +1,7 @@
 import { createServerApiClient } from "@/lib/server-api";
-import { TeamMembersView } from "./components/team-members-view";
+import { TeamMembersWrapper } from "./components/team-members-wrapper";
 import { PaginatedResponse } from "@/types/shared";
 import { DashboardUser } from "@/types/users";
-import { PageHeader } from "@/components/shared/page-header";
 
 export default async function TeamPage() {
   let initialUsersData: PaginatedResponse<DashboardUser>;
@@ -19,7 +18,6 @@ export default async function TeamPage() {
   } catch (err) {
     console.error("Failed to fetch team members on server:", err);
 
-    // Provide default empty paginated data if request fails
     initialUsersData = {
       data: [],
       meta: {
@@ -33,13 +31,5 @@ export default async function TeamPage() {
     };
   }
 
-  return (
-    <>
-      <PageHeader title="Team Members" />
-
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
-        <TeamMembersView initialUsersData={initialUsersData} />
-      </div>
-    </>
-  );
+  return <TeamMembersWrapper initialUsersData={initialUsersData} />;
 }

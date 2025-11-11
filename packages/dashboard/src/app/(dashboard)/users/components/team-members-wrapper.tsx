@@ -22,14 +22,14 @@ import {
 import { EditAddUserSheet } from "./edit-add-user-sheet";
 import { DashboardUserFormData } from "@/validation-schemas/dashboardUserSchema";
 import { ConfirmActionModal } from "@/components/modals/confirm-action-modal";
-import { toast } from "sonner";
 
-interface TeamMembersViewProps {
+interface TeamMembersWrapperProps {
   initialUsersData: PaginatedResponse<DashboardUser>;
 }
 
-export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
-  const [users, setUsers] = useState(initialUsersData);
+export function TeamMembersWrapper({
+  initialUsersData,
+}: TeamMembersWrapperProps) {
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -134,7 +134,9 @@ export function TeamMembersView({ initialUsersData }: TeamMembersViewProps) {
         <Button onClick={openAddSheet}>Invite User</Button>
       </PageHeader>
 
-      <DataTable table={table} totalCount={totalDashboardUsers} />
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+        <DataTable table={table} totalCount={totalDashboardUsers} />
+      </div>
 
       <EditAddUserSheet
         isOpen={isSheetOpen}
