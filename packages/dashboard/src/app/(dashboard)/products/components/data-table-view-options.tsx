@@ -19,7 +19,7 @@ interface DataTableViewOptionsProps {
 
 export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
   return (
-    <Card className="flex flex-wrap items-center rounded-sm shadow-none gap-4 py-4 px-4 my-8">
+    <Card className="flex flex-wrap items-center rounded-sm shadow-none gap-4 py-4 px-4 mt-4 mb-8">
       <Input
         placeholder="Filter by name... "
         value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}

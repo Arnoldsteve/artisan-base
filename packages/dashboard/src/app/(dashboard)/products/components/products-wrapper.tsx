@@ -37,11 +37,11 @@ import { ImagePreviewDialog } from "./image-preview-dialog";
 import { slugify } from "@/utils/slugify";
 import { ProductTableMeta } from "@/types/table-meta";
 
-interface ProductsViewProps {
+interface ProductsWrapperProps {
   initialProductData: PaginatedResponse<Product>;
 }
 
-export function ProductsView({ initialProductData }: ProductsViewProps) {
+export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   // --- Table State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -78,7 +78,7 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     isLoading,
     isError,
     isFetching,
-  } = useProducts(pageIndex + 1 , pageSize, "", initialProductData);
+  } = useProducts(pageIndex + 1, pageSize, "", initialProductData);
 
   // console.log("product data from product view: ", paginatedResponse);
 
@@ -108,7 +108,7 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
   const openEditSheet = (product: Product) => {
     setProductToEdit(product);
     setIsSheetOpen(true);
-  };  
+  };
   const handleCategoryChange = (product: Product) => {
     setProductForCategory(product);
     setIsCategorySheetOpen(true);
@@ -166,7 +166,7 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    meta: tableMeta, 
+    meta: tableMeta,
   });
 
   // --- Mutation Handlers ---
@@ -208,9 +208,9 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
     });
   };
 
- if (isFetching || (isLoading && !initialProductData)) {
-  return <DataTableSkeleton />;
-}
+  if (isFetching || (isLoading && !initialProductData)) {
+    return <DataTableSkeleton />;
+  }
 
   if (isError) {
     return <div className="p-8 text-red-500">Failed to load product data.</div>;
@@ -222,9 +222,10 @@ export function ProductsView({ initialProductData }: ProductsViewProps) {
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>
 
-      <DataTableViewOptions table={table} />
-
-      <DataTable table={table} totalCount={totalProducts} />
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+        <DataTableViewOptions table={table} />
+        <DataTable table={table} totalCount={totalProducts} />
+      </div>
 
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">

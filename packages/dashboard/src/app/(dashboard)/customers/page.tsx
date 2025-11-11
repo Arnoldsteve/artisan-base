@@ -2,7 +2,6 @@ import { createServerApiClient } from "@/lib/server-api";
 import { CustomersWrapper } from "./components/customers-wrapper";
 import { Customer } from "@/types/customers";
 import { PaginatedResponse } from "@/types/shared";
-import { PageHeader } from "@/components/shared/page-header";
 
 export default async function CustomersPage() {
   let initialCustomerData: PaginatedResponse<Customer>;
@@ -27,6 +26,6 @@ export default async function CustomersPage() {
       },
     };
   }
-  
+
   return <CustomersWrapper initialCustomerData={initialCustomerData} />;
 }
