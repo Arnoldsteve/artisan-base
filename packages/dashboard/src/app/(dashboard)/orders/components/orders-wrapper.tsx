@@ -32,11 +32,11 @@ import { OrdersTableViewOptions } from "./data-table-view-options";
 import { PaginatedResponse } from "@/types/shared";
 import { OrderTableMeta } from "@/types/table-meta";
 
-interface OrdersViewProps {
+interface OrdersWrapperProps {
   initialOrderData: PaginatedResponse<Order>;
 }
 
-export function OrdersView({ initialOrderData }: OrdersViewProps) {
+export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
   // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -149,52 +149,58 @@ export function OrdersView({ initialOrderData }: OrdersViewProps) {
 
   return (
     <>
-      <div>
+      <PageHeader title="Order">
+        <Link href="/orders/new">
+          <Button>New Order</Button>
+        </Link>
+      </PageHeader>
+
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
         <OrdersTableViewOptions table={table} />
         <DataTable table={table} totalCount={totalOrders} />
+      </div>
 
-        {numSelected > 0 && (
-          <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">
-            <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
-              <div className="text-sm font-medium">
-                <span className="font-semibold">{numSelected}</span> selected
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setIsBulkDeleteDialogOpen(true)}
-                  disabled={isBatchDeleting}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setRowSelection({})}
-                >
-                  Cancel
-                </Button>
-              </div>
+      {numSelected > 0 && (
+        <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">
+          <div className="mx-auto flex h-14 w-fit max-w-full items-center justify-between gap-8 rounded-full border bg-background/95 px-6 shadow-2xl backdrop-blur-sm">
+            <div className="text-sm font-medium">
+              <span className="font-semibold">{numSelected}</span> selected
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsBulkDeleteDialogOpen(true)}
+                disabled={isBatchDeleting}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setRowSelection({})}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <DeleteOrderDialog
-          isOpen={!!orderToDelete}
-          onClose={() => setOrderToDelete(null)}
-          onConfirm={handleConfirmDelete}
-          orderNumber={orderToDelete?.orderNumber || ""}
-          isPending={isDeleting}
-        />
-        <BulkDeleteAlertDialog
-          isOpen={isBulkDeleteDialogOpen}
-          onClose={() => setIsBulkDeleteDialogOpen(false)}
-          onConfirm={handleBulkDelete}
-          selectedCount={numSelected}
-          isPending={isBatchDeleting}
-        />
-      </div>
+      <DeleteOrderDialog
+        isOpen={!!orderToDelete}
+        onClose={() => setOrderToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        orderNumber={orderToDelete?.orderNumber || ""}
+        isPending={isDeleting}
+      />
+      <BulkDeleteAlertDialog
+        isOpen={isBulkDeleteDialogOpen}
+        onClose={() => setIsBulkDeleteDialogOpen(false)}
+        onConfirm={handleBulkDelete}
+        selectedCount={numSelected}
+        isPending={isBatchDeleting}
+      />
     </>
   );
 }

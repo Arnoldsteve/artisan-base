@@ -193,7 +193,7 @@ export function CustomersWrapper({
   const numSelected = Object.keys(rowSelection).length;
 
   return (
-    <div>
+    <>
       <PageHeader title="Customers">
         <Button onClick={openAddSheet} disabled={isCreating || isUpdating}>
           Add Customer
@@ -225,6 +225,6 @@ export function CustomersWrapper({
         onSave={handleSaveChanges}
         isPending={isCreating || isUpdating}
       />
-    </div>
+    </>
   );
 }

@@ -217,7 +217,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   }
 
   return (
-    <div>
+    <>
       <PageHeader title="Products">
         <Button onClick={openAddSheet}>Add Product</Button>
       </PageHeader>
@@ -279,6 +279,6 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
         onClose={() => setIsPreviewOpen(false)}
         product={productForPreview}
       />
-    </div>
+    </>
   );
 }

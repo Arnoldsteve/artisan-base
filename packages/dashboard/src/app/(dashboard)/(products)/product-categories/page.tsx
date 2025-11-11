@@ -2,7 +2,6 @@ import { createServerApiClient } from "@/lib/server-api";
 import { CategoriesWrapper } from "./components/categories-wrapper";
 import { Category } from "@/types/categories";
 import { PaginatedResponse } from "@/types/shared";
-import { PageHeader } from "@/components/shared/page-header";
 
 export default async function ProductCategoriesPage() {
   let initialData: PaginatedResponse<Category>;
