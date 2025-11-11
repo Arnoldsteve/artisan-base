@@ -1,5 +1,5 @@
 import { createServerApiClient } from "@/lib/server-api";
-import { CategoriesView } from "./components/categories-view";
+import { CategoriesWrapper } from "./components/categories-wrapper";
 import { Category } from "@/types/categories";
 import { PaginatedResponse } from "@/types/shared";
 import { PageHeader } from "@/components/shared/page-header";
@@ -28,12 +28,5 @@ export default async function ProductCategoriesPage() {
     };
   }
 
-  return (
-    <>
-      <PageHeader title="Product Categories" />
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0">
-        <CategoriesView initialCategoryData={initialData} />
-      </div>
-    </>
-  );
+  return <CategoriesWrapper initialCategoryData={initialData} />;
 }

@@ -24,8 +24,8 @@ export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
 
       <Button
         variant="outline"
-        onClick={() => table.resetColumnFilters()}
         className="ml-auto"
+        onClick={() => table.resetColumnFilters()}
       >
         Clear Filters
       </Button>

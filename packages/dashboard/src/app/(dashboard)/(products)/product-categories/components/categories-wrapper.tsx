@@ -29,13 +29,15 @@ import { DataTableViewOptions } from "./data-table-view-options";
 import { PaginatedResponse } from "@/types/shared";
 import { CategoryTableMeta } from "@/types/table-meta";
 
-interface CategoriesViewProps {
+interface CategoriesWrapperProps {
   initialCategoryData: PaginatedResponse<
     Category & { _count?: { products: number } }
   >;
 }
 
-export function CategoriesView({ initialCategoryData }: CategoriesViewProps) {
+export function CategoriesWrapper({
+  initialCategoryData,
+}: CategoriesWrapperProps) {
   // --- Table State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -194,9 +196,10 @@ export function CategoriesView({ initialCategoryData }: CategoriesViewProps) {
         <Button onClick={openAddSheet}>Add Category</Button>
       </PageHeader>
 
-      <DataTableViewOptions table={table} />
-
-      <DataTable table={table} totalCount={totalCategories} />
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+        <DataTableViewOptions table={table} />
+        <DataTable table={table} totalCount={totalCategories} />
+      </div>
 
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">
