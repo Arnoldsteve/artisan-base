@@ -80,60 +80,53 @@ export function DataTable<TData>({ table, totalCount }: DataTableProps<TData>) {
   );
 }
 
-// We keep the padding here as it's used directly by loading.tsx
 export function DataTableSkeleton() {
   return (
-    <div className="p-4 md:p-8 lg:p-10">
-      {/* Page Header Skeleton */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64 mt-2" />
+    <>
+      {/* Top bar */}
+      <div className="flex items-center gap-4 pb-4">
+        <Skeleton className="h-10 w-full" />
+      </div>
+      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+        {/* Page Header Skeleton */}
+        <div className="flex items-center gap-4 py-4">
+          <Skeleton className="h-20 w-full" />
         </div>
-        <Skeleton className="h-10 w-32" />
-      </div>
-
-      {/* Filter/View Options Skeleton */}
-      <div className="flex items-center gap-4 py-4">
-        <Skeleton className="h-10 w-72" />
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-10 w-32 ml-auto" />
-      </div>
-
-      {/* Table Skeleton */}
-      <div className="rounded-md border bg-[#fff]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <TableHead key={i}>
-                  <Skeleton className="h-5 w-full" />
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <TableRow key={i}>
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <TableCell key={j}>
-                    <Skeleton className="h-6 w-full" />
-                  </TableCell>
+        {/* Table Skeleton */}
+        <div className="rounded-md border bg-[#fff]">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <TableHead key={i}>
+                    <Skeleton className="h-8 w-full" />
+                  </TableHead>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Pagination Skeleton */}
-      <div className="bg-[#fff] rounded-md border flex items-center justify-end space-x-2 py-2 px-2">
-        <div className="flex-1 px-2">
-          <Skeleton className="h-4 w-24" />
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-8 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-        <Skeleton className="h-10 w-24" />
-        <Skeleton className="h-10 w-24" />
+
+        {/* Pagination Skeleton */}
+        <div className="bg-[#fff] rounded-md border flex items-center justify-end space-x-2 py-2 px-2">
+          <div className="flex-1 px-2">
+            <Skeleton className="h-10 w-72" />
+          </div>
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
