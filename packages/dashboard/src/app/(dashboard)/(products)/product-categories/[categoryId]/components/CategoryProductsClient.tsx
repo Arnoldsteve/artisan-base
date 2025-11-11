@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
 import { Category } from "@/types/categories";
-import { ProductsView } from "@/app/(dashboard)/products/components/products-view";
+import { ProductsWrapper } from "@/app/(dashboard)/products/components/products-wrapper";
 import { PaginatedResponse } from "@/types/shared";
 import { Product } from "@/types/products";
 import { Card } from "@repo/ui/components/ui/card";
@@ -31,7 +31,7 @@ export default function CategoryProductsClient({
         </Link>
       </div>
 
-      <ProductsView initialProductData={initialProductData} />
+      <ProductsWrapper initialProductData={initialProductData} />
     </div>
   );
 }
