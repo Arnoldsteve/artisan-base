@@ -12,7 +12,7 @@ interface DataTableViewOptionsProps {
 
 export function DataTableViewOptions({ table }: DataTableViewOptionsProps) {
   return (
-    <Card className="flex flex-row items-center w-full rounded-sm shadow-none gap-4 py-4 px-4 my-8">
+    <Card className="flex flex-row items-center w-full rounded-sm shadow-none gap-4 py-4 px-4 mt-4 mb-8">
       <Input
         placeholder="Filter customers by email..."
         value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}

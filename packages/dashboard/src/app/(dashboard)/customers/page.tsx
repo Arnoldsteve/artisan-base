@@ -27,14 +27,6 @@ export default async function CustomersPage() {
       },
     };
   }
-  return  <CustomersWrapper initialCustomerData={initialCustomerData} />
-
-  return (
-    <>
-      <PageHeader title="Customers" />
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
-        <CustomersWrapper initialCustomerData={initialCustomerData} />
-      </div>
-    </>
-  );
+  
+  return <CustomersWrapper initialCustomerData={initialCustomerData} />;
 }
