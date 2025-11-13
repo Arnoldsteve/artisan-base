@@ -1,5 +1,3 @@
-// REFACTOR: ProductService following Repository pattern and Single Responsibility Principle
-
 import { apiClient } from "@/lib/api-client";
 import { cleanParams } from "@/lib/clean-params";
 import {
@@ -11,62 +9,7 @@ import {
   ApiResponse,
 } from "@/types";
 
-// OPTIMIZATION: In-memory cache for frequently accessed data
-class ProductCache {
-  private products = new Map<string, Product>();
-  private categories = new Map<string, Category>();
-  private featuredProducts: Product[] = [];
-  private lastUpdate = 0;
-  private readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-
-  setProduct(product: Product): void {
-    this.products.set(product.id, product);
-  }
-
-  getProduct(id: string): Product | null {
-    return this.products.get(id) || null;
-  }
-
-  setProducts(products: Product[]): void {
-    products.forEach((product) => this.products.set(product.id, product));
-    this.lastUpdate = Date.now();
-  }
-
-  getProducts(): Product[] {
-    return Array.from(this.products.values());
-  }
-
-  setCategories(categories: Category[]): void {
-    categories.forEach((category) =>
-      this.categories.set(category.id, category)
-    );
-  }
-
-  getCategories(): Category[] {
-    return Array.from(this.categories.values());
-  }
-
-  setFeaturedProducts(products: Product[]): void {
-    this.featuredProducts = products;
-  }
-
-  getFeaturedProducts(): Product[] {
-    return this.featuredProducts;
-  }
-
-  isStale(): boolean {
-    return Date.now() - this.lastUpdate > this.CACHE_TTL;
-  }
-
-  clear(): void {
-    this.products.clear();
-    this.categories.clear();
-    this.featuredProducts = [];
-    this.lastUpdate = 0;
-  }
-}
-
-// Add this helper function at the top (after imports)
+// Helper function to normalize product
 function normalizeProduct(product: any): Product {
   return {
     id: product.id,
@@ -75,9 +18,7 @@ function normalizeProduct(product: any): Product {
     description: product.description || "",
     price: Number(product.price) || 0,
     currency: product.currency || "KES",
-    originalPrice: product.originalPrice
-      ? Number(product.originalPrice)
-      : undefined,
+    originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined,
     image: product.image || (product.images && product.images[0]) || "",
     images: product.images || [],
     categories: product.categories || [],
@@ -93,297 +34,110 @@ function normalizeProduct(product: any): Product {
   };
 }
 
-// REFACTOR: ProductService with business logic separation
 export class ProductService {
-  private cache: ProductCache;
+  constructor() {}
 
-  constructor() {
-    this.cache = new ProductCache();
-  }
-
-  // OPTIMIZATION: Efficient product filtering with O(n) complexity
-  private filterProducts(
-    products: Product[],
-    filters: ProductFilters
-  ): Product[] {
+  private filterProducts(products: Product[], filters: ProductFilters): Product[] {
     return products.filter((product) => {
-      // Category filter
-      if (filters.category && product.categoryId !== filters.category) {
-        return false;
-      }
-
-      // Price range filter (min / max)
-      if (filters.minPrice !== undefined && product.price < filters.minPrice) {
-        return false;
-      }
-      if (filters.maxPrice !== undefined && product.price > filters.maxPrice) {
-        return false;
-      }
-
-      // Rating filter
-      if (filters.rating && product.rating < filters.rating) {
-        return false;
-      }
-
-      // Tags filter
-      if (filters.tags && filters.tags.length > 0) {
-        const hasMatchingTag = filters.tags.some((tag) =>
-          product.tags.includes(tag)
-        );
-        if (!hasMatchingTag) {
-          return false;
-        }
-      }
-
-      // Search filter
+      if (filters.category && product.categoryId !== filters.category) return false;
+      if (filters.minPrice !== undefined && product.price < filters.minPrice) return false;
+      if (filters.maxPrice !== undefined && product.price > filters.maxPrice) return false;
+      if (filters.rating && product.rating < filters.rating) return false;
+      if (filters.tags?.length && !filters.tags.some((tag) => product.tags.includes(tag))) return false;
       if (filters.search) {
-        const searchTerm = filters.search.toLowerCase();
-        const matchesName = product.name.toLowerCase().includes(searchTerm);
-        const matchesDescription = product.description
-          ?.toLowerCase()
-          .includes(searchTerm);
-        const matchesTags = product.tags.some((tag) =>
-          tag.toLowerCase().includes(searchTerm)
-        );
-
-        if (!matchesName && !matchesDescription && !matchesTags) {
-          return false;
-        }
+        const term = filters.search.toLowerCase();
+        if (
+          !product.name.toLowerCase().includes(term) &&
+          !product.description?.toLowerCase().includes(term) &&
+          !product.tags.some((tag) => tag.toLowerCase().includes(term))
+        ) return false;
       }
-
       return true;
     });
   }
 
-  // OPTIMIZATION: Efficient sorting with stable sort algorithm
   private sortProducts(
     products: Product[],
     sortBy?: string,
     sortOrder: "asc" | "desc" = "desc"
   ): Product[] {
     if (!sortBy) return products;
-
     return [...products].sort((a, b) => {
-      let aValue: any, bValue: any;
-
+      let aVal: any, bVal: any;
       switch (sortBy) {
         case "name":
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
           break;
         case "price":
-          aValue = a.price;
-          bValue = b.price;
+          aVal = a.price;
+          bVal = b.price;
           break;
         case "rating":
-          aValue = a.rating;
-          bValue = b.rating;
+          aVal = a.rating;
+          bVal = b.rating;
           break;
         case "createdAt":
-          aValue = new Date(a.createdAt).getTime();
-          bValue = new Date(b.createdAt).getTime();
+          aVal = new Date(a.createdAt).getTime();
+          bVal = new Date(b.createdAt).getTime();
           break;
         default:
           return 0;
       }
-
-      if (sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
+      return sortOrder === "asc" ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
     });
   }
 
-  // OPTIMIZATION: Pagination with efficient slicing
-  private paginateProducts(
-    products: Product[],
-    page: number = 1,
-    limit: number = 12
-  ): PaginatedResponse<Product> {
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
+  private paginateProducts(products: Product[], page = 1, limit = 12): PaginatedResponse<Product> {
+    const start = (page - 1) * limit;
+    const end = start + limit;
     const total = products.length;
     const totalPages = Math.ceil(total / limit);
-
     return {
-      data: products.slice(startIndex, endIndex),
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
+      data: products.slice(start, end),
+      meta: { page, limit, total, totalPages, hasNext: page < totalPages, hasPrev: page > 1 },
     };
   }
 
-  async getProducts(
-    params: ProductSearchParams = {}
-  ): Promise<PaginatedResponse<Product>> {
-    try {
-      const cleanedParams = cleanParams(params);
-
-      // OPTIMIZATION: Use cache for frequently accessed data
-      if (!this.cache.isStale() && !params.search && !params.category) {
-        const cachedProducts = this.cache.getProducts();
-        if (cachedProducts.length > 0) {
-          const filtered = this.filterProducts(cachedProducts, params);
-          const sorted = this.sortProducts(
-            filtered,
-            params.sortBy,
-            params.sortOrder
-          );
-          return this.paginateProducts(sorted, params.page, params.limit);
-        }
-      }
-
-      // Use the cleaned parameters for the API call
-      const response = await apiClient.get<
-        ApiResponse<PaginatedResponse<Product>>
-      >("/api/v1/storefront/products", cleanedParams);
-
-      // OPTIMIZATION: Cache the results for better performance
-      if (response.success) {
-        this.cache.setProducts(response.data.data);
-      }
-
-      // console.log("Service returning:", response.data);
-      // console.log("Service return type check:", Array.isArray(response.data));
-
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
-    }
+  async getProducts(params: ProductSearchParams = {}): Promise<PaginatedResponse<Product>> {
+    const cleanedParams = cleanParams(params);
+    const response = await apiClient.get<ApiResponse<PaginatedResponse<Product>>>(
+      "/api/v1/storefront/products",
+      cleanedParams
+    );
+    return response.data;
   }
 
   async getProduct(id: string): Promise<Product> {
-    console.log("service level id", id)
-    try {
-      // OPTIMIZATION: Check cache first
-      // const cachedProduct = this.cache.getProduct(id);
-      // if (cachedProduct) {
-      //   return cachedProduct;
-      // }
-
-      const response = await apiClient.get<ApiResponse<Product>>(
-        `/api/v1/storefront/products/${id}`
-      );
-
-      if (response.success) {
-        const normalized = normalizeProduct(response.data);
-        // this.cache.setProduct(normalized);
-        //  console.log("service level normalized data", normalized)
-        return normalized;
-      }
-
-      throw new Error("Product not found");
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      throw error;
-    }
+    const response = await apiClient.get<ApiResponse<Product>>(`/api/v1/storefront/products/${id}`);
+    if (response.success) return normalizeProduct(response.data);
+    throw new Error("Product not found");
   }
 
-  async getFeaturedProducts(limit: number = 12): Promise<Product[]> {
-    try {
-      // OPTIMIZATION: Use cache for featured products
-      if (!this.cache.isStale()) {
-        const cached = this.cache.getFeaturedProducts();
-        if (cached.length > 0) {
-          return cached.slice(0, limit);
-        }
-      }
-
-      const response = await apiClient.get<ApiResponse<Product[]>>(
-        "/api/v1/storefront/products/featured",
-        { limit }
-      );
-
-      if (response.success) {
-        this.cache.setFeaturedProducts(response.data);
-        // console.log("features products response data", response)
-        return response.data.slice(0, limit);
-      }
-
-      return [];
-    } catch (error) {
-      console.error("Error fetching featured products:", error);
-      return [];
-    }
+  async getFeaturedProducts(limit = 12): Promise<Product[]> {
+    const response = await apiClient.get<ApiResponse<Product[]>>("/api/v1/storefront/products/featured", { limit });
+    return response.success ? response.data.slice(0, limit) : [];
   }
 
-  async getNewArrivals(limit: number = 24): Promise<Product[]> {
-    try {
-      // This method now works correctly because it calls the fixed getProducts method
-      const allProducts = await this.getProducts({ limit: 100 });
-      const sortedProducts = this.sortProducts(
-        allProducts.data || allProducts,
-        "createdAt",
-        "desc"
-      );
-
-      return sortedProducts.slice(0, limit);
-    } catch (error) {
-      console.error("Error fetching new arrivals:", error);
-      return [];
-    }
+  async getNewArrivals(limit = 24): Promise<Product[]> {
+    const allProducts = await this.getProducts({ limit: 100 });
+    return this.sortProducts(allProducts.data, "createdAt", "desc").slice(0, limit);
   }
 
   async getCategories(): Promise<Category[]> {
-    try {
-      // OPTIMIZATION: Use cache for categories
-      const cached = this.cache.getCategories();
-      if (cached.length > 0) {
-        return cached;
-      }
-
-      const response = await apiClient.get<ApiResponse<Category[]>>(
-        "/api/v1/storefront/categories"
-      );
-
-      if (response && response.data && Array.isArray(response.data)) {
-        this.cache.setCategories(response.data);
-        return response.data;
-      }
-
-      return [];
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      return [];
-    }
+    const response = await apiClient.get<ApiResponse<Category[]>>("/api/v1/storefront/categories");
+    return response.data || [];
   }
 
-  async searchProducts(query: string, limit: number = 10): Promise<Product[]> {
+  async searchProducts(query: string, limit = 10): Promise<Product[]> {
     if (!query.trim()) return [];
-
-    try {
-      const response = await apiClient.get<ApiResponse<Product[]>>(
-        "/storefront/products/search",
-        {
-          q: query,
-          limit,
-        }
-      );
-
-      return response.success ? response.data : [];
-    } catch (error) {
-      console.error("Error searching products:", error);
-      return [];
-    }
+    const response = await apiClient.get<ApiResponse<Product[]>>("/storefront/products/search", { q: query, limit });
+    return response.success ? response.data : [];
   }
 
   async getProductBySlug(slug: string) {
-    return apiClient.get<ApiResponse<Product>>(
-      `/api/v1/storefront/products/slug/${slug}`
-    );
-  }
-
-  clearCache(): void {
-    this.cache.clear();
+    return apiClient.get<ApiResponse<Product>>(`/api/v1/storefront/products/slug/${slug}`);
   }
 }
 
-// OPTIMIZATION: Singleton instance for better performance
 export const productService = new ProductService();
