@@ -13,7 +13,6 @@ import {
   Category,
 } from "@/types";
 
-// OPTIMIZATION: Query keys for better cache management
 export const productKeys = {
   all: ["products"] as const,
   lists: () => [...productKeys.all, "list"] as const,

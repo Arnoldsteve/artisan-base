@@ -22,11 +22,16 @@ export class GetProductsDto {
   @Min(0)
   maxPrice?: number;
 
+  // Will be removed soon, was used for skip based pagination, now transiting to cursor based pagination
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
   page?: number = 1;
+
+  @IsOptional()
+  @IsString()
+  cursor?: string;
 
   @IsOptional()
   @Type(() => Number)

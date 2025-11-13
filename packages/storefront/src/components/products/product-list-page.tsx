@@ -45,6 +45,8 @@ export function ProductsContent() {
 
   const products = (productsResponse as any) ?? [];
 
+  console.log("productsResponse", products)
+
   // Check if there are unapplied price changes
   const hasUnappliedPriceChanges = 
     priceRange[0] !== appliedPriceRange[0] || 
@@ -80,11 +82,6 @@ export function ProductsContent() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
           <div>
-            {/* <h1 className="text-2xl font-bold text-foreground mb-1">
-              {searchQuery
-                ? `Search results for "${searchQuery}"`
-                : "All Products"}
-            </h1> */}
             <p className="text-2xl font-bold text-foreground mb-1">
               {products.length} product
               {products.length !== 1 ? "s" : ""} found

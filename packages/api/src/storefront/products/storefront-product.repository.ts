@@ -32,15 +32,13 @@ export class StorefrontProductRepository
       category,
       minPrice,
       maxPrice,
-      page = 1,
       limit = 100,
       sortBy = 'name',
       sortOrder = 'asc',
+      cursor, //  ID of last fetched product
     } = filters;
 
-    const pageNum = Math.max(Number(page) || 1, 1);
-    const limitNum = Math.max(Number(limit) || 100, 1);
-    const skip = (pageNum - 1) * limitNum;
+    const limitNum = Math.max(Number(limit) || 50, 1);
 
     const where: any = { isActive: true };
 
@@ -81,62 +79,66 @@ export class StorefrontProductRepository
         orderBy = { createdAt: sortOrder === 'desc' ? 'desc' : 'asc' };
         break;
       default:
-        orderBy = { name: sortOrder === 'desc' ? 'desc' : 'asc' };
+        orderBy = [
+          { name: sortOrder === 'desc' ? 'desc' : 'asc' },
+          { id: 'asc' }, // tie-breaker for stable ordering
+        ];
     }
 
     const prisma = await this.getPrisma();
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limitNum,
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          price: true,
-          sku: true,
-          inventoryQuantity: true,
-          isFeatured: true,
-          isActive: true,
-          images: true,
-          createdAt: true,
-          updatedAt: true,
-          categories: {
-            select: {
-              category: { select: { id: true, name: true } },
-            },
-          },
-          reviews: {
-            where: { isApproved: false }, 
-            select: {
-              id: true,
-              rating: true,
-              comment: true,
-              createdAt: true,
-            },
-            orderBy: { createdAt: 'desc' },
+    const products = await prisma.product.findMany({
+      where,
+      orderBy,
+      take: limitNum,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        sku: true,
+        inventoryQuantity: true,
+        isFeatured: true,
+        isActive: true,
+        images: true,
+        createdAt: true,
+        updatedAt: true,
+        categories: {
+          select: {
+            category: { select: { id: true, name: true } },
           },
         },
-      }),
-      prisma.product.count({ where }),
-    ]);
+        reviews: {
+          where: { isApproved: true },
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
 
     const productsWithCategories = products.map((p) => ({
       ...p,
       categories: p.categories.map((c) => c.category),
     }));
 
+    const nextCursor =
+      productsWithCategories.length > 0
+        ? productsWithCategories[productsWithCategories.length - 1].id
+        : null;
+
     return {
       data: productsWithCategories,
       meta: {
-        total,
-        page: pageNum,
         limit: limitNum,
-        totalPages: Math.ceil(total / limitNum),
+        nextCursor, //  send to frontend for next page
+        hasMore: !!nextCursor,
       },
     };
   }
