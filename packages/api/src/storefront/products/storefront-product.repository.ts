@@ -149,7 +149,7 @@ export class StorefrontProductRepository
       meta: { limit: limitNum, nextCursor, hasMore: !!nextCursor },
     };
 
-    await this.redis.set(cacheKey, result, { ex: 120 }); // ✅ Store object directly
+    await this.redis.set(cacheKey, result, { ex: 300  }); // ✅ Store object directly
 
     return result;
   }
