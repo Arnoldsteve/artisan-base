@@ -35,7 +35,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto, @Req() req) {
     const ipAddress = req.ip || req.headers['x-forwarded-for'];
-  const userAgent = req.headers['user-agent'];
+    const userAgent = req.headers['user-agent'];
+    Logger.log(ipAddress, "Ip address")
     return this.authService.login(loginDto, ipAddress, userAgent);
   }
 

@@ -39,6 +39,14 @@ export class ProductRepository implements IProductRepository {
         counter++;
       }
 
+      const existingSku = await prisma.product.findUnique({
+        where: { sku: dto.sku },
+      });
+
+      if (existingSku) {
+        throw new ConflictException('SKU already exists');
+      }
+
       const product = await prisma.product.create({
         data: { ...dto, slug },
       });
@@ -46,8 +54,13 @@ export class ProductRepository implements IProductRepository {
       this.invalidateCache();
       return product;
     } catch (err) {
-      if (err.code === 'P2002' && err.meta?.target?.includes('slug')) {
-        throw new ConflictException('Slug already exists');
+      if (err.code === 'P2002') {
+        if (err.meta?.target?.includes('slug')) {
+          throw new ConflictException('Slug already exists');
+        }
+        if (err.meta?.target?.includes('sku')) {
+          throw new ConflictException('SKU already exists');
+        }
       }
       throw err;
     }

@@ -27,12 +27,12 @@ export class CustomerService {
   }
 
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {
-    await this.findOne(id); // Ensure customer exists
+    await this.findOne(id); 
     return this.customerRepository.update(id, updateCustomerDto);
   }
 
   async remove(id: string) {
-    await this.findOne(id); // Ensure customer exists
+    await this.findOne(id); 
     return this.customerRepository.remove(id);
   }
 }

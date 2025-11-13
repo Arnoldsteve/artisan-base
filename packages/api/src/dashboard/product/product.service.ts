@@ -9,7 +9,6 @@ import { ProductRepository } from './product.repository'; // <-- IMPORT THE CLAS
 @Injectable({ scope: Scope.REQUEST })
 export class ProductService {
   constructor(
-    // INJECT THE CLASS DIRECTLY. NO MORE @Inject() or string token.
     private readonly productRepository: ProductRepository,
     private readonly productCategoryService: ProductCategoryService,
   ) {}
