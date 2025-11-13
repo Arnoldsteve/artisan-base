@@ -1,8 +1,9 @@
-import { Injectable, Scope, Logger } from '@nestjs/common';
+import { Injectable, Scope, Logger, Inject } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
 import { PrismaClient, Prisma } from '../../../generated/tenant';
+import { Redis } from '@upstash/redis';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductRepository
@@ -10,15 +11,13 @@ export class StorefrontProductRepository
 {
   private readonly logger = new Logger(StorefrontProductRepository.name);
 
-  // This will hold the client once it's initialized
   private prismaClient: PrismaClient | null = null;
 
-  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+  constructor(
+    private readonly tenantPrismaService: TenantPrismaService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+  ) {}
 
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request
-   */
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
       this.prismaClient = await this.tenantPrismaService.getClient();
@@ -26,20 +25,35 @@ export class StorefrontProductRepository
     return this.prismaClient;
   }
 
-  async findAll(filters: GetProductsDto) {
+  async findAll(filters: GetProductsDto, tenantId: string) {
     const {
       search,
       category,
       minPrice,
       maxPrice,
-      limit = 100,
+      limit = 50,
       sortBy = 'name',
       sortOrder = 'asc',
-      cursor, //  ID of last fetched product
+      cursor,
     } = filters;
 
     const limitNum = Math.max(Number(limit) || 50, 1);
 
+    // ✅ Generate a cache key including tenantId and filters
+    const cacheKey = `${tenantId}:products:${JSON.stringify(filters)}`;
+
+    // 1️⃣ Check Redis cache
+    const cached = await this.redis.get<{
+      data: any[];
+      meta: { limit: number; nextCursor: string | null; hasMore: boolean };
+    }>(cacheKey);
+
+    if (cached) {
+      this.logger.log(`Cache hit for key: ${cacheKey}`);
+      return cached; // no JSON.parse needed
+    }
+
+    // 2️⃣ Build where filter
     const where: any = { isActive: true };
 
     if (search) {
@@ -52,9 +66,7 @@ export class StorefrontProductRepository
     if (category) {
       where.categories = {
         some: {
-          category: {
-            name: { equals: category, mode: 'insensitive' },
-          },
+          category: { name: { equals: category, mode: 'insensitive' } },
         },
       };
     }
@@ -67,26 +79,31 @@ export class StorefrontProductRepository
         where.price.lte = new Prisma.Decimal(maxPrice);
     }
 
-    let orderBy: any = {};
+    // 3️⃣ Set orderBy
+    let orderBy: any = [];
     switch (sortBy) {
       case 'price-low':
-        orderBy = { price: 'asc' };
+        orderBy = [{ price: 'asc' }, { id: 'asc' }];
         break;
       case 'price-high':
-        orderBy = { price: 'desc' };
+        orderBy = [{ price: 'desc' }, { id: 'asc' }];
         break;
       case 'created':
-        orderBy = { createdAt: sortOrder === 'desc' ? 'desc' : 'asc' };
+        orderBy = [
+          { createdAt: sortOrder === 'desc' ? 'desc' : 'asc' },
+          { id: 'asc' },
+        ];
         break;
       default:
         orderBy = [
           { name: sortOrder === 'desc' ? 'desc' : 'asc' },
-          { id: 'asc' }, // tie-breaker for stable ordering
+          { id: 'asc' },
         ];
     }
 
     const prisma = await this.getPrisma();
 
+    // 4️⃣ Query DB using cursor pagination
     const products = await prisma.product.findMany({
       where,
       orderBy,
@@ -106,18 +123,11 @@ export class StorefrontProductRepository
         createdAt: true,
         updatedAt: true,
         categories: {
-          select: {
-            category: { select: { id: true, name: true } },
-          },
+          select: { category: { select: { id: true, name: true } } },
         },
         reviews: {
           where: { isApproved: true },
-          select: {
-            id: true,
-            rating: true,
-            comment: true,
-            createdAt: true,
-          },
+          select: { id: true, rating: true, comment: true, createdAt: true },
           orderBy: { createdAt: 'desc' },
         },
       },
@@ -133,14 +143,15 @@ export class StorefrontProductRepository
         ? productsWithCategories[productsWithCategories.length - 1].id
         : null;
 
-    return {
+    // 5️⃣ Cache result for 2 minutes
+    const result = {
       data: productsWithCategories,
-      meta: {
-        limit: limitNum,
-        nextCursor, //  send to frontend for next page
-        hasMore: !!nextCursor,
-      },
+      meta: { limit: limitNum, nextCursor, hasMore: !!nextCursor },
     };
+
+    await this.redis.set(cacheKey, result, { ex: 120 }); // ✅ Store object directly
+
+    return result;
   }
 
   async findOne(identifier: string) {

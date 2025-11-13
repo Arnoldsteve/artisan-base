@@ -24,10 +24,10 @@ export class StorefrontProductRecommendationsRepository
     private readonly popularityStrategy: PopularityScoreStrategy,
   ) {}
 
-  async getRecommendations(productId: string): Promise<Product[]> {
+  async getRecommendations(productId: string, tenantId:string): Promise<Product[]> {
     // 1. Fetch all necessary data. This part of your code is already correct.
     const [allProductsResponse, currentProduct] = await Promise.all([
-      this.productsService.findAll({ limit: 1000 }),
+      this.productsService.findAll({ limit: 1000 }, tenantId),
       this.productsService.findOne(productId),
     ]);
 

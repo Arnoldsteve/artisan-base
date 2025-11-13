@@ -15,8 +15,8 @@ export class StorefontProductRecommendationsService {
    * @param productId The ID of the product.
    * @returns A list of recommended products.
    */
-  async getRecommendations(productId: string) {
+  async getRecommendations(productId: string, tenantId:string) {
     Logger.log(`Fetching recommendations for product ID: ${productId}`, StorefontProductRecommendationsService.name);
-    return this.recommendationsRepository.getRecommendations(productId);
+    return this.recommendationsRepository.getRecommendations(productId, tenantId);
   }
 }

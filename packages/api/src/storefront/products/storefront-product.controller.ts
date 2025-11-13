@@ -5,6 +5,7 @@ import {
   Param,
   ValidationPipe,
   Scope,
+  Req,
 } from '@nestjs/common';
 import { StorefrontProductService } from './storefront-product.service';
 import { GetProductsDto } from './dto/get-products.dto';
@@ -17,9 +18,10 @@ export class StorefrontProductController {
   constructor(private readonly productService: StorefrontProductService) {}
 
   @Get()
-  findAll(@Query(ValidationPipe) filters: GetProductsDto) {
+  findAll(@Query(ValidationPipe) filters: GetProductsDto, @Req() req) {
+    const tenantId = req.headers['x-tenant-id'];
     console.log('filters', filters);
-    return this.productService.findAll(filters);
+    return this.productService.findAll(filters, tenantId);
   }
 
   @Get('featured')

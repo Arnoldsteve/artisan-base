@@ -36,7 +36,7 @@
     "management:seed": "node scripts/management/seed.js",
     "management:cleanup": "node scripts/management/cleanup.js",
     "setup:database": "node scripts/setup-database.js",
-    "platform-admin:seed":"node scripts/management/seed.js"
+    "platform-admin:seed": "node scripts/management/seed.js"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
@@ -55,6 +55,7 @@
     "@supabase/storage-js": "^2.10.4",
     "@supabase/supabase-js": "^2.53.0",
     "@types/decimal.js": "^7.4.3",
+    "@upstash/redis": "^1.35.6",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.0.1",

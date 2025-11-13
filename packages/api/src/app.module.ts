@@ -18,6 +18,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { PlatformPlansModule } from './platform/plans/platform-plans.module'; 
 import { DashboardModule } from './dashboard/dashboard.module';
 import { BillingModule } from './billing/billing.module';
+import { RedisModule } from './redis/redis.module';
 
 
 @Module({
@@ -33,6 +34,7 @@ import { BillingModule } from './billing/billing.module';
     PlatformPlansModule, 
     // Billing
     BillingModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

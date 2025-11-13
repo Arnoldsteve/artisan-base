@@ -8,8 +8,8 @@ export class StorefrontProductService {
     private readonly productRepository: StorefrontProductRepository, 
   ) {}
 
-  async findAll(filters: GetProductsDto) {
-    return this.productRepository.findAll(filters);
+  async findAll(filters: GetProductsDto,  tenantId: string) {
+    return this.productRepository.findAll(filters, tenantId);
   }
 
   async findOne(id: string) {

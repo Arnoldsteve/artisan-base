@@ -1,6 +1,13 @@
-// C:\...\api\src\storefront\product-recommendations\storefront-product-recommendations.controller.ts
-import { Controller, Get, Logger, Param, Scope, UseInterceptors } from '@nestjs/common';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import {
+  Controller,
+  Get,
+  Param,
+  Req,
+  Scope,
+  UseInterceptors,
+  Logger,
+} from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { StorefontProductRecommendationsService } from './storefront-product-recommendations.service';
 import { Product } from './interfaces/product.interface';
 import { GetProductRecommendationsDto } from './dto/get-product-recommendations.dto';
@@ -16,11 +23,16 @@ export class StorefontProductRecommendationsController {
   ) {}
 
   @Get(':id/recommendations')
-  @CacheTTL(3600)
   getRecommendations(
     @Param() params: GetProductRecommendationsDto,
+    @Req() req,
   ): Promise<Product[]> {
-    Logger.log(`Fetching recommendations for product ID: ${params.id}`, StorefontProductRecommendationsController.name);
-    return this.recommendationsService.getRecommendations(params.id);
+    const tenantId = req.headers['x-tenant-id'];
+    Logger.log(
+      `Fetching recommendations for product ID: ${params.id} and tenantId: ${tenantId}`,
+      StorefontProductRecommendationsController.name,
+    );
+
+    return this.recommendationsService.getRecommendations(params.id, tenantId);
   }
 }
