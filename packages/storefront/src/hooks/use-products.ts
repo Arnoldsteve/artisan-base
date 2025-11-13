@@ -10,6 +10,7 @@ import {
   Product,
   ProductSearchParams,
   PaginatedResponse,
+  CursorPaginatedResponse,
   Category,
 } from "@/types";
 
@@ -29,36 +30,36 @@ export const productKeys = {
 // OPTIMIZATION: Custom hook for products with infinite scrolling support
 export function useProducts(
   params: ProductSearchParams = {},
-  options?: UseQueryOptions<PaginatedResponse<Product>>
+  options?: UseQueryOptions<CursorPaginatedResponse<Product>>
 ) {
-  return useQuery({
+  return useQuery<CursorPaginatedResponse<Product>>({
     queryKey: productKeys.list(params),
     queryFn: () => productService.getProducts(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     ...options,
   });
 }
 
+
 // OPTIMIZATION: Infinite query for better performance with large datasets
+// OPTIMIZATION: Infinite query with cursor-based pagination
 export function useInfiniteProducts(
-  params: Omit<ProductSearchParams, "page"> = {}
+  params: ProductSearchParams = {}
 ) {
-  return useInfiniteQuery({
+  return useInfiniteQuery<CursorPaginatedResponse<Product>, Error>({
     queryKey: productKeys.list(params),
     queryFn: ({ pageParam }) =>
-      productService.getProducts({ ...params, page: pageParam as number }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage: PaginatedResponse<Product>) =>
-      lastPage.meta.hasNext ? lastPage.meta.page + 1 : undefined,
-    getPreviousPageParam: (firstPage: PaginatedResponse<Product>) =>
-      firstPage.meta.hasPrev ? firstPage.meta.page - 1 : undefined,
+      productService.getProducts({ ...params, cursor: pageParam }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
-// OPTIMIZATION: Individual product query with caching
+
 export function useProduct(
   id: string,
   options?: Partial<UseQueryOptions<Product>> & { initialData?: Product }
@@ -74,53 +75,48 @@ export function useProduct(
   });
 }
 
-// OPTIMIZATION: Featured products with longer cache time
 export function useFeaturedProducts(limit: number = 12) {
   return useQuery({
     queryKey: productKeys.featured(),
     queryFn: () => productService.getFeaturedProducts(limit),
-    staleTime: 15 * 60 * 1000, // 15 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }
 
-// OPTIMIZATION: New arrivals with shorter cache time for freshness
 export function useNewArrivals(limit: number = 12) {
   return useQuery({
     queryKey: productKeys.newArrivals(),
     queryFn: () => productService.getNewArrivals(limit),
-    staleTime: 5 * 60 * 1000, // 5 minutes for freshness
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 }
 
-// OPTIMIZATION: Categories with long cache time since they rarely change
 export function useCategories() {
   return useQuery({
     queryKey: productKeys.categories(),
     queryFn: () => productService.getCategories(),
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 }
 
-// OPTIMIZATION: Search with debouncing support
 export function useProductSearch(query: string, limit: number = 10) {
   return useQuery({
     queryKey: productKeys.search(query),
     queryFn: () => productService.searchProducts(query, limit),
     enabled: !!query.trim(),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
 
-// OPTIMIZATION: Hook for filtered products with memoization
 export function useFilteredProducts(filters: ProductSearchParams) {
   return useQuery({
     queryKey: productKeys.list(filters),
     queryFn: () => productService.getProducts(filters),
-    staleTime: 3 * 60 * 1000, // 3 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 3 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }

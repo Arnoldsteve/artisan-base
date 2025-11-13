@@ -7,6 +7,7 @@ import {
   ProductSearchParams,
   PaginatedResponse,
   ApiResponse,
+  CursorPaginatedResponse
 } from "@/types";
 
 // Helper function to normalize product
@@ -98,13 +99,15 @@ export class ProductService {
       meta: { page, limit, total, totalPages, hasNext: page < totalPages, hasPrev: page > 1 },
     };
   }
-
-  async getProducts(params: ProductSearchParams = {}): Promise<PaginatedResponse<Product>> {
+  
+  async getProducts(params: ProductSearchParams = {}): Promise<CursorPaginatedResponse<Product>> {
     const cleanedParams = cleanParams(params);
-    const response = await apiClient.get<ApiResponse<PaginatedResponse<Product>>>(
+    const response = await apiClient.get<ApiResponse<CursorPaginatedResponse<Product>>>(
       "/api/v1/storefront/products",
       cleanedParams
     );
+
+    console.log(response.data)
     return response.data;
   }
 

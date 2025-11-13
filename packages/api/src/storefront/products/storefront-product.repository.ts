@@ -31,7 +31,7 @@ export class StorefrontProductRepository
       category,
       minPrice,
       maxPrice,
-      limit = 50,
+      limit,
       sortBy = 'name',
       sortOrder = 'asc',
       cursor,

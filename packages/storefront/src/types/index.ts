@@ -17,7 +17,7 @@ export interface Product {
   originalPrice?: number;
   image: string;
   images?: ProductImage[];
-  categories: Category[]; 
+  categories: Category[];
   categoryId: string;
   rating: number;
   reviewCount: number;
@@ -29,7 +29,7 @@ export interface Product {
   updatedAt: string;
 
   // added
-  reviews?: Review[];          
+  reviews?: Review[];
   averageRating?: number;
 }
 
@@ -109,7 +109,13 @@ export interface ProductFilters {
   rating?: number;
   tags?: string[];
   search?: string;
-  sortBy?: "name" | "price" | "rating" | "createdAt" | "price-low" | "price-high";
+  sortBy?:
+    | "name"
+    | "price"
+    | "rating"
+    | "createdAt"
+    | "price-low"
+    | "price-high";
   sortOrder?: "asc" | "desc";
 }
 
@@ -118,6 +124,18 @@ export interface ProductSearchParams extends ProductFilters {
   limit?: number;
   sortBy?: ProductFilters["sortBy"];
   sortOrder?: "asc" | "desc";
+  cursor?: string;
+}
+
+export interface CursorPaginationMeta {
+  limit: number;
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
+export interface CursorPaginatedResponse<T> {
+  data: T[];
+  meta: CursorPaginationMeta;
 }
 
 // OPTIMIZATION: Union types for better type safety and performance
