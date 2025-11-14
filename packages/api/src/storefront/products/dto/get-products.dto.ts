@@ -37,7 +37,7 @@ export class GetProductsDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  limit?: number = 50;
+  limit?: number = 10;
 
   @IsOptional()
   @IsIn(['name', 'price-low', 'price-high', 'created'])

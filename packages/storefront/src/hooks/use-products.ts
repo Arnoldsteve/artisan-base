@@ -35,8 +35,8 @@ export function useProducts(
   return useQuery<CursorPaginatedResponse<Product>>({
     queryKey: productKeys.list(params),
     queryFn: () => productService.getProducts(params),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
+    // gcTime: 10 * 60 * 1000,
     ...options,
   });
 }
@@ -54,8 +54,8 @@ export function useInfiniteProducts(
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
+    // gcTime: 10 * 60 * 1000,
   });
 }
 
