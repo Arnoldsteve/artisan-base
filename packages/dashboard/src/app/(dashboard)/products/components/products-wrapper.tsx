@@ -27,7 +27,7 @@ import { EditProductSheet } from "./edit-product-sheet";
 import { DeleteProductDialog } from "./delete-product-dialog";
 import { BulkDeleteAlertDialog } from "./bulk-delete-alert-dialog";
 import { DataTableViewOptions } from "./data-table-view-options";
-import { Button, Card } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { ProductFormData } from "@/validation-schemas/products";
 import { ImageUploadDialog } from "./image-upload-dialog";
@@ -36,6 +36,7 @@ import { PaginatedResponse } from "@/types/shared";
 import { ImagePreviewDialog } from "./image-preview-dialog";
 import { slugify } from "@/utils/slugify";
 import { ProductTableMeta } from "@/types/table-meta";
+import { BulkUploadDropdown } from "./bulk-upload-dropdown";
 
 interface ProductsWrapperProps {
   initialProductData: PaginatedResponse<Product>;
@@ -133,6 +134,19 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
     });
   };
 
+  // --- Bulk Upload Handlers ---
+  const handleCsvImport = (file: File) => {
+    toast.info(`CSV file selected: ${file.name}`);
+    // TODO: Process CSV file
+    console.log("CSV file:", file);
+  };
+
+  const handleExcelImport = (file: File) => {
+    toast.info(`Excel file selected: ${file.name}`);
+    // TODO: Process Excel file
+    console.log("Excel file:", file);
+  };
+
   const tableMeta: ProductTableMeta<Product> = {
     openDeleteDialog,
     openEditSheet,
@@ -219,6 +233,10 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   return (
     <>
       <PageHeader title="Products">
+        <BulkUploadDropdown
+          onCsvImport={handleCsvImport}
+          onExcelImport={handleExcelImport}
+        />
         <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
           Add Product
         </Button>
