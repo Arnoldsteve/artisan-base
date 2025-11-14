@@ -1,5 +1,3 @@
-// REFACTOR: Custom hook for products with React Query for better performance and caching
-
 import {
   useQuery,
   useInfiniteQuery,
@@ -41,24 +39,17 @@ export function useProducts(
   });
 }
 
-
-// OPTIMIZATION: Infinite query for better performance with large datasets
 // OPTIMIZATION: Infinite query with cursor-based pagination
-export function useInfiniteProducts(
-  params: ProductSearchParams = {}
-) {
-  return useInfiniteQuery<CursorPaginatedResponse<Product>, Error>({
+export function useInfiniteProducts(params: ProductSearchParams = {}) {
+  return useInfiniteQuery({
     queryKey: productKeys.list(params),
-    queryFn: ({ pageParam }) =>
+    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
       productService.getProducts({ ...params, cursor: pageParam }),
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) =>
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
       lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    // staleTime: 5 * 60 * 1000,
-    // gcTime: 10 * 60 * 1000,
   });
 }
-
 
 export function useProduct(
   id: string,
