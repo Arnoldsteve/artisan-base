@@ -27,7 +27,7 @@ export function ProductsContent() {
     useCategories();
   const categories = categoriesResponse || [];
 
-  // 🔥 Infinite Products Fetch
+  // Infinite Products Fetch
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     useInfiniteProducts({
       search: searchQuery,
@@ -44,15 +44,21 @@ export function ProductsContent() {
   useEffect(() => {
     if (!loaderRef.current) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        fetchNextPage();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        rootMargin: "200px", // Trigger 200px before element comes into view
+        threshold: 0.1, // Trigger when 10% visible
       }
-    });
+    );
 
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [hasNextPage]);
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const hasUnappliedPriceChanges =
     priceRange[0] !== appliedPriceRange[0] ||
@@ -119,16 +125,19 @@ export function ProductsContent() {
               ))}
             </div>
 
-            {/* Infinite Scroll Loader */}
-            <div
-              ref={loaderRef}
-              className="text-center py-8 col-span-full text-muted-foreground"
-            >
-              {isFetchingNextPage
-                ? "Loading more..."
-                : hasNextPage
-                  ? "Scroll to load more..."
-                  : "No more products"}
+            {/* Infinite Scroll Loader - Outside grid */}
+            <div ref={loaderRef} className="w-full mt-8">
+              {isFetchingNextPage ? (
+                  <ProductsLoading />
+              ) : hasNextPage ? (
+                <p className="text-center text-sm text-muted-foreground py-4">
+                  Scroll for more products
+                </p>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground py-4">
+                  You've reached the end
+                </p>
+              )}
             </div>
           </>
         )}
