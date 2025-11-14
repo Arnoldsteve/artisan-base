@@ -14,31 +14,29 @@ export function ProductsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
-  const [sortBy, setSortBy] = useState<NonNullable<ProductFilterType["sortBy"]>>("name");
+  const [sortBy, setSortBy] = useState<ProductFilterType["sortBy"]>("name");
   const [priceRange, setPriceRange] = useState<[number, number]>([1, 100000]);
-  const [appliedPriceRange, setAppliedPriceRange] = useState<[number, number]>([1, 100000]);
+  const [appliedPriceRange, setAppliedPriceRange] = useState<[number, number]>([
+    1, 100000,
+  ]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
   // Load categories
-  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories();
+  const { data: categoriesResponse, isLoading: isLoadingCategories } =
+    useCategories();
   const categories = categoriesResponse || [];
 
   // 🔥 Infinite Products Fetch
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteProducts({
-    search: searchQuery,
-    category: selectedCategory !== "all" ? selectedCategory : undefined,
-    minPrice: appliedPriceRange[0],
-    maxPrice: appliedPriceRange[1],
-    sortBy,
-    limit: 20,
-  });
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteProducts({
+      search: searchQuery,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
+      minPrice: appliedPriceRange[0],
+      maxPrice: appliedPriceRange[1],
+      sortBy,
+      limit: 50,
+    });
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
@@ -74,7 +72,6 @@ export function ProductsContent() {
   return (
     <section className="py-4 bg-muted/50">
       <div className="container mx-auto px-2 md:px-4 py-4">
-
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
           <p className="text-2xl font-bold">
@@ -130,8 +127,8 @@ export function ProductsContent() {
               {isFetchingNextPage
                 ? "Loading more..."
                 : hasNextPage
-                ? "Scroll to load more..."
-                : "No more products"}
+                  ? "Scroll to load more..."
+                  : "No more products"}
             </div>
           </>
         )}

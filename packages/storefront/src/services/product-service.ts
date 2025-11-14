@@ -140,11 +140,6 @@ export class ProductService {
       cleanedParams
     );
 
-    console.log(
-      "Api response in frontend service",
-      JSON.stringify(response, null, 2) // directly CursorPaginatedResponse<Product>
-    );
-
     return response; 
   }
 

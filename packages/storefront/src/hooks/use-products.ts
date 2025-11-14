@@ -25,7 +25,6 @@ export const productKeys = {
   search: (query: string) => [...productKeys.all, "search", query] as const,
 };
 
-// OPTIMIZATION: Custom hook for products with infinite scrolling support
 export function useProducts(
   params: ProductSearchParams = {},
   options?: UseQueryOptions<CursorPaginatedResponse<Product>>
@@ -33,13 +32,12 @@ export function useProducts(
   return useQuery<CursorPaginatedResponse<Product>>({
     queryKey: productKeys.list(params),
     queryFn: () => productService.getProducts(params),
-    // staleTime: 5 * 60 * 1000,
-    // gcTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     ...options,
   });
 }
 
-// OPTIMIZATION: Infinite query with cursor-based pagination
 export function useInfiniteProducts(params: ProductSearchParams = {}) {
   return useInfiniteQuery({
     queryKey: productKeys.list(params),
@@ -48,6 +46,8 @@ export function useInfiniteProducts(params: ProductSearchParams = {}) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
       lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
