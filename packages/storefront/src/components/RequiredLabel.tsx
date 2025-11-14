@@ -1,4 +1,3 @@
-// components/RequiredLabel.tsx
 import React from "react";
 import { Label } from "@repo/ui/components/ui/label";
 
