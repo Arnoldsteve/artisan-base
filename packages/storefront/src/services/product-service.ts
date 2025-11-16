@@ -8,6 +8,7 @@ import {
   PaginatedResponse,
   ApiResponse,
   CursorPaginatedResponse,
+  categorySearchParams,
 } from "@/types";
 
 // Helper function to normalize product
@@ -167,9 +168,14 @@ export class ProductService {
     );
   }
 
-  async getCategories(): Promise<CursorPaginatedResponse<Category>> {
+  async getCategories(
+    params: categorySearchParams = {}
+  ): Promise<CursorPaginatedResponse<Category>> {
+    const cleanedParams = cleanParams(params);
+
     const response = await apiClient.get<CursorPaginatedResponse<Category>>(
-      "/api/v1/storefront/categories"
+      "/api/v1/storefront/categories",
+      cleanedParams
     );
     // console.log("sever response in the service", response);
     return response;

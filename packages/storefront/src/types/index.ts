@@ -127,6 +127,12 @@ export interface ProductSearchParams extends ProductFilters {
   cursor?: string;
 }
 
+export interface categorySearchParams {
+   limit?: number;
+   cursor?: string;
+}
+
+
 export interface CursorPaginationMeta {
   limit: number;
   nextCursor?: string;
