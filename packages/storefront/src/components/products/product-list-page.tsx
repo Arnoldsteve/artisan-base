@@ -5,10 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@repo/ui/components/ui/button";
 import { Filter } from "lucide-react";
-import { useInfiniteProducts, useCategories } from "@/hooks/use-products";
+import { useInfiniteProducts } from "@/hooks/use-products";
 import { ProductFilters } from "@/components/products/product-filters";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
 import { Product, ProductFilters as ProductFilterType } from "@/types";
+import { useCategories } from "@/hooks/use-categories";
 
 export function ProductsContent() {
   const searchParams = useSearchParams();

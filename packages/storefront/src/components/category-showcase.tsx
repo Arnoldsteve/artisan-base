@@ -3,9 +3,9 @@
 import { memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCategories } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
 import { CategoriesLoading } from "./skeletons/category-card-skeleton";
+import { useCategories } from "@/hooks/use-categories";
 
 export const CategoryShowcase = memo(function CategoryShowcase() {
   const { data: response, isLoading, error } = useCategories();

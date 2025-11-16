@@ -84,28 +84,6 @@ export function useNewArrivals(limit: number = 12) {
   });
 }
 
-export function useCategories() {
-  return useQuery<CursorPaginatedResponse<Category>>({
-    queryKey: productKeys.categories(),
-    queryFn: () => productService.getCategories(),
-  });
-}
-// staleTime: 30 * 60 * 1000,
-// gcTime: 60 * 60 * 1000,
-
-export function useInfiniteCategories(params: ProductSearchParams = {}) {
-  return useInfiniteQuery({
-    queryKey: productKeys.categories(),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      productService.getCategories({ cursor: pageParam }),
-    initialPageParam: undefined as string | undefined, 
-    getNextPageParam: (lastPage: CursorPaginatedResponse<Category>) =>
-      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-  });
-}
-
 export function useProductSearch(query: string, limit: number = 10) {
   return useQuery({
     queryKey: productKeys.search(query),

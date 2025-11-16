@@ -3,9 +3,7 @@ import { cleanParams } from "@/lib/clean-params";
 import {
   Product,
   Category,
-  ProductFilters,
   ProductSearchParams,
-  PaginatedResponse,
   ApiResponse,
   CursorPaginatedResponse,
   categorySearchParams,
@@ -40,36 +38,6 @@ function normalizeProduct(product: any): Product {
 
 export class ProductService {
   constructor() {}
-
-  private filterProducts(
-    products: Product[],
-    filters: ProductFilters
-  ): Product[] {
-    return products.filter((product) => {
-      if (filters.category && product.categoryId !== filters.category)
-        return false;
-      if (filters.minPrice !== undefined && product.price < filters.minPrice)
-        return false;
-      if (filters.maxPrice !== undefined && product.price > filters.maxPrice)
-        return false;
-      if (filters.rating && product.rating < filters.rating) return false;
-      if (
-        filters.tags?.length &&
-        !filters.tags.some((tag) => product.tags.includes(tag))
-      )
-        return false;
-      if (filters.search) {
-        const term = filters.search.toLowerCase();
-        if (
-          !product.name.toLowerCase().includes(term) &&
-          !product.description?.toLowerCase().includes(term) &&
-          !product.tags.some((tag) => tag.toLowerCase().includes(term))
-        )
-          return false;
-      }
-      return true;
-    });
-  }
 
   private sortProducts(
     products: Product[],
@@ -144,19 +112,6 @@ export class ProductService {
       0,
       limit
     );
-  }
-
-  async getCategories(
-    params: categorySearchParams = {}
-  ): Promise<CursorPaginatedResponse<Category>> {
-    const cleanedParams = cleanParams(params);
-
-    const response = await apiClient.get<CursorPaginatedResponse<Category>>(
-      "/api/v1/storefront/categories",
-      cleanedParams
-    );
-    // console.log("sever response in the service", response);
-    return response;
   }
 
   async searchProducts(query: string, limit = 10): Promise<Product[]> {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useInfiniteCategories } from "@/hooks/use-products"; 
+import { useInfiniteCategories } from "@/hooks/use-categories";
 import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton";
 import { useRef, useEffect } from "react";
 
