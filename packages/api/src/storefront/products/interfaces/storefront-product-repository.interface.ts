@@ -5,5 +5,5 @@ export interface IStorefrontProductRepository {
   findAll(filters: GetProductsDto, tenantId: string): Promise<any>;
   findOne(id: string): Promise<any>;
   findFeatured(): Promise<any>;
-  findCategories(): Promise<any>;
+  findCategories(tenantId: string): Promise<any>;
 }

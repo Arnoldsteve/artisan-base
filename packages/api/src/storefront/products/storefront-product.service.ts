@@ -24,7 +24,7 @@ export class StorefrontProductService {
     return this.productRepository.findFeatured();
   }
 
-  async findCategories() {
-    return this.productRepository.findCategories();
+  async findCategories(tenantId: string) {
+    return this.productRepository.findCategories(tenantId);
   }
 }

@@ -20,7 +20,6 @@ export class StorefrontProductController {
   @Get()
   findAll(@Query(ValidationPipe) filters: GetProductsDto, @Req() req) {
     const tenantId = req.headers['x-tenant-id'];
-    console.log('filters', filters);
     return this.productService.findAll(filters, tenantId);
   }
 
@@ -35,13 +34,9 @@ export class StorefrontProductController {
   }
 
   @Get('categories')
-  async findCategories() {
-    const categories = await this.productService.findCategories();
-    return {
-      success: true,
-      data: categories,
-      meta: { total: categories.length },
-    };
+  async findCategories(@Req() req) {
+    const tenantId = req.headers['x-tenant-id'];
+    return  this.productService.findCategories(tenantId);
   }
 
   @Get(':id')

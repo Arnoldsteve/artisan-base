@@ -39,10 +39,8 @@ export class StorefrontProductRepository
 
     const limitNum = Math.max(Number(limit) || 50, 1);
 
-    // ✅ Generate a cache key including tenantId and filters
     const cacheKey = `${tenantId}:products:${JSON.stringify(filters)}`;
 
-    // 1️⃣ Check Redis cache
     const cached = await this.redis.get<{
       data: any[];
       meta: { limit: number; nextCursor: string | null; hasMore: boolean };
@@ -50,10 +48,9 @@ export class StorefrontProductRepository
 
     if (cached) {
       this.logger.log(`Cache hit for key: ${cacheKey}`);
-      return cached; // no JSON.parse needed
+      return cached; 
     }
 
-    // 2️⃣ Build where filter
     const where: any = { isActive: true };
 
     if (search) {
@@ -79,7 +76,6 @@ export class StorefrontProductRepository
         where.price.lte = new Prisma.Decimal(maxPrice);
     }
 
-    // 3️⃣ Set orderBy
     let orderBy: any = [];
     switch (sortBy) {
       case 'price-low':
@@ -103,7 +99,6 @@ export class StorefrontProductRepository
 
     const prisma = await this.getPrisma();
 
-    // 4️⃣ Query DB using cursor pagination
     const products = await prisma.product.findMany({
       where,
       orderBy,
@@ -143,13 +138,12 @@ export class StorefrontProductRepository
         ? productsWithCategories[productsWithCategories.length - 1].id
         : null;
 
-    // 5️⃣ Cache result for 2 minutes
     const result = {
       data: productsWithCategories,
       meta: { limit: limitNum, nextCursor, hasMore: !!nextCursor },
     };
 
-    await this.redis.set(cacheKey, result, { ex: 300  }); // ✅ Store object directly
+    await this.redis.set(cacheKey, result, { ex: 300 });
 
     return result;
   }
@@ -236,15 +230,26 @@ export class StorefrontProductRepository
     }));
   }
 
-  async findCategories() {
+  async findCategories(tenantId: string) {
+    const cacheKey = `${tenantId}:categories`;
+
+    const cached = await this.redis.get<{
+      data: any[];
+      meta: { total: number };
+    }>(cacheKey);
+
+    if (cached) {
+      this.logger.log(`Cache hit: ${cacheKey}`);
+      return cached;
+    }
+
     const prisma = await this.getPrisma();
+
     const categories = await prisma.category.findMany({
       where: {
         products: {
           some: {
-            product: {
-              isActive: true,
-            },
+            product: { isActive: true },
           },
         },
       },
@@ -254,6 +259,14 @@ export class StorefrontProductRepository
         slug: true,
       },
     });
-    return categories;
+
+    const result = {
+      data: categories,
+      meta: { total: categories.length },
+    };
+
+    await this.redis.set(cacheKey, result, { ex: 30 }); //1200
+
+    return result;
   }
 }
