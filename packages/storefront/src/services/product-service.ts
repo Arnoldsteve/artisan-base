@@ -109,28 +109,6 @@ export class ProductService {
     });
   }
 
-  private paginateProducts(
-    products: Product[],
-    page = 1,
-    limit = 12
-  ): PaginatedResponse<Product> {
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const total = products.length;
-    const totalPages = Math.ceil(total / limit);
-    return {
-      data: products.slice(start, end),
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
-    };
-  }
-
   async getProducts(
     params: ProductSearchParams = {}
   ): Promise<CursorPaginatedResponse<Product>> {
