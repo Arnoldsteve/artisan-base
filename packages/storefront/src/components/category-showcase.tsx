@@ -1,5 +1,4 @@
 "use client";
-// REFACTOR: Category showcase component with performance optimizations
 
 import { memo } from "react";
 import Link from "next/link";
@@ -9,7 +8,8 @@ import { Button } from "@repo/ui/components/ui/button";
 import { CategoriesLoading } from "./skeletons/category-card-skeleton";
 
 export const CategoryShowcase = memo(function CategoryShowcase() {
-  const { data: categories = [], isLoading, error } = useCategories();
+  const { data: response, isLoading, error } = useCategories();
+  const categories = response?.data || [];
 
   if (isLoading) {
     return (

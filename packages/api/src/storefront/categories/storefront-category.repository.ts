@@ -1,22 +1,23 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontCategoryRepository } from './interfaces/storefront-category-repository.interface';
 import { GetCategoriesDto } from './dto/get-categories.dto';
 import { PrismaClient } from '../../../generated/tenant';
+import { Redis } from '@upstash/redis';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontCategoryRepository
   implements IStorefrontCategoryRepository
 {
-  // This will hold the client once it's initialized for the request
+    private readonly logger = new Logger(StorefrontCategoryRepository.name);
+  
   private prismaClient: PrismaClient | null = null;
 
-  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
+  constructor(
+    private readonly tenantPrismaService: TenantPrismaService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+  ) {}
 
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request.
-   */
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
       this.prismaClient = await this.tenantPrismaService.getClient();
@@ -24,12 +25,21 @@ export class StorefrontCategoryRepository
     return this.prismaClient;
   }
 
-  /**
-   * EFFICIENTLY finds all categories with a TRUE count of their active products.
-   */
-  async findAll(filters: GetCategoriesDto) {
-    const { search, page = 1, limit = 20 } = filters;
-    const skip = (page - 1) * limit;
+  async findAll(filters: GetCategoriesDto, tenantId: string) {
+    const { search, limit, cursor } = filters;
+    const take = Number(limit);
+
+    const cacheKey = `${tenantId}:categories-list:${cursor || 'first'}:${take}:${search || ''}`;
+
+    const cached = await this.redis.get<{
+      data: any[];
+      meta: { limit: number; nextCursor: string | null; hasMore: boolean };
+    }>(cacheKey);
+
+    if (cached) {
+      this.logger.log(`Cache hit for key: ${cacheKey}`);
+      return cached;
+    }
 
     const where: any = {};
     if (search) {
@@ -40,44 +50,40 @@ export class StorefrontCategoryRepository
     }
 
     const prisma = await this.getPrisma();
-    const [categories, total] = await prisma.$transaction([
-      prisma.category.findMany({
-        where,
-        orderBy: { name: 'asc' },
-        skip,
-        take: limit,
-        include: {
-          _count: {
-            select: {
-              products: {
-                where: {
-                  product: {
-                    isActive: true,
-                  },
-                },
-              },
+
+    const categories = await prisma.category.findMany({
+      where,
+      orderBy: { id: 'asc' }, // unique sortable field
+      take,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }), // skip the cursor itself
+      include: {
+        _count: {
+          select: {
+            products: {
+              where: { product: { isActive: true } },
             },
           },
         },
-      }),
-      prisma.category.count({ where }),
-    ]);
+      },
+    });
 
-    return {
+    const nextCursor =
+      categories.length > 0 ? categories[categories.length - 1].id : null;
+
+    const result = {
       data: categories,
       meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        limit: take,
+        nextCursor,
+        hasMore: !!nextCursor,
       },
     };
+
+    await this.redis.set(cacheKey, result, { ex: 1200 });
+
+    return result;
   }
 
-  /**
-   * CORRECTLY finds a single category, its newest 20 active products,
-   * AND the TRUE total count of all its active products.
-   */
   async findOne(identifier: string) {
     const prisma = await this.getPrisma();
     // We need two pieces of info: the paginated products and the total count.

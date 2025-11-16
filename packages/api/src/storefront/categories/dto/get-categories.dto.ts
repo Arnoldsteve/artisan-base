@@ -7,14 +7,12 @@ export class GetCategoriesDto {
   search?: string;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
-  @IsNumber()
-  @Min(1)
-  page?: number = 1;
+  @IsString()
+  cursor?: string; 
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   @Min(1)
-  limit?: number = 20;
+  limit?: number = 12; 
 }

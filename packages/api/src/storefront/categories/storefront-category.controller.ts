@@ -6,6 +6,7 @@ import {
   ValidationPipe,
   Scope,
   Logger,
+  Req,
 } from '@nestjs/common';
 import { StorefrontCategoryService } from './storefront-category.service';
 import { GetCategoriesDto } from './dto/get-categories.dto';
@@ -17,10 +18,10 @@ import { GetCategoriesDto } from './dto/get-categories.dto';
 export class StorefrontCategoryController {
   constructor(private readonly categoryService: StorefrontCategoryService) {}
 
-  // gets all the categoies with there products data
   @Get()
-  findAll(@Query(ValidationPipe) filters: GetCategoriesDto) {
-    return this.categoryService.findAll(filters);
+  findAll(@Query(ValidationPipe) filters: GetCategoriesDto, @Req() req) {
+    const tenantId = req.headers['x-tenant-id'];
+    return this.categoryService.findAll(filters, tenantId);
   }
 
   @Get(':id')

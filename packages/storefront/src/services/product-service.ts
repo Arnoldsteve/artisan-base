@@ -140,7 +140,7 @@ export class ProductService {
       cleanedParams
     );
 
-    return response; 
+    return response;
   }
 
   async getProduct(id: string): Promise<Product> {
@@ -167,11 +167,12 @@ export class ProductService {
     );
   }
 
-  async getCategories(): Promise<Category[]> {
-    const response = await apiClient.get<ApiResponse<Category[]>>(
+  async getCategories(): Promise<CursorPaginatedResponse<Category>> {
+    const response = await apiClient.get<CursorPaginatedResponse<Category>>(
       "/api/v1/storefront/categories"
     );
-    return response.data || [];
+    // console.log("sever response in the service", response);
+    return response;
   }
 
   async searchProducts(query: string, limit = 10): Promise<Product[]> {

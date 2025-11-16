@@ -85,13 +85,14 @@ export function useNewArrivals(limit: number = 12) {
 }
 
 export function useCategories() {
-  return useQuery({
+  return useQuery<CursorPaginatedResponse<Category>>({
     queryKey: productKeys.categories(),
     queryFn: () => productService.getCategories(),
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
   });
 }
+// staleTime: 30 * 60 * 1000,
+// gcTime: 60 * 60 * 1000,
+
 
 export function useProductSearch(query: string, limit: number = 10) {
   return useQuery({

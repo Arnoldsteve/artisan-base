@@ -4,13 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCategories } from "@/hooks/use-products";
 import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton";
-import { Category } from "@/types";
 
 export default function CategoryListPage() {
-  const { data: categoriesResponse, isLoading: categoriesLoading } =  useCategories();
-  const categories = categoriesResponse || [];
+  const { data: response, isLoading, error } = useCategories();
+  const categories = response?.data || [];
 
-  if (categoriesLoading) return <CategoriesLoading />;
+  if (isLoading) return <CategoriesLoading />;
 
   return (
     <section className="py-4 bg-muted/100">

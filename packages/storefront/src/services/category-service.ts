@@ -375,17 +375,6 @@ export class CategoryService {
       return [];
     }
   }
-
-  // OPTIMIZATION: Clear cache when needed
-  clearCache(): void {
-    this.cache.clear();
-  }
-
-  // OPTIMIZATION: Clear cache for specific category
-  clearCategoryCache(categoryId: string): void {
-    this.cache.clearCategoryProducts(categoryId);
-  }
 }
 
-// OPTIMIZATION: Singleton instance for better performance
 export const categoryService = new CategoryService();

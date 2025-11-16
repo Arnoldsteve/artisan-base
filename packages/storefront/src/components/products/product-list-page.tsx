@@ -22,10 +22,13 @@ export function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Load categories
-  const { data: categoriesResponse, isLoading: isLoadingCategories } =
-    useCategories();
-  const categories = categoriesResponse || [];
+  const {
+    data: response,
+    isLoading: isLoadingCategories,
+    error,
+  } = useCategories();
+
+  const categories = response?.data || [];
 
   // Infinite Products Fetch
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
@@ -128,7 +131,7 @@ export function ProductsContent() {
             {/* Infinite Scroll Loader - Outside grid */}
             <div ref={loaderRef} className="w-full mt-8">
               {isFetchingNextPage ? (
-                  <ProductsLoading />
+                <ProductsLoading />
               ) : hasNextPage ? (
                 <p className="text-center text-sm text-muted-foreground py-4">
                   Scroll for more products

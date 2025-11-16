@@ -8,8 +8,8 @@ export class StorefrontCategoryService {
     private readonly categoryRepository: StorefrontCategoryRepository,
   ) {}
 
-  async findAll(filters: GetCategoriesDto) {
-    return this.categoryRepository.findAll(filters);
+  async findAll(filters: GetCategoriesDto, tenantId: string) {
+    return this.categoryRepository.findAll(filters, tenantId);
   }
 
   async findOne(id: string) {
