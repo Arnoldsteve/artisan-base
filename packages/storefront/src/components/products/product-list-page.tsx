@@ -44,7 +44,6 @@ export function ProductsContent() {
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-load next page when scrolling to bottom
   useEffect(() => {
     if (!loaderRef.current) return;
 
@@ -55,8 +54,8 @@ export function ProductsContent() {
         }
       },
       {
-        rootMargin: "200px", // Trigger 200px before element comes into view
-        threshold: 0.1, // Trigger when 10% visible
+        rootMargin: "200px", 
+        threshold: 0.1,
       }
     );
 

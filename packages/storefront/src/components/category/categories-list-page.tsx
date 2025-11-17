@@ -12,7 +12,6 @@ export default function CategoryListPage() {
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-load next page when scrolling to bottom
   useEffect(() => {
     if (!loaderRef.current) return;
     const observer = new IntersectionObserver(
@@ -31,7 +30,7 @@ export default function CategoryListPage() {
   if (isLoading) return <CategoriesLoading />;
 
   console.log("data in the category list", data)
-  const categories = data?.pages.flatMap((p) => p.data) || [];
+  const categories = data?.pages.flatMap((p) => p?.data) ?? [];
   console.log("data in the category list", categories)
 
 

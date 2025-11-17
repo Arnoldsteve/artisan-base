@@ -52,8 +52,8 @@ export function useCategories(params: ProductSearchParams = {}) {
 export function useInfiniteCategories(params: CategorySearchParams = {}) {
   return useInfiniteQuery({
     queryKey: categoryKeys.list(params),
-    queryFn: ({ pageParam }: { pageParam: string | undefined}) =>
-      categoryService.getCategories({...params, cursor: pageParam }),
+    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
+      categoryService.getCategories({ ...params, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: CursorPaginatedResponse<Category>) =>
       lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,

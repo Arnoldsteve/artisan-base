@@ -86,6 +86,7 @@ export class ProductService {
       cleanedParams
     );
 
+    console.log("api response in product service", response)
     return response;
   }
 
