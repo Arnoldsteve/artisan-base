@@ -39,7 +39,7 @@ export function ProductsContent() {
       minPrice: appliedPriceRange[0],
       maxPrice: appliedPriceRange[1],
       sortBy,
-      limit: 50,
+      limit: 54,
     });
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
