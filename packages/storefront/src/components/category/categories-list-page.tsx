@@ -27,9 +27,13 @@ export default function CategoryListPage() {
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  const categories = data?.pages.flatMap((p) => p.data) || [];
-
+  
   if (isLoading) return <CategoriesLoading />;
+
+  console.log("data in the category list", data)
+  const categories = data?.pages.flatMap((p) => p.data) || [];
+  console.log("data in the category list", categories)
+
 
   return (
     <section className="py-4 bg-muted/100">

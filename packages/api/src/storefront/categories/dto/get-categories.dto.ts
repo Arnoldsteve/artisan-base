@@ -14,5 +14,5 @@ export class GetCategoriesDto {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   @Min(1)
-  limit?: number = 12; 
+  limit?: number = 36; 
 }

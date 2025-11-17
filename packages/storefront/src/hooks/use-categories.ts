@@ -6,6 +6,7 @@ import {
 import { categoryService } from "@/services/category-service";
 import {
   Category,
+  CategorySearchParams,
   CursorPaginatedResponse,
   ProductSearchParams,
 } from "@/types";
@@ -14,6 +15,8 @@ import {
 export const categoryKeys = {
   all: ["categories"] as const,
   lists: () => [...categoryKeys.all, "list"] as const,
+  list: (filters: CategorySearchParams) =>
+    [...categoryKeys.lists(), filters] as const,
   detail: (id: string) => [...categoryKeys.all, "detail", id] as const,
 };
 
@@ -38,7 +41,7 @@ export function useCategory(
 // Fetch categories for normal sections (featured, homepage, etc.)
 export function useCategories(params: ProductSearchParams = {}) {
   return useQuery<CursorPaginatedResponse<Category>>({
-    queryKey: categoryKeys.lists(),
+    queryKey: categoryKeys.list(params),
     queryFn: () => categoryService.getCategories(params),
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
@@ -46,12 +49,12 @@ export function useCategories(params: ProductSearchParams = {}) {
 }
 
 // Infinite scroll for categories
-export function useInfiniteCategories(params: ProductSearchParams = {}) {
+export function useInfiniteCategories(params: CategorySearchParams = {}) {
   return useInfiniteQuery({
-    queryKey: categoryKeys.lists(),
-    queryFn: ({ pageParam }: { pageParam?: string }) =>
-      categoryService.getCategories({ cursor: pageParam }),
-    initialPageParam: undefined,
+    queryKey: categoryKeys.list(params),
+    queryFn: ({ pageParam }: { pageParam: string | undefined}) =>
+      categoryService.getCategories({...params, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: CursorPaginatedResponse<Category>) =>
       lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
     staleTime: 30 * 60 * 1000,

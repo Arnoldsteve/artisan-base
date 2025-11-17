@@ -6,7 +6,6 @@ import {
   ProductSearchParams,
   ApiResponse,
   CursorPaginatedResponse,
-  categorySearchParams,
 } from "@/types";
 
 // Helper function to normalize product

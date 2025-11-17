@@ -76,7 +76,7 @@ export function ProductsContent() {
     return <ProductsLoading />;
   }
 
-  // Flatten all pages
+  console.log("product data in the list:", data)
   const products = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (

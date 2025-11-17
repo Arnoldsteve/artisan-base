@@ -127,7 +127,7 @@ export interface ProductSearchParams extends ProductFilters {
   cursor?: string;
 }
 
-export interface categorySearchParams {
+export interface CategorySearchParams {
    limit?: number;
    cursor?: string;
 }

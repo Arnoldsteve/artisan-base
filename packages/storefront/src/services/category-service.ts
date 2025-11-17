@@ -3,13 +3,13 @@ import { cleanParams } from "@/lib/clean-params";
 import {
   Category,
   ApiResponse,
-  categorySearchParams,
+  CategorySearchParams,
   CursorPaginatedResponse,
 } from "@/types";
 
 export class CategoryService {
   async getCategories(
-    params: categorySearchParams = {}
+    params: CategorySearchParams = {}
   ): Promise<CursorPaginatedResponse<Category>> {
     const cleanedParams = cleanParams(params);
 
