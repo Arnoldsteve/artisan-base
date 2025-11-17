@@ -8,7 +8,7 @@ import { CategoriesLoading } from "./skeletons/category-card-skeleton";
 import { useCategories } from "@/hooks/use-categories";
 
 export const CategoryShowcase = memo(function CategoryShowcase() {
-  const { data: response, isLoading, error } = useCategories();
+  const { data: response, isLoading, error, refetch } = useCategories();
   const categories = response?.data || [];
 
   if (isLoading) {
@@ -21,6 +21,30 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
             </h2>
           </div>
           <CategoriesLoading />
+        </div>
+      </section>
+    );
+  }
+
+
+   if (error) {
+    return (
+      <section className="py-4 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="text-start mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              Shop by Category
+            </h2>
+          </div>
+
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">
+              Unable to load categories. Please try again.
+            </p>
+            <Button onClick={() => refetch()} variant="outline">
+              Retry
+            </Button>
+          </div>
         </div>
       </section>
     );
