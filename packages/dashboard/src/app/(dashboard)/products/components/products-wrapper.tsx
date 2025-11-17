@@ -37,6 +37,7 @@ import { ImagePreviewDialog } from "./image-preview-dialog";
 import { slugify } from "@/utils/slugify";
 import { ProductTableMeta } from "@/types/table-meta";
 import { BulkUploadDropdown } from "./bulk-upload-dropdown";
+import { BulkProductRow, BulkUploadModal } from "./bulk-upload-preview-modal";
 
 interface ProductsWrapperProps {
   initialProductData: PaginatedResponse<Product>;
@@ -72,6 +73,10 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
     null
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Bull import file
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
   const {
@@ -136,15 +141,42 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
 
   // --- Bulk Upload Handlers ---
   const handleCsvImport = (file: File) => {
-    toast.info(`CSV file selected: ${file.name}`);
-    // TODO: Process CSV file
-    console.log("CSV file:", file);
+    setBulkFile(file);
+    setIsBulkModalOpen(true);
   };
 
   const handleExcelImport = (file: File) => {
-    toast.info(`Excel file selected: ${file.name}`);
-    // TODO: Process Excel file
-    console.log("Excel file:", file);
+    setBulkFile(file);
+    setIsBulkModalOpen(true);
+  };
+
+  const handleBulkImport = async (validRows: BulkProductRow[]) => {
+    if (validRows.length === 0) {
+      toast.error("No valid rows to upload");
+      return;
+    }
+
+    try {
+      await toast.promise(
+        Promise.all(
+          validRows.map((row) => {
+            const { id, ...createData } = row; // remove id if exists
+            return createProduct(createData as CreateProductDto);
+          })
+        ),
+        {
+          loading: `Uploading ${validRows.length} products...`,
+          success: `${validRows.length} products uploaded successfully!`,
+          error: "Failed to upload one or more products",
+        }
+      );
+
+      // Close modal and reset file
+      setIsBulkModalOpen(false);
+      setBulkFile(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const tableMeta: ProductTableMeta<Product> = {
@@ -298,6 +330,13 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         product={productForPreview}
+      />
+
+      <BulkUploadModal
+        file={bulkFile}
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        onConfirm={handleBulkImport}
       />
     </>
   );
