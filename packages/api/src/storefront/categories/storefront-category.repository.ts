@@ -9,8 +9,8 @@ import { Redis } from '@upstash/redis';
 export class StorefrontCategoryRepository
   implements IStorefrontCategoryRepository
 {
-    private readonly logger = new Logger(StorefrontCategoryRepository.name);
-  
+  private readonly logger = new Logger(StorefrontCategoryRepository.name);
+
   private prismaClient: PrismaClient | null = null;
 
   constructor(
@@ -51,11 +51,12 @@ export class StorefrontCategoryRepository
 
     const prisma = await this.getPrisma();
 
+    // Fetch take + 1 to check if there are more
     const categories = await prisma.category.findMany({
       where,
-      orderBy: { id: 'asc' }, // unique sortable field
-      take,
-      ...(cursor && { cursor: { id: cursor }, skip: 1 }), // skip the cursor itself
+      orderBy: { id: 'asc' },
+      take: take + 1, // ← CHANGED: Fetch one extra
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       include: {
         _count: {
           select: {
@@ -67,15 +68,24 @@ export class StorefrontCategoryRepository
       },
     });
 
+    // ← CHANGED: Check if we got more than requested
+    const hasMore = categories.length > take;
+
+    // ← CHANGED: Only return the requested amount
+    const returnCategories = hasMore ? categories.slice(0, take) : categories;
+
+    // ← CHANGED: Only set nextCursor if there are more items
     const nextCursor =
-      categories.length > 0 ? categories[categories.length - 1].id : null;
+      hasMore && returnCategories.length > 0
+        ? returnCategories[returnCategories.length - 1].id
+        : null;
 
     const result = {
-      data: categories,
+      data: returnCategories, // ← CHANGED: Return sliced data
       meta: {
         limit: take,
         nextCursor,
-        hasMore: !!nextCursor,
+        hasMore, // ← CHANGED: Use calculated hasMore
       },
     };
 
