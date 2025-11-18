@@ -13,13 +13,12 @@ import { ICategoryRepository } from './interfaces/category-repository.interface'
 import slugify from 'slugify';
 import { PrismaClient } from '../../../generated/tenant';
 
-const CACHE_TTL = 10 * 1000; 
+const CACHE_TTL = 10 * 1000;
 
 @Injectable({ scope: Scope.REQUEST })
 export class CategoryRepository implements ICategoryRepository {
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
-
 
   private prismaClient: PrismaClient | null = null;
 
@@ -59,21 +58,35 @@ export class CategoryRepository implements ICategoryRepository {
     const result = await paginate(
       prisma.category,
       {
-      page: paginationQuery?.page,
-      limit: paginationQuery?.limit,
+        page: paginationQuery?.page,
+        limit: paginationQuery?.limit,
       },
       {
         orderBy: { createdAt: 'desc' },
-          include: { 
-            _count: { 
-              select: { products: true
-            }, 
-          }, 
-        } 
-      }
-    )
+        include: {
+          _count: {
+            select: { products: true },
+          },
+        },
+      },
+    );
     this.findAllCache = { data: result, expires: now + CACHE_TTL };
     return result;
+  }
+
+  async search(term: string): Promise<any[]> {
+    const prisma = await this.getPrisma();
+
+    return prisma.category.findMany({
+      where: {
+        name: {
+          contains: term,
+          mode: 'insensitive',
+        },
+      },
+      orderBy: { name: 'asc' },
+      take: 30, // very fast
+    });
   }
 
   async findOne(id: string): Promise<any> {

@@ -14,7 +14,10 @@ export class CategoryService {
     return this.categoryRepository.create(createCategoryDto);
   }
 
-  findAll(pagination?: PaginationQueryDto) {
+  findAll(search?: string, pagination?: PaginationQueryDto) {
+    if (search) {
+      return this.categoryRepository.search(search);
+    }
     return this.categoryRepository.findAll(pagination);
   }
 

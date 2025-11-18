@@ -5,6 +5,7 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 export interface ICategoryRepository {
   create(dto: CreateCategoryDto): Promise<any>;
   findAll(pagination?: PaginationQueryDto): Promise<any>;
+  search(term: string): Promise<any[]>;
   findOne(id: string): Promise<any>;
   update(id: string, dto: UpdateCategoryDto): Promise<any>;
   remove(id: string): Promise<any>;

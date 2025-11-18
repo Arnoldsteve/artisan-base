@@ -8,6 +8,8 @@ import { PaginatedResponse } from "@/types/shared";
 
 export class CategoryService {
   async searchCategories(searchTerm: string): Promise<Category[]> {
+    console.log("Creating category with data:", searchTerm);
+
     const response = await apiClient.get<PaginatedResponse<Category>>(
       "dashboard/categories",
       { page: 1, limit: 5, search: searchTerm }

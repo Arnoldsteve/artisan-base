@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { Category } from "@/types/categories";
 import { Product } from "@/types/products";
 import { useAssignCategories } from "@/hooks/use-products";
+import { useDebounce } from "@/hooks/use-debounce";
+
 
 interface CategoryAssignmentModalProps {
   isOpen: boolean;
@@ -36,6 +38,8 @@ export function CategoryAssignmentSheet({
 
   const mutation = useAssignCategories();
   const isLoading = mutation.status === "pending";
+  const debouncedSearch = useDebounce(searchTerm, 400); 
+
 
   // Preselect current categories
   useEffect(() => {
@@ -46,9 +50,10 @@ export function CategoryAssignmentSheet({
     }
   }, [isOpen, product]);
 
+
   // Live search categories
   useEffect(() => {
-    if (!searchTerm) {
+    if (!debouncedSearch) {
       setSearchResults([]);
       return;
     }
@@ -58,7 +63,7 @@ export function CategoryAssignmentSheet({
 
     import("@/services/category-service").then(({ categoryService }) => {
       categoryService
-        .searchCategories(searchTerm)
+        .searchCategories(debouncedSearch)
         .then((results) => {
           if (active) setSearchResults(results);
         })
@@ -71,7 +76,7 @@ export function CategoryAssignmentSheet({
     return () => {
       active = false;
     };
-  }, [searchTerm]);
+  }, [debouncedSearch]);
 
   const handleCategoryToggle = (categoryId: string) => {
     setSelectedCategoryIds((prev) =>

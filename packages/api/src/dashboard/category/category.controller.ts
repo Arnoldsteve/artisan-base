@@ -4,10 +4,10 @@ import {
   Delete,
   Get,
   HttpCode,
-  Logger,
   Param,
   Patch,
   Post,
+  Query,
   Scope,
   UseGuards,
   ValidationPipe,
@@ -17,6 +17,7 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import { AssignProductDto } from './dto/assign-product.dto';
 import { ProductCategoryService } from '../product-category/product-category.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller({
   path: 'dashboard/categories',
@@ -31,14 +32,15 @@ export class CategoryController {
 
   @Post()
   create(@Body(ValidationPipe) createCategoryDto: CreateCategoryDto) {
-      console.log('Received:', createCategoryDto);
-
     return this.categoryService.create(createCategoryDto);
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(
+    @Query('search') search?: string,
+    @Query() pagination?: PaginationQueryDto,
+  ) {
+    return this.categoryService.findAll(search, pagination);
   }
 
   @Get(':id')
@@ -65,7 +67,6 @@ export class CategoryController {
     @Param('id') id: string,
     @Body(ValidationPipe) body: AssignProductDto,
   ) {
-    // id is categoryId, body.productId is product
     return this.productCategoryService.assignProductToCategory(
       body.productId,
       id,
