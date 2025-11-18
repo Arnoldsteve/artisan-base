@@ -18,7 +18,7 @@ export interface Product {
   isFeatured: boolean;
   isActive: boolean;
   images: ProductImage[];
-  categories?: Category[];
+  categories?: ProductCategoryRelation[];
   createdAt: string;
   updatedAt: string;
 }
@@ -39,4 +39,10 @@ export type UpdateProductDto = Partial<CreateProductDto>;
 
 export interface AssignCategoriesToProductDto {
   categoryIds: string[];
+}
+
+export interface ProductCategoryRelation {
+  productId: string;
+  categoryId: string;
+  category: Category;
 }
