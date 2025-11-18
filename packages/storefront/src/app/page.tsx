@@ -1,5 +1,3 @@
-// REFACTOR: Homepage with optimized performance and proper error handling
-
 import { Suspense } from "react";
 import { Hero } from "@/components/hero";
 import { FeaturedProducts } from "@/components/featured-products";

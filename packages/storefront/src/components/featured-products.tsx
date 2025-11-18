@@ -1,5 +1,5 @@
 "use client";
-// REFACTOR: Featured products component with proper separation of concerns and performance optimizations
+
 
 import { memo } from "react";
 import { ProductCard } from "./product-card";

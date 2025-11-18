@@ -6,9 +6,11 @@ import {
   ValidationPipe,
   Scope,
   Req,
+  Logger,
 } from '@nestjs/common';
 import { StorefrontProductService } from './storefront-product.service';
 import { GetProductsDto } from './dto/get-products.dto';
+import { GetFeaturedProductsDto } from './dto/get-featured-products';
 
 @Controller({
   path: 'storefront/products',
@@ -24,19 +26,16 @@ export class StorefrontProductController {
   }
 
   @Get('featured')
-  async findFeatured() {
-    const products = await this.productService.findFeatured();
-    return {
-      success: true,
-      data: products,
-      meta: { total: products.length },
-    };
+  async findFeatured(@Query(ValidationPipe) filters: GetFeaturedProductsDto, @Req() req) {
+    const tenantId = req.headers['x-tenant-id'];
+
+    return this.productService.findFeatured(filters, tenantId);
   }
 
   @Get('categories')
   async findCategories(@Req() req) {
     const tenantId = req.headers['x-tenant-id'];
-    return  this.productService.findCategories(tenantId);
+    return this.productService.findCategories(tenantId);
   }
 
   @Get(':id')

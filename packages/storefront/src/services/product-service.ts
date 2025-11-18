@@ -103,7 +103,9 @@ export class ProductService {
       "/api/v1/storefront/products/featured",
       { limit }
     );
-    return response.success ? response.data.slice(0, limit) : [];
+
+    console.log("featured product response",response )
+    return response.success ? response.data : [];
   }
 
   async getNewArrivals(limit = 24): Promise<Product[]> {

@@ -70,8 +70,8 @@ export function useFeaturedProducts(limit: number = 12) {
   return useQuery({
     queryKey: productKeys.featured(),
     queryFn: () => productService.getFeaturedProducts(limit),
-    staleTime: 15 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    // staleTime: 15 * 60 * 1000,
+    // gcTime: 30 * 60 * 1000,
   });
 }
 

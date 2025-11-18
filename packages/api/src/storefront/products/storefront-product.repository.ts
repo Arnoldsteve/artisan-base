@@ -2,6 +2,7 @@ import { Injectable, Scope, Logger, Inject } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { IStorefrontProductRepository } from './interfaces/storefront-product-repository.interface';
 import { GetProductsDto } from './dto/get-products.dto';
+import { GetFeaturedProductsDto } from './dto/get-featured-products';
 import { PrismaClient, Prisma } from '../../../generated/tenant';
 import { Redis } from '@upstash/redis';
 
@@ -48,7 +49,7 @@ export class StorefrontProductRepository
 
     if (cached) {
       this.logger.log(`Cache hit for key: ${cacheKey}`);
-      return cached; 
+      return cached;
     }
 
     const where: any = { isActive: true };
@@ -187,47 +188,58 @@ export class StorefrontProductRepository
       categories: product.categories.map((c) => c.category),
     };
   }
-
-  async findFeatured() {
+  async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
     const prisma = await this.getPrisma();
+    const limit = filters.limit ?? 12;
+    const cursor = filters.cursor ?? null;
+
+    const cacheKey = `featured:${tenantId}:limit:${limit}:cursor:${cursor || 'start'}`;
+
+    const cached = await this.redis.get<{
+      data: any[];
+      meta: { limit: number; nextCursor: string | null; hasMore: boolean };
+    }>(cacheKey);
+
+    if (cached) {
+      this.logger.log(`Cache hit for key: ${cacheKey}`);
+      return cached;
+    }
+
+    // Query the database
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
         isFeatured: true,
       },
-      take: 100,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      take: limit,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         name: true,
         slug: true,
         description: true,
         price: true,
-        sku: true,
-        inventoryQuantity: true,
         isFeatured: true,
         isActive: true,
         images: true,
         createdAt: true,
         updatedAt: true,
-        categories: {
-          select: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
       },
     });
-    return products.map((product) => ({
-      ...product,
-      categories: product.categories.map((c) => c.category),
-    }));
+
+    // Determine nextCursor for pagination
+    const nextCursor =
+      products.length > 0 ? products[products.length - 1].id : null;
+
+    const result = {
+      data: products,
+      meta: { limit, nextCursor, hasMore: !!nextCursor },
+    };
+
+    await this.redis.set(cacheKey, result, { ex: 300 });
+
+    return result;
   }
 
   async findCategories(tenantId: string) {
