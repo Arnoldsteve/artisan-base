@@ -7,16 +7,19 @@ import {
 import { PaginatedResponse } from "@/types/shared";
 
 export class CategoryService {
+  // Search categories with query param ?search=term
+
   async searchCategories(searchTerm: string): Promise<Category[]> {
-    console.log("Creating category with data:", searchTerm);
-
-    const response = await apiClient.get<PaginatedResponse<Category>>(
-      "dashboard/categories",
-      { page: 1, limit: 5, search: searchTerm }
-    );
-    return response.data;
+    console.log("search category api response in service", searchTerm);
+    const response = await apiClient.get<Category[]>("dashboard/categories", { 
+      search: searchTerm,
+      page: 1,
+      limit: 5,
+    });
+    console.log("search category api response in service", response);
+    return response; // Return response directly, not response.data
   }
-
+  // Get paginated categories (with optional search)
   async getCategories(
     page = 1,
     limit = 10,
@@ -34,7 +37,6 @@ export class CategoryService {
   }
 
   async createCategory(categoryData: CreateCategoryDto): Promise<Category> {
-    console.log("Creating category with data:", categoryData);
     return apiClient.post<Category>("dashboard/categories", categoryData);
   }
 

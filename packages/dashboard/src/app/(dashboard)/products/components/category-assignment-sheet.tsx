@@ -9,7 +9,6 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@repo/ui/components/ui/sheet";
-import { Input } from "@repo/ui/components/ui/input";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Button } from "@repo/ui/components/ui/button";
@@ -18,7 +17,17 @@ import { Category } from "@/types/categories";
 import { Product } from "@/types/products";
 import { useAssignCategories } from "@/hooks/use-products";
 import { useDebounce } from "@/hooks/use-debounce";
+import { categoryService } from "@/services/category-service";
+import { Label } from "@repo/ui/components/ui/label";
 
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@repo/ui/components/ui/command";
 
 interface CategoryAssignmentModalProps {
   isOpen: boolean;
@@ -38,22 +47,18 @@ export function CategoryAssignmentSheet({
 
   const mutation = useAssignCategories();
   const isLoading = mutation.status === "pending";
-  const debouncedSearch = useDebounce(searchTerm, 400); 
+  const debouncedSearch = useDebounce(searchTerm, 400);
 
-
-  // Preselect current categories
+  // Preselect current categories safely
   useEffect(() => {
     if (isOpen && product) {
-      const currentCategoryIds = product.categories?.map((c) => c.id) || [];
-
-      setSelectedCategoryIds(currentCategoryIds);
+      setSelectedCategoryIds(product.categories?.map((c) => c.id) ?? []);
     }
   }, [isOpen, product]);
 
-
-  // Live search categories
+  // Debounced live search
   useEffect(() => {
-    if (!debouncedSearch) {
+    if (!debouncedSearch.trim()) {
       setSearchResults([]);
       return;
     }
@@ -61,17 +66,21 @@ export function CategoryAssignmentSheet({
     let active = true;
     setIsSearching(true);
 
-    import("@/services/category-service").then(({ categoryService }) => {
-      categoryService
-        .searchCategories(debouncedSearch)
-        .then((results) => {
-          if (active) setSearchResults(results);
-        })
-        .catch(() => setSearchResults([]))
-        .finally(() => {
-          if (active) setIsSearching(false);
-        });
-    });
+    categoryService
+      .searchCategories(debouncedSearch)
+      .then((results) => {
+        console.log("Results received:", results);
+        if (active) {
+          setSearchResults(results || []);
+        }
+      })
+      .catch((error) => {
+        console.error("Search error:", error);
+        if (active) setSearchResults([]);
+      })
+      .finally(() => {
+        if (active) setIsSearching(false);
+      });
 
     return () => {
       active = false;
@@ -105,26 +114,14 @@ export function CategoryAssignmentSheet({
     );
   };
 
-  // Merge search results + current product categories for badge display
-  // const allCategoriesMap: Record<string, Category> = {};
-  const allCategoriesMap: Record<string, Category | { category: Category }> =
-    {};
+  // Merge current product categories + search results
+  const allCategoriesMap: Record<string, Category> = {};
+  (product?.categories ?? []).forEach((c) => (allCategoriesMap[c.id] = c));
+  (searchResults ?? []).forEach((c) => (allCategoriesMap[c.id] = c));
 
-  product?.categories?.forEach((c) => {
-    allCategoriesMap[c.id] = c;
-  });
-
-  searchResults.forEach((c) => {
-    allCategoriesMap[c.id] = c;
-  });
   const selectedCategories = selectedCategoryIds
-    .map((id) => {
-      const raw = allCategoriesMap[id];
-      return (raw as any)?.category ?? raw; // safe access
-    })
+    .map((id) => allCategoriesMap[id])
     .filter(Boolean);
-
-  // console.log("selected category", selectedCategories);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -140,7 +137,7 @@ export function CategoryAssignmentSheet({
         <div className="space-y-4">
           {selectedCategories.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium my-3">Selected Categories:</h4>
+              <h4 className="text-sm font-medium my-2">Selected Categories:</h4>
               <div className="flex flex-wrap gap-2 mb-2">
                 {selectedCategories.map((cat) => (
                   <Badge
@@ -156,44 +153,46 @@ export function CategoryAssignmentSheet({
             </div>
           )}
 
-          <Input
-            placeholder="Search categories..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
-          {searchTerm && (
-            <div className="space-y-2 max-h-48 overflow-y-auto mt-2">
+          {/* Command search */}
+          <Command shouldFilter={false}>
+            <CommandInput
+              placeholder="Search categories..."
+              value={searchTerm}
+              onValueChange={(value) => setSearchTerm(value)}
+            />
+            <CommandList className="max-h-48 overflow-y-auto">
               {isSearching && (
-                <div className="text-sm text-gray-500">Searching...</div>
+                <div className="text-sm text-gray-500 px-2 py-1">
+                  Searching...
+                </div>
               )}
-              {!isSearching && searchResults.length === 0 && (
-                <div className="text-sm text-gray-500">No categories found</div>
+              {!isSearching && searchResults.length === 0 && searchTerm && (
+                <CommandEmpty>No categories found</CommandEmpty>
               )}
-              {!isSearching &&
-                searchResults.map((category) => (
-                  <div
+
+              <CommandGroup>
+                {searchResults.map((category) => (
+                  <CommandItem
                     key={category.id}
-                    className="flex items-center space-x-2"
+                    value={category.id}
+                    onSelect={() => handleCategoryToggle(category.id)}
                   >
-                    <Checkbox
-                      id={category.id}
-                      checked={selectedCategoryIds.includes(category.id)}
-                      onCheckedChange={() => handleCategoryToggle(category.id)}
-                    />
-                    <label
-                      htmlFor={category.id}
-                      className="text-sm cursor-pointer capitalize"
-                    >
-                      {category.name}
-                    </label>
-                  </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={selectedCategoryIds.includes(category.id)}
+                      />
+                      <Label className="text-sm capitalize">
+                        {category.name}
+                      </Label>
+                    </div>
+                  </CommandItem>
                 ))}
-            </div>
-          )}
+              </CommandGroup>
+            </CommandList>
+          </Command>
         </div>
 
-        <SheetFooter className="pt-4">
+        <SheetFooter className="pt-4 flex justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>

@@ -42,7 +42,7 @@ export class AuthService {
     const { hashedPassword: _, ...userWithoutPassword } = user;
 
     const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '120m' });
 
     // Create and store Refresh Token (with IP & user-agent tracking)
     const { refreshToken } = await this.createAndStoreRefreshToken(
@@ -75,7 +75,7 @@ export class AuthService {
     );
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '120m' });
 
     // Create Refresh Token and save in DB
     const { refreshToken } = await this.createAndStoreRefreshToken(

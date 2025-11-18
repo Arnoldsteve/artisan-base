@@ -80,12 +80,17 @@ export class CategoryRepository implements ICategoryRepository {
     return prisma.category.findMany({
       where: {
         name: {
-          contains: term,
+          startsWith: term,
           mode: 'insensitive',
         },
       },
       orderBy: { name: 'asc' },
-      take: 30, // very fast
+      take: 30, // limit results for speed
+      select: {
+        id: true,
+        name: true,
+        slug: true, // include slug
+      },
     });
   }
 
