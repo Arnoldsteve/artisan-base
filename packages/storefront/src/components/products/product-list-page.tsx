@@ -54,7 +54,7 @@ export function ProductsContent() {
         }
       },
       {
-        rootMargin: "200px", 
+        rootMargin: "200px",
         threshold: 0.1,
       }
     );
@@ -75,7 +75,6 @@ export function ProductsContent() {
     return <ProductsLoading />;
   }
 
-  console.log("product data in the list:", data)
   const products = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (

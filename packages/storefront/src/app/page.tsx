@@ -23,7 +23,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-muted/100">
       {/* <HeroSearch/> */}
 
-      {/* <Hero /> */}
+      <Hero />
 
       <Suspense fallback={<ProductsLoading />}>
         <FeaturedProducts />
@@ -31,14 +31,14 @@ export default function HomePage() {
 
 
       <Suspense fallback={<ProductsLoading />}>
-        {/* <CategoryShowcase /> */}
+        <CategoryShowcase />
       </Suspense>
 
       <Suspense fallback={<ProductsLoading />}>
         {/* <Testimonials /> */}
       </Suspense>
 
-      {/* <Newsletter /> */}
+      <Newsletter />
     </div>
   );
 }

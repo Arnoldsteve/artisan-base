@@ -12,7 +12,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
     isLoading,
     error,
     refetch,
-  } = useFeaturedProducts({ limit: 12 });
+  } = useFeaturedProducts({ limit: 24 });
 
   const products = featuredResponse?.data ?? [];
   const meta = featuredResponse?.meta;
@@ -94,7 +94,10 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
           ))}
         </div>
 
-        <div className="text-start mt-12">
+        <div className="text-start mt-12 flex flex-col sm:flex-row gap-4 ">
+          <Button asChild variant="default" className="w-full sm:w-auto">
+            <a href="/featured">View All Featured Products</a>
+          </Button>
           <Button asChild variant="default" className="w-full sm:w-auto">
             <a href="/products">View All Products</a>
           </Button>

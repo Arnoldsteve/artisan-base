@@ -32,6 +32,8 @@ export default function FeaturedPage() {
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
+    console.log("data in the feateured product list", data)
+
   const products = data?.pages.flatMap((p) => p.data) ?? [];
 
   if (isLoading) return <ProductsLoading />;

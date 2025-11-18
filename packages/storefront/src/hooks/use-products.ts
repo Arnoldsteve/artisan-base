@@ -79,8 +79,8 @@ export function useFeaturedProducts({
   return useQuery<CursorPaginatedResponse<Product>>({
     queryKey: productKeys.featured(limit),
     queryFn: () => productService.getFeaturedProducts({ limit }),
-    // staleTime: 15 * 60 * 1000,
-    // gcTime: 30 * 60 * 1000,
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }
 
@@ -92,8 +92,8 @@ export function useInfiniteFeaturedProducts(params: { limit?: number } = {}) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
       lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    // staleTime: 5 * 60 * 1000,
-    // gcTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
