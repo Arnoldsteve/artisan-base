@@ -173,4 +173,28 @@ export class AuthService {
     await this.authRepository.revokeRefreshTokenByHash(tokenHash);
     return { message: 'Logged out successfully' };
   }
+
+  // src/auth/auth.service.ts
+async forgotPassword(email: string, ipAddress?: string, userAgent?: string) {
+  const user = await this.authRepository.findUserByEmail(email);
+
+  // Always return success to avoid leaking email existence
+  if (!user) {
+    return { message: 'If an account with that email exists, you will receive a reset link.' };
+  }
+
+  // Generate secure token
+  const resetToken = randomBytes(32).toString('hex');
+  const resetTokenHash = createHash('sha256').update(resetToken).digest('hex');
+  const resetTokenExpiry = new Date(Date.now() + 3600_000); // 1 hour
+
+  // Save token & expiry in DB (you can add resetToken & expiry fields to user table)
+  await this.authRepository.savePasswordResetToken(user.id, resetTokenHash, resetTokenExpiry);
+
+  // TODO: Send reset email
+  // await this.mailService.sendPasswordResetEmail(user.email, resetToken);
+
+  return { message: 'If an account with that email exists, you will receive a reset link.' };
+}
+
 }

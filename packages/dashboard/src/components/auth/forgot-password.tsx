@@ -36,7 +36,7 @@ export function ForgotPasswordPage() {
         className="space-y-5 px-1 sm:px-2 md:px-0 text-center"
       >
         <p className="text-sm text-muted-foreground">
-          Enter your email address, and we’ll send you a link to reset your
+          Enter your email address, and we'll send you a link to reset your
           password.
         </p>
 

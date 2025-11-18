@@ -14,6 +14,7 @@ import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserProfileResponseDto } from './dto/user-profile.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -64,4 +65,13 @@ export class AuthController {
     this.logger.log(`Fetching profile for user ID: ${req.user.id}`);
     return this.authService.getProfile(req.user.id);
   }
+
+  @Post('forgot-password')
+@HttpCode(HttpStatus.OK)
+async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Req() req) {
+  const ipAddress = req.ip || req.headers['x-forwarded-for'];
+  const userAgent = req.headers['user-agent'];
+  this.logger.log(`Password reset requested for email: ${forgotPasswordDto.email}`);
+  return this.authService.forgotPassword(forgotPasswordDto.email, ipAddress, userAgent);
+}
 }

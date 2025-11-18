@@ -7,7 +7,6 @@ import { User, Tenant, RefreshToken } from '../../../generated/management';
  */
 export interface IAuthRepository {
   // ---------- User methods ----------
-
   getProfile(userId: string): Promise<UserProfileResponseDto>;
 
   findUserByEmail(email: string): Promise<User | null>;
@@ -24,7 +23,6 @@ export interface IAuthRepository {
   ): Promise<Pick<Tenant, 'id' | 'name' | 'subdomain'>[]>;
 
   // ---------- Refresh token methods ----------
-
   createRefreshToken(data: {
     userId: string;
     tokenHash: string;
@@ -48,4 +46,11 @@ export interface IAuthRepository {
   deleteExpiredTokens(): Promise<{ count: number }>;
 
   findActiveRefreshTokensForUser(userId: string): Promise<RefreshToken[]>;
+
+  // ---------- Forgot / Reset Password methods ----------
+  savePasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<any>;
 }

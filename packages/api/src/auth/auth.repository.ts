@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IAuthRepository } from './interfaces/auth-repository.interface';
 import { UserProfileResponseDto } from './dto/user-profile.dto';
@@ -135,5 +135,16 @@ export class AuthRepository implements IAuthRepository {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async savePasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ) {
+    Logger.debug(`Saving password reset token for userId=${userId}`);
+    Logger.debug(`Reset Token: ${tokenHash}`);
+    Logger.debug(`Expires At: ${expiresAt.toISOString()}`);
+    return { message: 'Logged reset token successfully' };
   }
 }
