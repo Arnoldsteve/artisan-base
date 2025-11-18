@@ -47,12 +47,14 @@ export function CategoryAssignmentSheet({
 
   const mutation = useAssignCategories();
   const isLoading = mutation.status === "pending";
-  const debouncedSearch = useDebounce(searchTerm, 400);
+  const debouncedSearch = useDebounce(searchTerm, 250);
 
   // Preselect current categories safely
   useEffect(() => {
     if (isOpen && product) {
-      setSelectedCategoryIds(product.categories?.map((c) => c.id) ?? []);
+      const currentCategoryIds =
+        product.categories?.map((c) => c.category?.id) ?? [];
+      setSelectedCategoryIds(currentCategoryIds);
     }
   }, [isOpen, product]);
 
@@ -116,13 +118,22 @@ export function CategoryAssignmentSheet({
 
   // Merge current product categories + search results
   const allCategoriesMap: Record<string, Category> = {};
-  (product?.categories ?? []).forEach((c) => (allCategoriesMap[c.id] = c));
-  (searchResults ?? []).forEach((c) => (allCategoriesMap[c.id] = c));
+  (product?.categories ?? []).forEach((c) => {
+    if (c.category) {
+      allCategoriesMap[c.category.id] = c.category;
+    }
+  });
 
   const selectedCategories = selectedCategoryIds
     .map((id) => allCategoriesMap[id])
     .filter(Boolean);
 
+  console.log("product.categories", product?.categories);
+  console.log("selectedCategoryIds", selectedCategoryIds);
+  console.log("selectedCategories", selectedCategories);
+
+  // console.log("allCategoriesMap",allCategoriesMap)
+  // console.log("selectedCategories",selectedCategories)
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
@@ -177,13 +188,13 @@ export function CategoryAssignmentSheet({
                     value={category.id}
                     onSelect={() => handleCategoryToggle(category.id)}
                   >
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={selectedCategoryIds.includes(category.id)}
-                      />
+                    <div className="flex items-center justify-between w-full">
                       <Label className="text-sm capitalize">
                         {category.name}
                       </Label>
+                      <Checkbox
+                        checked={selectedCategoryIds.includes(category.id)}
+                      />
                     </div>
                   </CommandItem>
                 ))}

@@ -80,7 +80,7 @@ export class CategoryRepository implements ICategoryRepository {
     return prisma.category.findMany({
       where: {
         name: {
-          startsWith: term,
+          contains: term,
           mode: 'insensitive',
         },
       },
@@ -89,7 +89,7 @@ export class CategoryRepository implements ICategoryRepository {
       select: {
         id: true,
         name: true,
-        slug: true, // include slug
+        slug: true, 
       },
     });
   }

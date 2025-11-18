@@ -10,14 +10,14 @@ export class CategoryService {
   // Search categories with query param ?search=term
 
   async searchCategories(searchTerm: string): Promise<Category[]> {
-    console.log("search category api response in service", searchTerm);
+    // console.log("search category api response in service", searchTerm);
     const response = await apiClient.get<Category[]>("dashboard/categories", { 
       search: searchTerm,
       page: 1,
       limit: 5,
     });
-    console.log("search category api response in service", response);
-    return response; // Return response directly, not response.data
+    // console.log("search category api response in service", response);
+    return response; 
   }
   // Get paginated categories (with optional search)
   async getCategories(
