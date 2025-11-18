@@ -17,7 +17,7 @@ export class CategoryService {
       "/api/v1/storefront/categories",
       cleanedParams
     );
-    console.log("api response in category service", response)
+    // console.log("api response in category service", response)
     return response;
   }
 

@@ -140,6 +140,8 @@ export interface CursorPaginationMeta {
 }
 
 export interface CursorPaginatedResponse<T> {
+  success: boolean;
+  message?: string; 
   data: T[];
   meta: CursorPaginationMeta;
 }

@@ -86,7 +86,7 @@ export class ProductService {
       cleanedParams
     );
 
-    console.log("api response in product service", response)
+    console.log("api response in product service", response);
     return response;
   }
 
@@ -98,14 +98,16 @@ export class ProductService {
     throw new Error("Product not found");
   }
 
-  async getFeaturedProducts(limit = 12): Promise<Product[]> {
-    const response = await apiClient.get<ApiResponse<Product[]>>(
+  async getFeaturedProducts(params?: {
+    limit?: number;
+    cursor?: string;
+  }): Promise<CursorPaginatedResponse<Product>> {
+    const response = await apiClient.get<CursorPaginatedResponse<Product>>(
       "/api/v1/storefront/products/featured",
-      { limit }
+      params
     );
 
-    console.log("featured product response",response )
-    return response.success ? response.data : [];
+    return response;
   }
 
   async getNewArrivals(limit = 24): Promise<Product[]> {

@@ -21,9 +21,9 @@ export const metadata = createMetadata({
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-muted/100">
-      <HeroSearch/>
+      {/* <HeroSearch/> */}
 
-      <Hero />
+      {/* <Hero /> */}
 
       <Suspense fallback={<ProductsLoading />}>
         <FeaturedProducts />
@@ -31,14 +31,14 @@ export default function HomePage() {
 
 
       <Suspense fallback={<ProductsLoading />}>
-        <CategoryShowcase />
+        {/* <CategoryShowcase /> */}
       </Suspense>
 
       <Suspense fallback={<ProductsLoading />}>
-        <Testimonials />
+        {/* <Testimonials /> */}
       </Suspense>
 
-      <Newsletter />
+      {/* <Newsletter /> */}
     </div>
   );
 }

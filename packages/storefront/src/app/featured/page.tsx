@@ -2,14 +2,37 @@
 
 import { ProductCard } from "@/components/product-card";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
-import { useFeaturedProducts } from "@/hooks/use-products";
-import { Badge } from "@repo/ui/components/ui/badge";
+import { useInfiniteFeaturedProducts } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
-import { Star, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 export default function FeaturedPage() {
-  const { data: productsResponse, isLoading } = useFeaturedProducts(12);
-  const products = productsResponse || [];
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteFeaturedProducts({ limit: 36 });
+
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!loaderRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        rootMargin: "200px",
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
+
+  const products = data?.pages.flatMap((p) => p.data) ?? [];
 
   if (isLoading) return <ProductsLoading />;
 
@@ -20,7 +43,8 @@ export default function FeaturedPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-bold text-foreground">
-              Featured Items
+              {products.length} featured product
+              {products.length !== 1 ? "s" : ""} found
             </h1>
           </div>
         </div>
@@ -46,6 +70,20 @@ export default function FeaturedPage() {
                   <ProductCard product={product} />
                 </div>
               ))}
+            </div>
+
+            <div ref={loaderRef} className="w-full mt-8">
+              {isFetchingNextPage ? (
+                <ProductsLoading />
+              ) : hasNextPage ? (
+                <p className="text-center text-sm text-muted-foreground py-4">
+                  Scroll for more products
+                </p>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground py-4">
+                  You've reached the end
+                </p>
+              )}
             </div>
 
             {/* Call to Action */}

@@ -19,7 +19,10 @@ export const productKeys = {
     [...productKeys.lists(), filters] as const,
   details: () => [...productKeys.all, "detail"] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
-  featured: () => [...productKeys.all, "featured"] as const,
+  featured: (limit?: number) =>
+    limit
+      ? ([...productKeys.all, "featured", limit] as const)
+      : ([...productKeys.all, "featured"] as const),
   newArrivals: () => [...productKeys.all, "new-arrivals"] as const,
   categories: () => [...productKeys.all, "categories"] as const,
   search: (query: string) => [...productKeys.all, "search", query] as const,
@@ -66,12 +69,31 @@ export function useProduct(
   });
 }
 
-export function useFeaturedProducts(limit: number = 12) {
-  return useQuery({
-    queryKey: productKeys.featured(),
-    queryFn: () => productService.getFeaturedProducts(limit),
+interface UseFeaturedProductsOptions {
+  limit?: number;
+}
+
+export function useFeaturedProducts({
+  limit,
+}: UseFeaturedProductsOptions = {}) {
+  return useQuery<CursorPaginatedResponse<Product>>({
+    queryKey: productKeys.featured(limit),
+    queryFn: () => productService.getFeaturedProducts({ limit }),
     // staleTime: 15 * 60 * 1000,
     // gcTime: 30 * 60 * 1000,
+  });
+}
+
+export function useInfiniteFeaturedProducts(params: { limit?: number } = {}) {
+  return useInfiniteQuery({
+    queryKey: productKeys.featured(params.limit),
+    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
+      productService.getFeaturedProducts({ ...params, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
+      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
+    // staleTime: 5 * 60 * 1000,
+    // gcTime: 10 * 60 * 1000,
   });
 }
 

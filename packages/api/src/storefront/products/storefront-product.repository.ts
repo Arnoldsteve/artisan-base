@@ -25,7 +25,6 @@ export class StorefrontProductRepository
     }
     return this.prismaClient;
   }
-
   async findAll(filters: GetProductsDto, tenantId: string) {
     const {
       search,
@@ -100,10 +99,11 @@ export class StorefrontProductRepository
 
     const prisma = await this.getPrisma();
 
+    // Fetch one extra to check if there are more
     const products = await prisma.product.findMany({
       where,
       orderBy,
-      take: limitNum,
+      take: limitNum + 1, // ← CHANGED: Fetch one extra
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       select: {
         id: true,
@@ -129,19 +129,26 @@ export class StorefrontProductRepository
       },
     });
 
-    const productsWithCategories = products.map((p) => ({
+    // ← CHANGED: Check if we have more than requested
+    const hasMore = products.length > limitNum;
+
+    // ← CHANGED: Only return the requested amount
+    const returnProducts = hasMore ? products.slice(0, limitNum) : products;
+
+    const productsWithCategories = returnProducts.map((p) => ({
       ...p,
       categories: p.categories.map((c) => c.category),
     }));
 
+    // ← CHANGED: Only set nextCursor if there are more items
     const nextCursor =
-      productsWithCategories.length > 0
+      hasMore && productsWithCategories.length > 0
         ? productsWithCategories[productsWithCategories.length - 1].id
         : null;
 
     const result = {
       data: productsWithCategories,
-      meta: { limit: limitNum, nextCursor, hasMore: !!nextCursor },
+      meta: { limit: limitNum, nextCursor, hasMore }, // ← CHANGED: Use calculated hasMore
     };
 
     await this.redis.set(cacheKey, result, { ex: 300 });
@@ -188,10 +195,12 @@ export class StorefrontProductRepository
       categories: product.categories.map((c) => c.category),
     };
   }
+
   async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
     const prisma = await this.getPrisma();
-    const limit = filters.limit ?? 12;
-    const cursor = filters.cursor ?? null;
+    const { limit, cursor } = filters;
+
+    const limitNum = Math.max(Number(limit) || 50, 1);
 
     const cacheKey = `featured:${tenantId}:limit:${limit}:cursor:${cursor || 'start'}`;
 
@@ -205,13 +214,13 @@ export class StorefrontProductRepository
       return cached;
     }
 
-    // Query the database
+    // Fetch limit + 1 to check if there are more
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
         isFeatured: true,
       },
-      take: limit,
+      take: limitNum + 1,
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       orderBy: { createdAt: 'desc' },
       select: {
@@ -228,20 +237,28 @@ export class StorefrontProductRepository
       },
     });
 
-    // Determine nextCursor for pagination
+    // Check if we got more than requested
+    const hasMore = products.length > limitNum;
+
+    // Only return the requested amount
+    const returnProducts = hasMore ? products.slice(0, limitNum) : products;
+
+    // nextCursor is the last item in the returned products (only if hasMore)
     const nextCursor =
-      products.length > 0 ? products[products.length - 1].id : null;
+      hasMore && returnProducts.length > 0
+        ? returnProducts[returnProducts.length - 1].id
+        : null;
 
     const result = {
-      data: products,
-      meta: { limit, nextCursor, hasMore: !!nextCursor },
+      data: returnProducts,
+      meta: { limit: limitNum, nextCursor, hasMore },
     };
 
     await this.redis.set(cacheKey, result, { ex: 300 });
 
     return result;
   }
-
+  
   async findCategories(tenantId: string) {
     const cacheKey = `${tenantId}:categories`;
 

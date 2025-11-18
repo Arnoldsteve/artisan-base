@@ -1,20 +1,25 @@
 "use client";
 
-
 import { memo } from "react";
 import { ProductCard } from "./product-card";
 import { useFeaturedProducts } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { ProductsLoading } from "./skeletons/product-card-skeleton";
 
 export const FeaturedProducts = memo(function FeaturedProducts() {
   const {
-    data: products = [],
+    data: featuredResponse,
     isLoading,
     error,
     refetch,
-  } = useFeaturedProducts();
+  } = useFeaturedProducts({ limit: 12 });
+
+  const products = featuredResponse?.data ?? [];
+  const meta = featuredResponse?.meta;
+  const success = featuredResponse?.success;
+  const message = featuredResponse?.message;
+
+  // console.log("features products in the landing page", products);
 
   if (isLoading) {
     return (

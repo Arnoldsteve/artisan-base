@@ -11,5 +11,5 @@ export class GetFeaturedProductsDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  limit?: number = 12;
+  limit?: number = 54;
 }
