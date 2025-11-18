@@ -2,36 +2,40 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useInfiniteCategories } from "@/hooks/use-categories";
+import { useCategories, useInfiniteCategories } from "@/hooks/use-categories";
 import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton";
 import { useRef, useEffect } from "react";
 
 export default function CategoryListPage() {
-  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    useInfiniteCategories();
+  // const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+  //   useInfiniteCategories();
+
+   const { data: response, isLoading, error, refetch } = useCategories();
+    const categories = response?.data || [];
+  
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!loaderRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "200px", threshold: 0.1 }
-    );
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
+  // useEffect(() => {
+  //   if (!loaderRef.current) return;
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+  //         fetchNextPage();
+  //       }
+  //     },
+  //     { rootMargin: "200px", threshold: 0.1 }
+  //   );
+  //   observer.observe(loaderRef.current);
+  //   return () => observer.disconnect();
+  // }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   
   if (isLoading) return <CategoriesLoading />;
 
-  console.log("data in the category list", data)
-  const categories = data?.pages.flatMap((p) => p?.data) ?? [];
-  console.log("data in the category list", categories)
+  // console.log("data in the category list", data)
+  // const categories = data?.pages.flatMap((p) => p?.data) ?? [];
+  // console.log("data in the category list", categories)
 
 
   return (
@@ -97,14 +101,14 @@ export default function CategoryListPage() {
             </div>
 
             {/* Loader for infinite scrolling */}
-            <div ref={loaderRef} className="w-full mt-8 text-center">
+            {/* <div ref={loaderRef} className="w-full mt-8 text-center">
               {isFetchingNextPage && <CategoriesLoading />}
               {!hasNextPage && categories.length > 0 && (
                 <p className="text-sm text-muted-foreground py-4">
                   You've reached the end
                 </p>
               )}
-            </div>
+            </div> */}
           </>
         )}
       </div>
