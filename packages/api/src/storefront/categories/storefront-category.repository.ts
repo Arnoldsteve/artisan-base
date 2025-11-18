@@ -55,7 +55,7 @@ export class StorefrontCategoryRepository
     const categories = await prisma.category.findMany({
       where,
       orderBy: { id: 'asc' },
-      take: take + 1, // ← CHANGED: Fetch one extra
+      take: take + 1, 
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       include: {
         _count: {
@@ -68,24 +68,21 @@ export class StorefrontCategoryRepository
       },
     });
 
-    // ← CHANGED: Check if we got more than requested
     const hasMore = categories.length > take;
 
-    // ← CHANGED: Only return the requested amount
     const returnCategories = hasMore ? categories.slice(0, take) : categories;
 
-    // ← CHANGED: Only set nextCursor if there are more items
     const nextCursor =
       hasMore && returnCategories.length > 0
         ? returnCategories[returnCategories.length - 1].id
         : null;
 
     const result = {
-      data: returnCategories, // ← CHANGED: Return sliced data
+      data: returnCategories, 
       meta: {
         limit: take,
         nextCursor,
-        hasMore, // ← CHANGED: Use calculated hasMore
+        hasMore, 
       },
     };
 

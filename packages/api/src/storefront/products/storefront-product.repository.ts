@@ -103,7 +103,7 @@ export class StorefrontProductRepository
     const products = await prisma.product.findMany({
       where,
       orderBy,
-      take: limitNum + 1, // ← CHANGED: Fetch one extra
+      take: limitNum + 1,
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       select: {
         id: true,
@@ -129,10 +129,8 @@ export class StorefrontProductRepository
       },
     });
 
-    // ← CHANGED: Check if we have more than requested
     const hasMore = products.length > limitNum;
 
-    // ← CHANGED: Only return the requested amount
     const returnProducts = hasMore ? products.slice(0, limitNum) : products;
 
     const productsWithCategories = returnProducts.map((p) => ({
@@ -140,7 +138,6 @@ export class StorefrontProductRepository
       categories: p.categories.map((c) => c.category),
     }));
 
-    // ← CHANGED: Only set nextCursor if there are more items
     const nextCursor =
       hasMore && productsWithCategories.length > 0
         ? productsWithCategories[productsWithCategories.length - 1].id
@@ -148,7 +145,7 @@ export class StorefrontProductRepository
 
     const result = {
       data: productsWithCategories,
-      meta: { limit: limitNum, nextCursor, hasMore }, // ← CHANGED: Use calculated hasMore
+      meta: { limit: limitNum, nextCursor, hasMore },
     };
 
     await this.redis.set(cacheKey, result, { ex: 300 });
@@ -237,13 +234,10 @@ export class StorefrontProductRepository
       },
     });
 
-    // Check if we got more than requested
     const hasMore = products.length > limitNum;
 
-    // Only return the requested amount
     const returnProducts = hasMore ? products.slice(0, limitNum) : products;
 
-    // nextCursor is the last item in the returned products (only if hasMore)
     const nextCursor =
       hasMore && returnProducts.length > 0
         ? returnProducts[returnProducts.length - 1].id
@@ -258,7 +252,7 @@ export class StorefrontProductRepository
 
     return result;
   }
-  
+
   async findCategories(tenantId: string) {
     const cacheKey = `${tenantId}:categories`;
 
