@@ -40,30 +40,6 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
 
     // Calculate subtotal using Decimal for precision
     let subtotal = new Decimal(0);
-    // const orderItemsData = await Promise.all(
-    //   dto.items.map(async (item) => {
-    //     const product = products.find((p) => p.id === item.productId);
-    //     if (!product) throw new BadRequestException('Invalid product.');
-    //     if (product.inventoryQuantity < item.quantity) {
-    //       throw new BadRequestException(
-    //         `Insufficient inventory for product: ${product.name}`,
-    //       );
-    //     }
-    //     const unitPrice = product.price;
-    //     subtotal = subtotal.plus(unitPrice.mul(item.quantity));
-    //     return {
-    //       quantity: item.quantity,
-    //       unitPrice,
-    //       productName: product.name,
-    //       sku: product.sku,
-    //       image:
-    //         Array.isArray(product.images) && product.images.length > 0
-    //           ? String(product.images[0])
-    //           : null,
-    //       productId: product.id,
-    //     };
-    //   }),
-    // );
 
     const orderItemsData = await Promise.all(
       dto.items.map(async (item) => {
@@ -101,7 +77,7 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
           unitPrice,
           productName: product.name,
           sku: product.sku,
-          image, // safe, either a valid URL or null
+          image, 
           productId: product.id,
         };
       }),

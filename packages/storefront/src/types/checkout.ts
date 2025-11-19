@@ -1,3 +1,5 @@
+import { CartItem } from "./cart";
+
 export interface Customer {
   firstName: string;
   lastName: string;
@@ -31,10 +33,9 @@ export interface PaymentMethod {
   icon?: string;
 }
 
-import type { CartItem } from "./cart";
-
 export interface Order {
   id: string;
+  orderNumber: string;
   customer: Customer;
   shippingAddress: ShippingAddress;
   shippingOption: ShippingOption;

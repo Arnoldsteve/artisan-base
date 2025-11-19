@@ -58,7 +58,7 @@ export const OrderConfirmationStep = () => {
         </p>
         <div className="inline-block bg-muted px-6 py-3 rounded-lg">
           <p className="text-sm text-muted-foreground">Order Number</p>
-          <p className="text-xl font-bold">#{order.id}</p>
+          <p className="text-xl font-bold">#{order.orderNumber}</p>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ export const OrderConfirmationStep = () => {
               <div className="flex-1">
                 <p className="font-medium">{item.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  Qty: {item.quantity} × {order.items.length} items
+                  Qty: {item.quantity} X {order.items.length} items
                 </p>
               </div>
               <p className="font-medium">
