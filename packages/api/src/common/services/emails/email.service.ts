@@ -2,8 +2,8 @@ import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common
 import { ConfigService } from '@nestjs/config';
 import { render } from '@react-email/components';
 import { Resend } from 'resend';
-import { ContactFormEmail } from 'src/emails/storefont/ContactFormEmail';
 import { CreateContactSubmissionDto } from 'src/storefront/contact/dto/create-contact-submission.dto';
+import { ContactFormEmail } from './templates/storefont/customer-contact';
 
 @Injectable()
 export class EmailService {

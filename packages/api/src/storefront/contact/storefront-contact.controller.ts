@@ -21,10 +21,8 @@ export class StorefrontContactController {
   @Post()
   @HttpCode(HttpStatus.NO_CONTENT)
   async create(
-    @Body(new ValidationPipe({ transform: true }))
-    dto: CreateContactSubmissionDto,
+    @Body(ValidationPipe) dto: CreateContactSubmissionDto,
   ): Promise<void> {
-    Logger.log(`Received contact submission: ${JSON.stringify(dto)}`);
     return this.contactService.createSubmission(dto);
   }
 }

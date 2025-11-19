@@ -1,7 +1,7 @@
 import { Module, Scope } from '@nestjs/common';
 import { StorefrontContactController } from './storefront-contact.controller';
 import { StorefrontContactService } from './storefront-contact.service';
-import { EmailModule } from 'src/common/services/email.module'; // <-- Import the new shared EmailModule
+import { EmailModule } from '@/common/services/emails/email.module';
 
 @Module({
   // Import the EmailModule to make EmailService available for dependency injection.
