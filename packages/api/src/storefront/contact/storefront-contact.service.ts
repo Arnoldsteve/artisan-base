@@ -5,21 +5,15 @@ import { EmailService } from '@/common/services/emails/email.service';
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontContactService {
   constructor(private readonly emailService: EmailService) {}
-
   async createSubmission(
     dto: CreateContactSubmissionDto,
   ): Promise<{ success: boolean; message: string }> {
     const result = await this.emailService.send({
       templateId: 'contact-form',
-      props: {
-        name: dto.name,
-        email: dto.email,
-        message: dto.message,
-      },
-      to: 'support@artisan-base.com',
+      props: dto, 
+      to: 'stevearnold9e@gmail.com', 
     });
 
-    // Transform email service result into API response
     if (result.success) {
       return {
         success: true,

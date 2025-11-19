@@ -25,6 +25,7 @@ export class EmailService {
     options: SendEmailOptions<TProps>,
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { templateId, props, to, subject, from, replyTo, cc, bcc } = options;
+    this.logger.log('sending email with options', options)
 
     try {
       // 1. Get template from registry
