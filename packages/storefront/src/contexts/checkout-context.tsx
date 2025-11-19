@@ -77,9 +77,13 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined);
+const CheckoutContext = createContext<CheckoutContextType | undefined>(
+  undefined
+);
 
-export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState, (init) => {
     if (typeof window !== "undefined") {
@@ -90,7 +94,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           ...init,
           ...parsed,
           selectedPaymentMethod: parsed.selectedPaymentMethod
-            ? paymentMethods.find((m) => m.id === parsed.selectedPaymentMethod.id) || null
+            ? paymentMethods.find(
+                (m) => m.id === parsed.selectedPaymentMethod.id
+              ) || null
             : null,
         };
       }
@@ -103,7 +109,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [state]);
 
   const { items, clearCart } = useCart();
-  const { createOrder, isCreating, createError } = useOrders(state.customer?.email);
+  const { createOrder, isCreating, createError } = useOrders(
+    state.customer?.email
+  );
 
   // Actions
   const setCustomer = (customer: Customer) =>
@@ -120,36 +128,46 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const nextStep = () => dispatch({ type: "NEXT_STEP" });
   const previousStep = () => dispatch({ type: "PREVIOUS_STEP" });
-  const goToStep = (step: number) => dispatch({ type: "GO_TO_STEP", payload: step });
-  const setLoading = (loading: boolean) => dispatch({ type: "SET_LOADING", payload: loading });
-  const setError = (error: string | null) => dispatch({ type: "SET_ERROR", payload: error });
-  const setOrder = (order: Order) => dispatch({ type: "SET_ORDER", payload: order });
+  const goToStep = (step: number) =>
+    dispatch({ type: "GO_TO_STEP", payload: step });
+  const setLoading = (loading: boolean) =>
+    dispatch({ type: "SET_LOADING", payload: loading });
+  const setError = (error: string | null) =>
+    dispatch({ type: "SET_ERROR", payload: error });
+  const setOrder = (order: Order) =>
+    dispatch({ type: "SET_ORDER", payload: order });
   const resetCheckout = () => dispatch({ type: "RESET" });
 
   const submitOrder = async () => {
-    if (!state.customer || !state.shippingAddress || !state.selectedShippingOption || !state.selectedPaymentMethod) {
+    if (
+      !state.customer ||
+      !state.shippingAddress ||
+      !state.selectedPaymentMethod
+    ) {
       setError("Please complete all checkout steps.");
       return;
     }
 
     setLoading(true);
     setError(null);
+
     try {
       const payload = {
         customer: state.customer,
         shippingAddress: state.shippingAddress,
-        shippingOption: state.selectedShippingOption,
-        paymentMethod: state.selectedPaymentMethod,
+        billingAddress: state.shippingAddress,
+        // paymentMethod: state.selectedPaymentMethod,
         items,
+        currency: "KES" as const,
       };
 
-      const order = await createOrder(payload); // ✅ use hook
+      const order = await createOrder(payload); // use hook
 
       setOrder(order);
       clearCart();
       router.push("/checkout/confirmation");
     } catch (e: any) {
-      setError(e.message || createError || "Failed to submit order.");
+      setError(e?.message || createError || "Failed to submit order.");
     } finally {
       setLoading(false);
     }
@@ -169,7 +187,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         submitOrder,
         resetCheckout,
         isLoading: state.isLoading || isCreating,
-        error: state.error || createError,
+        error: state.error || createError || null,
       }}
     >
       {children}
@@ -179,6 +197,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export function useCheckoutContext() {
   const ctx = useContext(CheckoutContext);
-  if (!ctx) throw new Error("useCheckoutContext must be used within CheckoutProvider");
+  if (!ctx)
+    throw new Error("useCheckoutContext must be used within CheckoutProvider");
   return ctx;
 }

@@ -1,7 +1,8 @@
-export function formatDate(dateString: string, locale = "en-US"): string {
-  if (!dateString) return "";
+export function formatDate(dateInput: string | Date, locale = "en-US"): string {
+  if (!dateInput) return "";
 
-  const date = new Date(dateString);
+  // Convert string to Date if needed
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
   if (isNaN(date.getTime())) return "";
 
   return date.toLocaleDateString(locale, {

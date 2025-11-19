@@ -24,8 +24,7 @@ export const OrderConfirmationStep = () => {
   const { order, resetCheckout } = useCheckoutContext();
   const [mounted, setMounted] = React.useState(false);
 
-  console.log("oder data in order confimation page", order)
-
+  console.log("created order in the confirmayion", order)
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
@@ -41,7 +40,9 @@ export const OrderConfirmationStep = () => {
 
   const handleContinueShopping = () => resetCheckout();
 
-  const estimatedDelivery = formatDate(order.estimatedDelivery.toString());
+  const estimatedDelivery = order.estimatedDelivery
+    ? formatDate(order.estimatedDelivery)
+    : "TBD";
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-8 px-2">
@@ -58,7 +59,7 @@ export const OrderConfirmationStep = () => {
         </p>
         <div className="inline-block bg-muted px-6 py-3 rounded-lg">
           <p className="text-sm text-muted-foreground">Order Number</p>
-          <p className="text-xl font-bold">#{order.orderNumber}</p>
+          <p className="text-xl font-bold">#{order.orderNumber ?? "N/A"}</p>
         </div>
       </div>
 
@@ -71,7 +72,9 @@ export const OrderConfirmationStep = () => {
           <p className="font-medium text-blue-900">Confirmation email sent</p>
           <p className="text-sm text-blue-700">
             We've sent a confirmation to{" "}
-            <span className="font-medium">{order.customer.email}</span>
+            <span className="font-medium">
+              {order.customer?.email ?? "N/A"}
+            </span>
           </p>
         </div>
       </div>
@@ -81,7 +84,6 @@ export const OrderConfirmationStep = () => {
         <h2 className="text-xl font-semibold mb-6">What happens next?</h2>
 
         <div className="relative flex justify-between items-start">
-          {/* Single connector line behind all steps */}
           <div className="absolute top-6 left-0 w-full h-0.5 bg-gray-300 -z-10" />
 
           {[
@@ -111,7 +113,6 @@ export const OrderConfirmationStep = () => {
               key={i}
               className="flex flex-col items-center flex-1 text-center"
             >
-              {/* Icon */}
               <div
                 className={`rounded-full p-3 mb-2 relative z-10 ${
                   step.active ? "bg-green-100" : "bg-gray-200"
@@ -119,8 +120,6 @@ export const OrderConfirmationStep = () => {
               >
                 {step.icon}
               </div>
-
-              {/* Title */}
               <p className="font-medium">{step.title}</p>
               <p className="text-sm text-muted-foreground">{step.subtitle}</p>
             </div>
@@ -128,128 +127,16 @@ export const OrderConfirmationStep = () => {
         </div>
       </div>
 
-      {/* Summary */}
-      <div className="bg-card border rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-
-        <div className="space-y-4 mb-6">
-          {order.items.map((item) => (
-            <div key={item.id} className="flex gap-4">
-              <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                {item.image ? (
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Package className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">{item.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  Qty: {item.quantity} X {order.items.length} items
-                </p>
-              </div>
-              <p className="font-medium">
-                {formatMoney(item.price * item.quantity, "KES")}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <Separator className="my-4" />
-        <div className="space-y-2">
-          {[
-            ["Subtotal", order.subtotal],
-            ["Shipping", order.shippingCost],
-            ["tax", order.tax],
-            ...(order.tax > 0 ? [["Tax", order.tax]] : []),
-          ].map(([label, value]) => (
-            <div key={label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{label}</span>
-              <span>{formatMoney(value, "KES")}</span>
-            </div>
-          ))}
-          <Separator className="my-2" />
-          <div className="flex justify-between text-lg font-bold">
-            <span>Total</span>
-            <span>{formatMoney(order.total, "KES")}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Shipping + Contact */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {[
-          {
-            icon: <MapPin className="h-5 w-5" />,
-            title: "Shipping Address",
-            content: (
-              <>
-                <p className="font-medium text-foreground">
-                  {order.customer.firstName} {order.customer.lastName}
-                </p>
-                <p>{order.shippingAddress.street}</p>
-                <p>
-                  {order.shippingAddress.city}, {order.shippingAddress.zipCode}
-                </p>
-                <p>{order.shippingAddress.country}</p>
-              </>
-            ),
-          },
-          {
-            icon: <Phone className="h-5 w-5" />,
-            title: "Contact Information",
-            content: (
-              <>
-                <p className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" /> {order.customer.email}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" /> {order.customer.phone}
-                </p>
-              </>
-            ),
-          },
-        ].map(({ icon, title, content }) => (
-          <div key={title} className="bg-card border rounded-lg p-6">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              {icon}
-              {title}
-            </h3>
-            <div className="text-sm space-y-1 text-muted-foreground">
-              {content}
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <Button
-          asChild
-          size="lg"
-          className=""
-          onClick={handleContinueShopping}
-        >
+        <Button asChild size="lg" onClick={handleContinueShopping}>
           <Link href="/products">
             Continue Shopping <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className=""
-          onClick={handleContinueShopping}
-        >
+        {/* <Button asChild variant="outline" size="lg" onClick={handleContinueShopping}>
           <Link href={`/orders/${order.id}`}>View Order Details</Link>
-        </Button>
+        </Button> */}
         <Button variant="outline" size="lg" onClick={() => window.print()}>
           <Download className="mr-2 h-4 w-4" />
           Print Receipt

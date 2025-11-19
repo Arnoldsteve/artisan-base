@@ -1,14 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orderService } from "@/services/order-service";
 import type { CartItem } from "@/types/cart";
-import type { Customer, ShippingAddress, ShippingOption, PaymentMethod, Order } from "@/types/checkout";
+import type { Customer, ShippingAddress, PaymentMethod, Order } from "@/types/checkout";
 
 type CreateOrderPayload = {
-  customer: Customer;
+  customer?: Customer;
   shippingAddress: ShippingAddress;
-  shippingOption: ShippingOption;
-  paymentMethod: PaymentMethod;
+  billingAddress: ShippingAddress;
+  paymentMethod?: PaymentMethod;
   items: CartItem[];
+  currency: "KES"; // or other enum value
+  notes?: string;
+  shippingAmount?: number;
 };
 
 export function useOrders(email: string | undefined) {
@@ -24,11 +27,26 @@ export function useOrders(email: string | undefined) {
   // Create order mutation
   const createOrderMutation = useMutation({
     mutationFn: async (payload: CreateOrderPayload) => {
-      const response = await orderService.createOrder(payload);
+      // Transform payload to match backend DTO
+      const transformed = {
+        customer: payload.customer,
+        shippingAddress: payload.shippingAddress,
+        billingAddress: payload.billingAddress,
+        items: payload.items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          ...(item.variantId ? { variantId: item.variantId } : {}),
+        })),
+        paymentMethod: payload.paymentMethod?.code, // must match PaymentProvider enum
+        currency: payload.currency,
+        notes: payload.notes,
+        shippingAmount: payload.shippingAmount,
+      };
+
+      const response = await orderService.createOrder(transformed);
       return response.order as Order;
     },
     onSuccess: (order) => {
-      // Update the orders cache to include the new order
       queryClient.setQueryData(["orders", email], (old: Order[] | undefined) =>
         old ? [order, ...old] : [order]
       );
@@ -38,7 +56,7 @@ export function useOrders(email: string | undefined) {
   return {
     ...ordersQuery,
     createOrder: createOrderMutation.mutateAsync,
-    isCreating: createOrderMutation.isPending, 
-    createError: createOrderMutation.error,
+    isCreating: createOrderMutation.isPending,
+    createError: createOrderMutation.error?.message || null,
   };
 }

@@ -27,13 +27,12 @@ export class OrderService {
   }
 
   async createOrder(payload: {
-    customer: Customer;
+    customer?: Customer;
     shippingAddress: ShippingAddress;
-    billingAddress?: ShippingAddress;
-    shippingOption?: ShippingOption;
-    paymentMethod?: PaymentMethod;
-    items: CartItem[];
-    currency?: string;
+    billingAddress: ShippingAddress;
+    paymentMethod?: string; 
+    items: { productId: string; quantity: number; variantId?: string }[];
+    currency: "KES";
     notes?: string;
     shippingAmount?: number;
   }): Promise<any> {
