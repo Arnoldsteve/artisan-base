@@ -23,7 +23,7 @@ interface ContactFormEmailProps {
   source?: string;
 }
 
-export const ContactFormEmail = ({
+export const ContactFormEmailTemplate = ({
   name,
   email,
   subject,
@@ -46,26 +46,26 @@ export const ContactFormEmail = ({
         {/* Contact Information Card */}
         <Section style={contactCard}>
           <Heading as="h2" style={cardHeading}>Contact Information</Heading>
-          <Row
-            children={[
-              <Column style={labelColumn} key="name-label">
-                <Text style={infoLabel}>👤 Name:</Text>
-              </Column>,
-              <Column key="name-value">
-                <Text style={infoText}>{name}</Text>
-              </Column>
-            ]}
-          />
-          <Row
-            children={[
-              <Column style={labelColumn} key="email-label">
-                <Text style={infoLabel}>📧 Email:</Text>
-              </Column>,
-              <Column key="email-value">
-                <Text style={infoTextEmail}>{email}</Text>
-              </Column>
-            ]}
-          />
+          
+          {/* @ts-expect-error - react-email Row component type issue */}
+          <Row>
+            <Column style={labelColumn}>
+              <Text style={infoLabel}>👤 Name:</Text>
+            </Column>
+            <Column>
+              <Text style={infoText}>{name}</Text>
+            </Column>
+          </Row>
+          
+          {/* @ts-expect-error - react-email Row component type issue */}
+          <Row>
+            <Column style={labelColumn}>
+              <Text style={infoLabel}>📧 Email:</Text>
+            </Column>
+            <Column>
+              <Text style={infoTextEmail}>{email}</Text>
+            </Column>
+          </Row>
         </Section>
 
         <Hr style={hr} />
@@ -287,3 +287,5 @@ const footerSmall = {
   margin: '0',
   fontStyle: 'italic',
 };
+
+export default ContactFormEmailTemplate;

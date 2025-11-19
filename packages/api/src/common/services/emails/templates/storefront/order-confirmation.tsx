@@ -23,7 +23,7 @@ interface OrderItem {
   sku?: string | null;
 }
 
-interface OrderConfirmationEmailProps {
+export interface OrderConfirmationEmailProps {
   orderNumber: string;
   customerName?: string;
   items: OrderItem[];

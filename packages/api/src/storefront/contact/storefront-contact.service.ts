@@ -8,7 +8,17 @@ export class StorefrontContactService {
     private readonly emailService: EmailService,
   ) {}
 
-  async createSubmission(dto: CreateContactSubmissionDto): Promise<void> {
-    return this.emailService.sendContactFormEmail(dto);
-  }
+  // storefront-contact.service.ts
+async createSubmission(dto: CreateContactSubmissionDto): Promise<void> {
+  await this.emailService.send({
+    templateId: 'contact-submission', // use your registered template ID
+    props: {
+      name: dto.name,
+      email: dto.email,
+      message: dto.message,
+    },
+    to: 'support@artisan-base.com', // or some default
+  });
+}
+
 }
