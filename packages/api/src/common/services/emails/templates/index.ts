@@ -1,4 +1,3 @@
-// Storefront templates
 export * from './storefront/contact-form';
 
 // Template IDs enum for type-safe usage

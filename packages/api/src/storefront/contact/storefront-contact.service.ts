@@ -11,7 +11,7 @@ export class StorefrontContactService {
   // storefront-contact.service.ts
 async createSubmission(dto: CreateContactSubmissionDto): Promise<void> {
   await this.emailService.send({
-    templateId: 'contact-submission', // use your registered template ID
+    templateId: 'contact-form', // use your registered template ID
     props: {
       name: dto.name,
       email: dto.email,
