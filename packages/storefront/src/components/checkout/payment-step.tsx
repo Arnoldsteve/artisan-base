@@ -9,6 +9,7 @@ import { paymentMethods } from "@/utils/payment-methods";
 import { paymentSchema } from "@/validation-schemas/payment-schema";
 import { RequiredLabel } from "../RequiredLabel";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { PaymentWarning } from "./payment-warning";
 
 export const PaymentStep: React.FC = () => {
   const { selectedPaymentMethod, setPaymentMethod, nextStep, previousStep } =
@@ -26,7 +27,7 @@ export const PaymentStep: React.FC = () => {
   });
 
   const [mpesaPhone, setMpesaPhone] = useState("");
-  const [paypalEmail, setPaypalEmail] = useState(""); // ✅ new state for PayPal
+  const [paypalEmail, setPaypalEmail] = useState("");
 
   const [error, setError] = useState<string | null>(null);
 
@@ -51,7 +52,7 @@ export const PaymentStep: React.FC = () => {
       method: method.id,
       card: method.id === "credit_card" ? card : undefined,
       mpesaPhone: method.id === "mpesa" ? mpesaPhone : undefined,
-      paypal: method.id === "paypal" ? { email: paypalEmail } : undefined, // ✅ validate PayPal
+      paypal: method.id === "paypal" ? { email: paypalEmail } : undefined,
     });
 
     if (!result.success) {
@@ -67,6 +68,9 @@ export const PaymentStep: React.FC = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Payment</h2>
+      {/* <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm"> */}
+        <PaymentWarning />
+      {/* </div> */}
       <div>
         <RadioGroup
           value={selected}
