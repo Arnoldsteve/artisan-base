@@ -3,17 +3,14 @@ import { StorefrontOrderService } from './storefront-order.service';
 import { StorefrontOrderController } from './storefront-order.controller';
 import { StorefrontOrderRepository } from './storefront-order.repository';
 import { TenantContextService } from 'src/common/tenant-context.service';
+import { EmailModule } from '@/common/services/emails/email.module';
 
 @Module({
-  imports: [], // wa here TenantPrismaModule
+  imports: [EmailModule], 
   controllers: [StorefrontOrderController],
   providers: [
     StorefrontOrderService,
     StorefrontOrderRepository,
-    // {
-    //   provide: 'StorefrontOrderRepository',
-    //   useClass: StorefrontOrderRepository,
-    // },
     {
       provide: TenantContextService,
       useClass: TenantContextService,

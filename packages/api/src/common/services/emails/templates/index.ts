@@ -1,8 +1,7 @@
 export * from './storefront/contact-form';
+export * from './storefront/order-confirmation';
 
-// Template IDs enum for type-safe usage
 export enum EmailTemplateId {
   CONTACT_FORM = 'contact-form',
-  // Add more as you create them
-  // ORDER_CONFIRMATION = 'order-confirmation',
+  ORDER_CONFIRMATION = 'order-confirmation',
 }

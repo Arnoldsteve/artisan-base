@@ -9,7 +9,7 @@ export const contactFormEmailConfig: EmailTemplateConfig = {
   category: 'transactional',
   defaultSubject: 'New Contact Form Submission: {{subject}}',
   defaultFrom: 'Artisan Base <onboarding@resend.dev>',
-  defaultTo: 'stevearnold9e@gmai', // TODO: Replace with your actual support email
-  defaultReplyTo: '{{email}}', // Will use the sender's email
+  defaultTo: 'stevearnold9e@gmail.com',  
+  defaultReplyTo: '{{email}}', 
   priority: 'high',
 };
