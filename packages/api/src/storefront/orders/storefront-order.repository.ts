@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Scope,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Scope, BadRequestException } from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateStorefrontOrderDto } from './dto/create-storefront-order.dto';
 import { IStorefrontOrderRepository } from './interfaces/storefront-order-repository.interface';
@@ -16,10 +12,6 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
-  /**
-   * Lazy getter that initializes the Prisma client only when first needed
-   * and reuses it for subsequent calls within the same request.
-   */
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
       this.prismaClient = await this.tenantPrismaService.getClient();
@@ -48,26 +40,68 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
 
     // Calculate subtotal using Decimal for precision
     let subtotal = new Decimal(0);
+    // const orderItemsData = await Promise.all(
+    //   dto.items.map(async (item) => {
+    //     const product = products.find((p) => p.id === item.productId);
+    //     if (!product) throw new BadRequestException('Invalid product.');
+    //     if (product.inventoryQuantity < item.quantity) {
+    //       throw new BadRequestException(
+    //         `Insufficient inventory for product: ${product.name}`,
+    //       );
+    //     }
+    //     const unitPrice = product.price;
+    //     subtotal = subtotal.plus(unitPrice.mul(item.quantity));
+    //     return {
+    //       quantity: item.quantity,
+    //       unitPrice,
+    //       productName: product.name,
+    //       sku: product.sku,
+    //       image:
+    //         Array.isArray(product.images) && product.images.length > 0
+    //           ? String(product.images[0])
+    //           : null,
+    //       productId: product.id,
+    //     };
+    //   }),
+    // );
+
     const orderItemsData = await Promise.all(
       dto.items.map(async (item) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) throw new BadRequestException('Invalid product.');
+        const product = products.find((p) => p.id === item.productId)!; // non-null assertion
+
         if (product.inventoryQuantity < item.quantity) {
           throw new BadRequestException(
             `Insufficient inventory for product: ${product.name}`,
           );
         }
-        const unitPrice = product.price; 
+
+        // Pick the first valid image URL if it exists, otherwise null
+        let image: string | null = null;
+
+        if (Array.isArray(product.images) && product.images.length > 0) {
+          const firstImage = product.images[0];
+
+          // Narrow to object with url property
+          if (
+            firstImage &&
+            typeof firstImage === 'object' &&
+            'url' in firstImage &&
+            typeof (firstImage as any).url === 'string' &&
+            (firstImage as any).url.startsWith('http')
+          ) {
+            image = (firstImage as any).url;
+          }
+        }
+
+        const unitPrice = product.price;
         subtotal = subtotal.plus(unitPrice.mul(item.quantity));
+
         return {
           quantity: item.quantity,
           unitPrice,
           productName: product.name,
           sku: product.sku,
-          image:
-            Array.isArray(product.images) && product.images.length > 0
-              ? String(product.images[0])
-              : null,
+          image, // safe, either a valid URL or null
           productId: product.id,
         };
       }),
@@ -197,8 +231,10 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
     return order;
   }
 
-    // --- THIS METHOD IS NOW UPDATED ---
-  async findOrderByCheckoutRequestId(checkoutRequestId: string): Promise<Order | null> {
+  // --- THIS METHOD IS NOW UPDATED ---
+  async findOrderByCheckoutRequestId(
+    checkoutRequestId: string,
+  ): Promise<Order | null> {
     const prisma = await this.getPrisma();
     const payment = await prisma.payment.findUnique({
       where: { checkoutRequestId },
@@ -218,7 +254,10 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
   }
 
   // --- NEW METHOD ---
-  async updateOrderStatus(orderId: string, data: { status?: any; paymentStatus?: any }): Promise<Order> {
+  async updateOrderStatus(
+    orderId: string,
+    data: { status?: any; paymentStatus?: any },
+  ): Promise<Order> {
     const prisma = await this.getPrisma();
     return prisma.order.update({
       where: { id: orderId },
