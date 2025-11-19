@@ -19,9 +19,7 @@ export class StorefrontContactController {
   constructor(private readonly contactService: StorefrontContactService) {}
 
   @Post()
-  async create(
-    @Body(ValidationPipe) dto: CreateContactSubmissionDto,
-  ):  Promise<{ success: boolean; message: string }> {
+  async create(@Body(ValidationPipe) dto: CreateContactSubmissionDto) {
     return this.contactService.createSubmission(dto);
   }
 }
