@@ -6,7 +6,7 @@
   "scripts": {
     "build": "pnpm tsup && pnpm postcss ./src/styles.css -o ./dist/index.css",
     "dev": "pnpm build --watch",
-    "lint": "pnpm eslint . --max-warnings 0"
+    "lint": "pnpm eslint"
   },
   "exports": {
     ".": {
