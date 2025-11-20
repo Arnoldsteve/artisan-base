@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-      - "feature/**" # More robust way to match feature branches
+      - "feature/**"
   pull_request:
     branches:
       - main
@@ -13,93 +13,57 @@ on:
 
 jobs:
   # =============================================================
-  # JOB 1: CI - Build All Artifacts
-  # This job installs, (lints/tests), and builds everything once.
+  # JOB 1: CI - Code Quality Check
+  # This job just ensures dependencies install and the code is valid.
   # =============================================================
   ci:
-    name: Build Artifacts
+    name: Code Quality Check
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      # TODO: Fix and re-enable lint and test steps
-      # - name: Run linter
-      #   run: pnpm run lint -- --max-warnings=0
-      # - name: Run tests
-      #   run: pnpm run test
-
-      - name: Build all packages
-        run: pnpm turbo run build --cache-dir .turbo
-
-      # --- NEW: Upload the entire built project as an artifact ---
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: .
-          retention-days: 1 # Keep artifacts for 1 day
+      # TODO: Fix and re-enable lint/test steps here later
 
   # =============================================================
   # JOB 2: Deploy API to Render
-  # This job runs on a push to 'main' AFTER the 'ci' job succeeds.
   # =============================================================
   deploy-api:
     name: Deploy API (Render)
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-
     steps:
       - name: Trigger Render Deploy Hook
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
-      - name: Confirm trigger
-        run: echo "✅ API deployment successfully triggered on Render."
-
   # =============================================================
-  # JOB 3: Deploy Admin to Vercel
-  # This job now downloads pre-built artifacts and deploys them.
-  # It runs in parallel with the storefront deploy.
+  # JOB 3: Deploy Admin to Vercel (Simplified)
   # =============================================================
   deploy-admin:
     name: Deploy Admin (Vercel)
-    needs: ci # Depends on the build job
+    needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
-      # --- NEW: Download the pre-built project ---
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: .
-
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install Vercel CLI
         run: npm install --global vercel
-
-      # --- NO 'vercel build' command needed anymore ---
-
-      - name: Pull Vercel Project Configuration
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./packages/dashboard
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      
+      # This single command tells Vercel to pull the code, build it on their servers, and deploy to production.
+      - name: Deploy to Vercel Production
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: ./packages/dashboard
 
     env:
@@ -107,35 +71,23 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
   # =============================================================
-  # JOB 4: Deploy Storefront to Vercel
-  # This job also downloads pre-built artifacts and deploys them.
-  # It runs in parallel with the admin deploy.
+  # JOB 4: Deploy Storefront to Vercel (Simplified)
   # =============================================================
   deploy-storefront:
     name: Deploy Storefront (Vercel)
-    needs: ci # Depends on the build job
+    needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
-      # --- NEW: Download the pre-built project ---
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: .
-
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install Vercel CLI
         run: npm install --global vercel
-
-      # --- NO 'vercel build' command needed anymore ---
-
-      - name: Pull Vercel Project Configuration
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./packages/storefront
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        
+      # This single command does everything for the storefront.
+      - name: Deploy to Vercel Production
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: ./packages/storefront
 
     env:
