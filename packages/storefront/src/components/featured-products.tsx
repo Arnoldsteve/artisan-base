@@ -5,6 +5,7 @@ import { ProductCard } from "./product-card";
 import { useFeaturedProducts } from "@/hooks/use-products";
 import { Button } from "@repo/ui/components/ui/button";
 import { ProductsLoading } from "./skeletons/product-card-skeleton";
+import Link from "next/link";
 
 export const FeaturedProducts = memo(function FeaturedProducts() {
   const {
@@ -96,10 +97,10 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
         <div className="text-start mt-12 flex flex-col sm:flex-row gap-4 ">
           <Button asChild variant="default" className="w-full sm:w-auto">
-            <a href="/featured">View All Featured Products</a>
+            <Link href="/featured">View All Featured Products</Link>
           </Button>
           <Button asChild variant="default" className="w-full sm:w-auto">
-            <a href="/products">View All Products</a>
+            <Link href="/products">View All Products</Link>
           </Button>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Palette, Star, Users, Leaf } from "lucide-react";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
@@ -133,12 +134,14 @@ export default function AboutPage() {
               Have questions about our platform or want to learn more about
               becoming an artisan partner?
             </p>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild>
-                <a href="/contact">Contact Us</a>
+                <Link href="/contact">Contact Us</Link>
               </Button>
+
               <Button variant="outline" asChild>
-                <a href="/products">Browse Products</a>
+                <Link href="/products">Browse Products</Link>
               </Button>
             </div>
           </CardContent>
