@@ -15,36 +15,38 @@ jobs:
   # ============================================
   # JOB 1: CI - Lint, Test & Build
   # ============================================
-  ci:
-    name: Lint & Test
-    runs-on: ubuntu-latest
+ci:
+  name: Lint & Test
+  runs-on: ubuntu-latest
+  env:
+    PATH: /home/runner/.local/share/pnpm:$PATH
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "pnpm"
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9
 
-      - name: Install dependencies
-        run: pnpm install
+    - name: Install dependencies
+      run: pnpm install
 
-      - name: Run linter
-        run: pnpm run lint
+    - name: Run linter
+      run: pnpm run lint
 
-      - name: Run tests
-        run: pnpm run test
+    - name: Run tests
+      run: pnpm run test
 
-      - name: Build all packages
-        run: pnpm run build
+    - name: Build all packages
+      run: pnpm run build
 
   # ============================================
   # JOB 2: Deploy API to Render
