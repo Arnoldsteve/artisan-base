@@ -1,24 +1,7 @@
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - main
-      - develop
-      - new-features
-  pull_request:
-    branches:
-      - main
-      - develop
-
 jobs:
-  # ============================================
-  # JOB 1: CI - Runs on ALL branches
-  # ============================================
   ci:
     name: Lint & Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,88 +29,69 @@ jobs:
       - name: Build all packages
         run: pnpm run build
 
-    # ============================================
-    # JOB 2: Deploy API to Render
-    # Only runs on 'main' branch after CI passes
-    # ============================================
-    deploy-api:
-      name: Deploy API (Render)
-      needs: ci
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      runs-on: ubuntu-latest
+  deploy-api:
+    name: Deploy API (Render)
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys
 
-      steps:
-        - name: Trigger Render Deploy
-          run: |
-            curl -X POST \
-              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-              -H "Content-Type: application/json" \
-              https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys
+      - name: Wait for deployment
+        run: |
+          echo "⏳ Waiting for API deployment to complete..."
+          sleep 60
+          echo "✅ API deployment triggered successfully"
 
-        - name: Wait for deployment
-          run: |
-            echo "⏳ Waiting for API deployment to complete..."
-            sleep 60
-            echo "✅ API deployment triggered successfully"
+  deploy-admin:
+    name: Deploy Admin (Vercel)
+    needs: deploy-api
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Deploy to Vercel
+        run: |
+          cd packages/admin
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
-    # ============================================
-    # JOB 3: Deploy Admin to Vercel
-    # ============================================
-    deploy-admin:
-      name: Deploy Admin (Vercel)
-      needs: deploy-api
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Setup Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: "20"
-
-        - name: Install Vercel CLI
-          run: npm install -g vercel
-
-        - name: Deploy to Vercel
-          run: |
-            cd packages/admin
-            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-          env:
-            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
-
-    # ============================================
-    # JOB 4: Deploy Storefront to Vercel
-    # ============================================
-    deploy-storefront:
-      name: Deploy Storefront (Vercel)
-      needs: deploy-admin
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Setup Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: "20"
-
-        - name: Install Vercel CLI
-          run: npm install -g vercel
-
-        - name: Deploy to Vercel
-          run: |
-            cd packages/storefront
-            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-          env:
-            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STOREFRONT }}
+  deploy-storefront:
+    name: Deploy Storefront (Vercel)
+    needs: deploy-admin
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Deploy to Vercel
+        run: |
+          cd packages/storefront
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STOREFRONT }}
