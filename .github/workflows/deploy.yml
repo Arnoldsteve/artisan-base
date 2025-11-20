@@ -64,7 +64,7 @@ jobs:
       # This single command tells Vercel to pull the code, build it on their servers, and deploy to production.
       - name: Deploy to Vercel Production
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./packages/dashboard
+        # working-directory: ./packages/dashboard
 
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -88,7 +88,7 @@ jobs:
       # This single command does everything for the storefront.
       - name: Deploy to Vercel Production
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./packages/storefront
+        # working-directory: ./packages/storefront
 
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
