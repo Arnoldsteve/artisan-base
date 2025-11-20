@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { EmailTemplateRegistry } from './templates/registry';
 import { EmailRenderer } from './utils/email-renderer';
 import { IEmailProvider } from './providers/email-provider.interface';
-import { SendEmailOptions } from './interfaces/email-template.interface';
 import { ZodError } from 'zod';
 import { EMAIL_PROVIDER } from './constants';
+import { SendEmailOptions } from './interfaces/email-options.interface';
 
 @Injectable()
 export class EmailService {
