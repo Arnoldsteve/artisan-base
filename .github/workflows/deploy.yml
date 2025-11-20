@@ -92,6 +92,7 @@ jobs:
 
       - name: Pull Vercel Project Configuration
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./packages/dashboard 
         # Note: We specify the working directory in the next step instead of `cd`.
 
       - name: Build Project Artifacts
@@ -125,6 +126,7 @@ jobs:
 
       - name: Pull Vercel Project Configuration
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./packages/storefront 
 
       - name: Build Project Artifacts
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
