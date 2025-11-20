@@ -13,50 +13,44 @@ on:
 
 jobs:
   # ============================================
-  # JOB 1: CI - Lint, Test & Build
+  # JOB 1: CI - Runs on ALL branches
   # ============================================
-ci:
-  name: Lint & Test
-  runs-on: ubuntu-latest
-  env:
-    PATH: /home/runner/.local/share/pnpm:$PATH
+  ci:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
-        cache: "pnpm"
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Setup PNPM
-      uses: pnpm/action-setup@v3
-      with:
-        version: 9
+      - name: Run linter
+        run: npm run lint
 
-    - name: Install dependencies
-      run: pnpm install
+      - name: Run tests
+        run: npm run test
 
-    - name: Run linter
-      run: pnpm run lint
-
-    - name: Run tests
-      run: pnpm run test
-
-    - name: Build all packages
-      run: pnpm run build
+      - name: Build all packages
+        run: npm run build
 
   # ============================================
   # JOB 2: Deploy API to Render
+  # Only runs on 'main' branch after CI passes
   # ============================================
   deploy-api:
     name: Deploy API (Render)
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Trigger Render Deploy
         run: |
@@ -73,13 +67,14 @@ ci:
 
   # ============================================
   # JOB 3: Deploy Admin to Vercel
+  # Runs after API deployment succeeds
   # ============================================
   deploy-admin:
     name: Deploy Admin (Vercel)
     needs: deploy-api
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -87,7 +82,7 @@ ci:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install Vercel CLI
         run: npm install -g vercel
@@ -104,13 +99,14 @@ ci:
 
   # ============================================
   # JOB 4: Deploy Storefront to Vercel
+  # Runs after Admin deployment succeeds
   # ============================================
   deploy-storefront:
     name: Deploy Storefront (Vercel)
     needs: deploy-admin
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -118,7 +114,17 @@ ci:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install Vercel CLI
         run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        run: |
+          cd packages/storefront
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STOREFRONT }}
