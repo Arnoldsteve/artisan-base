@@ -5,16 +5,17 @@ on:
     branches:
       - main
       - develop
-      - new-features
+      - 'feature/**' # More robust way to match feature branches
   pull_request:
     branches:
       - main
       - develop
 
 jobs:
-  # ============================================
+  # =============================================================
   # JOB 1: CI - Lint, Test, Build
-  # ============================================
+  # This job runs on all pushes and pull requests to ensure code quality.
+  # =============================================================
   ci:
     name: Lint, Test & Build
     runs-on: ubuntu-latest
@@ -23,16 +24,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
+      # --- FIX: CORRECT ORDER ---
+      # 1. Install PNPM first. This makes the `pnpm` command available.
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           version: 9
+
+      # 2. Setup Node.js. This will now detect and use the installed pnpm.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm" # This now correctly caches based on the pnpm lockfile.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -43,13 +47,13 @@ jobs:
       - name: Run tests
         run: pnpm run test
 
-      - name: Build all packages
+      - name: Build all packages in the monorepo
         run: pnpm turbo run build --cache-dir .turbo
 
-  # ============================================
+  # =============================================================
   # JOB 2: Deploy API to Render
-  # Only runs on 'main' branch after CI passes
-  # ============================================
+  # This job only runs on a push to the 'main' branch AFTER the 'ci' job succeeds.
+  # =============================================================
   deploy-api:
     name: Deploy API (Render)
     needs: ci
@@ -57,22 +61,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger Render Deploy
-        run: |
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys
+      - name: Trigger Render Deploy Hook
+        # Using a deploy hook is simpler and more standard than the API endpoint for basic triggers.
+        # You can get this URL from your Render service's settings page.
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
-      - name: Wait for deployment
+      - name: Wait for deployment to start
+        # This is a simple confirmation, not a full status check.
+        # It gives Render's system a moment to begin the process.
         run: |
-          echo "⏳ Waiting for API deployment to complete..."
-          sleep 60
-          echo "✅ API deployment triggered successfully"
+          echo "✅ API deployment triggered successfully."
+          echo "⏳ Note: The next jobs will start immediately. Render deployment will continue in the background."
+          sleep 10 # A short, optional pause.
 
-  # ============================================
+  # =============================================================
   # JOB 3: Deploy Admin to Vercel
-  # ============================================
+  # This job runs after the API deployment is TRIGGERED (not necessarily completed).
+  # =============================================================
   deploy-admin:
     name: Deploy Admin (Vercel)
     needs: deploy-api
@@ -83,30 +88,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - name: Install Vercel CLI
-        run: npm install -g vercel
+        run: npm install --global vercel
 
-      - name: Deploy Admin
-        run: |
-          cd packages/admin
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
+      - name: Pull Vercel Project Configuration
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        # Note: We specify the working directory in the next step instead of `cd`.
 
-  # ============================================
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./packages/admin # Specify the directory for this command
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./packages/admin # Specify the directory for this command
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
+
+  # =============================================================
   # JOB 4: Deploy Storefront to Vercel
-  # ============================================
+  # This job runs after the admin app deployment is triggered.
+  # =============================================================
   deploy-storefront:
     name: Deploy Storefront (Vercel)
-    needs: deploy-admin
+    needs: deploy-admin # Runs sequentially after admin deploy
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
@@ -114,20 +121,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - name: Install Vercel CLI
-        run: npm install -g vercel
+        run: npm install --global vercel
 
-      - name: Deploy Storefront
-        run: |
-          cd packages/storefront
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STOREFRONT }}
+      - name: Pull Vercel Project Configuration
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./packages/storefront # Specify the directory for this command
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./packages/storefront # Specify the directory for this command
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STOREFRONT }}
