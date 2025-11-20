@@ -18,7 +18,7 @@ jobs:
   ci:
     name: Lint & Test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,19 +27,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      # Install PNPM globally so Turborepo can find it
+      - name: Install PNPM globally
+        run: npm install -g pnpm@9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Run linter
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Run tests
-        run: npm run test
+        run: pnpm run test
 
       - name: Build all packages
-        run: npm run build
+        run: pnpm run build
 
   # ============================================
   # JOB 2: Deploy API to Render
@@ -50,7 +54,7 @@ jobs:
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Trigger Render Deploy
         run: |
@@ -67,14 +71,13 @@ jobs:
 
   # ============================================
   # JOB 3: Deploy Admin to Vercel
-  # Runs after API deployment succeeds
   # ============================================
   deploy-admin:
     name: Deploy Admin (Vercel)
     needs: deploy-api
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -99,14 +102,13 @@ jobs:
 
   # ============================================
   # JOB 4: Deploy Storefront to Vercel
-  # Runs after Admin deployment succeeds
   # ============================================
   deploy-storefront:
     name: Deploy Storefront (Vercel)
     needs: deploy-admin
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
