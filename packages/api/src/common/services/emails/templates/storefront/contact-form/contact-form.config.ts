@@ -1,4 +1,4 @@
-import { EmailTemplateConfig } from '../../../interfaces/email-template.interface';
+import { EmailTemplateConfig } from "../../../interfaces/email-config.interface";
 
 /**
  * Configuration for the contact form email template
