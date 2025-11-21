@@ -20,7 +20,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
   const success = featuredResponse?.success;
   const message = featuredResponse?.message;
 
-  // console.log("features products in the landing page", products);
+  console.log("features products in the landing page", products);
 
   if (isLoading) {
     return (

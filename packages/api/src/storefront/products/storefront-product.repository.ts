@@ -226,6 +226,8 @@ export class StorefrontProductRepository
         slug: true,
         description: true,
         price: true,
+        sku: true,
+        inventoryQuantity: true,
         isFeatured: true,
         isActive: true,
         images: true,

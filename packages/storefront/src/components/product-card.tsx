@@ -24,13 +24,13 @@ export const ProductCard = memo(function ProductCard({
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [addedProduct, setAddedProduct] = useState({
-    name: "",
-    price: 0,
-    image: "",
-    quantity: 1,
-  });
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [addedProduct, setAddedProduct] = useState({
+  //   name: "",
+  //   price: 0,
+  //   image: "",
+  //   quantity: 1,
+  // });
 
   const handleAddToCart = useCallback(() => {
     addToCart({
