@@ -24,10 +24,10 @@ import {
   CommandItem,
   CommandList,
 } from "@repo/ui/components/ui/command";
+import { useCheckoutContext } from "@/contexts/checkout-context";
 import { Check, ArrowRight } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 
-import { useCheckoutContext } from "@/contexts/checkout-context";
 
 export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
