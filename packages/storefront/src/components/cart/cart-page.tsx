@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@repo/ui/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { formatMoney } from "@/lib/money";
+import Link from "next/link";
 
 export default function CartPage() {
   const { items, getTotalPrice, getTotalItems, clearCart } = useCart();
@@ -25,6 +26,13 @@ export default function CartPage() {
     );
   }
 
+  // Debug logs
+  // console.log("🛒 Cart Items:", items);
+  // console.log("🧮 Total Items:", getTotalItems());
+  // console.log("💵 Total Price:", getTotalPrice());
+  // console.log("🧹 clearCart function:", clearCart);
+
+
   return (
     <div className="flex justify-center  items-center bg-background p-0 md:p-6">
       <div className="w-full max-w-6xl">
@@ -36,7 +44,7 @@ export default function CartPage() {
             </h1>
 
             <Separator />
-            
+
             {items.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
                 <p>Your cart is empty.</p>
@@ -82,10 +90,12 @@ export default function CartPage() {
         </div>
 
         <div className="flex items-center gap-2 pt-6">
-          <Button variant="outline" onClick={() => router.push("/products")}>
-            <ArrowLeft className="h-3 w-3" />
-            Continue Shopping
-          </Button>
+          <Link href="/products">
+            <Button variant="outline">
+              <ArrowLeft className="h-3 w-3" />
+              Continue Shopping
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

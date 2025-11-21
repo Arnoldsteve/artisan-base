@@ -21,7 +21,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
         href={`/products/${item.slug}`}
         className="flex items-center justify-between gap-4 py-3 hover:bg-muted/30 transition-colors rounded-md"
       >
-        <div className="flex items-center justify-between gap-4 py-1">
+        <div className="flex items-center gap-4">
           <div className="flex-shrink-0">
             <Image
               src={
@@ -44,11 +44,11 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
             </div>
             <p className="text-sm text-orange-500">Few units left</p>
           </div>
+          </div>
 
           <div className="hidden md:block font-semibold text-right min-w-[100px]">
             {formatMoney(item.price * item.quantity, "KES")}
           </div>
-        </div>
       </Link>
 
       <div className="flex items-center justify-between py-2">
