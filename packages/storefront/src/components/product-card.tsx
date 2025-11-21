@@ -76,8 +76,11 @@ export const ProductCard = memo(function ProductCard({
               isImageLoading ? "blur-md" : "blur-0"
             } group-hover:scale-105`}
             onLoad={() => setIsImageLoading(false)}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"
+            sizes="(max-width: 768px) 50vw, 
+                  (max-width: 1024px) 33vw, 
+                  (max-width: 1280px) 20vw, 
+                  16vw"
           />
         </Link>
         {isImageLoading && (
@@ -85,7 +88,7 @@ export const ProductCard = memo(function ProductCard({
         )}
 
         {showWishlist && (
-          <button
+          <Button
             onClick={handleToggleWishlist}
             className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white transition"
           >
@@ -94,7 +97,7 @@ export const ProductCard = memo(function ProductCard({
                 isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"
               }`}
             />
-          </button>
+          </Button>
         )}
       </div>
 

@@ -10,9 +10,8 @@ export default function CategoryListPage() {
   // const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
   //   useInfiniteCategories();
 
-   const { data: response, isLoading, error, refetch } = useCategories();
-    const categories = response?.data || [];
-  
+  const { data: response, isLoading, error, refetch } = useCategories();
+  const categories = response?.data || [];
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,13 +29,11 @@ export default function CategoryListPage() {
   //   return () => observer.disconnect();
   // }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  
   if (isLoading) return <CategoriesLoading />;
 
   // console.log("data in the category list", data)
   // const categories = data?.pages.flatMap((p) => p?.data) ?? [];
   // console.log("data in the category list", categories)
-
 
   return (
     <section className="py-4 bg-muted/100">
@@ -75,6 +72,10 @@ export default function CategoryListPage() {
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
+                      sizes="(max-width: 768px) 100vw, 
+                            (max-width: 1024px) 33vw, 
+                            (max-width: 1280px) 20vw, 
+                            16vw"
                     />
                   </div>
                   <div className="p-4">
