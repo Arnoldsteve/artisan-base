@@ -33,7 +33,7 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
   const createReviewMutation = useCreateReview();
   const { data: productReviews, isLoading } = useProductReviews(productId);
 
-  console.log("productReviews", productReviews)
+  // console.log("productReviews", productReviews)
 
   const {
     register,

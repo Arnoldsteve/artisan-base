@@ -27,10 +27,10 @@ export default function CartPage() {
   }
 
   // Debug logs
-  // console.log("🛒 Cart Items:", items);
-  // console.log("🧮 Total Items:", getTotalItems());
-  // console.log("💵 Total Price:", getTotalPrice());
-  // console.log("🧹 clearCart function:", clearCart);
+  console.log("🛒 Cart Items:", items);
+  console.log("🧮 Total Items:", getTotalItems());
+  console.log("💵 Total Price:", getTotalPrice());
+  console.log("🧹 clearCart function:", clearCart);
 
 
   return (

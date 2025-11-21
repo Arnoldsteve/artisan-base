@@ -26,6 +26,7 @@ import StarRating from "@/components/products/star-rating";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { Product } from "@/types";
 import ProductDetailsSkeleton from "@/skeletons/products/product-details-skeleton";
+import { Label } from "@repo/ui/components/ui/label";
 
 
 interface ProductDetailsPageProps {
@@ -326,9 +327,9 @@ export default function ProductDetailsPage({ initialProduct }: ProductDetailsPag
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <label className="text-sm font-medium text-foreground">
+                <Label className="text-sm font-medium text-foreground">
                   Quantity:
-                </label>
+                </Label>
                 <div className="flex items-center border rounded-lg">
                   <Button
                     variant="ghost"
