@@ -27,6 +27,7 @@ import { UserAccountDropdown } from "./UserAccountDropdown";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Input } from "@repo/ui/components/ui/input";
 
 export function Header() {
   const pathname = usePathname();
@@ -39,17 +40,6 @@ export function Header() {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const debouncedQuery = useDebounce(searchQuery, 300);
-  const { data: searchResults = [], isLoading: isSearching } = useProductSearch(
-    debouncedQuery,
-    5
-  );
-
-  const filteredResults = useMemo(() => {
-    if (!debouncedQuery.trim()) return [];
-    return searchResults.slice(0, 5);
-  }, [searchResults, debouncedQuery]);
-
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchQuery(e.target.value);
@@ -61,8 +51,7 @@ export function Header() {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (searchQuery.trim()) {
-        // Navigate to search results page
-        window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+        router.push ( `/products?search=${encodeURIComponent(searchQuery)}`);
       }
     },
     [searchQuery]
@@ -71,38 +60,6 @@ export function Header() {
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
   }, []);
-
-  const toggleSearch = useCallback(() => {
-    setIsSearchOpen((prev) => !prev);
-    if (!isSearchOpen && searchInputRef.current) {
-      setTimeout(() => searchInputRef.current?.focus(), 0);
-    }
-    if (isSearchOpen) {
-      setSearchQuery("");
-    }
-  }, [isSearchOpen]);
-
-  // Close dropdown on click outside or Escape
-  useEffect(() => {
-    if (!isUserDropdownOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (
-        userDropdownRef.current &&
-        !userDropdownRef.current.contains(e.target as Node)
-      ) {
-        setIsUserDropdownOpen(false);
-      }
-    }
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") setIsUserDropdownOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [isUserDropdownOpen]);
 
   return (
     <header className="bg-background border-b sticky top-0 z-50">
@@ -158,56 +115,20 @@ export function Header() {
           {/* Search Bar */}
           <div className="hidden md:flex items-center space-x-4 flex-1 max-w-md mx-8">
             <form onSubmit={handleSearchSubmit} className="relative flex-1">
-              <input
+              <Input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search products..."
+                placeholder="123 Search products..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full px-4 py-2 pl-10 pr-4 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 pl-10  "
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-              {/* Search Results Dropdown */}
-              {isSearchOpen && filteredResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-input rounded-lg shadow-lg z-50">
-                  {filteredResults.map((product: Product) => (
-                    <Link
-                      key={product.id}
-                      href={`/products/${product.id}`}
-                      className="flex items-center space-x-3 p-3 hover:bg-accent transition-colors"
-                      onClick={() => setIsSearchOpen(false)}
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {product.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          ${product.price.toFixed(2)}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
             </form>
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSearch}
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </Button>
             <CartButton onClick={() => router.push("/cart")} />
             <div className="relative" ref={userDropdownRef}>
               <Button
@@ -244,7 +165,7 @@ export function Header() {
         </div>
 
         {/* Mobile Search */}
-        {isSearchOpen && (
+        {/* {isSearchOpen && ( */}
           <div className="md:hidden py-4 border-t">
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
@@ -258,7 +179,7 @@ export function Header() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </form>
           </div>
-        )}
+        {/* )} */}
 
         {/* Mobile Menu */}
         {isMenuOpen && (
