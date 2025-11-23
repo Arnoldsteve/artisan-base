@@ -20,11 +20,8 @@ import {
   LogIn,
 } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
-import { useProductSearch } from "@/hooks/use-products";
-import { Product } from "@/types";
 import { CartButton } from "@/components/cart/cart-button";
 import { UserAccountDropdown } from "./UserAccountDropdown";
-import { useDebounce } from "@/hooks/use-debounce";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Input } from "@repo/ui/components/ui/input";
@@ -35,7 +32,6 @@ export function Header() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +47,7 @@ export function Header() {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (searchQuery.trim()) {
-        router.push ( `/products?search=${encodeURIComponent(searchQuery)}`);
+        router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
       }
     },
     [searchQuery]
@@ -113,19 +109,24 @@ export function Header() {
           </nav>
 
           {/* Search Bar */}
-          <div className="hidden md:flex items-center space-x-4 flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearchSubmit} className="relative flex-1">
-              <Input
-                ref={searchInputRef}
-                type="text"
-                placeholder="123 Search products..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full px-4 pl-10  "
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            </form>
-          </div>
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative flex-1 max-w-md"
+          >
+            <Input
+              placeholder="Search for products..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className=""
+            />
+
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </form>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
@@ -165,21 +166,27 @@ export function Header() {
         </div>
 
         {/* Mobile Search */}
-        {/* {isSearchOpen && ( */}
-          <div className="md:hidden py-4 border-t">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full px-4 py-2 pl-10 pr-4 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            </form>
-          </div>
-        {/* )} */}
+        <div className="md:hidden py-4 border-t">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <Input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full px-4 pl-10"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Button
+              type="submit"
+              variant={"default"}
+              size={"sm"}
+              className="absolute right-1 top-1/2 transform -translate-y-1/2"
+            >
+              Search
+            </Button>
+          </form>
+        </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
