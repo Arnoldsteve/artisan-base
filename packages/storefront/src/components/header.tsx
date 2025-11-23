@@ -108,24 +108,25 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* Search Bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="relative flex-1 max-w-md"
+            className="hidden md:flex max-w-md"
           >
-            <Input
-              placeholder="Search for products..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className=""
-            />
-
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              <Search className="h-4 w-4" />
-            </button>
+            <div className="flex w-full rounded-lg border border-input overflow-hidden">
+              <Input
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="flex-1 border-none rounded-none focus:ring-0"
+              />
+              <Button
+                type="submit"
+                variant="default"
+                className="px-4 rounded-none"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
           </form>
 
           {/* Desktop Actions */}
@@ -167,24 +168,22 @@ export function Header() {
 
         {/* Mobile Search */}
         <div className="md:hidden py-4 border-t">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <Input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full px-4 pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Button
-              type="submit"
-              variant={"default"}
-              size={"sm"}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2"
-            >
-              Search
-            </Button>
+          <form onSubmit={handleSearchSubmit} className="md:hidden max-w-md">
+            <div className="flex w-full rounded-lg border border-input overflow-hidden">
+              <Input
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="flex-1 border-none rounded-none focus:ring-0"
+              />
+              <Button
+                type="submit"
+                variant="default"
+                className="px-4 rounded-none"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
           </form>
         </div>
 
