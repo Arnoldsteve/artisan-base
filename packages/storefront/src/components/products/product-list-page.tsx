@@ -81,20 +81,33 @@ export function ProductsContent() {
     <section className="py-4 bg-muted/50">
       <div className="container mx-auto px-2 md:px-4 py-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2 space-y-2 md:space-y-0 md:space-x-2">
           <p className="text-2xl font-bold">
             {products.length} product{products.length !== 1 ? "s" : ""} found
           </p>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2"
-          >
-            <Filter className="h-4 w-4" />
-            <span>Filters</span>
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2"
+            >
+              <Filter className="h-4 w-4" />
+              <span>Filters</span>
+            </Button>
+
+            {showFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(false)}
+                className="flex items-center space-x-2"
+              >
+                Close Filters
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Filters */}
