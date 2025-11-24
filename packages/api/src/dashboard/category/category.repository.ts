@@ -17,7 +17,6 @@ const CACHE_TTL = 10 * 1000;
 
 @Injectable({ scope: Scope.REQUEST })
 export class CategoryRepository implements ICategoryRepository {
-  private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
 
   private prismaClient: PrismaClient | null = null;
