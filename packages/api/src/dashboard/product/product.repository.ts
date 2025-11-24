@@ -86,7 +86,7 @@ export class ProductRepository implements IProductRepository {
   }
 
   async findAll(pagination: PaginationQueryDto) {
-    const { page, limit = 50, search } = pagination;
+    const { page, limit, search } = pagination;
 
     const prisma = await this.getPrisma();
 
