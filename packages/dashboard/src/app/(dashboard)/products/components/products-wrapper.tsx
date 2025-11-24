@@ -51,7 +51,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 100,
   });
 
   // --- UI State for Modals/Sheets ---

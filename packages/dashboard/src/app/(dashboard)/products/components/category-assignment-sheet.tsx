@@ -128,9 +128,9 @@ export function CategoryAssignmentSheet({
     .map((id) => allCategoriesMap[id])
     .filter(Boolean);
 
-  console.log("product.categories", product?.categories);
-  console.log("selectedCategoryIds", selectedCategoryIds);
-  console.log("selectedCategories", selectedCategories);
+  // console.log("product.categories", product?.categories);
+  // console.log("selectedCategoryIds", selectedCategoryIds);
+  // console.log("selectedCategories", selectedCategories);
 
   // console.log("allCategoriesMap",allCategoriesMap)
   // console.log("selectedCategories",selectedCategories)

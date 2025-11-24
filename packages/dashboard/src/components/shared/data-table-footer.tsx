@@ -21,6 +21,8 @@ export function DataTablePagination<TData>({
   totalCount,
 }: DataTablePaginationProps<TData>) {
   const { pageIndex, pageSize } = table.getState().pagination;
+
+  console.log("Page Size:", pageSize);
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const firstItem = Math.min(pageIndex * pageSize + 1, totalCount);

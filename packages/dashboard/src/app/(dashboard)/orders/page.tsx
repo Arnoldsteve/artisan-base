@@ -11,7 +11,7 @@ export default async function OrdersPage() {
 
     initialData = await serverApi.get<PaginatedResponse<Order>>(
       "/dashboard/orders",
-      { page: 1, limit: 10 }
+      { page: 1, limit: 50 }
     );
   } catch (error) {
     console.error("Failed to fetch initial orders on the server:", error);
