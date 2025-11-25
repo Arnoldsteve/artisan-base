@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-// Import the main client from the primary package
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-// Import the specific StorageClient type from its own sub-package
-// THIS LINE WILL NOW WORK because the package has been installed
 import { StorageClient } from '@supabase/storage-js';
 
 @Injectable()
