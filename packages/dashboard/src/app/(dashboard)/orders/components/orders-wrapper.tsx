@@ -44,7 +44,7 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 50,
+    pageSize: 100,
   });
 
   // --- Modal/Dialog UI State ---
