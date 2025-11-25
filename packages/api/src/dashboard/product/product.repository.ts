@@ -85,6 +85,71 @@ export class ProductRepository implements IProductRepository {
     );
   }
 
+  async bulkCreate(dtos: CreateProductDto[]) {
+    const prisma = await this.getPrisma();
+
+    const slugsToTest: string[] = [];
+    const skusToTest: string[] = [];
+    const productsToCreate = dtos.map((dto) => {
+      const slug = slugify(dto.name, { lower: true, strict: true });
+      slugsToTest.push(slug);
+      if (dto.sku) {
+        skusToTest.push(dto.sku);
+      }
+      return { ...dto, slug, sku: dto.sku?.trim() || undefined };
+    });
+
+    if (skusToTest.length > 0) {
+      const existingSkus = await prisma.product.findMany({
+        where: { sku: { in: skusToTest } },
+        select: { sku: true },
+      });
+      if (existingSkus.length > 0) {
+        throw new ConflictException(
+          `The following SKUs already exist: ${existingSkus.map((p) => p.sku).join(', ')}`,
+        );
+      }
+    }
+
+    const existingSlugs = new Set(
+      (
+        await prisma.product.findMany({
+          where: { slug: { in: slugsToTest } },
+          select: { slug: true },
+        })
+      ).map((p) => p.slug),
+    );
+
+    const batchSlugs = new Set<string>();
+
+    for (const product of productsToCreate) {
+      let finalSlug = product.slug;
+      let counter = 1;
+      // Check if slug exists in DB or in the current batch we are building
+      while (existingSlugs.has(finalSlug) || batchSlugs.has(finalSlug)) {
+        finalSlug = `${product.slug}-${counter}`;
+        counter++;
+      }
+      product.slug = finalSlug;
+      batchSlugs.add(finalSlug);
+    }
+
+    try {
+      const result = await prisma.product.createMany({
+        data: productsToCreate,
+      });
+
+      this.invalidateCache();
+      return { count: result.count };
+    } catch (err) {
+      // This can still fail if there's a race condition, but it's much less likely.
+      this.logger.error('Bulk create failed', err);
+      throw new InternalServerErrorException(
+        'Failed to create products in bulk.',
+      );
+    }
+  }
+
   async findAll(pagination: PaginationQueryDto) {
     const { page, limit, search } = pagination;
 

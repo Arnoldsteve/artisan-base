@@ -1,12 +1,26 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@repo/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@repo/ui";
 import { toast } from "sonner";
 import { DataTable } from "@/components/shared/data-table";
-import { useReactTable, getCoreRowModel, ColumnDef } from "@tanstack/react-table";
+import {
+  useReactTable,
+  getCoreRowModel,
+  ColumnDef,
+} from "@tanstack/react-table";
 import * as XLSX from "xlsx";
-import { productFormSchema, ProductFormData } from "@/validation-schemas/products";
+import {
+  productFormSchema,
+  ProductFormData,
+} from "@/validation-schemas/products";
 
 export interface BulkProductRow extends ProductFormData {
   isValid: boolean;
@@ -20,7 +34,12 @@ interface BulkUploadModalProps {
   onConfirm: (validRows: BulkProductRow[]) => void;
 }
 
-export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUploadModalProps) {
+export function BulkUploadModal({
+  file,
+  isOpen,
+  onClose,
+  onConfirm,
+}: BulkUploadModalProps) {
   const [rows, setRows] = useState<BulkProductRow[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -28,72 +47,89 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
     if (!file || !isOpen) return;
 
     const parseFile = async () => {
-      try {
-        let rawRows: any[] = [];
+      //  try {
+      let rawRows: any[] = [];
 
-        if (file.name.endsWith(".csv")) {
-          const text = await file.text();
-          const lines = text.split("\n").filter(Boolean);
-          const headers = lines[0].split(",");
-          rawRows = lines.slice(1).map((line) => {
-            const values = line.split(",");
-            const obj: any = {};
-            headers.forEach((h, i) => (obj[h] = values[i]));
-            return obj;
-          });
-        } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
-          const arrayBuffer = await file.arrayBuffer();
-          const workbook = XLSX.read(arrayBuffer, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const json: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-          const headers = json[0] as string[];
-          rawRows = json.slice(1).map((row) => {
-            const obj: any = {};
-            headers.forEach((h, i) => (obj[h] = row[i]));
-            return obj;
-          });
-        } else {
-          toast.error("Unsupported file type");
-          onClose();
-          return;
-        }
+      if (file.name.endsWith(".csv")) {
+        const text = await file.text();
+        const lines = text.split("\n").filter(Boolean);
+        const headers = lines[0].split(",");
+        rawRows = lines.slice(1).map((line) => {
+          const values = line.split(",");
+          const obj: any = {};
+          headers.forEach((h, i) => (obj[h] = values[i]));
+          return obj;
+        });
+      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const json: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const headers = json[0] as string[];
+        rawRows = json.slice(1).map((row) => {
+          const obj: any = {};
+          headers.forEach((h, i) => (obj[h] = row[i]));
+          return obj;
+        });
+      } else {
+        toast.error("Unsupported file type");
+        onClose();
+        return;
+      }
 
-        // Validate each row using zod schema
-        const parsedRows: BulkProductRow[] = rawRows.map((row) => {
-          const parsed: BulkProductRow = { ...row, isValid: true, errors: [] };
-          const result = productFormSchema.safeParse({
-            name: row.Name ?? row.name,
-            price: row.Price ?? row.price,
-            inventoryQuantity: row.Inventory ?? row.inventoryQuantity,
-            sku: row.SKU ?? row.sku,
-            description: row.Description ?? row.description,
-            isActive: row["Is Active"] ?? row.isActive ?? true,
-            isFeatured: row["Is Featured"] ?? row.isFeatured ?? false,
-          });
-
-          if (!result.success) {
-            parsed.isValid = false;
-            parsed.errors = result.error.errors.map((e) => e.message);
-          } else {
-            Object.assign(parsed, result.data);
-          }
-
-          return parsed;
+      // Validate each row using zod schema
+      const parsedRows: BulkProductRow[] = rawRows.map((row) => {
+        // Try to parse the row into the shape that your schema expects
+        const result = productFormSchema.safeParse({
+          name: row.Name ?? row.name,
+          price: row.Price ?? row.price,
+          inventoryQuantity:
+            row.Inventory ?? row.inventoryQuantity ?? row.inventoryquantity,
+          sku: row.SKU ?? row.sku,
+          description: row.Description ?? row.description,
+          // Handle boolean conversion for 'Is Active' and 'Is Featured'
+          isActive: ["true", "active", "yes", "1"].includes(
+            String(row["Is Active"] ?? row.isActive ?? "true").toLowerCase()
+          ),
+          isFeatured: ["true", "active", "yes", "1"].includes(
+            String(
+              row["Is Featured"] ?? row.isFeatured ?? "false"
+            ).toLowerCase()
+          ),
         });
 
-        setRows(parsedRows);
-      } catch (err) {
-        toast.error("Failed to parse the file");
-        onClose();
-      }
+        // --- THIS IS THE FIX ---
+        if (result.success) {
+          // If validation succeeds, create a CLEAN object with ONLY the validated data
+          return {
+            ...result.data, // This has the correctly cased keys (name, price, etc.)
+            isValid: true,
+            errors: [],
+          };
+        } else {
+          // If validation fails, return the original data plus the errors
+          return {
+            ...row, // Keep original data to display to the user
+            name: row.Name ?? row.name, // Ensure at least 'name' is present for display
+            isValid: false,
+            errors: result.error.errors.map(
+              (e) => `${e.path.join(".")}: ${e.message}`
+            ),
+          };
+        }
+      });
+
+      setRows(parsedRows);
+
+      // ... (catch block)
     };
 
     parseFile();
   }, [file, isOpen, onClose]);
-
   const handleConfirm = () => {
     const validRows = rows.filter((r) => r.isValid);
+    console.log("Valid rows to upload:", validRows);
     if (validRows.length === 0) {
       toast.error("No valid rows to upload");
       return;
@@ -102,16 +138,31 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
     onClose();
   };
 
-  const columns = useMemo<ColumnDef<BulkProductRow>[]>(() => [
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "price", header: "Price" },
-    { accessorKey: "inventoryQuantity", header: "Inventory" },
-    { accessorKey: "sku", header: "SKU" },
-    { accessorKey: "isActive", header: "Is Active", cell: ({ row }) => row.original.isActive ? "Active" : "Inactive" },
-    { accessorKey: "isFeatured", header: "Is Featured", cell: ({ row }) => row.original.isFeatured ? "Yes" : "No" },
-    { accessorKey: "description", header: "Description" },
-    { accessorKey: "errors", header: "Errors", cell: ({ row }) => row.original.errors.join(", ") },
-  ], []);
+  const columns = useMemo<ColumnDef<BulkProductRow>[]>(
+    () => [
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "price", header: "Price" },
+      { accessorKey: "inventoryQuantity", header: "Inventory" },
+      { accessorKey: "sku", header: "SKU" },
+      {
+        accessorKey: "isActive",
+        header: "Is Active",
+        cell: ({ row }) => (row.original.isActive ? "Active" : "Inactive"),
+      },
+      {
+        accessorKey: "isFeatured",
+        header: "Is Featured",
+        cell: ({ row }) => (row.original.isFeatured ? "Yes" : "No"),
+      },
+      { accessorKey: "description", header: "Description" },
+      {
+        accessorKey: "errors",
+        header: "Errors",
+        cell: ({ row }) => row.original.errors.join(", "),
+      },
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: rows,
@@ -131,8 +182,12 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
         </div>
 
         <DialogFooter className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleConfirm} disabled={isProcessing}>Upload Valid Rows</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} disabled={isProcessing}>
+            Upload Valid Rows
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

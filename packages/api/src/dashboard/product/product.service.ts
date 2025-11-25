@@ -14,6 +14,9 @@ export class ProductService {
   async create(createProductDto: CreateProductDto) {
     return this.productRepository.create(createProductDto);
   }
+  async bulkCreate(createProductDtos: CreateProductDto[]) {
+    return this.productRepository.bulkCreate(createProductDtos);
+  }
 
   async findAll(paginationQuery: PaginationQueryDto) {
     return this.productRepository.findAll(paginationQuery);

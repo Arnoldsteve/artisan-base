@@ -20,6 +20,7 @@ import {
   useProducts,
   useUpdateProduct,
   useDeleteProduct,
+  useBulkCreateProducts,
 } from "@/hooks/use-products";
 
 // UI Components
@@ -51,7 +52,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 100,
+    pageSize: 10,
   });
 
   // --- UI State for Modals/Sheets ---
@@ -89,6 +90,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   // console.log("product data from product view: ", paginatedResponse);
 
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
+  const { mutate: bulkCreateProducts, isPending: isBulkCreating } = useBulkCreateProducts();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
@@ -150,33 +152,25 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
     setIsBulkModalOpen(true);
   };
 
-  const handleBulkImport = async (validRows: BulkProductRow[]) => {
+ const handleBulkImport = async (validRows: BulkProductRow[]) => {
+   console.log("bulk create products called");
     if (validRows.length === 0) {
       toast.error("No valid rows to upload");
       return;
     }
 
-    try {
-      await toast.promise(
-        Promise.all(
-          validRows.map((row) => {
-            const { id, ...createData } = row; // remove id if exists
-            return createProduct(createData as CreateProductDto);
-          })
-        ),
-        {
-          loading: `Uploading ${validRows.length} products...`,
-          success: `${validRows.length} products uploaded successfully!`,
-          error: "Failed to upload one or more products",
-        }
-      );
+    return
+    bulkCreateProducts(validRows as CreateProductDto[], {
 
-      // Close modal and reset file
-      setIsBulkModalOpen(false);
-      setBulkFile(null);
-    } catch (err) {
-      console.error(err);
-    }
+      onSuccess: () => {
+        setIsBulkModalOpen(false);
+        setBulkFile(null);
+      },
+      onError: () => {
+        // You can add specific logic here if needed, but the hook already shows a toast.
+        // For example, you might want to keep the modal open on error.
+      }
+    });
   };
 
   const tableMeta: ProductTableMeta<Product> = {
