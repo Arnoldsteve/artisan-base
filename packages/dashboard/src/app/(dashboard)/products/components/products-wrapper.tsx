@@ -90,7 +90,8 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   // console.log("product data from product view: ", paginatedResponse);
 
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
-  const { mutate: bulkCreateProducts, isPending: isBulkCreating } = useBulkCreateProducts();
+  const { mutate: bulkCreateProducts, isPending: isBulkCreating } =
+    useBulkCreateProducts();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
@@ -152,24 +153,36 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
     setIsBulkModalOpen(true);
   };
 
- const handleBulkImport = async (validRows: BulkProductRow[]) => {
-   console.log("bulk create products called");
+  const handleBulkImport = async (validRows: BulkProductRow[]) => {
+    console.log("bulk create products called", validRows);
+
     if (validRows.length === 0) {
       toast.error("No valid rows to upload");
       return;
     }
 
-    return
-    bulkCreateProducts(validRows as CreateProductDto[], {
+    const cleanedRows: CreateProductDto[] = validRows.map((row) => ({
+      name: row.name,
+      slug: slugify(row.name),
+      price: Number(row.price),
+      sku: row.sku,
+      inventoryQuantity: row.inventoryQuantity,
+      description: row.description,
+      isActive: row.isActive,
+      isFeatured: row.isFeatured,
+    }));
 
+    console.log("Cleaned rows (final payload to backend):", cleanedRows);
+    // return; 
+
+    bulkCreateProducts(cleanedRows, {
       onSuccess: () => {
         setIsBulkModalOpen(false);
         setBulkFile(null);
       },
       onError: () => {
-        // You can add specific logic here if needed, but the hook already shows a toast.
-        // For example, you might want to keep the modal open on error.
-      }
+        // optional
+      },
     });
   };
 

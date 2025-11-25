@@ -47,89 +47,85 @@ export function BulkUploadModal({
     if (!file || !isOpen) return;
 
     const parseFile = async () => {
-      //  try {
-      let rawRows: any[] = [];
+      try {
+        let rawRows: any[] = [];
 
-      if (file.name.endsWith(".csv")) {
-        const text = await file.text();
-        const lines = text.split("\n").filter(Boolean);
-        const headers = lines[0].split(",");
-        rawRows = lines.slice(1).map((line) => {
-          const values = line.split(",");
-          const obj: any = {};
-          headers.forEach((h, i) => (obj[h] = values[i]));
-          return obj;
-        });
-      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
-        const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const json: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        const headers = json[0] as string[];
-        rawRows = json.slice(1).map((row) => {
-          const obj: any = {};
-          headers.forEach((h, i) => (obj[h] = row[i]));
-          return obj;
-        });
-      } else {
-        toast.error("Unsupported file type");
-        onClose();
-        return;
-      }
-
-      // Validate each row using zod schema
-      const parsedRows: BulkProductRow[] = rawRows.map((row) => {
-        // Try to parse the row into the shape that your schema expects
-        const result = productFormSchema.safeParse({
-          name: row.Name ?? row.name,
-          price: row.Price ?? row.price,
-          inventoryQuantity:
-            row.Inventory ?? row.inventoryQuantity ?? row.inventoryquantity,
-          sku: row.SKU ?? row.sku,
-          description: row.Description ?? row.description,
-          // Handle boolean conversion for 'Is Active' and 'Is Featured'
-          isActive: ["true", "active", "yes", "1"].includes(
-            String(row["Is Active"] ?? row.isActive ?? "true").toLowerCase()
-          ),
-          isFeatured: ["true", "active", "yes", "1"].includes(
-            String(
-              row["Is Featured"] ?? row.isFeatured ?? "false"
-            ).toLowerCase()
-          ),
-        });
-
-        // --- THIS IS THE FIX ---
-        if (result.success) {
-          // If validation succeeds, create a CLEAN object with ONLY the validated data
-          return {
-            ...result.data, // This has the correctly cased keys (name, price, etc.)
-            isValid: true,
-            errors: [],
-          };
+        if (file.name.endsWith(".csv")) {
+          const text = await file.text();
+          const lines = text.split("\n").filter(Boolean);
+          const headers = lines[0].split(",");
+          rawRows = lines.slice(1).map((line) => {
+            const values = line.split(",");
+            const obj: any = {};
+            headers.forEach((h, i) => (obj[h] = values[i]));
+            return obj;
+          });
+        } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+          const arrayBuffer = await file.arrayBuffer();
+          const workbook = XLSX.read(arrayBuffer, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const json: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          const headers = json[0] as string[];
+          rawRows = json.slice(1).map((row) => {
+            const obj: any = {};
+            headers.forEach((h, i) => (obj[h] = row[i]));
+            return obj;
+          });
         } else {
-          // If validation fails, return the original data plus the errors
-          return {
-            ...row, // Keep original data to display to the user
-            name: row.Name ?? row.name, // Ensure at least 'name' is present for display
-            isValid: false,
-            errors: result.error.errors.map(
-              (e) => `${e.path.join(".")}: ${e.message}`
-            ),
-          };
+          toast.error("Unsupported file type");
+          onClose();
+          return;
         }
-      });
 
-      setRows(parsedRows);
+        const parsedRows: BulkProductRow[] = rawRows.map((row) => {
+          const result = productFormSchema.safeParse({
+            name: row.Name ?? row.name,
+            price: row.Price ?? row.price,
+            inventoryQuantity:
+              row.Inventory ?? row.inventoryQuantity ?? row.inventoryquantity,
+            sku: row.SKU ?? row.sku,
+            description: row.Description ?? row.description,
+            isActive: ["true", "active", "yes", "1"].includes(
+              String(row["Is Active"] ?? row.isActive ?? "true").toLowerCase()
+            ),
+            isFeatured: ["true", "active", "yes", "1"].includes(
+              String(
+                row["Is Featured"] ?? row.isFeatured ?? "false"
+              ).toLowerCase()
+            ),
+          });
 
-      // ... (catch block)
+          if (result.success) {
+            return {
+              ...result.data, 
+              isValid: true,
+              errors: [],
+            };
+          } else {
+            return {
+              ...row, 
+              name: row.Name ?? row.name, 
+              isValid: false,
+              errors: result.error.errors.map(
+                (e) => `${e.path.join(".")}: ${e.message}`
+              ),
+            };
+          }
+        });
+
+        setRows(parsedRows);
+      } catch (err) {
+        toast.error("Failed to parse the file");
+        onClose();
+      }
     };
 
     parseFile();
   }, [file, isOpen, onClose]);
   const handleConfirm = () => {
     const validRows = rows.filter((r) => r.isValid);
-    console.log("Valid rows to upload:", validRows);
+    // console.log("Valid rows to upload:", validRows);
     if (validRows.length === 0) {
       toast.error("No valid rows to upload");
       return;
