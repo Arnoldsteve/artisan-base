@@ -299,6 +299,7 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
           },
           include: {
             items: true,
+            customer: true,
           },
         });
 
@@ -342,6 +343,7 @@ export class StorefrontOrderRepository implements IStorefrontOrderRepository {
         shippingAmount: order.shippingAmount,
         totalAmount: order.totalAmount,
         items: 'items' in order ? order.items : [],
+        customer: order.customer,
         createdAt: order.createdAt,
       },
     };
