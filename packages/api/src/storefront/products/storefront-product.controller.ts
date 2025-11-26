@@ -27,20 +27,17 @@ export class StorefrontProductController {
   }
 
   @Get('featured')
-  async findFeatured(@Query(ValidationPipe) filters: GetFeaturedProductsDto, @Req() req) {
-    const tenantId = req.headers['x-tenant-id'];
-
-    return this.productService.findFeatured(filters);
+  async findFeatured(@Query(ValidationPipe) filters: GetFeaturedProductsDto,  @GetTenant() tenantId: string) {
+    return this.productService.findFeatured(filters, tenantId);
   }
 
   @Get('categories')
-  async findCategories(@Req() req) {
-    const tenantId = req.headers['x-tenant-id'];
-    return this.productService.findCategories();
+  async findCategories( @GetTenant() tenantId: string) {
+    return this.productService.findCategories(tenantId);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @GetTenant() tenantId: string) {
     const product = await this.productService.findOne(id);
     return { success: true, data: product };
   }

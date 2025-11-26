@@ -21,6 +21,9 @@ export class StorefrontProductService {
     return this.productRepository.findAll(filters);
   }
 
+  @Cacheable(
+    6000, (id: string) => `product:${id}`
+  )
   async findOne(id: string) {
     const product = await this.productRepository.findOne(id);
     if (!product) {
@@ -32,14 +35,14 @@ export class StorefrontProductService {
   @Cacheable(
     6000,
     (filters: GetFeaturedProductsDto, tenantId: string) =>
-      `featured:${tenantId}:limit:${filters.limit}:cursor:${filters.cursor || 'start'}`,
+      `${tenantId}:featured:limit:${filters.limit}:cursor:${filters.cursor || 'start'}`,
   )
-  async findFeatured(filters: GetFeaturedProductsDto) {
+  async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
     return this.productRepository.findFeatured(filters);
   }
 
   @Cacheable(6000, (tenantId: string) => `${tenantId}:categories`)
-  async findCategories() {
+  async findCategories( tenantId: string) {
     return this.productRepository.findCategories();
   }
 }
