@@ -17,7 +17,7 @@ export class StorefrontProductService {
     (filters: GetProductsDto, tenantId: string) =>
       `${tenantId}:products:${JSON.stringify(filters)}`,
   )
-  async findAll(filters: GetProductsDto) {
+  async findAll(filters: GetProductsDto, tenantId: string) {
     return this.productRepository.findAll(filters);
   }
 
