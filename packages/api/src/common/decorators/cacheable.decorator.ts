@@ -38,7 +38,7 @@ export function Cacheable(
         if (cached !== null) {
           logger.debug(`Cache hit for key: ${key}`);
           try {
-            return JSON.parse(cached);
+            return cached;
           } catch (err) {
             logger.warn(`Failed to parse cache for key: ${key}. Deleting corrupted cache.`, err);
             // Delete corrupted cache so next request repopulates
@@ -61,7 +61,7 @@ export function Cacheable(
         const valueToCache = result === undefined ? null : result;
         const expire = result === null || result === undefined ? NULL_CACHE_TTL_SECONDS : ttlSeconds;
 
-        await redis.set(key, JSON.stringify(valueToCache), { ex: expire });
+        await redis.set(key, valueToCache, { ex: expire });
       } catch (err) {
         logger.error(`Redis SET failed for key: ${key}`, err);
       }

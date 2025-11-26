@@ -2,8 +2,8 @@ import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { GetProductsDto } from './dto/get-products.dto';
 import { StorefrontProductRepository } from './storefront-product.repository';
 import { GetFeaturedProductsDto } from './dto/get-featured-products';
-import { Redis } from '@upstash/redis';
 import { Cacheable } from '@/common/decorators/cacheable.decorator';
+import { Redis } from '@upstash/redis';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductService {
@@ -12,16 +12,14 @@ export class StorefrontProductService {
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
-
   @Cacheable(
-    300,
+    6000,
     (filters: GetProductsDto, tenantId: string) =>
       `${tenantId}:products:${JSON.stringify(filters)}`,
   )
-  async findAll(filters: GetProductsDto, tenantId: string) {
-    return this.productRepository.findAll(filters, tenantId);
+  async findAll(filters: GetProductsDto) {
+    return this.productRepository.findAll(filters);
   }
-
 
   async findOne(id: string) {
     const product = await this.productRepository.findOne(id);
@@ -31,16 +29,17 @@ export class StorefrontProductService {
     return product;
   }
 
-
-   @Cacheable(300, (filters: GetFeaturedProductsDto, tenantId: string) => 
-    `featured:${tenantId}:limit:${filters.limit}:cursor:${filters.cursor || 'start'}`
+  @Cacheable(
+    6000,
+    (filters: GetFeaturedProductsDto, tenantId: string) =>
+      `featured:${tenantId}:limit:${filters.limit}:cursor:${filters.cursor || 'start'}`,
   )
-  async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
-    return this.productRepository.findFeatured(filters, tenantId);
+  async findFeatured(filters: GetFeaturedProductsDto) {
+    return this.productRepository.findFeatured(filters);
   }
 
-  @Cacheable(30, (tenantId: string) => `${tenantId}:categories`)
-  async findCategories(tenantId: string) {
-    return this.productRepository.findCategories(tenantId);
+  @Cacheable(6000, (tenantId: string) => `${tenantId}:categories`)
+  async findCategories() {
+    return this.productRepository.findCategories();
   }
 }

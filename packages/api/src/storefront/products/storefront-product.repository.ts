@@ -13,9 +13,7 @@ export class StorefrontProductRepository
 
   private prismaClient: PrismaClient | null = null;
 
-  constructor(
-    private readonly tenantPrismaService: TenantPrismaService,
-  ) {}
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
@@ -24,7 +22,7 @@ export class StorefrontProductRepository
     return this.prismaClient;
   }
 
-  async findAll(filters: GetProductsDto, tenantId: string) {
+  async findAll(filters: GetProductsDto) {
     const {
       search,
       category,
@@ -176,7 +174,7 @@ export class StorefrontProductRepository
     };
   }
 
-  async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
+  async findFeatured(filters: GetFeaturedProductsDto) {
     const prisma = await this.getPrisma();
     const { limit, cursor } = filters;
 
@@ -222,7 +220,7 @@ export class StorefrontProductRepository
     };
   }
 
-  async findCategories(tenantId: string) {
+  async findCategories() {
     const prisma = await this.getPrisma();
 
     const categories = await prisma.category.findMany({
