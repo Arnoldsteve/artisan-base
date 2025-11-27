@@ -28,7 +28,6 @@ import { Product } from "@/types/products";
 import { formatMoney } from "@/utils/money";
 import { ProductTableMeta, TableWithMeta } from "@/types/table-meta";
 
-
 export const columns: ColumnDef<Product>[] = [
   {
     id: "select",
@@ -68,7 +67,7 @@ export const columns: ColumnDef<Product>[] = [
       >;
 
       return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Avatar
             className="h-6 w-8 rounded-md cursor-pointer"
             onClick={() => typedTable.options.meta?.openImagePreview(product)}
@@ -87,18 +86,16 @@ export const columns: ColumnDef<Product>[] = [
       );
     },
   },
-
+  {
+    accessorKey: "sku",
+    header: "Sku",
+    cell: ({ row }) => {
+      return <span className="font-sm">{row.getValue("sku")}</span>;
+    },
+  },
   {
     accessorKey: "isActive",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Status
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: "Status",
     cell: ({ row }) => {
       const isActive = row.getValue("isActive");
       return (

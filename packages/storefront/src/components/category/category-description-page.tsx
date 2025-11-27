@@ -66,7 +66,7 @@ export default function CategoryDetailsPage({ initialCategory }: CategoryDetails
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
               {products.map((product: Product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

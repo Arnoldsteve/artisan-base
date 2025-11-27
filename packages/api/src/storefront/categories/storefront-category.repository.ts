@@ -107,7 +107,7 @@ export class StorefrontCategoryRepository
               product: true,
             },
             orderBy: { product: { createdAt: 'desc' } },
-            take: 20,
+            take: 54,
           },
         },
       }),

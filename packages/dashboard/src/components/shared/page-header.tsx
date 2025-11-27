@@ -6,8 +6,10 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
   return (
-    <div className="border-b border-border bg-[#FFFFFF]">
-      <div className="flex h-10 items-center px-8">
+    // <div className="sticky top-0 border-b border-border bg-[#FFFFFF]">
+    <div className="sticky top-0 z-40 border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+
+      <div className="flex h-10 items-center px-2">
         <div>
           <h1 className="text-xl font-bold tracking-tight ">{title}</h1>
           {description && (

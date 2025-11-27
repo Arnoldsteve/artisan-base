@@ -87,7 +87,7 @@ export function DataTableSkeleton() {
       <div className="flex items-center gap-4 pb-4">
         <Skeleton className="h-10 w-full" />
       </div>
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+      <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
         {/* Page Header Skeleton */}
         <div className="flex items-center gap-4 py-4">
           <Skeleton className="h-20 w-full" />

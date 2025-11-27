@@ -108,7 +108,7 @@ export function CategoryAssignmentSheet({
       { productId: product.id, categoryIds: selectedCategoryIds },
       {
         onSuccess: () => {
-          toast.success("Product categories updated successfully");
+          // toast.success("Product categories updated successfully");
           onClose();
         },
         onError: () => toast.error("Failed to update categories"),
