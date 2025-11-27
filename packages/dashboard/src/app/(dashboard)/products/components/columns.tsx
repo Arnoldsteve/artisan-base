@@ -28,7 +28,6 @@ import { Product } from "@/types/products";
 import { formatMoney } from "@/utils/money";
 import { ProductTableMeta, TableWithMeta } from "@/types/table-meta";
 
-
 export const columns: ColumnDef<Product>[] = [
   {
     id: "select",
@@ -87,7 +86,13 @@ export const columns: ColumnDef<Product>[] = [
       );
     },
   },
-
+  {
+    accessorKey: "sku",
+    header: "SKU",
+    cell: ({ row }) => {
+      return <span className="font-sm">{row.getValue("sku")}</span>;
+    },
+  },
   {
     accessorKey: "isActive",
     header: ({ column }) => (
