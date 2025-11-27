@@ -22,6 +22,7 @@ import {
 import { EditAddUserSheet } from "./edit-add-user-sheet";
 import { DashboardUserFormData } from "@/validation-schemas/dashboardUserSchema";
 import { ConfirmActionModal } from "@/components/modals/confirm-action-modal";
+import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface TeamMembersWrapperProps {
   initialUsersData: PaginatedResponse<DashboardUser>;
@@ -137,8 +138,9 @@ export function TeamMembersWrapper({
       </PageHeader>
 
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
-        <DataTable table={table} totalCount={totalDashboardUsers} />
+        <DataTable table={table} />
       </div>
+      <DataTablePagination table={table} totalCount={totalDashboardUsers} />
 
       <EditAddUserSheet
         isOpen={isSheetOpen}

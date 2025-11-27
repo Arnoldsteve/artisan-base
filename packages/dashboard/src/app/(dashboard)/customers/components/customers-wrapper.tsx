@@ -37,6 +37,7 @@ import { Plus } from "lucide-react";
 import { CustomerFormData } from "@/validation-schemas/customers";
 import { PaginatedResponse } from "@/types/shared";
 import { CustomerTableMeta } from "@/types/table-meta";
+import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface CustomersWrapperProps {
   initialCustomerData: PaginatedResponse<Customer>;
@@ -207,8 +208,9 @@ export function CustomersWrapper({
 
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
         <DataTableViewOptions table={table} />
-        <DataTable table={table} totalCount={totalCustomers} />
+        <DataTable table={table} />
       </div>
+      <DataTablePagination table={table} totalCount={totalCustomers} />
 
       <div
         className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? "translate-y-0" : "translate-y-24"}`}

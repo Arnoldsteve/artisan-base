@@ -10,72 +10,62 @@ import {
   TableRow,
 } from "@repo/ui/components/ui/table";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import { DataTablePagination } from "./data-table-footer";
 
 // --- The Main DataTable Component ---
 // This component is now a "dumb" renderer.
 // It receives the table instance from a parent component.
 interface DataTableProps<TData> {
   table: TanstackTable<TData>;
-  totalCount: number;
+  // totalCount: number;
 }
 
-export function DataTable<TData>({ table, totalCount }: DataTableProps<TData>) {
+export function DataTable<TData>({ table }: DataTableProps<TData>) {
   return (
-    <div>
-      {/* Table */}
-      <div className="rounded-md border bg-[#fff]">
-        <Table className="text-sm">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
+    <div className="rounded-md border bg-[#fff]">
+      <Table className="text-sm">
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={table.getAllColumns().length}
-                  className="h-24 text-center"
-                  data-testid="products-empty-state"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Pagination */}
-      <DataTablePagination table={table} totalCount={totalCount} />
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={table.getAllColumns().length}
+                className="h-24 text-center"
+                data-testid="products-empty-state"
+              >
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

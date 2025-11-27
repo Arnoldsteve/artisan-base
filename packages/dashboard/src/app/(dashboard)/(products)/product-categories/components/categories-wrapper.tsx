@@ -28,6 +28,7 @@ import {
 import { DataTableViewOptions } from "./data-table-view-options";
 import { PaginatedResponse } from "@/types/shared";
 import { CategoryTableMeta } from "@/types/table-meta";
+import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface CategoriesWrapperProps {
   initialCategoryData: PaginatedResponse<
@@ -200,8 +201,9 @@ export function CategoriesWrapper({
 
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
         <DataTableViewOptions table={table} />
-        <DataTable table={table} totalCount={totalCategories} />
+        <DataTable table={table} />
       </div>
+      <DataTablePagination table={table} totalCount={totalCategories} />
 
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">
