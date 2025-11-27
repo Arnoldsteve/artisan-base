@@ -21,6 +21,7 @@ import {
   productFormSchema,
   ProductFormData,
 } from "@/validation-schemas/products";
+import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 export interface BulkProductRow extends ProductFormData {
   isValid: boolean;
@@ -174,8 +175,8 @@ export function BulkUploadModal({
         </DialogHeader>
 
         <div className="max-h-96 overflow-auto">
-          <DataTable table={table} totalCount={rows.length} />
-        </div>
+          <DataTable table={table}  />
+        </div>        
 
         <DialogFooter className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={onClose}>

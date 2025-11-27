@@ -31,6 +31,7 @@ import { BulkDeleteAlertDialog } from "../../products/components/bulk-delete-ale
 import { OrdersTableViewOptions } from "./data-table-view-options";
 import { PaginatedResponse } from "@/types/shared";
 import { OrderTableMeta } from "@/types/table-meta";
+import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface OrdersWrapperProps {
   initialOrderData: PaginatedResponse<Order>;
@@ -159,8 +160,10 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
 
       <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
         <OrdersTableViewOptions table={table} />
-        <DataTable table={table} totalCount={totalOrders} />
+        <DataTable table={table} />
       </div>
+      <DataTablePagination table={table} totalCount={totalOrders} />
+      
 
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">

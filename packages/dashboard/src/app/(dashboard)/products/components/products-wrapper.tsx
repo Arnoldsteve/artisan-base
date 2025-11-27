@@ -39,6 +39,7 @@ import { slugify } from "@/utils/slugify";
 import { ProductTableMeta } from "@/types/table-meta";
 import { BulkUploadDropdown } from "./bulk-upload-dropdown";
 import { BulkProductRow, BulkUploadModal } from "./bulk-upload-preview-modal";
+import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface ProductsWrapperProps {
   initialProductData: PaginatedResponse<Product>;
@@ -283,8 +284,9 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
 
       <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
         <DataTableViewOptions table={table} />
-        <DataTable table={table} totalCount={totalProducts} />
+        <DataTable table={table} />
       </div>
+      <DataTablePagination table={table} totalCount={totalProducts} />
 
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-background p-4 shadow-lg border">

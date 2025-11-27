@@ -44,7 +44,7 @@ export function DataTablePagination<TData>({
   const showPagination = totalCount > pageSize;
 
   return (
-    <div className="sticky bottom-0 bg-white rounded-md border py-2 px-4 w-full mt-4">
+    <div className="sticky bottom-0 bg-white rounded-md border py-1 px-4 w-full mt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
         {/* Left side: Item count and rows per page selector */}
         <div className="flex items-center gap-6">

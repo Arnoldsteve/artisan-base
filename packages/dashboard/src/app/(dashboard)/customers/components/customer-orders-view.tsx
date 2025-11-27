@@ -25,7 +25,7 @@ export function CustomerOrdersView({ initialOrders }: { initialOrders: Order[] }
           <CardTitle>Order History</CardTitle>
         </CardHeader>
         <CardContent>
-            <DataTable table={table}  totalCount={totalOrders}/>
+            <DataTable table={table} />
         </CardContent>
     </Card>
   )
