@@ -111,7 +111,7 @@ export const ProductCard = memo(function ProductCard({
           )}
         </div>
         <div className="mb-2">
-          <StarRating rating={product.rating ?? 3.7} size="small" />
+          <StarRating rating={product.rating } size="small" />
         </div>
 
         <Button

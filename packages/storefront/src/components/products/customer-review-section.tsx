@@ -84,15 +84,13 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
       {/* Rating Summary */}
       <div className="flex items-center space-x-3 mb-6">
         <StarRating rating={productReviews?.averageRating || 0} />
+
         <span className="text-sm text-muted-foreground">
-          {productReviews?.averageRating
-            ? productReviews.averageRating.toFixed(1)
-            : "No ratings yet"}
           {productReviews?.reviewCount
-            ? ` (${productReviews.reviewCount} ${
+            ? `(${productReviews.reviewCount} ${
                 productReviews.reviewCount === 1 ? "review" : "reviews"
               })`
-            : ""}
+            : "No reviews yet"}
         </span>
       </div>
 
@@ -104,7 +102,9 @@ export const CustomerReviewSection: React.FC<CustomerReviewSectionProps> = ({
             <p className="text-sm text-muted-foreground">Loading reviews...</p>
           </CardContent>
         </Card>
-      ) : productReviews && productReviews.reviews && productReviews.reviews.length > 0 ? (
+      ) : productReviews &&
+        productReviews.reviews &&
+        productReviews.reviews.length > 0 ? (
         <div className="space-y-4 mb-8">
           {productReviews.reviews.map((review) => (
             <Card key={review.id} className="shadow-none">
