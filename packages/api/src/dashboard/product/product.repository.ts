@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, Scope } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  Scope,
+} from '@nestjs/common';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -7,14 +13,16 @@ import { paginate } from 'src/common/helpers/paginate.helper';
 import { IProductRepository } from './interfaces/product-repository.interface';
 import { PrismaClient } from '../../../generated/tenant';
 import slugify from 'slugify';
+import { Prisma } from '../../../generated/tenant';
+import { randomBytes } from 'crypto';
 
 const CACHE_TTL = 10 * 1000;
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductRepository implements IProductRepository {
+  private readonly logger = new Logger(ProductRepository.name);
   private findOneCache = new Map<string, { data: any; expires: number }>();
   private findAllCache: { data: any; expires: number } | null = null;
-
   private prismaClient: PrismaClient | null = null;
 
   constructor(private readonly tenantPrismaService: TenantPrismaService) {}
@@ -27,47 +35,122 @@ export class ProductRepository implements IProductRepository {
   }
 
   async create(dto: CreateProductDto) {
-    try {
-      const prisma = await this.getPrisma();
+    const prisma = await this.getPrisma();
+    const baseSlug = slugify(dto.name, { lower: true, strict: true });
+    const sku = dto.sku?.trim() || undefined;
 
-      let baseSlug = slugify(dto.name, { lower: true, strict: true });
-      let slug = baseSlug;
+    const MAX_RETRIES = 5;
+
+    for (let i = 0; i < MAX_RETRIES; i++) {
+      try {
+        const slug =
+          i === 0 ? baseSlug : `${baseSlug}-${randomBytes(3).toString('hex')}`;
+
+        const product = await prisma.product.create({
+          data: {
+            ...dto,
+            slug,
+            sku,
+          },
+        });
+
+        this.invalidateCache();
+        return product;
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          const meta = err.meta as { target?: string[] };
+          if (meta.target?.includes('sku')) {
+            throw new ConflictException('SKU already exists');
+          }
+
+          if (meta.target?.includes('slug')) {
+            this.logger.warn(
+              `Slug collision for "${baseSlug}". Retrying... (Attempt ${i + 1})`,
+            );
+            continue;
+          }
+        }
+
+        throw new InternalServerErrorException(
+          'Could not generate a unique slug for the product.',
+        );
+      }
+    }
+
+    throw new InternalServerErrorException(
+      'Could not generate a unique slug for the product.',
+    );
+  }
+
+  async bulkCreate(dtos: CreateProductDto[]) {
+    const prisma = await this.getPrisma();
+
+    const slugsToTest: string[] = [];
+    const skusToTest: string[] = [];
+    const productsToCreate = dtos.map((dto) => {
+      const slug = slugify(dto.name, { lower: true, strict: true });
+      slugsToTest.push(slug);
+      if (dto.sku) {
+        skusToTest.push(dto.sku);
+      }
+      return { ...dto, slug, sku: dto.sku?.trim() || undefined };
+    });
+
+    if (skusToTest.length > 0) {
+      const existingSkus = await prisma.product.findMany({
+        where: { sku: { in: skusToTest } },
+        select: { sku: true },
+      });
+      if (existingSkus.length > 0) {
+        throw new ConflictException(
+          `The following SKUs already exist: ${existingSkus.map((p) => p.sku).join(', ')}`,
+        );
+      }
+    }
+
+    const existingSlugs = new Set(
+      (
+        await prisma.product.findMany({
+          where: { slug: { in: slugsToTest } },
+          select: { slug: true },
+        })
+      ).map((p) => p.slug),
+    );
+
+    const batchSlugs = new Set<string>();
+
+    for (const product of productsToCreate) {
+      let finalSlug = product.slug;
       let counter = 1;
-
-      while (await prisma.product.findUnique({ where: { slug } })) {
-        slug = `${baseSlug}-${counter}`;
+      // Check if slug exists in DB or in the current batch we are building
+      while (existingSlugs.has(finalSlug) || batchSlugs.has(finalSlug)) {
+        finalSlug = `${product.slug}-${counter}`;
         counter++;
       }
+      product.slug = finalSlug;
+      batchSlugs.add(finalSlug);
+    }
 
-      const existingSku = await prisma.product.findUnique({
-        where: { sku: dto.sku },
-      });
-
-      if (existingSku) {
-        throw new ConflictException('SKU already exists');
-      }
-
-      const product = await prisma.product.create({
-        data: { ...dto, slug },
+    try {
+      const result = await prisma.product.createMany({
+        data: productsToCreate,
       });
 
       this.invalidateCache();
-      return product;
+      return { count: result.count };
     } catch (err) {
-      if (err.code === 'P2002') {
-        if (err.meta?.target?.includes('slug')) {
-          throw new ConflictException('Slug already exists');
-        }
-        if (err.meta?.target?.includes('sku')) {
-          throw new ConflictException('SKU already exists');
-        }
-      }
-      throw err;
+      // This can still fail if there's a race condition, but it's much less likely.
+      this.logger.error('Bulk create failed', err);
+      throw new InternalServerErrorException(
+        'Failed to create products in bulk.',
+      );
     }
   }
 
   async findAll(pagination: PaginationQueryDto) {
-    const now = Date.now();
     const { page, limit, search } = pagination;
 
     const prisma = await this.getPrisma();

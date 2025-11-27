@@ -1,12 +1,26 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@repo/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@repo/ui";
 import { toast } from "sonner";
 import { DataTable } from "@/components/shared/data-table";
-import { useReactTable, getCoreRowModel, ColumnDef } from "@tanstack/react-table";
+import {
+  useReactTable,
+  getCoreRowModel,
+  ColumnDef,
+} from "@tanstack/react-table";
 import * as XLSX from "xlsx";
-import { productFormSchema, ProductFormData } from "@/validation-schemas/products";
+import {
+  productFormSchema,
+  ProductFormData,
+} from "@/validation-schemas/products";
 
 export interface BulkProductRow extends ProductFormData {
   isValid: boolean;
@@ -20,7 +34,12 @@ interface BulkUploadModalProps {
   onConfirm: (validRows: BulkProductRow[]) => void;
 }
 
-export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUploadModalProps) {
+export function BulkUploadModal({
+  file,
+  isOpen,
+  onClose,
+  onConfirm,
+}: BulkUploadModalProps) {
   const [rows, setRows] = useState<BulkProductRow[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -59,27 +78,40 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
           return;
         }
 
-        // Validate each row using zod schema
         const parsedRows: BulkProductRow[] = rawRows.map((row) => {
-          const parsed: BulkProductRow = { ...row, isValid: true, errors: [] };
           const result = productFormSchema.safeParse({
             name: row.Name ?? row.name,
             price: row.Price ?? row.price,
-            inventoryQuantity: row.Inventory ?? row.inventoryQuantity,
+            inventoryQuantity:
+              row.Inventory ?? row.inventoryQuantity ?? row.inventoryquantity,
             sku: row.SKU ?? row.sku,
             description: row.Description ?? row.description,
-            isActive: row["Is Active"] ?? row.isActive ?? true,
-            isFeatured: row["Is Featured"] ?? row.isFeatured ?? false,
+            isActive: ["true", "active", "yes", "1"].includes(
+              String(row["Is Active"] ?? row.isActive ?? "true").toLowerCase()
+            ),
+            isFeatured: ["true", "active", "yes", "1"].includes(
+              String(
+                row["Is Featured"] ?? row.isFeatured ?? "false"
+              ).toLowerCase()
+            ),
           });
 
-          if (!result.success) {
-            parsed.isValid = false;
-            parsed.errors = result.error.errors.map((e) => e.message);
+          if (result.success) {
+            return {
+              ...result.data, 
+              isValid: true,
+              errors: [],
+            };
           } else {
-            Object.assign(parsed, result.data);
+            return {
+              ...row, 
+              name: row.Name ?? row.name, 
+              isValid: false,
+              errors: result.error.errors.map(
+                (e) => `${e.path.join(".")}: ${e.message}`
+              ),
+            };
           }
-
-          return parsed;
         });
 
         setRows(parsedRows);
@@ -91,9 +123,9 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
 
     parseFile();
   }, [file, isOpen, onClose]);
-
   const handleConfirm = () => {
     const validRows = rows.filter((r) => r.isValid);
+    // console.log("Valid rows to upload:", validRows);
     if (validRows.length === 0) {
       toast.error("No valid rows to upload");
       return;
@@ -102,16 +134,31 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
     onClose();
   };
 
-  const columns = useMemo<ColumnDef<BulkProductRow>[]>(() => [
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "price", header: "Price" },
-    { accessorKey: "inventoryQuantity", header: "Inventory" },
-    { accessorKey: "sku", header: "SKU" },
-    { accessorKey: "isActive", header: "Is Active", cell: ({ row }) => row.original.isActive ? "Active" : "Inactive" },
-    { accessorKey: "isFeatured", header: "Is Featured", cell: ({ row }) => row.original.isFeatured ? "Yes" : "No" },
-    { accessorKey: "description", header: "Description" },
-    { accessorKey: "errors", header: "Errors", cell: ({ row }) => row.original.errors.join(", ") },
-  ], []);
+  const columns = useMemo<ColumnDef<BulkProductRow>[]>(
+    () => [
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "price", header: "Price" },
+      { accessorKey: "inventoryQuantity", header: "Inventory" },
+      { accessorKey: "sku", header: "SKU" },
+      {
+        accessorKey: "isActive",
+        header: "Is Active",
+        cell: ({ row }) => (row.original.isActive ? "Active" : "Inactive"),
+      },
+      {
+        accessorKey: "isFeatured",
+        header: "Is Featured",
+        cell: ({ row }) => (row.original.isFeatured ? "Yes" : "No"),
+      },
+      { accessorKey: "description", header: "Description" },
+      {
+        accessorKey: "errors",
+        header: "Errors",
+        cell: ({ row }) => row.original.errors.join(", "),
+      },
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: rows,
@@ -131,8 +178,12 @@ export function BulkUploadModal({ file, isOpen, onClose, onConfirm }: BulkUpload
         </div>
 
         <DialogFooter className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleConfirm} disabled={isProcessing}>Upload Valid Rows</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} disabled={isProcessing}>
+            Upload Valid Rows
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

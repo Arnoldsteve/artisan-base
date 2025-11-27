@@ -18,6 +18,7 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AssignCategoryDto } from '../product-category/dto/assign-category.dto';
+import { P } from 'node_modules/@upstash/redis/zmscore-Cq_Bzgy4';
 
 @Controller({
   path: 'dashboard/products',
@@ -30,6 +31,11 @@ export class ProductController {
   @Post()
   create(@Body(ValidationPipe) createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
+  }
+
+  @Post('bulk-upload')
+  bulkCreate(@Body(ValidationPipe) createProductDtos: CreateProductDto[]) {
+    return this.productService.bulkCreate(createProductDtos);
   }
 
   @Get()

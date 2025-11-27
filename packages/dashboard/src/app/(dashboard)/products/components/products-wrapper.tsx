@@ -20,6 +20,7 @@ import {
   useProducts,
   useUpdateProduct,
   useDeleteProduct,
+  useBulkCreateProducts,
 } from "@/hooks/use-products";
 
 // UI Components
@@ -51,7 +52,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 100,
   });
 
   // --- UI State for Modals/Sheets ---
@@ -89,6 +90,8 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   // console.log("product data from product view: ", paginatedResponse);
 
   const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
+  const { mutate: bulkCreateProducts, isPending: isBulkCreating } =
+    useBulkCreateProducts();
   const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
 
@@ -151,32 +154,36 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   };
 
   const handleBulkImport = async (validRows: BulkProductRow[]) => {
+    console.log("bulk create products called", validRows);
+
     if (validRows.length === 0) {
       toast.error("No valid rows to upload");
       return;
     }
 
-    try {
-      await toast.promise(
-        Promise.all(
-          validRows.map((row) => {
-            const { id, ...createData } = row; // remove id if exists
-            return createProduct(createData as CreateProductDto);
-          })
-        ),
-        {
-          loading: `Uploading ${validRows.length} products...`,
-          success: `${validRows.length} products uploaded successfully!`,
-          error: "Failed to upload one or more products",
-        }
-      );
+    const cleanedRows: CreateProductDto[] = validRows.map((row) => ({
+      name: row.name,
+      slug: slugify(row.name),
+      price: Number(row.price),
+      sku: row.sku,
+      inventoryQuantity: row.inventoryQuantity,
+      description: row.description,
+      isActive: row.isActive,
+      isFeatured: row.isFeatured,
+    }));
 
-      // Close modal and reset file
-      setIsBulkModalOpen(false);
-      setBulkFile(null);
-    } catch (err) {
-      console.error(err);
-    }
+    console.log("Cleaned rows (final payload to backend):", cleanedRows);
+    // return; 
+
+    bulkCreateProducts(cleanedRows, {
+      onSuccess: () => {
+        setIsBulkModalOpen(false);
+        setBulkFile(null);
+      },
+      onError: () => {
+        // optional
+      },
+    });
   };
 
   const tableMeta: ProductTableMeta<Product> = {

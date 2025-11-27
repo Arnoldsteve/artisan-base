@@ -87,45 +87,55 @@ export class StorefrontReviewRepository implements IStorefrontReviewRepository {
       orderBy: { [sortBy]: sortOrder },
     });
   }
+
   async findRatingsWithReviewsByProductId(productId: string) {
     const prisma = await this.getPrisma();
 
-    // 1️⃣ Aggregate rating info
-    const aggregate = await prisma.review.aggregate({
-      where: { productId, isApproved: true },
-      _avg: { rating: true },
-      _count: { id: true },
-    });
+    // Use a transaction to run all queries concurrently
+    const [aggregate, reviews, product] = await prisma.$transaction([
+      // Query 1: Aggregate rating info
+      prisma.review.aggregate({
+        where: { productId, isApproved: true },
+        _avg: { rating: true },
+        _count: { id: true },
+      }),
 
-    // 2️⃣ Fetch all reviews for the product
-    const reviews = await prisma.review.findMany({
-      where: { productId, isApproved: true },
-      select: {
-        id: true,
-        rating: true,
-        comment: true,
-        createdAt: true,
-        customer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+      // Query 2: Fetch all reviews for the product
+      prisma.review.findMany({
+        where: { productId, isApproved: true },
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          customer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+      }),
 
-    // 3️⃣ Fetch product info (id and slug)
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-      select: { id: true, slug: true },
-    });
+      // Query 3: Fetch product info
+      prisma.product.findUnique({
+        where: { id: productId },
+        select: { id: true, slug: true },
+      }),
+    ]);
+
+    // If the product doesn't exist, we might want to return null or throw an error
+    if (!product) {
+      // Depending on your use case, you could throw a NotFoundException here
+      return null;
+    }
 
     return {
-      productId: product?.id,
-      slug: product?.slug,
+      productId: product.id,
+      slug: product.slug,
       averageRating: aggregate._avg.rating ?? 0,
       reviewCount: aggregate._count.id,
       reviews,

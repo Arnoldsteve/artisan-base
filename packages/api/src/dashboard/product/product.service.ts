@@ -2,10 +2,8 @@ import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { IProductRepository } from './interfaces/product-repository.interface';
 import { ProductCategoryService } from '../product-category/product-category.service';
-import { ProductRepository } from './product.repository'; // <-- IMPORT THE CLASS
-
+import { ProductRepository } from './product.repository';
 @Injectable({ scope: Scope.REQUEST })
 export class ProductService {
   constructor(
@@ -15,6 +13,9 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto) {
     return this.productRepository.create(createProductDto);
+  }
+  async bulkCreate(createProductDtos: CreateProductDto[]) {
+    return this.productRepository.bulkCreate(createProductDtos);
   }
 
   async findAll(paginationQuery: PaginationQueryDto) {

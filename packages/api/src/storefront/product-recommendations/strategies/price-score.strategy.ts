@@ -14,22 +14,17 @@ export class PriceScoreStrategy implements RecommendationStrategy {
    * @returns A score of 0 or 1.
    */
   calculateScore(currentProduct: Product, otherProduct: Product): number {
-    const priceA = currentProduct.price;
-    const priceB = otherProduct.price;
+    const priceA = Number(currentProduct.price);
+    const priceB = Number(otherProduct.price);
 
-    // --- THIS IS THE CORRECTED LOGIC ---
-    
-    // Check if prices are valid using Decimal's comparison methods.
-    if (!priceA || !priceB || priceA.lessThanOrEqualTo(0) || priceB.lessThanOrEqualTo(0)) {
+
+    if (!priceA || !priceB || priceA <= 0 || priceB <= 0) {
       return 0;
     }
 
-    // Use .mul() for multiplication to get new Decimal objects.
-    const minPrice = priceA.mul(0.5);
-    const maxPrice = priceA.mul(1.5);
+    const minPrice = priceA * 0.5;
+    const maxPrice = priceA * 1.5;
 
-    // Use .isGreaterThanOrEqualTo() and .isLessThanOrEqualTo() for comparison.
-    // The && operator works because these methods return a standard boolean.
-    return priceB.greaterThanOrEqualTo(minPrice) && priceB.lessThanOrEqualTo(maxPrice) ? 1 : 0;
+    return priceB >= minPrice && priceB <= maxPrice ? 1 : 0;
   }
 }

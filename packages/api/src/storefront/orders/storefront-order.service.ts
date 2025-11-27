@@ -19,6 +19,7 @@ export class StorefrontOrderService {
     // 1️⃣ Create the order
     const createdOrderResult = await this.orderRepository.create(dto);
     const order = createdOrderResult.order;
+    Logger.debug(`Created order: ${JSON.stringify(order)}`, StorefrontOrderService.name);
 
     // 2️⃣ Prepare email props for order-confirmation template
     const emailProps = {
@@ -38,6 +39,8 @@ export class StorefrontOrderService {
       currency: order.currency || 'KES', 
       createdAt: formatDate(order.createdAt, { includeTime: true }),
     };
+
+    // Logger.debug(`Email props for order confirmation: ${JSON.stringify(emailProps)}`, StorefrontOrderService.name);
 
     // 3️⃣ Send order confirmation email
     try {

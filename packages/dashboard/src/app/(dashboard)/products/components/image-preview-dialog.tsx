@@ -38,7 +38,7 @@ export function ImagePreviewDialog({
         className="
           w-[90vw] max-w-[800px] 
           h-[80vh] max-h-[600px] 
-          flex flex-col
+          flex flex-col justify-between
         "
       >
         <DialogHeader>
@@ -47,41 +47,42 @@ export function ImagePreviewDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {images.length > 0 ? (
-          <div className="relative flex-1 flex items-center justify-center">
-            {/* Fixed-size container (scales with screen size) */}
-            <div className="w-full h-full flex items-center justify-center bg-black/5 rounded-lg">
-              <Image
-                src={images[currentIndex].url}
-                alt={`${product.name} image`}
-                fill
-                className="object-contain rounded-lg"
-              />
-            </div>
+        <div className="flex-1 flex items-center justify-center">
+          {images.length > 0 ? (
+            <div className="relative flex-1 flex items-center justify-center">
+              <div className="w-full h-full flex items-center justify-center bg-black/5 rounded-lg">
+                <Image
+                  src={images[currentIndex].url}
+                  alt={`${product.name} image`}
+                  fill
+                  className="object-contain rounded-lg"
+                />
+              </div>
 
-            {/* Navigation arrows */}
-            {images.length > 1 && (
-              <>
-                <button
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
-                  onClick={prevImage}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
-                  onClick={nextImage}
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </>
-            )}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-center py-10">
-            No images available
-          </p>
-        )}
+              {/* Navigation arrows */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+                    onClick={prevImage}
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+                    onClick={nextImage}
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-10">
+              No images available
+            </p>
+          )}
+        </div>
 
         <div className="flex justify-end mt-4">
           <Button variant="outline" onClick={onClose}>

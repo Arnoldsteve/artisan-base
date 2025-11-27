@@ -47,6 +47,23 @@ export function useCreateProduct() {
   });
 }
 
+export function useBulkCreateProducts() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateProductDto[]) => productService.bulkCreateProducts(data),
+    onSuccess: (response) => {
+      toast.success(`${response.count} products have been created successfully.`);
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+    },
+    
+    onError: (error: Error) => {
+      toast.error(error.message || "An error occurred during the bulk upload.");
+    },
+  });
+}
+
+
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation({

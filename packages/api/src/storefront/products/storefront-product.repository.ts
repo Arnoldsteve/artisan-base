@@ -4,7 +4,6 @@ import { IStorefrontProductRepository } from './interfaces/storefront-product-re
 import { GetProductsDto } from './dto/get-products.dto';
 import { GetFeaturedProductsDto } from './dto/get-featured-products';
 import { PrismaClient, Prisma } from '../../../generated/tenant';
-import { Redis } from '@upstash/redis';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductRepository
@@ -14,10 +13,7 @@ export class StorefrontProductRepository
 
   private prismaClient: PrismaClient | null = null;
 
-  constructor(
-    private readonly tenantPrismaService: TenantPrismaService,
-    @Inject('REDIS_CLIENT') private readonly redis: Redis,
-  ) {}
+  constructor(private readonly tenantPrismaService: TenantPrismaService) {}
 
   private async getPrisma(): Promise<PrismaClient> {
     if (!this.prismaClient) {
@@ -25,7 +21,8 @@ export class StorefrontProductRepository
     }
     return this.prismaClient;
   }
-  async findAll(filters: GetProductsDto, tenantId: string) {
+
+  async findAll(filters: GetProductsDto) {
     const {
       search,
       category,
@@ -38,18 +35,6 @@ export class StorefrontProductRepository
     } = filters;
 
     const limitNum = Math.max(Number(limit) || 50, 1);
-
-    const cacheKey = `${tenantId}:products:${JSON.stringify(filters)}`;
-
-    const cached = await this.redis.get<{
-      data: any[];
-      meta: { limit: number; nextCursor: string | null; hasMore: boolean };
-    }>(cacheKey);
-
-    if (cached) {
-      this.logger.log(`Cache hit for key: ${cacheKey}`);
-      return cached;
-    }
 
     const where: any = { isActive: true };
 
@@ -143,14 +128,10 @@ export class StorefrontProductRepository
         ? productsWithCategories[productsWithCategories.length - 1].id
         : null;
 
-    const result = {
+    return {
       data: productsWithCategories,
       meta: { limit: limitNum, nextCursor, hasMore },
     };
-
-    await this.redis.set(cacheKey, result, { ex: 300 });
-
-    return result;
   }
 
   async findOne(identifier: string) {
@@ -193,23 +174,11 @@ export class StorefrontProductRepository
     };
   }
 
-  async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
+  async findFeatured(filters: GetFeaturedProductsDto) {
     const prisma = await this.getPrisma();
     const { limit, cursor } = filters;
 
     const limitNum = Math.max(Number(limit) || 50, 1);
-
-    const cacheKey = `featured:${tenantId}:limit:${limit}:cursor:${cursor || 'start'}`;
-
-    const cached = await this.redis.get<{
-      data: any[];
-      meta: { limit: number; nextCursor: string | null; hasMore: boolean };
-    }>(cacheKey);
-
-    if (cached) {
-      this.logger.log(`Cache hit for key: ${cacheKey}`);
-      return cached;
-    }
 
     // Fetch limit + 1 to check if there are more
     const products = await prisma.product.findMany({
@@ -245,29 +214,13 @@ export class StorefrontProductRepository
         ? returnProducts[returnProducts.length - 1].id
         : null;
 
-    const result = {
+    return {
       data: returnProducts,
       meta: { limit: limitNum, nextCursor, hasMore },
     };
-
-    await this.redis.set(cacheKey, result, { ex: 300 });
-
-    return result;
   }
 
-  async findCategories(tenantId: string) {
-    const cacheKey = `${tenantId}:categories`;
-
-    const cached = await this.redis.get<{
-      data: any[];
-      meta: { total: number };
-    }>(cacheKey);
-
-    if (cached) {
-      this.logger.log(`Cache hit: ${cacheKey}`);
-      return cached;
-    }
-
+  async findCategories() {
     const prisma = await this.getPrisma();
 
     const categories = await prisma.category.findMany({
@@ -285,13 +238,9 @@ export class StorefrontProductRepository
       },
     });
 
-    const result = {
+    return {
       data: categories,
       meta: { total: categories.length },
     };
-
-    await this.redis.set(cacheKey, result, { ex: 30 }); //1200
-
-    return result;
   }
 }

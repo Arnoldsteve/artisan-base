@@ -11,7 +11,7 @@ export default async function ProductsPage() {
 
     initialData = await serverApi.get<PaginatedResponse<Product>>(
       "/dashboard/products",
-      { page: 1, limit: 10 }
+      { page: 1, limit: 100 }
     );
   } catch (err) {
     console.error("Failed to fetch initial products on server:", err);

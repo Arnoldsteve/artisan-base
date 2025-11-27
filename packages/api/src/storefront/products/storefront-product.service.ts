@@ -1,18 +1,29 @@
-import { Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { GetProductsDto } from './dto/get-products.dto';
 import { StorefrontProductRepository } from './storefront-product.repository';
 import { GetFeaturedProductsDto } from './dto/get-featured-products';
+import { Cacheable } from '@/common/decorators/cacheable.decorator';
+import { Redis } from '@upstash/redis';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StorefrontProductService {
   constructor(
     private readonly productRepository: StorefrontProductRepository,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
+  @Cacheable(
+    6000,
+    (filters: GetProductsDto, tenantId: string) =>
+      `${tenantId}:products:${JSON.stringify(filters)}`,
+  )
   async findAll(filters: GetProductsDto, tenantId: string) {
-    return this.productRepository.findAll(filters, tenantId);
+    return this.productRepository.findAll(filters);
   }
 
+  @Cacheable(
+    6000, (id: string) => `product:${id}`
+  )
   async findOne(id: string) {
     const product = await this.productRepository.findOne(id);
     if (!product) {
@@ -21,11 +32,17 @@ export class StorefrontProductService {
     return product;
   }
 
+  @Cacheable(
+    6000,
+    (filters: GetFeaturedProductsDto, tenantId: string) =>
+      `${tenantId}:featured:limit:${filters.limit}:cursor:${filters.cursor || 'start'}`,
+  )
   async findFeatured(filters: GetFeaturedProductsDto, tenantId: string) {
-    return this.productRepository.findFeatured(filters, tenantId);
+    return this.productRepository.findFeatured(filters);
   }
 
-  async findCategories(tenantId: string) {
-    return this.productRepository.findCategories(tenantId);
+  @Cacheable(6000, (tenantId: string) => `${tenantId}:categories`)
+  async findCategories( tenantId: string) {
+    return this.productRepository.findCategories();
   }
 }

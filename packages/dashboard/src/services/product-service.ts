@@ -37,6 +37,14 @@ export class ProductService {
     return apiClient.post<Product>("dashboard/products", productData);
   }
 
+    /**
+   * Creates multiple products in a single batch operation.
+   * @param products - An array of products to create.
+   * @returns A response object with the count of created products.
+   */
+  async bulkCreateProducts(products: CreateProductDto[]): Promise<{ count: number }> {
+    return apiClient.post<{ count: number }>("dashboard/products/bulk-upload", products);
+  }
   async updateProduct(id: string, productData: UpdateProductDto): Promise<Product> {
     return apiClient.patch<Product>(`dashboard/products/${id}`, productData);
   }

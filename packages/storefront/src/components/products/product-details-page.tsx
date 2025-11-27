@@ -230,10 +230,9 @@ export default function ProductDetailsPage({ initialProduct }: ProductDetailsPag
               </h1>
 
               <div className="flex items-center space-x-2 mb-4">
-                <StarRating rating={product.rating || 3.7} />
+                <StarRating rating={product.rating } />
                 <span className="text-sm text-muted-foreground">
-                  {product.rating.toFixed(1)} ({product.reviewCount || 10}{" "}
-                  reviews)
+                  ({product.reviewCount }{" "}  reviews)
                 </span>
               </div>
 
