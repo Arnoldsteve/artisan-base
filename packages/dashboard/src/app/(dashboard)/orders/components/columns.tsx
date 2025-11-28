@@ -76,8 +76,52 @@ export const columns: ColumnDef<Order>[] = [
         return <span className="text-muted-foreground">Guest</span>;
       const name =
         `${customer.firstName || ""} ${customer.lastName || ""}`.trim();
-      return <div>{name || customer.email}</div>;
+      return (
+        <div className="flex flex-col">
+          <span>{name}</span>
+          <span className="text-sm text-muted-foreground">
+            {customer.email}
+          </span>
+        </div>
+      );
     },
+  },
+  {
+    accessorKey: "currency",
+    header: () => <div>Currency</div>,
+    cell: ({ row }) => <div>{row.getValue("currency")}</div>,
+  },
+  {
+    accessorKey: "subtotal",
+    header: () => <div>Subtotal</div>,
+    cell: React.memo(({ row }) => {
+      const amount = parseFloat(row.getValue("subtotal"));
+      return <div>{formatMoney(amount)}</div>;
+    }),
+  },
+  {
+    accessorKey: "taxAmount",
+    header: () => <div>Tax</div>,
+    cell: React.memo(({ row }) => {
+      const amount = parseFloat(row.getValue("taxAmount"));
+      return <div>{formatMoney(amount)}</div>;
+    }),
+  },
+  {
+    accessorKey: "shippingAmount",
+    header: () => <div>Shipping</div>,
+    cell: React.memo(({ row }) => {
+      const amount = parseFloat(row.getValue("shippingAmount"));
+      return <div>{formatMoney(amount)}</div>;
+    }),
+  },
+  {
+    accessorKey: "totalAmount",
+    header: () => <div>Total</div>,
+    cell: React.memo(({ row }) => {
+      const amount = parseFloat(row.getValue("totalAmount"));
+      return <div>{formatMoney(amount)}</div>;
+    }),
   },
   {
     accessorKey: "status",
@@ -106,16 +150,6 @@ export const columns: ColumnDef<Order>[] = [
         >
           {status.toLowerCase()}
         </span>
-      );
-    }),
-  },
-  {
-    accessorKey: "totalAmount",
-    header: () => <div className="text-right">Total</div>,
-    cell: React.memo(({ row }) => {
-      const amount = parseFloat(row.getValue("totalAmount"));
-      return (
-        <div className="text-right font-medium">{formatMoney(amount)}</div>
       );
     }),
   },

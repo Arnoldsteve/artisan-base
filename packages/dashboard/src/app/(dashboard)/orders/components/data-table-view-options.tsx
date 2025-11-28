@@ -39,7 +39,7 @@ export function OrdersTableViewOptions({ table }: OrdersTableViewOptionsProps) {
     <Card className="flex flex-wrap items-center rounded-sm shadow-none gap-4 py-4 px-4 mt-4 mb-8">
       {/* Search input */}
       <Input
-        placeholder="Search by order # or customer..."
+        placeholder="Search by order number..."
         value={
           (table.getColumn("orderNumber")?.getFilterValue() as string) ?? ""
         }
