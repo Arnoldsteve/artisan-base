@@ -85,11 +85,12 @@ export const columns: ColumnDef<Order>[] = [
     cell: React.memo(({ row }) => {
       const status = row.getValue("status") as OrderStatus;
       return (
-        <Badge
-          className={`${getOrderStatusColor(status)} hover:bg-none capitalize`}
+        <span
+          style={{ color: getOrderStatusColor(status) }}
+          className="capitalize"
         >
           {status.toLowerCase()}
-        </Badge>
+        </span>
       );
     }),
   },
@@ -99,12 +100,12 @@ export const columns: ColumnDef<Order>[] = [
     cell: React.memo(({ row }) => {
       const status = row.getValue("paymentStatus") as PaymentStatus;
       return (
-        <Badge
-          variant="outline"
-          className={`${getPaymentStatusColor(status)} hover:bg-none capitalize`}
+        <span
+          style={{ color: getPaymentStatusColor(status) }}
+          className="capitalize"
         >
           {status.toLowerCase()}
-        </Badge>
+        </span>
       );
     }),
   },

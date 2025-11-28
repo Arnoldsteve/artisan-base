@@ -192,16 +192,18 @@ export function CategoriesWrapper({
   }
 
   return (
-    <div>
-      <PageHeader title="Product Categories">
-        <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
-          Add Category
-        </Button>
-      </PageHeader>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <PageHeader title="Product Categories">
+          <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
+            Add Category
+          </Button>
+        </PageHeader>
 
-      <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
-        <DataTableViewOptions table={table} />
-        <DataTable table={table} />
+        <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
+          <DataTableViewOptions table={table} />
+          <DataTable table={table} />
+        </div>
       </div>
       <DataTablePagination table={table} totalCount={totalCategories} />
 
