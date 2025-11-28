@@ -38,7 +38,7 @@ export default function ReportsPage() {
       <PageHeader title="Reports">
         <Button onClick={() => alert("Add clicked!")}>Add Item</Button>
       </PageHeader>
-      <div className="p-6 space-y-6">
+      <div className="p-4 space-y-6">
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="rounded-2xl shadow-sm">

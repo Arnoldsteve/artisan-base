@@ -32,15 +32,15 @@ export default async function OrderDetailPage({
   return (
     <>
       <PageHeader title={`Order ${order.orderNumber}`} />
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+      <div className="px-2 md:px-2 lg:px-4 md:mt-0 md:pb-10">
         <div className="space-y-6">
           <OrderActions order={order} />
         </div>
-        <div className="mt-4 grid gap-6 lg:grid-cols-3">
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <OrderItemsTable items={order.items || []} />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4">
             <OrderSummaryCard order={order} />
           </div>
         </div>

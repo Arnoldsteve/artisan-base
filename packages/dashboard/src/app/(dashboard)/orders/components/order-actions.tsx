@@ -92,7 +92,7 @@ export function OrderActions({ order }: OrderActionsProps) {
 
   return (
     <>
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle>Actions</CardTitle>
         </CardHeader>

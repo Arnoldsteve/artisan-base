@@ -23,7 +23,7 @@ export function CustomerStats({ orders }: CustomerStatsProps) {
     totalOrders > 0 ? lifetimeValue.dividedBy(totalOrders) : new Decimal(0);
 
   return (
-    <Card>
+    <Card className="shadow-none">
       <CardHeader>
         <CardTitle>Lifetime Stats</CardTitle>
       </CardHeader>
