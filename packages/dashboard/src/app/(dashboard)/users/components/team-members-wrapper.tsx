@@ -137,7 +137,7 @@ export function TeamMembersWrapper({
         </Button>
       </PageHeader>
 
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
+      <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
         <DataTable table={table} />
       </div>
       <DataTablePagination table={table} totalCount={totalDashboardUsers} />

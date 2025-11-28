@@ -30,7 +30,7 @@ export default function StorePage() {
   return (
     <>
       <PageHeader title="Store Settings" />
-      <div className="px-8 space-y-6">
+      <div className="px-4 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StoreDetailsForm initialData={{ name: tenant.name }} />
           <StoreDomainsForm
