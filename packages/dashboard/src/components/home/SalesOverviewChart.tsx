@@ -8,6 +8,7 @@ import {
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { SalesOverviewResponse } from "@/types/dashboard";
 import { formatMoney } from "@/utils/money";
+import { cn } from "@repo/ui/lib/utils";
 
 interface SalesOverviewChartProps {
   data: SalesOverviewResponse | undefined;
@@ -91,7 +92,7 @@ export function SalesOverviewChart({
   };
 
   return (
-    <Card className={className}>
+    <Card className={cn("shadow-none", className)}>
       <CardHeader>
         <CardTitle>Sales Overview</CardTitle>
       </CardHeader>
