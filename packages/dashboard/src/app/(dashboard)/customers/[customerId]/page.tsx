@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 import { createServerApiClient } from "@/lib/server-api";
 import { CustomerDetails } from "@/types/customers";
 
-
 export default async function CustomerDetailPage({
   params,
 }: {
@@ -36,26 +35,22 @@ export default async function CustomerDetailPage({
 
   return (
     <>
-    <PageHeader title={`${customer.firstName} ${customer.lastName}`}/>
-    <div className="p-4 md:p-8 lg:p-10">
       <PageHeader title={`${customer.firstName} ${customer.lastName}`}>
-        <Link href={`/customers/${customer.id}/edit`}>
-          <Button>Edit Customer</Button>
-        </Link>
+        <Button asChild variant={"outline"} size={"sm"}>
+          <Link href="/orders">Back to Order lists</Link>
+        </Button>
       </PageHeader>
-
-      <div className="mt-4 grid gap-6 lg:grid-cols-3">
+      <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10 grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <CustomerOrdersView initialOrders={customerOrders} />
         </div>
 
         {/* Sidebar Column */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <CustomerStats orders={customerOrders} />
           <CustomerContactCard customer={customer} />
         </div>
       </div>
-    </div>
     </>
   );
 }

@@ -36,6 +36,7 @@ export interface OrderCustomer {
   firstName: string | null;
   lastName: string | null;
   email: string;
+  phone?: string;
 }
 
 export interface OrderItem {

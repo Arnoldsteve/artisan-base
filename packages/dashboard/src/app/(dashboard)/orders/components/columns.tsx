@@ -88,12 +88,12 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     accessorKey: "currency",
-    header: () => <div>Currency</div>,
+    header: "Currency",
     cell: ({ row }) => <div>{row.getValue("currency")}</div>,
   },
   {
     accessorKey: "subtotal",
-    header: () => <div>Subtotal</div>,
+    header: "Subtotal",
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("subtotal"));
       return <div>{formatMoney(amount)}</div>;
@@ -101,7 +101,7 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     accessorKey: "taxAmount",
-    header: () => <div>Tax</div>,
+    header: "Tax",
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("taxAmount"));
       return <div>{formatMoney(amount)}</div>;
@@ -109,7 +109,7 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     accessorKey: "shippingAmount",
-    header: () => <div>Shipping</div>,
+    header: "Shipping",
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("shippingAmount"));
       return <div>{formatMoney(amount)}</div>;

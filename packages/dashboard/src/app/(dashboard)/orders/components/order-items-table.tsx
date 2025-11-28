@@ -18,7 +18,7 @@ import { formatMoney } from "@/utils/money";
 
 export function OrderItemsTable({ items }: { items: OrderItem[] }) {
   return (
-    <Card>
+    <Card className="shadow-none">
       <CardHeader>
         <CardTitle>Order Items</CardTitle>
       </CardHeader>

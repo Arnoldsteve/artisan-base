@@ -12,7 +12,7 @@ export function CustomerContactCard({ customer }: { customer: Customer }) {
       : null;
 
   return (
-    <Card>
+    <Card className="shadow-none">
         <CardHeader><CardTitle>Contact Information</CardTitle></CardHeader>
         <CardContent className="space-y-4 text-sm">
             <div className="flex items-center gap-3">
