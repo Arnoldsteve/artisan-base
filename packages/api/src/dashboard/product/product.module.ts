@@ -10,8 +10,6 @@ import { ProductCategoryModule } from '../product-category/product-category.modu
   controllers: [ProductController],
   providers: [
     ProductService,
-    // SIMPLY LIST THE CLASS.
-    // Nest will see its `@Injectable({ scope: Scope.REQUEST })` decorator and do the right thing.
     ProductRepository,
     {
       provide: TenantContextService,

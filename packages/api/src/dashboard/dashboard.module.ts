@@ -9,6 +9,7 @@ import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
 import { ProductCategoryModule } from './product-category/product-category.module';
 import { DashboardUsersModule } from './dashboard-users/dashboard-users.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { DashboardUsersModule } from './dashboard-users/dashboard-users.module';
     ProductCategoryModule,
     SettingsModule,
     StorageModule,
-    DashboardUsersModule
+    DashboardUsersModule,
+    AnalyticsModule
   ],
 })
 export class DashboardModule {}

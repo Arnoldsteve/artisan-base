@@ -33,7 +33,7 @@ export default function HomePage() {
       <PageHeader title="Dashboard Overview">
       </PageHeader>
 
-      <div className="px-8 space-y-4">
+      <div className="px-4 space-y-4">
         <DashboardKpiCards
           kpis={kpis}
           isLoading={kpisLoading}

@@ -1,4 +1,11 @@
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   Card,
   CardContent,
@@ -8,6 +15,7 @@ import {
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import { SalesOverviewResponse } from "@/types/dashboard";
 import { formatMoney } from "@/utils/money";
+import { cn } from "@repo/ui/lib/utils";
 
 interface SalesOverviewChartProps {
   data: SalesOverviewResponse | undefined;
@@ -84,6 +92,10 @@ export function SalesOverviewChart({
             axisLine={true}
             tickFormatter={(value) => `${formatMoney(value)}`}
           />
+          <Tooltip
+            formatter={(value) => formatMoney(Number(value))}
+            cursor={false}
+          />
           <Bar dataKey="total" fill="#16a34a" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
@@ -91,11 +103,29 @@ export function SalesOverviewChart({
   };
 
   return (
-    <Card className={className}>
+    <Card className={cn("shadow-none", className)}>
       <CardHeader>
         <CardTitle>Sales Overview</CardTitle>
       </CardHeader>
-      <CardContent className="pl-2">{renderContent()}</CardContent>
+      <CardContent className="pl-2">
+        {renderContent()}
+
+        {data && data.sales.length > 0 && (
+          <div className="mt-4 pt-4 border-t flex items-center justify-between px-2">
+            <p className="text-sm text-muted-foreground">
+              Average Monthly Sales
+            </p>
+            <p className="text-lg font-semibold">
+              {formatMoney(
+                data.sales.reduce(
+                  (sum, item) => sum + parseFloat(item.total),
+                  0
+                ) / data.sales.length
+              )}
+            </p>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
