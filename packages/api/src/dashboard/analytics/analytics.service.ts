@@ -1,4 +1,4 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { BadRequestException, Injectable, Scope } from '@nestjs/common';
 import {
   DateRangeDto,
   RevenueTrendQueryDto,
@@ -23,7 +23,10 @@ export class AnalyticsService {
   /**
    * Convert two ISO strings to a tuple of Dates or undefined
    */
-  private toDates(start?: string, end?: string): [Date | undefined, Date | undefined] {
+  private toDates(
+    start?: string,
+    end?: string,
+  ): [Date | undefined, Date | undefined] {
     return [this.toDate(start), this.toDate(end)];
   }
 
@@ -74,19 +77,22 @@ export class AnalyticsService {
 
   async getSalesVelocity(dateRange: DateRangeDto) {
     const [start, end] = this.toDates(dateRange.startDate, dateRange.endDate);
-    if (!start || !end) throw new Error('StartDate and EndDate are required');
+
+    if (!start || !end) {
+      throw new BadRequestException('StartDate and EndDate are required');
+    }
     return this.analyticsRepository.getSalesVelocity();
   }
 
   async getSalesByDayOfWeek(dateRange: DateRangeDto) {
     const [start, end] = this.toDates(dateRange.startDate, dateRange.endDate);
-    if (!start || !end) throw new Error('StartDate and EndDate are required');
+    if (!start || !end) throw new BadRequestException('StartDate and EndDate are required');
     return this.analyticsRepository.getSalesByDayOfWeek();
   }
 
   async getSalesByHour(dateRange: DateRangeDto) {
     const [start, end] = this.toDates(dateRange.startDate, dateRange.endDate);
-    if (!start || !end) throw new Error('StartDate and EndDate are required');
+    if (!start || !end) throw new BadRequestException('StartDate and EndDate are required');
     return this.analyticsRepository.getSalesByHour();
   }
 
@@ -132,7 +138,7 @@ export class AnalyticsService {
 
   async getProductPerformanceMatrix(dateRange: DateRangeDto) {
     const [start, end] = this.toDates(dateRange.startDate, dateRange.endDate);
-    if (!start || !end) throw new Error('StartDate and EndDate are required');
+    if (!start || !end) throw new BadRequestException('StartDate and EndDate are required');
     return this.analyticsRepository.getProductPerformanceMatrix();
   }
 
