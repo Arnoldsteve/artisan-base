@@ -15,7 +15,9 @@ import {
   CustomerRetentionResponse,
   ProductPerformanceMatrixResponse,
   InactiveProductsResponse,
+  OrderFunnelResponse,
 } from "@/types/analytics";
+import { getOrderStatusColor } from "@/utils/status-colors";
 
 /* ===========================
    ANALYTICS SERVICE
@@ -66,7 +68,7 @@ export class AnalyticsService {
     endDate?: string;
   }): Promise<PaymentMethodsResponse> {
     return apiClient.get<PaymentMethodsResponse>(
-      "dashboard/analytics/revenue/payment-methods",
+      "dashboard/analytics/revenue/by-payment-provider",
       params
     );
   }
@@ -88,7 +90,7 @@ export class AnalyticsService {
     endDate?: string;
   }): Promise<TopCustomersResponse> {
     return apiClient.get<TopCustomersResponse>(
-      "dashboard/analytics/customers/top",
+      "dashboard/analytics/customers/top-spenders",
       params
     );
   }
@@ -96,12 +98,21 @@ export class AnalyticsService {
   /* ===========================
      SALES & MARKETING
   =========================== */
+  async getOrderStatusDistribution(params?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<OrderFunnelResponse> {
+    return apiClient.get<OrderFunnelResponse>(
+      "dashboard/analytics/sales/order-status-distribution",
+      params
+    );
+  }
 
   async getSalesVelocity(params: {
     startDate?: string;
     endDate?: string;
-  }): Promise<SalesVelocityResponse> {
-    return apiClient.get<SalesVelocityResponse>(
+  }): Promise<OrderFunnelResponse> {
+    return apiClient.get<OrderFunnelResponse>(
       "dashboard/analytics/sales/velocity",
       params
     );

@@ -11,6 +11,9 @@ export function RevenueBreakdown() {
   const { data: categoryData, isLoading: categoryLoading } = useRevenueByCategory();
   const { data: paymentData, isLoading: paymentLoading } = usePaymentMethods();
 
+  // console.log("Category Data:", categoryData);
+  // console.log("Payment Data:", paymentData);
+
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -32,16 +35,17 @@ export function RevenueBreakdown() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={categoryData?.data || []}
+                    data={categoryData || []}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(entry) => entry.category}
+                    // label={(entry) => entry.category}
+                    label={true}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="revenue"
                   >
-                    {(categoryData?.data || []).map((entry, index) => (
+                    {(categoryData || []).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -59,7 +63,7 @@ export function RevenueBreakdown() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={paymentData?.data || []}>
+                <BarChart data={paymentData || []}>
                   <XAxis dataKey="method" />
                   <YAxis />
                   <Tooltip />

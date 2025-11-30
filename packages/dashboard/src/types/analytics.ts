@@ -126,7 +126,7 @@ export type BestSellingProductsResponse = BestSellingProduct[];
 export interface TopCustomerAnalytics {
   rank: number;
   customerId: string;
-  fullName: string;
+  customerName: string;
   email: string;
   totalOrders: number;
   totalSpent: number;

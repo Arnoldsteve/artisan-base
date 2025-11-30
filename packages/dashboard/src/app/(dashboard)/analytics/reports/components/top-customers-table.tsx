@@ -22,8 +22,8 @@ export function TopCustomersTable() {
   const [limit, setLimit] = useState(10);
   const { data, isLoading, error } = useTopCustomers({ limit });
 
-  const filteredData = data?.data?.filter((customer) =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data?.filter((customer) =>
+    customer.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (error) {
@@ -81,13 +81,13 @@ export function TopCustomersTable() {
               <TableBody>
                 {filteredData && filteredData.length > 0 ? (
                   filteredData.map((customer, index) => (
-                    <TableRow key={customer.id}>
+                    <TableRow key={customer.customerId}>
                       <TableCell className="font-medium">#{index + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
                             <AvatarFallback>
-                              {customer.name
+                              {customer.customerName
                                 .split(" ")
                                 .map((n) => n[0])
                                 .join("")
@@ -95,7 +95,7 @@ export function TopCustomersTable() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{customer.name}</p>
+                            <p className="font-medium">{customer.customerName}</p>
                             <p className="text-xs text-muted-foreground">{customer.email}</p>
                           </div>
                         </div>

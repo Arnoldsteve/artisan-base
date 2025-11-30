@@ -105,7 +105,11 @@ export class AnalyticsRepository implements IAnalyticsRepository {
   async getOrderStatusDistribution(): Promise<OrderStatusData[]> {
     return [
       { status: 'pending', count: 22, percentage: 4.5 },
+      { status: 'paid', count: 0, percentage: 0 },
+      { status: 'packed', count: 0, percentage: 0 },
+      { status: 'shipped', count: 0, percentage: 0 },
       { status: 'delivered', count: 430, percentage: 89.6 },
+      { status: 'refunded', count: 0, percentage: 0 },
       { status: 'cancelled', count: 28, percentage: 5.9 },
     ];
   }
@@ -120,9 +124,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
   }
 
   async getSalesByDayOfWeek(): Promise<DayOfWeekData[]> {
-    return [
-      { dayOfWeek: 1, dayName: 'Monday', orderCount: 74, revenue: 9000 },
-    ];
+    return [{ dayOfWeek: 1, dayName: 'Monday', orderCount: 74, revenue: 9000 }];
   }
 
   async getSalesByHour(): Promise<HourlyData[]> {

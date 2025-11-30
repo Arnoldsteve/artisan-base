@@ -21,8 +21,10 @@ export function BestSellingProductsTable() {
   const [limit, setLimit] = useState(10);
   const { data, isLoading, error } = useBestSellingProducts({ limit });
 
-  const filteredData = data?.data?.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  console.log("Best Selling Products Data:", data);
+
+  const filteredData = data?.filter((product) =>
+    product.productName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (error) {
@@ -81,9 +83,9 @@ export function BestSellingProductsTable() {
               <TableBody>
                 {filteredData && filteredData.length > 0 ? (
                   filteredData.map((product, index) => (
-                    <TableRow key={product.id}>
+                    <TableRow key={product.productId}>
                       <TableCell className="font-medium">#{index + 1}</TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell className="font-medium">{product.productName}</TableCell>
                       <TableCell>{product.category || "Uncategorized"}</TableCell>
                       <TableCell className="text-right">{product.unitsSold}</TableCell>
                       <TableCell className="text-right">

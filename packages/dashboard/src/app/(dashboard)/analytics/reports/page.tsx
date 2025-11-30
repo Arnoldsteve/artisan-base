@@ -176,7 +176,7 @@ export default function ReportsPage() {
   return (
     <>
       <PageHeader title="Reports & Analytics" />
-      <div className="flex flex-col gap-6 p-4">
+      <div className="flex flex-col gap-4 p-4">
         {/* Global Filters */}
         <GlobalFiltersBar
           onFiltersChange={handleFiltersChange}

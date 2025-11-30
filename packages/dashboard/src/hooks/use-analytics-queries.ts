@@ -19,6 +19,7 @@ import {
   CustomerRetentionResponse,
   ProductPerformanceMatrixResponse,
   InactiveProductsResponse,
+  OrderFunnelResponse,
 } from "@/types/analytics";
 
 /* ===========================
@@ -119,6 +120,18 @@ export function useTopCustomers(params?: {
 /* ===========================
    SALES & MARKETING
 =========================== */
+
+export function useOrderStatusDistribution(params?: {
+  startDate?: string;
+  endDate?: string;
+}) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext(); 
+  return useQuery<OrderFunnelResponse>({
+    queryKey: [...ANALYTICS_QUERY_KEY, "order-status-distribution", params],
+    queryFn: () => analyticsService.getOrderStatusDistribution(params),
+    enabled: !isAuthLoading && isAuthenticated,
+  });
+}
 
 export function useSalesVelocity(params?: {
   startDate?: string;
