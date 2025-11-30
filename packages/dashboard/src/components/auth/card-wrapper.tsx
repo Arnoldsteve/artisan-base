@@ -29,7 +29,7 @@ export function CardWrapper({
 }: CardWrapperProps) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/40 p-4">
-      <Card className="w-full max-w-[380px] sm:max-w-[420px] md:max-w-[450px] shadow-lg rounded-2xl">
+      <Card className="w-full max-w-[380px] sm:max-w-[420px] md:max-w-[450px] shadow-none">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-blue-500">
             Artisan Base
