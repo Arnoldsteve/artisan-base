@@ -8,14 +8,20 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Download, Search, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useAnalyticsOverview } from "@/hooks/use-analytics-queries";
-import { format } from "date-fns";
+import { formatDate } from "@/utils/date";
+import { formatMoney } from "@/utils/money";
 
 export function RefundsReturnsTable() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,7 +54,9 @@ export function RefundsReturnsTable() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Failed to load refunds data</p>
+          <p className="text-sm text-destructive">
+            Failed to load refunds data
+          </p>
         </CardContent>
       </Card>
     );
@@ -88,7 +96,10 @@ export function RefundsReturnsTable() {
         {isLoading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"></div>
+              <div
+                key={i}
+                className="h-12 bg-gray-200 rounded animate-pulse"
+              ></div>
             ))}
           </div>
         ) : (
@@ -114,24 +125,22 @@ export function RefundsReturnsTable() {
                         {refund.reason}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {new Intl.NumberFormat("en-KE", {
-                          style: "currency",
-                          currency: "KES",
-                        }).format(refund.amount)}
+                        {formatMoney(refund.amount)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusVariant(refund.status)}>
                           {refund.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {format(new Date(refund.date), "MMM dd, yyyy")}
-                      </TableCell>
+                      <TableCell>{formatDate(refund.date)}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={5}
+                      className="text-center text-muted-foreground"
+                    >
                       No refunds or returns found
                     </TableCell>
                   </TableRow>

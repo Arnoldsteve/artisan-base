@@ -15,6 +15,7 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Download, Search } from "lucide-react";
 import { useState } from "react";
 import { useBestSellingProducts } from "@/hooks/use-analytics-queries";
+import { formatMoney } from "@/utils/money";
 
 export function BestSellingProductsTable() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -88,11 +89,7 @@ export function BestSellingProductsTable() {
                       <TableCell className="font-medium">{product.productName}</TableCell>
                       <TableCell>{product.category || "Uncategorized"}</TableCell>
                       <TableCell className="text-right">{product.unitsSold}</TableCell>
-                      <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-KE", {
-                          style: "currency",
-                          currency: "KES",
-                        }).format(product.revenue)}
+                      <TableCell className="text-right">{formatMoney(product.revenue)}
                       </TableCell>
                       <TableCell className="text-right">{product.stock || 0}</TableCell>
                       <TableCell>

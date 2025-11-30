@@ -8,14 +8,20 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { Download, Search } from "lucide-react";
 import { useState } from "react";
 import { useTopCustomers } from "@/hooks/use-analytics-queries";
-import { format } from "date-fns";
+import { formatMoney } from "@/utils/money";
+import { formatDate } from "@/utils/date";
 
 export function TopCustomersTable() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,7 +36,9 @@ export function TopCustomersTable() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Failed to load top customers</p>
+          <p className="text-sm text-destructive">
+            Failed to load top customers
+          </p>
         </CardContent>
       </Card>
     );
@@ -62,7 +70,10 @@ export function TopCustomersTable() {
         {isLoading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"></div>
+              <div
+                key={i}
+                className="h-12 bg-gray-200 rounded animate-pulse"
+              ></div>
             ))}
           </div>
         ) : (
@@ -75,14 +86,16 @@ export function TopCustomersTable() {
                   <TableHead className="text-right">Orders</TableHead>
                   <TableHead className="text-right">Total Spent</TableHead>
                   <TableHead className="text-right">Avg Order</TableHead>
-                  <TableHead>Last Order</TableHead>
+                  <TableHead className="text-right">Last Order</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredData && filteredData.length > 0 ? (
                   filteredData.map((customer, index) => (
                     <TableRow key={customer.customerId}>
-                      <TableCell className="font-medium">#{index + 1}</TableCell>
+                      <TableCell className="font-medium">
+                        #{index + 1}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
@@ -95,34 +108,35 @@ export function TopCustomersTable() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{customer.customerName}</p>
-                            <p className="text-xs text-muted-foreground">{customer.email}</p>
+                            <p className="font-medium">
+                              {customer.customerName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {customer.email}
+                            </p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">{customer.totalOrders}</TableCell>
                       <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-KE", {
-                          style: "currency",
-                          currency: "KES",
-                        }).format(customer.totalSpent)}
+                        {customer.totalOrders}
                       </TableCell>
                       <TableCell className="text-right">
-                        {new Intl.NumberFormat("en-KE", {
-                          style: "currency",
-                          currency: "KES",
-                        }).format(customer.averageOrderValue)}
+                        {formatMoney(customer.totalSpent)}
                       </TableCell>
-                      <TableCell>
-                        {customer.lastOrderDate
-                          ? format(new Date(customer.lastOrderDate), "MMM dd, yyyy")
-                          : "N/A"}
+                      <TableCell className="text-right">
+                        {formatMoney(customer.averageOrderValue)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatDate(customer.lastOrderDate)}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center text-muted-foreground"
+                    >
                       No customers found
                     </TableCell>
                   </TableRow>
