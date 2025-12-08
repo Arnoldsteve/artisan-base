@@ -149,21 +149,22 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
   }
 
   return (
-    <>
-      <PageHeader title="Order">
-        <Link href="/orders/new">
-          <Button variant={"outline"} size={"sm"}>
-            New Order
-          </Button>
-        </Link>
-      </PageHeader>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <PageHeader title="Order">
+          <Link href="/orders/new">
+            <Button variant={"outline"} size={"sm"}>
+              New Order
+            </Button>
+          </Link>
+        </PageHeader>
 
-      <div className="px-4 md:px-4 lg:px-8 md:mt-0 md:pb-10">
-        <OrdersTableViewOptions table={table} />
-        <DataTable table={table} />
+        <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
+          <OrdersTableViewOptions table={table} />
+          <DataTable table={table} />
+        </div>
       </div>
       <DataTablePagination table={table} totalCount={totalOrders} />
-      
 
       {numSelected > 0 && (
         <div className="fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out translate-y-0">
@@ -206,6 +207,6 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
         selectedCount={numSelected}
         isPending={isBatchDeleting}
       />
-    </>
+    </div>
   );
 }

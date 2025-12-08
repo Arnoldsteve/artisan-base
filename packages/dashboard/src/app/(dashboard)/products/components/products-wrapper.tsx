@@ -174,7 +174,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
     }));
 
     console.log("Cleaned rows (final payload to backend):", cleanedRows);
-    // return; 
+    // return;
 
     bulkCreateProducts(cleanedRows, {
       onSuccess: () => {
@@ -271,20 +271,22 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   }
 
   return (
-    <>
-      <PageHeader title="Products">
-        <BulkUploadDropdown
-          onCsvImport={handleCsvImport}
-          onExcelImport={handleExcelImport}
-        />
-        <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
-          Add Product
-        </Button>
-      </PageHeader>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <PageHeader title="Products">
+          <BulkUploadDropdown
+            onCsvImport={handleCsvImport}
+            onExcelImport={handleExcelImport}
+          />
+          <Button variant={"outline"} size={"sm"} onClick={openAddSheet}>
+            Add Product
+          </Button>
+        </PageHeader>
 
-      <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
-        <DataTableViewOptions table={table} />
-        <DataTable table={table} />
+        <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
+          <DataTableViewOptions table={table} />
+          <DataTable table={table} />
+        </div>
       </div>
       <DataTablePagination table={table} totalCount={totalProducts} />
 
@@ -347,6 +349,6 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
         onClose={() => setIsBulkModalOpen(false)}
         onConfirm={handleBulkImport}
       />
-    </>
+    </div>
   );
 }

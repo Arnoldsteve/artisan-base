@@ -20,7 +20,7 @@ export function CustomerOrdersView({ initialOrders }: { initialOrders: Order[] }
   const totalOrders = orders.length;
 
   return (
-    <Card>
+    <Card className="shadow-none">
         <CardHeader>
           <CardTitle>Order History</CardTitle>
         </CardHeader>

@@ -186,6 +186,7 @@ export class OrderRepository implements IOrderRepository {
               firstName: true,
               lastName: true,
               email: true,
+              phone: true,
             },
           },
         },

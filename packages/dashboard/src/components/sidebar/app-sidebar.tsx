@@ -127,12 +127,12 @@ const data = {
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "analytics",
       icon: BarChart3,
       items: [
         {
           title: "Reports",
-          url: "/reports",
+          url: "/analytics/reports",
         },
         {
           title: "Sales & Marketing",

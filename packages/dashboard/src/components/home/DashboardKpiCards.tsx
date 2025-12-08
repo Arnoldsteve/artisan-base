@@ -63,7 +63,7 @@ export function DashboardKpiCards({
         </p>
       ) : kpis ? (
         <>
-          <Card className="bg-[#fff]">
+          <Card className="shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Revenue
@@ -82,7 +82,7 @@ export function DashboardKpiCards({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Sales Today</CardTitle>
               <ShoppingBag className="h-4 w-4 text-muted-foreground" />
@@ -97,7 +97,7 @@ export function DashboardKpiCards({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Receivables</CardTitle>
               <span className="text-xs font-semibold text-muted-foreground">
@@ -114,7 +114,7 @@ export function DashboardKpiCards({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Cash Collected
@@ -133,7 +133,7 @@ export function DashboardKpiCards({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Customers
@@ -148,7 +148,7 @@ export function DashboardKpiCards({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Active Products

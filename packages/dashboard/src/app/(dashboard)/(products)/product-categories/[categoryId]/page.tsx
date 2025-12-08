@@ -49,7 +49,6 @@ export default async function CategoryProductsPage({
       data: products,
       meta: response.meta,
     };
-
   } catch (error) {
     console.error("❌ Failed to fetch category/products:", error);
     initialProductData = {
@@ -66,14 +65,9 @@ export default async function CategoryProductsPage({
   }
 
   return (
-    <>
-      {/* <PageHeader title={category?.name ?? "Category"} /> */}
-      {/* <div className="px-4 md:px-4 lg:px-8 md:mt-0"> */}
-        <CategoryProductsClient
-          category={category}
-          initialProductData={initialProductData}
-        />
-      {/* </div> */}
-    </>
+    <CategoryProductsClient
+      category={category}
+      initialProductData={initialProductData}
+    />
   );
 }

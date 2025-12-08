@@ -8,15 +8,35 @@ export type OrderStatus =
   | "PROCESSING"
   | "SHIPPED"
   | "DELIVERED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "PACKED"
+  | "IN_TRANSIT"
+  | "OUT_FOR_DELIVERY"
+  | "PARTIALLY_DELIVERED"
+  | "RETURN_REQUESTED"
+  | "RETURNED"
+  | "REFUNDED"
+  | "FAILED_DELIVERY";
 
-export type PaymentStatus = "PENDING" | "PAID" | "REFUNDED" | "FAILED";
+export type PaymentStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "PAID"
+  | "OVERPAID"
+  | "CANCELLED"
+  | "PARTIALLY_PAID"
+  | "REFUNDED"
+  | "PARTIALLY_REFUNDED"
+  | "FAILED"
+  | "EXPIRED"
+  | "CHARGEBACK";
 
 export interface OrderCustomer {
   id: string;
   firstName: string | null;
   lastName: string | null;
   email: string;
+  phone?: string;
 }
 
 export interface OrderItem {

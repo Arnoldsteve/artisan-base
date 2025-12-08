@@ -90,7 +90,7 @@ export function RecentOrders({
   // --- Success State (with data) ---
   if (ordersData) {
     return (
-      <Card className="lg:col-span-3">
+      <Card className="lg:col-span-3 shadow-none">
         <CardHeader>
           <CardTitle>Recent Orders</CardTitle>
           <CardDescription>

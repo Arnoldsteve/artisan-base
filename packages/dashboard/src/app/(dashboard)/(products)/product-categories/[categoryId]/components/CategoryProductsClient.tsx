@@ -22,17 +22,17 @@ export default function CategoryProductsClient({
     <>
       <PageHeader title={category?.name ?? "Category"}>
         <Link href="/product-categories">
-          <Button variant={"outline"} size={"sm"}>Categories List</Button>
+          <Button variant={"outline"} size={"sm"}>
+            Categories List
+          </Button>
         </Link>
       </PageHeader>
 
-      {/* <div className="px-4 md:px-4 lg:px-8 md:mt-0"> */}
-        <Card className="p-6">
-          {category?.description && (
-            <p className="text-gray-600 mt-1">{category.description}</p>
-          )}
-        </Card>
-      {/* </div> */}
+      <Card className="p-6">
+        {category?.description && (
+          <p className="text-gray-600 mt-1">{category.description}</p>
+        )}
+      </Card>
 
       <ProductsWrapper initialProductData={initialProductData} />
     </>
