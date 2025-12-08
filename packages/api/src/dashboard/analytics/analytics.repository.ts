@@ -97,9 +97,40 @@ export class AnalyticsRepository implements IAnalyticsRepository {
         productCount: 32,
         percentage: 48,
       },
+      {
+        categoryId: 'cat-2',
+        categoryName: 'Clothing',
+        revenue: 45000,
+        orderCount: 120,
+        productCount: 85,
+        percentage: 18,
+      },
+      {
+        categoryId: 'cat-3',
+        categoryName: 'Home & Garden',
+        revenue: 38000,
+        orderCount: 65,
+        productCount: 45,
+        percentage: 15,
+      },
+      {
+        categoryId: 'cat-4',
+        categoryName: 'Sports',
+        revenue: 28000,
+        orderCount: 55,
+        productCount: 38,
+        percentage: 11,
+      },
+      {
+        categoryId: 'cat-5',
+        categoryName: 'Books',
+        revenue: 19000,
+        orderCount: 95,
+        productCount: 120,
+        percentage: 8,
+      },
     ];
   }
-
   async getRevenueByPaymentProvider(): Promise<PaymentProviderData[]> {
     return [
       {
