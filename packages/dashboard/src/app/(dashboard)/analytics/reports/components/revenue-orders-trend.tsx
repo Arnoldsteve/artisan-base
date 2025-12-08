@@ -16,7 +16,8 @@ export function RevenueOrdersTrend() {
   const [groupBy, setGroupBy] = useState<"day" | "week" | "month" | "year">("day");
   const { data, isLoading, error } = useRevenueTrend({ groupBy });
 
-  // console.log("Revenue Trend Data:", data);
+  console.log("Revenue Trend Data:", data);
+
 
   if (error) {
     return (
@@ -51,7 +52,7 @@ export function RevenueOrdersTrend() {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data?.data || []}>
+            <LineChart data={data || []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="period" />
               <YAxis yAxisId="left" />
@@ -68,7 +69,7 @@ export function RevenueOrdersTrend() {
               <Line
                 yAxisId="right"
                 type="monotone"
-                dataKey="orders"
+                dataKey="orderCount"
                 stroke="#82ca9d"
                 name="Orders"
               />

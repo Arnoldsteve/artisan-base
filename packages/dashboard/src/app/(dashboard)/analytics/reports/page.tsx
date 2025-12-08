@@ -18,10 +18,12 @@ import { RefundsReturnsTable } from "./components/refunds-returns-table";
 import { useAnalyticsOverview } from "@/hooks/use-analytics-queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { KpiSection } from "./components/kpi-metrics-grid";
+import { Separator } from "@repo/ui";
 
 export default function ReportsPage() {
   const [filters, setFilters] = useState({});
   const { data, isLoading } = useAnalyticsOverview();
+  // console.log("fetched data", data)
 
   const handleFiltersChange = (newFilters: any) => {
     setFilters(newFilters);
@@ -183,37 +185,50 @@ export default function ReportsPage() {
           onExport={handleExport}
         />
 
-        {/* Revenue KPIs */}
-        <KpiSection
-          title="Revenue"
-          metrics={revenueMetrics}
-          onMetricClick={handleMetricClick}
-          isLoading={isLoading}
-        />
+        <Tabs defaultValue="revenue" className="w-full">
+          <TabsList className="grid grid-cols-4 w-full mb-4">
+            <TabsTrigger value="revenue">Revenue</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="customers">Customers</TabsTrigger>
+            <TabsTrigger value="products">Products</TabsTrigger>
+          </TabsList>
 
-        {/* Orders KPIs */}
-        <KpiSection
-          title="Orders"
-          metrics={ordersMetrics}
-          onMetricClick={handleMetricClick}
-          isLoading={isLoading}
-        />
+          <TabsContent value="revenue">
+            <KpiSection
+              title="Revenue Metrics"
+              metrics={revenueMetrics}
+              onMetricClick={handleMetricClick}
+              isLoading={isLoading}
+            />
+          </TabsContent>
 
-        {/* Customers KPIs */}
-        <KpiSection
-          title="Customers"
-          metrics={customersMetrics}
-          onMetricClick={handleMetricClick}
-          isLoading={isLoading}
-        />
+          <TabsContent value="orders">
+            <KpiSection
+              title="Order Metrics"
+              metrics={ordersMetrics}
+              onMetricClick={handleMetricClick}
+              isLoading={isLoading}
+            />
+          </TabsContent>
 
-        {/* Products KPIs */}
-        <KpiSection
-          title="Products"
-          metrics={productsMetrics}
-          onMetricClick={handleMetricClick}
-          isLoading={isLoading}
-        />
+          <TabsContent value="customers">
+            <KpiSection
+              title="Customer Metrics"
+              metrics={customersMetrics}
+              onMetricClick={handleMetricClick}
+              isLoading={isLoading}
+            />
+          </TabsContent>
+
+          <TabsContent value="products">
+            <KpiSection
+              title="Product Metrics"
+              metrics={productsMetrics}
+              onMetricClick={handleMetricClick}
+              isLoading={isLoading}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Charts Section */}
         <div className="grid gap-6 md:grid-cols-2">

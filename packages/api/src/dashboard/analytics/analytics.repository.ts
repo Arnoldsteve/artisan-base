@@ -53,14 +53,13 @@ export class AnalyticsRepository implements IAnalyticsRepository {
   }
 
   async getRevenueTrend(): Promise<RevenueTrendData[]> {
-    return [
-      {
-        period: '2025-01',
-        revenue: 50000,
-        orderCount: 120,
-        averageOrderValue: 416,
-      },
-    ];
+     return [
+    { period: '2025-01-01', revenue: 45000, orderCount: 110, averageOrderValue: 409 },
+    { period: '2025-01-02', revenue: 50000, orderCount: 120, averageOrderValue: 416 },
+    { period: '2025-01-03', revenue: 48000, orderCount: 115, averageOrderValue: 417 },
+    { period: '2025-01-04', revenue: 52000, orderCount: 125, averageOrderValue: 416 },
+    { period: '2025-01-05', revenue: 47000, orderCount: 112, averageOrderValue: 419 },
+  ];
   }
 
   async getRevenueByCategory(): Promise<CategoryRevenueData[]> {

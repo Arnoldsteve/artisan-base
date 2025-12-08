@@ -66,14 +66,16 @@ export interface AnalyticsOverviewResponse {
 export interface RevenueTrendPoint {
   date: string; // ISO
   revenue: number;
-  orders: number;
+  orderCount: number;
   averageOrderValue: number;
 }
 
-export interface RevenueTrendResponse {
-  groupBy: GroupBy;
-  data: RevenueTrendPoint[];
-}
+// export interface RevenueTrendResponse {
+//   groupBy: GroupBy;
+//   data: RevenueTrendPoint[];
+// }
+
+export type RevenueTrendResponse = RevenueTrendPoint[];
 
 /* ---- Order Funnel ---- */
 export interface OrderFunnelStage {

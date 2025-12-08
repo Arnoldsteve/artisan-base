@@ -22,7 +22,7 @@ export function BestSellingProductsTable() {
   const [limit, setLimit] = useState(10);
   const { data, isLoading, error } = useBestSellingProducts({ limit });
 
-  console.log("Best Selling Products Data:", data);
+  // console.log("Best Selling Products Data:", data);
 
   const filteredData = data?.filter((product) =>
     product.productName.toLowerCase().includes(searchTerm.toLowerCase())
