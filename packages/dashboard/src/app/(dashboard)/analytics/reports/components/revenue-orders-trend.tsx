@@ -16,7 +16,7 @@ export function RevenueOrdersTrend() {
   const [groupBy, setGroupBy] = useState<"day" | "week" | "month" | "year">("day");
   const { data, isLoading, error } = useRevenueTrend({ groupBy });
 
-  console.log("Revenue Trend Data:", data);
+  // console.log("Revenue Trend Data:", data);
 
 
   if (error) {

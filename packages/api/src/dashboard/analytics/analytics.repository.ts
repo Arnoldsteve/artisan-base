@@ -53,13 +53,38 @@ export class AnalyticsRepository implements IAnalyticsRepository {
   }
 
   async getRevenueTrend(): Promise<RevenueTrendData[]> {
-     return [
-    { period: '2025-01-01', revenue: 45000, orderCount: 110, averageOrderValue: 409 },
-    { period: '2025-01-02', revenue: 50000, orderCount: 120, averageOrderValue: 416 },
-    { period: '2025-01-03', revenue: 48000, orderCount: 115, averageOrderValue: 417 },
-    { period: '2025-01-04', revenue: 52000, orderCount: 125, averageOrderValue: 416 },
-    { period: '2025-01-05', revenue: 47000, orderCount: 112, averageOrderValue: 419 },
-  ];
+    return [
+      {
+        period: '2025-01-01',
+        revenue: 45000,
+        orderCount: 110,
+        averageOrderValue: 409,
+      },
+      {
+        period: '2025-01-02',
+        revenue: 50000,
+        orderCount: 120,
+        averageOrderValue: 416,
+      },
+      {
+        period: '2025-01-03',
+        revenue: 48000,
+        orderCount: 115,
+        averageOrderValue: 417,
+      },
+      {
+        period: '2025-01-04',
+        revenue: 52000,
+        orderCount: 125,
+        averageOrderValue: 416,
+      },
+      {
+        period: '2025-01-05',
+        revenue: 47000,
+        orderCount: 112,
+        averageOrderValue: 419,
+      },
+    ];
   }
 
   async getRevenueByCategory(): Promise<CategoryRevenueData[]> {
@@ -103,13 +128,13 @@ export class AnalyticsRepository implements IAnalyticsRepository {
 
   async getOrderStatusDistribution(): Promise<OrderStatusData[]> {
     return [
-      { status: 'pending', count: 22, percentage: 4.5 },
-      { status: 'paid', count: 0, percentage: 0 },
-      { status: 'packed', count: 0, percentage: 0 },
-      { status: 'shipped', count: 0, percentage: 0 },
-      { status: 'delivered', count: 430, percentage: 89.6 },
-      { status: 'refunded', count: 0, percentage: 0 },
-      { status: 'cancelled', count: 28, percentage: 5.9 },
+      { status: 'pending', count: 45, percentage: 9.4 },
+      { status: 'paid', count: 68, percentage: 14.2 },
+      { status: 'packed', count: 52, percentage: 10.8 },
+      { status: 'shipped', count: 89, percentage: 18.5 },
+      { status: 'delivered', count: 198, percentage: 41.2 },
+      { status: 'refunded', count: 12, percentage: 2.5 },
+      { status: 'cancelled', count: 16, percentage: 3.3 },
     ];
   }
 

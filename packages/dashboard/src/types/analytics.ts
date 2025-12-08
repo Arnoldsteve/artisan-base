@@ -78,15 +78,17 @@ export interface RevenueTrendPoint {
 export type RevenueTrendResponse = RevenueTrendPoint[];
 
 /* ---- Order Funnel ---- */
-export interface OrderFunnelStage {
-  stage: "pending" | "paid" | "packed" | "shipped" | "delivered" | "refunded";
+export interface OrderStatusData {
+  status: "pending" | "paid" | "packed" | "shipped" | "delivered" | "refunded" | "cancelled";
   count: number;
-  percentageDrop?: number;
+  percentage: number;
 }
 
-export interface OrderFunnelResponse {
-  stages: OrderFunnelStage[];
-}
+// export interface OrderFunnelResponse {
+//   stages: OrderFunnelStage[];
+// }
+export type OrderFunnelResponse = OrderStatusData[];
+
 
 /* ---- Revenue by Category ---- */
 export interface RevenueByCategoryItem {
