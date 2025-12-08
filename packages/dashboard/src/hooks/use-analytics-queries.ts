@@ -20,6 +20,8 @@ import {
   ProductPerformanceMatrixResponse,
   InactiveProductsResponse,
   OrderFunnelResponse,
+  RecentTransactionsResponse,
+  RefundsResponse,
 } from "@/types/analytics";
 
 /* ===========================
@@ -125,7 +127,7 @@ export function useOrderStatusDistribution(params?: {
   startDate?: string;
   endDate?: string;
 }) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext(); 
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
   return useQuery<OrderFunnelResponse>({
     queryKey: [...ANALYTICS_QUERY_KEY, "order-status-distribution", params],
     queryFn: () => analyticsService.getOrderStatusDistribution(params),
@@ -142,12 +144,10 @@ export function useSalesVelocity(params?: {
   return useQuery<SalesVelocityResponse>({
     queryKey: [...ANALYTICS_QUERY_KEY, "sales-velocity", params],
     queryFn: () =>
-      analyticsService
-        .getSalesVelocity(params || {})
-        .catch((err) => {
-          toast.error(err.message || "Failed to load sales velocity");
-          throw err;
-        }),
+      analyticsService.getSalesVelocity(params || {}).catch((err) => {
+        toast.error(err.message || "Failed to load sales velocity");
+        throw err;
+      }),
     enabled: !isAuthLoading && isAuthenticated,
   });
 }
@@ -192,6 +192,30 @@ export function useSalesByLocation(params: {
   });
 }
 
+export function useRecentTransactions(params?: {
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+}) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
+  return useQuery<RecentTransactionsResponse>({
+    queryKey: [...ANALYTICS_QUERY_KEY, "recent-transactions", params],
+    queryFn: () => analyticsService.getRecentTransactions(params),
+    enabled: !isAuthLoading && isAuthenticated,
+  });
+}
+
+export function useRefunds(params?: { startDate?: string; endDate?: string }) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+
+  return useQuery<RefundsResponse>({
+    queryKey: [...ANALYTICS_QUERY_KEY, "refunds", params],
+    queryFn: () => analyticsService.getRefunds(params),
+    enabled: !isAuthLoading && isAuthenticated,
+  });
+}
+
 /* ===========================
    CUSTOMER INTELLIGENCE
 =========================== */
@@ -224,10 +248,7 @@ export function useCustomerRetention(params: {
   return useQuery<CustomerRetentionResponse>({
     queryKey: [...ANALYTICS_QUERY_KEY, "customer-retention", params],
     queryFn: () => analyticsService.getCustomerRetention(params),
-    enabled:
-      !isAuthLoading &&
-      isAuthenticated &&
-      !!params?.cohortPeriod,
+    enabled: !isAuthLoading && isAuthenticated && !!params?.cohortPeriod,
   });
 }
 
@@ -243,20 +264,17 @@ export function useProductPerformanceMatrix(params?: {
 
   return useQuery<ProductPerformanceMatrixResponse>({
     queryKey: [...ANALYTICS_QUERY_KEY, "product-performance-matrix", params],
-    queryFn: () =>
-      analyticsService.getProductPerformanceMatrix(params || {}),
+    queryFn: () => analyticsService.getProductPerformanceMatrix(params || {}),
     enabled: !isAuthLoading && isAuthenticated,
   });
 }
 
-export function useInactiveProducts(params: {
-  days: 30 | 60 | 90;
-}) {
+export function useInactiveProducts(params: { days: 30 | 60 | 90 }) {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
 
   return useQuery<InactiveProductsResponse>({
     queryKey: [...ANALYTICS_QUERY_KEY, "inactive-products", params],
     queryFn: () => analyticsService.getInactiveProducts(params),
     enabled: !isAuthLoading && isAuthenticated,
-    });
+  });
 }

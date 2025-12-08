@@ -16,6 +16,8 @@ import {
   ProductPerformanceMatrixResponse,
   InactiveProductsResponse,
   OrderFunnelResponse,
+  RecentTransactionsResponse,
+  RefundsResponse,
 } from "@/types/analytics";
 import { getOrderStatusColor } from "@/utils/status-colors";
 
@@ -111,8 +113,8 @@ export class AnalyticsService {
   async getSalesVelocity(params: {
     startDate?: string;
     endDate?: string;
-  }): Promise<OrderFunnelResponse> {
-    return apiClient.get<OrderFunnelResponse>(
+  }): Promise<SalesVelocityResponse> {
+    return apiClient.get<SalesVelocityResponse>(
       "dashboard/analytics/sales/velocity",
       params
     );
@@ -145,6 +147,27 @@ export class AnalyticsService {
   }): Promise<SalesByLocationResponse> {
     return apiClient.get<SalesByLocationResponse>(
       "dashboard/analytics/sales/by-location",
+      params
+    );
+  }
+
+  async getRecentTransactions(params?: {
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<RecentTransactionsResponse> {
+    return apiClient.get<RecentTransactionsResponse>(
+      "dashboard/analytics/transactions/recent",
+      params
+    );
+  }
+
+  async getRefunds(params?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<RefundsResponse> {
+    return apiClient.get<RefundsResponse>(
+      "dashboard/analytics/refunds",
       params
     );
   }

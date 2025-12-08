@@ -7,12 +7,6 @@ import {
   CardTitle,
 } from "@repo/ui/components/ui/card";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@repo/ui/components/ui/tabs";
-import {
   PieChart,
   Pie,
   Cell,
@@ -36,22 +30,15 @@ export function RevenueBreakdown() {
     useRevenueByCategory();
   const { data: paymentData, isLoading: paymentLoading } = usePaymentMethods();
 
-  // console.log("Category Data:", categoryData);
-  // console.log("Payment Data:", paymentData);
-
   return (
-    <Card className="col-span-2">
-      <CardHeader>
-        <CardTitle>Revenue Breakdown</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="category" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="category">By Category</TabsTrigger>
-            <TabsTrigger value="payment">By Payment Method</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="category" className="h-[300px]">
+    <div className="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* By Category Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Revenue by Category</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
             {categoryLoading ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-sm text-muted-foreground">Loading...</p>
@@ -84,9 +71,17 @@ export function RevenueBreakdown() {
                 </PieChart>
               </ResponsiveContainer>
             )}
-          </TabsContent>
+          </div>
+        </CardContent>
+      </Card>
 
-          <TabsContent value="payment" className="h-[300px]">
+      {/* By Payment Method Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Revenue by Payment Method</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
             {paymentLoading ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-sm text-muted-foreground">Loading...</p>
@@ -101,9 +96,9 @@ export function RevenueBreakdown() {
                 </BarChart>
               </ResponsiveContainer>
             )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

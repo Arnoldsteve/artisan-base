@@ -1,6 +1,7 @@
 import { Progress } from "@repo/ui/components/ui/progress";
 import { useOrderStatusDistribution } from "@/hooks/use-analytics-queries";
 import { OrderStatusData } from "@/types/analytics";
+import { Card } from "@repo/ui";
 
 export function OrderStatusFunnel() {
   const { data, isLoading } = useOrderStatusDistribution();
@@ -44,9 +45,9 @@ export function OrderStatusFunnel() {
   // console.log("Total Orders:", total);
 
   return (
-    <div className="space-y-4">
+    <Card className="space-y-4 ">
       {statuses.map((status) => (
-        <div key={status.key} className="space-y-2">
+        <div key={status.key} className="space-y-2 px-8 pt-2">
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium">{status.label}</span>
             <span className="text-muted-foreground">
@@ -57,6 +58,6 @@ export function OrderStatusFunnel() {
           <Progress value={status.percentage} className={status.color} />
         </div>
       ))}
-    </div>
+    </Card>
   );
 }

@@ -14,19 +14,26 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Download, Search, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { useAnalyticsOverview } from "@/hooks/use-analytics-queries";
 import { format } from "date-fns";
+import { useRecentTransactions } from "@/hooks/use-analytics-queries";
 
 export function RecentTransactionsTable() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data, isLoading, error } = useAnalyticsOverview();
+  
+  // TODO: Replace with actual recent transactions API call
 
-  // Mock recent transactions - replace with actual API call
-  const transactions = data?.data?.recentTransactions || [];
+  const { data, isLoading, error } = useRecentTransactions({ limit: 10 });
+const transactions = data || [];
+  // // const { data, isLoading, error } = useRecentTransactions();
+  // const isLoading = false;
+  // const error = null;
+  
+  // // Placeholder data - replace when you have the actual endpoint
+  // const transactions: any[] = [];
 
   const filteredData = transactions.filter(
     (transaction: any) =>
-      transaction.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.customerName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -120,7 +127,7 @@ export function RecentTransactionsTable() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(transaction.date), "MMM dd, yyyy HH:mm")}
+                        {format(new Date(transaction.createdAt), "MMM dd, yyyy HH:mm")}
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">

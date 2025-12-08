@@ -19,20 +19,18 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Download, Search, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { useAnalyticsOverview } from "@/hooks/use-analytics-queries";
 import { formatDate } from "@/utils/date";
 import { formatMoney } from "@/utils/money";
+import { useRefunds } from "@/hooks/use-analytics-queries";
 
 export function RefundsReturnsTable() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data, isLoading, error } = useAnalyticsOverview();
-
-  // Mock refunds data - replace with actual API call
-  const refunds = data?.data?.refunds || [];
+  const { data, isLoading, error } = useRefunds();
+  const refunds = data || [];
 
   const filteredData = refunds.filter(
     (refund: any) =>
-      refund.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      refund.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       refund.reason?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -117,7 +115,7 @@ export function RefundsReturnsTable() {
               <TableBody>
                 {filteredData && filteredData.length > 0 ? (
                   filteredData.map((refund: any) => (
-                    <TableRow key={refund.id}>
+                    <TableRow key={refund.orderId}>
                       <TableCell className="font-mono text-sm">
                         {refund.orderId}
                       </TableCell>
@@ -132,7 +130,7 @@ export function RefundsReturnsTable() {
                           {refund.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{formatDate(refund.date)}</TableCell>
+                      <TableCell>{formatDate(refund.createdAt)}</TableCell>
                     </TableRow>
                   ))
                 ) : (
