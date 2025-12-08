@@ -134,11 +134,32 @@ export class AnalyticsRepository implements IAnalyticsRepository {
   async getRevenueByPaymentProvider(): Promise<PaymentProviderData[]> {
     return [
       {
-        provider: 'Stripe',
+        provider: 'M-Pesa',
         revenue: 180000,
-        orderCount: 160,
-        successRate: 97,
+        orderCount: 245,
+        successRate: 98,
         percentage: 72,
+      },
+      {
+        provider: 'Card',
+        revenue: 45000,
+        orderCount: 68,
+        successRate: 95,
+        percentage: 18,
+      },
+      {
+        provider: 'Cash',
+        revenue: 18000,
+        orderCount: 42,
+        successRate: 100,
+        percentage: 7,
+      },
+      {
+        provider: 'Bank Transfer',
+        revenue: 7000,
+        orderCount: 15,
+        successRate: 93,
+        percentage: 3,
       },
     ];
   }

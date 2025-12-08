@@ -94,7 +94,7 @@ export function RevenueBreakdown() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={paymentData || []}>
-                  <XAxis dataKey="method" />
+                  <XAxis dataKey="provider" />
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="revenue" fill="#8884d8" />

@@ -4,7 +4,7 @@ import { OrderStatusData } from "@/types/analytics";
 
 export function OrderStatusFunnel() {
   const { data, isLoading } = useOrderStatusDistribution();
-  console.log("Order Status Distribution Data:", data);
+  // console.log("Order Status Distribution Data:", data);
 
   if (isLoading) {
     return (

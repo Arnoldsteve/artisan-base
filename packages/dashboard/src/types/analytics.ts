@@ -103,12 +103,16 @@ export type RevenueByCategoryResponse = RevenueByCategoryItem[];
 /* ---- Payment Methods ---- */
 export type PaymentMethod = "mpesa" | "card" | "cash" | "bank_transfer";
 
+// In analytics.ts
 export interface PaymentMethodAnalytics {
-  method: PaymentMethod;
-  transactions: number;
+  provider: string;  
+  orderCount: number;  
   successRate: number;
   revenue: number;
+  percentage: number;  
 }
+
+// export type PaymentMethodsResponse = PaymentMethodAnalytics[];
 
 export type PaymentMethodsResponse = PaymentMethodAnalytics[];
 
