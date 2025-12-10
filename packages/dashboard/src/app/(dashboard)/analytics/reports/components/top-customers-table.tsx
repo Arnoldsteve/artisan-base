@@ -83,7 +83,7 @@ export function TopCustomersTable() {
                 <TableRow>
                   <TableHead className="w-[50px]">Rank</TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead className="text-right">Orders</TableHead>
+                  <TableHead className="text-right">Total Orders</TableHead>
                   <TableHead className="text-right">Total Spent</TableHead>
                   <TableHead className="text-right">Avg Order</TableHead>
                   <TableHead className="text-right">Last Order</TableHead>

@@ -136,7 +136,7 @@ const data = {
         },
         {
           title: "Sales & Marketing",
-          url: "#",
+          url: "/analytics/sales-marketing",
         },
       ],
     },
