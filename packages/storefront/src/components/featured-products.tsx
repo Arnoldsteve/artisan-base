@@ -24,7 +24,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (isLoading) {
     return (
-      <section className="py-4 bg-muted/40">
+      <section className="py-4">
         <div className="container mx-auto px-4">
           <div className="text-start mb-6">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -39,7 +39,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (error) {
     return (
-      <section className="py-4 bg-muted/50">
+      <section className="py-4">
         <div className="container mx-auto px-4">
           <div className="text-start mb-6">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -62,7 +62,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
 
   if (!products.length) {
     return (
-      <section className="py-4 bg-muted/50">
+      <section className="py-4">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -81,7 +81,7 @@ export const FeaturedProducts = memo(function FeaturedProducts() {
   }
 
   return (
-    <section className="py-4 bg-muted/100">
+    <section className="py-4">
       <div className="container mx-auto px-2 md:px-4">
         <div className="text-start mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-1">

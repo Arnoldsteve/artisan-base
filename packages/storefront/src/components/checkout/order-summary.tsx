@@ -118,8 +118,9 @@ export const OrderSummary: React.FC = () => {
 
         <div className="space-y-3 pt-4">
           <Button
+            variant={"default"}
             onClick={submitOrder}
-            className="w-full"
+            className="bg-blue-500 hover:bg-blue-600 w-full"
             disabled={items.length === 0 || isLoading || !isCheckoutComplete}
             size="lg"
           >
@@ -133,7 +134,11 @@ export const OrderSummary: React.FC = () => {
             )}
           </Button>
 
-          <Button variant="outline" onClick={previousStep} className="w-full">
+          <Button
+            variant="outline"
+            onClick={previousStep}
+            className="border border-blue-500 text-blue-500 hover:text-blue-600 w-full"
+          >
             Back to Payment
           </Button>
         </div>

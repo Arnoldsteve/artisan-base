@@ -20,14 +20,14 @@ export default function CartPage() {
 
   if (!mounted) {
     return (
-      <div className="max-w-6xl mx-auto p-6 text-center text-muted-foreground py-12">
+      <div className="bg-muted min-h-screen p-6 text-center text-muted-foreground py-12">
         <p>Loading cart…</p>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center  items-center bg-background p-0 md:p-6">
+    <div className="bg-muted min-h-screen flex justify-center items-center p-0 md:p-6">
       <div className="w-full max-w-6xl">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Cart Items */}
@@ -66,6 +66,7 @@ export default function CartPage() {
             <div className="flex flex-col gap-2 mt-auto">
               <Button
                 variant="outline"
+                className="border border-blue-500 text-blue-500 hover:text-blue-600"
                 onClick={clearCart}
                 disabled={items.length === 0}
               >
@@ -73,6 +74,7 @@ export default function CartPage() {
               </Button>
               <Button
                 variant="default"
+                className="bg-blue-500 hover:bg-blue-600"
                 disabled={items.length === 0}
                 onClick={() => router.push("/checkout")}
               >
@@ -84,7 +86,10 @@ export default function CartPage() {
 
         <div className="flex items-center gap-2 pt-6">
           <Link href="/products">
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              className="border border-blue-500 text-blue-500 hover:text-blue-600"
+            >
               <ArrowLeft className="h-3 w-3" />
               Continue Shopping
             </Button>

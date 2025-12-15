@@ -28,7 +28,6 @@ import { useCheckoutContext } from "@/contexts/checkout-context";
 import { Check, ArrowRight } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 
-
 export const CustomerInfoStep: React.FC = () => {
   const { customer, setCustomer, nextStep } = useCheckoutContext();
   const [open, setOpen] = useState(false);
@@ -62,7 +61,7 @@ export const CustomerInfoStep: React.FC = () => {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      phone: fullPhone, 
+      phone: fullPhone,
     });
 
     nextStep();
@@ -165,7 +164,10 @@ export const CustomerInfoStep: React.FC = () => {
       </div>
 
       <div className="flex justify-end pt-6">
-        <Button type="submit" className="sm:w-auto w-full">
+        <Button
+          type="submit"
+          className="sm:w-auto bg-blue-500 hover:bg-blue-600 w-full"
+        >
           Next
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

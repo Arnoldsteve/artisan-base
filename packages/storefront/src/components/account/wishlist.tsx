@@ -12,6 +12,7 @@ import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useWishlistContext } from "@/contexts/wishlist-context";
 import { useCartContext } from "@/contexts/cart-context";
+import { formatMoney } from "@/lib/money";
 
 export const Wishlist: React.FC = () => {
   const { items: wishlistItems, removeFromWishlist } = useWishlistContext();
@@ -38,7 +39,7 @@ export const Wishlist: React.FC = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
             {wishlistItems.map((item) => (
               <div
                 key={item.id}
@@ -55,22 +56,28 @@ export const Wishlist: React.FC = () => {
                   />
                 </Link>
                 <div className="flex-1 flex flex-col">
-                  <h3 className="font-semibold text-foreground mb-1 line-clamp-2">
-                    {item.name}
-                  </h3>
-                  <span className="text-primary font-bold mb-1">
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(item.price)}
-                  </span>
-                  <span className="inline-block bg-accent text-xs px-2 py-1 rounded mb-2">
-                    {item.category}
-                  </span>
+                  <div className="flex-1 flex flex-col justify-center items-center">
+                    <Link href={`/products/${item.id}`} className="block mb-3">
+                      <h3 className="text-sm line-clamp-2 text-foreground group-hover:text-primary transition">
+                        {item.name}
+                      </h3>
+                    </Link>
+                    {/* <Link href={`/products/${item.slug}`} className="block mb-3"> */}
+                      <span className="inline-block bg-accent text-xs px-2 py-1 rounded my-2">
+                        {item.category}
+                      </span>
+                    {/* </Link>
+                     */}
+                    <span className="text-sm md:text-md font-semibold text-foreground mb-1">
+                      {formatMoney(item.price)}
+                    </span>
+                  </div>
+
                   <div className="flex space-x-2 mt-auto">
                     <Button
                       size="sm"
                       variant="outline"
+                      className=" text-red-500 hover:text-red-600"
                       onClick={() => removeFromWishlist(item.id)}
                       aria-label="Remove from wishlist"
                     >

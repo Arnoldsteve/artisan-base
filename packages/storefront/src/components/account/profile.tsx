@@ -16,16 +16,16 @@ import {
 } from "@repo/ui/components/ui/avatar";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Separator } from "@repo/ui/components/ui/separator";
-import { 
-  Edit3, 
-  Save, 
-  X, 
-  User, 
-  Mail, 
+import {
+  Edit3,
+  Save,
+  X,
+  User,
+  Mail,
   Calendar,
   Shield,
   Camera,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/auth-context";
@@ -48,13 +48,15 @@ export const Profile: React.FC = () => {
   useEffect(() => {
     const getWishlistCount = () => {
       try {
-        const wishlist = localStorage.getItem('wishlist');
+        const wishlist = localStorage.getItem("wishlist");
         if (wishlist) {
           const parsedWishlist = JSON.parse(wishlist);
-          setWishlistCount(Array.isArray(parsedWishlist) ? parsedWishlist.length : 0);
+          setWishlistCount(
+            Array.isArray(parsedWishlist) ? parsedWishlist.length : 0
+          );
         }
       } catch (error) {
-        console.error('Error reading wishlist from localStorage:', error);
+        console.error("Error reading wishlist from localStorage:", error);
         setWishlistCount(0);
       }
     };
@@ -63,27 +65,27 @@ export const Profile: React.FC = () => {
 
     // Listen for storage changes to update count in real-time
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'wishlist') {
+      if (e.key === "wishlist") {
         getWishlistCount();
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
+    window.addEventListener("storage", handleStorageChange);
+
     // Also listen for custom wishlist events (if your app dispatches them)
     const handleWishlistUpdate = () => getWishlistCount();
-    window.addEventListener('wishlist-updated', handleWishlistUpdate);
+    window.addEventListener("wishlist-updated", handleWishlistUpdate);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("wishlist-updated", handleWishlistUpdate);
     };
   }, []);
 
   const handleSaveProfile = async () => {
     setIsLoading(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsEditing(false);
     setIsLoading(false);
     toast.success("Profile updated successfully");
@@ -98,26 +100,31 @@ export const Profile: React.FC = () => {
     setIsEditing(false);
   };
 
-  const isFormValid = profileData.firstName.trim() && profileData.lastName.trim() && profileData.email.trim();
+  const isFormValid =
+    profileData.firstName.trim() &&
+    profileData.lastName.trim() &&
+    profileData.email.trim();
 
   return (
     <div className="space-y-6">
       {/* Profile Header Card */}
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10"></div>
+      <Card className=" relative overflow-hidden">
         <CardContent className="relative pt-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             {/* Avatar Section */}
             <div className="relative group">
               <Avatar className="h-24 w-24 ring-4 ring-background shadow-lg">
-                <AvatarImage src={avatarUrl} alt={`${profileData.firstName} ${profileData.lastName}`} />
+                <AvatarImage
+                  src={avatarUrl}
+                  alt={`${profileData.firstName} ${profileData.lastName}`}
+                />
                 <AvatarFallback className="text-xl bg-primary/10 text-primary">
                   {(profileData.firstName?.charAt(0) || "").toUpperCase()}
                   {(profileData.lastName?.charAt(0) || "").toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="secondary"
                 className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               >
@@ -127,33 +134,40 @@ export const Profile: React.FC = () => {
 
             {/* Profile Info */}
             <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-row sm:flex-row sm:items-start justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold flex items-center gap-2">
                     {profileData.firstName} {profileData.lastName}
-                    <CheckCircle className="h-5 w-5 text-green-500" />
                   </h2>
                   <p className="text-muted-foreground flex items-center gap-2 mt-1">
                     <Mail className="h-4 w-4" />
                     {profileData.email}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="outline" className="text-xs">
                       <Shield className="h-3 w-3 mr-1" />
                       Verified Account
                     </Badge>
                     <Badge variant="outline" className="text-xs">
                       <Calendar className="h-3 w-3 mr-1" />
-                      Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : 'N/A'}
+                      Member since{" "}
+                      {user?.createdAt
+                        ? new Date(user.createdAt).getFullYear()
+                        : "N/A"}
                     </Badge>
                   </div>
                 </div>
 
+                <div>
                 <Button
                   variant={isEditing ? "ghost" : "outline"}
                   size="sm"
                   onClick={() => setIsEditing(!isEditing)}
-                  className="shrink-0"
+                  className={`shrink-0 ${
+                    isEditing
+                      ? "border border-blue-500 hover:bg-blue-100 hover:text-blue-600"
+                      : "border border-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                  }`}
                 >
                   {isEditing ? (
                     <>
@@ -167,6 +181,7 @@ export const Profile: React.FC = () => {
                     </>
                   )}
                 </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -181,7 +196,9 @@ export const Profile: React.FC = () => {
             <div>
               <CardTitle>Personal Information</CardTitle>
               <CardDescription>
-                {isEditing ? "Update your personal details below" : "Your current profile information"}
+                {isEditing
+                  ? "Update your personal details below"
+                  : "Your current profile information"}
               </CardDescription>
             </div>
           </div>
@@ -204,7 +221,9 @@ export const Profile: React.FC = () => {
                 }
                 disabled={!isEditing}
                 placeholder="Enter your first name"
-                className={isEditing ? "border-primary/50 focus:border-primary" : ""}
+                className={
+                  isEditing ? "border-primary/50 focus:border-primary" : ""
+                }
               />
             </div>
 
@@ -224,7 +243,9 @@ export const Profile: React.FC = () => {
                 }
                 disabled={!isEditing}
                 placeholder="Enter your last name"
-                className={isEditing ? "border-primary/50 focus:border-primary" : ""}
+                className={
+                  isEditing ? "border-primary/50 focus:border-primary" : ""
+                }
               />
             </div>
           </div>
@@ -247,7 +268,9 @@ export const Profile: React.FC = () => {
               }
               disabled={!isEditing}
               placeholder="Enter your email address"
-              className={isEditing ? "border-primary/50 focus:border-primary" : ""}
+              className={
+                isEditing ? "border-primary/50 focus:border-primary" : ""
+              }
             />
           </div>
 
@@ -255,10 +278,10 @@ export const Profile: React.FC = () => {
             <>
               <Separator />
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
+                <Button
                   onClick={handleSaveProfile}
                   disabled={!isFormValid || isLoading}
-                  className="flex-1 sm:flex-initial"
+                  className="flex-1 sm:flex-initial bg-blue-500 hover:bg-blue-600 text-white border-2 border-blue-500 transition-all"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
@@ -272,11 +295,11 @@ export const Profile: React.FC = () => {
                     </>
                   )}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className="flex-1 sm:flex-initial"
+                  className="flex-1 sm:flex-initial border border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition-all"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
@@ -298,46 +321,39 @@ export const Profile: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold text-primary">-</div>
+              <div className="text-2xl font-bold text-primary">0</div>
               <div className="text-sm text-muted-foreground">Total Orders</div>
             </div>
             <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{wishlistCount}</div>
-              <div className="text-sm text-muted-foreground">Wishlist Items</div>
-            </div>
-            <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{user?.tenant?.status || 'N/A'}</div>
-              <div className="text-sm text-muted-foreground">Account Status</div>
+              <div className="text-2xl font-bold text-primary">
+                {wishlistCount}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Wishlist Items
+              </div>
             </div>
             <div className="text-center p-4 bg-muted/30 rounded-lg">
               <div className="text-2xl font-bold text-primary">
-                {user?.createdAt ? 
-                  Math.floor((new Date().getTime() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) + 'd'
-                  : 'N/A'
-                }
+                {user?.tenant?.status
+                  ? user.tenant.status.charAt(0).toUpperCase() +
+                    user.tenant.status.slice(1).toLowerCase()
+                  : "N/A"}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Account Status
+              </div>
+            </div>
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <div className="text-2xl font-bold text-primary">
+                {user?.createdAt
+                  ? Math.floor(
+                      (new Date().getTime() -
+                        new Date(user.createdAt).getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    ) + "d"
+                  : "N/A"}
               </div>
               <div className="text-sm text-muted-foreground">Days Active</div>
-            </div>
-          </div>
-          
-          {/* Additional Info Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-muted">
-            <div className="text-center p-3 bg-muted/20 rounded-lg">
-              <div className="text-lg font-semibold text-primary">{user?.tenant?.name || 'N/A'}</div>
-              <div className="text-xs text-muted-foreground">Organization</div>
-            </div>
-            <div className="text-center p-3 bg-muted/20 rounded-lg">
-              <div className="text-lg font-semibold text-primary">{user?.tenant?.subdomain || 'N/A'}</div>
-              <div className="text-xs text-muted-foreground">Subdomain</div>
-            </div>
-            <div className="text-center p-3 bg-muted/20 rounded-lg">
-              <div className="text-lg font-semibold text-primary">
-                {user?.updatedAt ? 
-                  new Date(user.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                  : 'N/A'
-                }
-              </div>
-              <div className="text-xs text-muted-foreground">Last Updated</div>
             </div>
           </div>
         </CardContent>

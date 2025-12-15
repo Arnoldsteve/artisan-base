@@ -19,7 +19,7 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
     <div className="border-b last:border-b-0">
       <Link
         href={`/products/${item.slug}`}
-        className="flex items-center justify-between gap-4 py-3 hover:bg-muted/30 transition-colors rounded-md"
+        className="flex items-center justify-between gap-4 py-3 hover:text-muted/30 transition-colors rounded-md"
       >
         <div className="flex items-center gap-4">
           <div className="flex-shrink-0">
@@ -67,7 +67,8 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
         <div className="flex items-center gap-3">
           <Button
             size="sm"
-            variant="default"
+            variant="outline"
+            className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
             onClick={() => updateQuantity(item.id, item.quantity - 1)}
             disabled={item.quantity <= 1}
           >
@@ -76,7 +77,8 @@ export const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <span className="px-2">{item.quantity}</span>
           <Button
             size="sm"
-            variant="default"
+            variant="outline"
+            className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
             onClick={() => updateQuantity(item.id, item.quantity + 1)}
             disabled={item.quantity >= item.inventoryQuantity}
           >

@@ -23,10 +23,10 @@ export const TabList: React.FC = () => {
           {wishlistItems.length > 0 ? ` (${wishlistItems.length})` : ""}
         </span>
       </TabsTrigger>
-      <TabsTrigger value="settings" className="flex items-center space-x-2">
+      {/* <TabsTrigger value="settings" className="flex items-center space-x-2">
         <Settings className="h-4 w-4" />
         <span>Settings</span>
-      </TabsTrigger>
+      </TabsTrigger> */}
     </TabsList>
   );
 };

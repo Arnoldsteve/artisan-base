@@ -12,7 +12,7 @@ export const CheckoutLayout: React.FC<{ children: React.ReactNode }> = ({ childr
   // Final step: Order Confirmation stays simple
   if (currentStep === 4) {
     return (
-      <div className="flex justify-center bg-background p-4 md:p-8 min-h-screen">
+      <div className="flex justify-center bg-muted p-4 md:p-8 min-h-screen">
         <div className="w-full max-w-6xl">
           <Card className="p-6 shadow-sm rounded-lg">
             {children}
@@ -23,7 +23,7 @@ export const CheckoutLayout: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   return (
-    <div className="flex justify-center bg-background p-4 md:p-8 min-h-screen">
+    <div className="flex justify-center bg-muted p-4 md:p-8 min-h-screen">
       <div className="w-full max-w-6xl space-y-8">
         {/* Progress Bar */}
         <div className="p-4 rounded-lg shadow-sm">

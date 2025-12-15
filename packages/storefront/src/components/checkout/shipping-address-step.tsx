@@ -62,14 +62,14 @@ export const ShippingAddressStep: React.FC = () => {
 
   const country = watch("country");
 
-const regionLabel =
-  country === "US"
-    ? "State"
-    : country === "CA"
-    ? "Province"
-    : country === "GB"
-    ? "County"
-    : "Region";
+  const regionLabel =
+    country === "US"
+      ? "State"
+      : country === "CA"
+        ? "Province"
+        : country === "GB"
+          ? "County"
+          : "Region";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -102,7 +102,6 @@ const regionLabel =
             <p className="text-red-500 text-sm">{errors.region.message}</p>
           )}
         </div>
-
 
         {/* ZIP Code */}
         <div>
@@ -150,8 +149,8 @@ const regionLabel =
                         <Check
                           className={cn(
                             "ml-auto h-4 w-4",
-                            watch("country") === c.code 
-                              ? "text-blue-600 opacity-100" 
+                            watch("country") === c.code
+                              ? "text-blue-600 opacity-100"
                               : "text-gray-300 opacity-0"
                           )}
                         />
@@ -177,14 +176,14 @@ const regionLabel =
             variant="outline"
             type="button"
             onClick={previousStep}
-            className="sm:w-auto w-full"
+            className="border border-blue-500 text-blue-500 hover:text-blue-600"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           <Button
             type="submit"
-            className="sm:w-auto w-full"
+            className="sm:w-auto bg-blue-500 hover:bg-blue-600 w-full"
           >
             Next
             <ArrowRight className="ml-2 h-4 w-4" />
