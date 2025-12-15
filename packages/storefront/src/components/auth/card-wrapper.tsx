@@ -28,7 +28,7 @@ export function CardWrapper({
   backButtonAction,
 }: CardWrapperProps) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40  sm:px-0">
+    <div className="flex items-center justify-center min-h-screen bg-muted sm:px-0">
       <Card className="w-full max-w-[300px] sm:max-w-[420px] md:max-w-[450px] shadow-lg rounded-2xl">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-blue-500">

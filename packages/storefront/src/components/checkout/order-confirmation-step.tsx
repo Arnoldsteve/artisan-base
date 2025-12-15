@@ -24,7 +24,7 @@ export const OrderConfirmationStep = () => {
   const { order, resetCheckout } = useCheckoutContext();
   const [mounted, setMounted] = React.useState(false);
 
-  console.log("created order in the confirmayion", order)
+  console.log("created order in the confirmayion", order);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
@@ -129,15 +129,32 @@ export const OrderConfirmationStep = () => {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <Button asChild size="lg" onClick={handleContinueShopping}>
+        <Button
+          asChild
+          variant={'outline'}
+          size="lg"
+          className="border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white"
+          onClick={handleContinueShopping}
+        >
           <Link href="/products">
             Continue Shopping <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
-        {/* <Button asChild variant="outline" size="lg" onClick={handleContinueShopping}>
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white"
+          onClick={handleContinueShopping}
+        >
           <Link href={`/orders/${order.id}`}>View Order Details</Link>
-        </Button> */}
-        <Button variant="outline" size="lg" onClick={() => window.print()}>
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          className="border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white"
+          onClick={() => window.print()}
+        >
           <Download className="mr-2 h-4 w-4" />
           Print Receipt
         </Button>

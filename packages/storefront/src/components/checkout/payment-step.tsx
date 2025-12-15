@@ -69,7 +69,7 @@ export const PaymentStep: React.FC = () => {
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Payment</h2>
       {/* <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm"> */}
-        <PaymentWarning />
+      <PaymentWarning />
       {/* </div> */}
       <div>
         <RadioGroup
@@ -182,14 +182,14 @@ export const PaymentStep: React.FC = () => {
             variant="outline"
             type="button"
             onClick={previousStep}
-            className="sm:w-auto w-full"
+            className="border border-blue-500 text-blue-500 hover:text-blue-600"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           <Button
             type="submit"
-            className="sm:w-auto w-full"
+            className="sm:w-auto bg-blue-500 hover:bg-blue-600 w-full"
             onClick={handleNext}
           >
             Next

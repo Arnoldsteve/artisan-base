@@ -20,7 +20,7 @@ export const metadata = createMetadata({
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-muted/100">
+    <div className="min-h-screen bg-muted">
       {/* <HeroSearch/> */}
 
       <Hero />

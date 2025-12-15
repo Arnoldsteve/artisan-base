@@ -13,7 +13,6 @@ import { AccountLoading } from "@/skeletons/account/account-loading";
 
 const validTabs = ["profile", "orders", "wishlist", "settings"];
 
-
 function AccountContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,42 +38,46 @@ function AccountContent() {
   };
 
   return (
-    <div className="container mx-auto px-0 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">My Account</h1>
-        <p className="text-muted-foreground">
-          Manage your profile, orders, and preferences
-        </p>
+    <section className="bg-muted"> 
+      <div className="container mx-auto px-0 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            My Account
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your profile, orders, and preferences
+          </p>
+        </div>
+
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="space-y-6"
+        >
+          <TabList />
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <Profile />
+          </TabsContent>
+
+          {/* Orders Tab */}
+          <TabsContent value="orders" className="space-y-6">
+            <Orders />
+          </TabsContent>
+
+          {/* Wishlist Tab */}
+          <TabsContent value="wishlist" className="space-y-6">
+            <Wishlist />
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <AccountSettings />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={handleTabChange}
-        className="space-y-6"
-      >
-        <TabList />
-
-        {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-6">
-          <Profile />
-        </TabsContent>
-
-        {/* Orders Tab */}
-        <TabsContent value="orders" className="space-y-6">
-          <Orders />
-        </TabsContent>
-
-        {/* Wishlist Tab */}
-        <TabsContent value="wishlist" className="space-y-6">
-          <Wishlist />
-        </TabsContent>
-
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-6">
-          <AccountSettings />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </section>
   );
 }
 
