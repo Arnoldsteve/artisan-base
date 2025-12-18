@@ -13,7 +13,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
 
   if (isLoading) {
     return (
-      <section className="py-16 bg-muted/30">
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -29,7 +29,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
 
    if (error) {
     return (
-      <section className="py-4 bg-muted/50">
+      <section className="py-4">
         <div className="container mx-auto px-4">
           <div className="text-start mb-6">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -52,7 +52,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
 
   if (error || !categories.length) {
     return (
-      <section className="py-4 bg-muted/30">
+      <section className="py-4">
         <div className="container mx-auto px-4">
           <div className="text-start mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -71,7 +71,7 @@ export const CategoryShowcase = memo(function CategoryShowcase() {
   }
 
   return (
-    <section className="py-4 bg-[#f4f4f4]">
+    <section className="py-4">
       <div className="container mx-auto px-4">
         <div className="text-start mb-12">
           <h2 className="text-2xl font-bold text-foreground mb-1">

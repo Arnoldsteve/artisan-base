@@ -39,20 +39,21 @@ export function InternationalShippingTab() {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">International Shipping</h3>
+      {/* <div className="px-4">
+        <h3 className="text-lg font-semibold mb-4">International Shipping</h3>
 
-      {/* Country Selector */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-1">
-          Select your country
-        </label>
-        <Input
-          placeholder="Start typing your destination country..."
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          className="w-72"
-        />
-      </div>
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-1">
+            Select your country
+          </label>
+          <Input
+            placeholder="Start typing your destination country..."
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="w-72"
+          />
+        </div>
+      </div> */}
 
       {/* Shipping Regions */}
       <Card className="mb-6">
@@ -66,7 +67,9 @@ export function InternationalShippingTab() {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="font-semibold">Region</TableHead>
-                <TableHead className="font-semibold">Shipping Cost (KSh)</TableHead>
+                <TableHead className="font-semibold">
+                  Shipping Cost (KSh)
+                </TableHead>
                 <TableHead className="font-semibold">Delivery Time</TableHead>
               </TableRow>
             </TableHeader>
@@ -81,7 +84,8 @@ export function InternationalShippingTab() {
             </TableBody>
           </Table>
           <p className="text-xs text-gray-400 mt-2">
-            * Rates are estimates and may vary depending on destination, weight, and courier.
+            * Rates are estimates and may vary depending on destination, weight,
+            and courier.
           </p>
         </CardContent>
       </Card>
@@ -108,7 +112,9 @@ export function InternationalShippingTab() {
       {/* Restricted Items */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Restricted Items</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Restricted Items
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="list-disc ml-6 text-sm text-gray-600">
@@ -122,13 +128,15 @@ export function InternationalShippingTab() {
       {/* Processing Time */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Processing Time</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Processing Time
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            International orders are processed within 1 - 3 business days after payment
-            confirmation. Delivery times vary based on the destination, courier, and
-            customs processing.
+            International orders are processed within 1 - 3 business days after
+            payment confirmation. Delivery times vary based on the destination,
+            courier, and customs processing.
           </p>
         </CardContent>
       </Card>
