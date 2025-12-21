@@ -27,7 +27,7 @@ export function OrderProcessingTab() {
   return (
     <div className="space-y-6">
       {/* Title */}
-      <h3 className="text-lg font-semibold">Order Processing Timeline</h3>
+      <h3 className="text-lg font-semibold px-2">Order Processing Timeline</h3>
 
       {/* Steps Grid */}
       <div className="relative grid grid-cols-4 items-center justify-between gap-2 sm:gap-4">

@@ -5,7 +5,7 @@ import { ContactInfo } from "@/components/contact/contact-info";
 
 export default function ContactPage() {
   return (
-    <section className="bg-[#f4f4f4]">
+    <section className="bg-muted">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-start mb-12">

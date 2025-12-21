@@ -53,15 +53,21 @@ export function QuickActions() {
           {/* Top content */}
           <div className="flex flex-col items-center gap-2">
             <div className="mb-2">{action.icon}</div>
-            <div className="font-bold text-lg mb-1 text-center">{action.title}</div>
-            <div className="text-sm text-gray-600 mb-2 text-center">{action.description}</div>
+            <div className="font-bold text-lg mb-1 text-center">
+              {action.title}
+            </div>
+            <div className="text-sm text-gray-600 mb-2 text-center">
+              {action.description}
+            </div>
             {action.status && (
-              <div className="text-xs font-medium mb-1 text-center">{action.status}</div>
+              <div className="text-xs font-medium mb-1 text-center">
+                {action.status}
+              </div>
             )}
           </div>
 
           {/* Button at the bottom */}
-          <Button asChild size="sm" className="w-full mt-3">
+          <Button asChild variant={'outline'} size="sm" className="border-2 border-blue-400 hover:bg-blue-500 hover:text-white w-full mt-3">
             <a href={action.href}>{action.button}</a>
           </Button>
         </div>

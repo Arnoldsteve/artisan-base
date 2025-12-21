@@ -134,7 +134,7 @@ export default function ProductDetailsPage({ initialProduct }: ProductDetailsPag
   };
 
   return (
-    <section className="bg-[#f4f4f4]">
+    <section className="bg-muted">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-8">

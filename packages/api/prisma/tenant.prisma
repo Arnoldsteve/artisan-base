@@ -280,3 +280,199 @@ enum Currency {
   INR
   KES
 }
+
+
+// generator client {
+//   provider = "prisma-client-js"
+//   output   = "../generated/analytics"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// =====================================================
+// REVENUE ANALYTICS
+// =====================================================
+
+model AnalyticsDailyRevenue {
+  dateKey           DateTime @id @db.Date // Changed to DATE type
+  totalRevenue      Decimal  @db.Decimal(14, 2) @default(0)
+  paidRevenue       Decimal  @db.Decimal(14, 2) @default(0)
+  pendingRevenue    Decimal  @db.Decimal(14, 2) @default(0)
+  refundedRevenue   Decimal  @db.Decimal(14, 2) @default(0)
+  averageOrderValue Decimal  @db.Decimal(14, 2) @default(0)
+  orderCount        Int      @default(0)
+}
+
+model AnalyticsMonthlyRevenue {
+  monthKey          DateTime @id @db.Date // Use DATE, e.g., first day of the month
+  totalRevenue      Decimal  @db.Decimal(14, 2) @default(0)
+  paidRevenue       Decimal  @db.Decimal(14, 2) @default(0)
+  pendingRevenue    Decimal  @db.Decimal(14, 2) @default(0)
+  refundedRevenue   Decimal  @db.Decimal(14, 2) @default(0)
+  averageOrderValue Decimal  @db.Decimal(14, 2) @default(0)
+  orderCount        Int      @default(0)
+}
+
+model AnalyticsYearlyRevenue {
+  yearKey           DateTime @id @db.Date // Use DATE, e.g., first day of the year
+  totalRevenue      Decimal  @db.Decimal(14, 2) @default(0)
+  paidRevenue       Decimal  @db.Decimal(14, 2) @default(0)
+  pendingRevenue    Decimal  @db.Decimal(14, 2) @default(0)
+  refundedRevenue   Decimal  @db.Decimal(14, 2) @default(0)
+  averageOrderValue Decimal  @db.Decimal(14, 2) @default(0)
+  orderCount        Int      @default(0)
+}
+
+model AnalyticsDailyRevenueByCategory {
+  dateKey        DateTime @db.Date
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId     String
+  categoryName   String   // Denormalized for query speed
+  revenue        Decimal  @db.Decimal(14, 2) @default(0)
+  orderCount     Int      @default(0)
+  
+  @@id([dateKey, categoryId])
+}
+
+model AnalyticsRevenueByPaymentProvider {
+  dateKey     DateTime        @db.Date
+  provider    PaymentProvider // Changed to Enum
+  revenue     Decimal         @db.Decimal(14, 2) @default(0)
+  orderCount  Int             @default(0)
+  successRate Float           @default(100)
+
+  @@id([dateKey, provider])
+}
+
+// =====================================================
+// SALES ANALYTICS
+// =====================================================
+
+model AnalyticsDailyOrders {
+  dateKey                DateTime @id @db.Date
+  totalOrders            Int      @default(0)
+  pendingOrders          Int      @default(0)
+  deliveredOrders        Int      @default(0)
+  cancelledOrders        Int      @default(0)
+  averageProcessingTime  Float    @default(0) // in hours
+}
+
+model AnalyticsOrderStatusDistribution {
+  dateKey DateTime    @db.Date
+  status  OrderStatus // Changed to Enum
+  count   Int         @default(0)
+  
+  @@id([dateKey, status])
+}
+
+// Sales by day of week can be a simple aggregate over daily tables,
+// but if pre-calculating, this is how you'd do it.
+model AnalyticsSalesByDayOfWeek {
+  dateKey     DateTime @db.Date
+  dayOfWeek   Int      // 0-6 (Sun-Sat)
+  dayName     String
+  orderCount  Int      @default(0)
+  revenue     Decimal  @db.Decimal(14, 2) @default(0)
+
+  @@id([dateKey, dayOfWeek])
+}
+
+model AnalyticsSalesByHour {
+  dateKey     DateTime @db.Date
+  hour        Int      // 0-23
+  orderCount  Int      @default(0)
+  revenue     Decimal  @db.Decimal(14, 2) @default(0)
+
+  @@id([dateKey, hour])
+}
+
+model AnalyticsSalesByLocation {
+  dateKey           DateTime @db.Date
+  location          String   // e.g., 'city, country'
+  orderCount        Int      @default(0)
+  revenue           Decimal  @db.Decimal(14, 2) @default(0)
+  customerCount     Int      @default(0)
+  averageOrderValue Decimal  @db.Decimal(14, 2) @default(0)
+
+  @@id([dateKey, location])
+}
+
+// =====================================================
+// CUSTOMER ANALYTICS
+// =====================================================
+
+model AnalyticsCustomerMetrics {
+  dateKey            DateTime @id @db.Date
+  totalCustomers     Int      @default(0)
+  newCustomers       Int      @default(0)
+  returningCustomers Int      @default(0)
+}
+
+model AnalyticsTopCustomers {
+  dateKey           DateTime  @db.Date
+  customer          Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId        String
+  customerName      String    // Denormalized for speed
+  email             String    // Denormalized for speed
+  totalOrders       Int
+  totalSpent        Decimal   @db.Decimal(14, 2)
+  lastOrderDate     DateTime
+
+  @@id([dateKey, customerId])
+}
+
+model AnalyticsCustomerSegmentation {
+  dateKey            DateTime @id @db.Date
+  newCustomers       Int      @default(0)
+  returningCustomers Int      @default(0)
+  vipCustomers       Int      @default(0)
+  atRiskCustomers    Int      @default(0)
+}
+
+model AnalyticsCustomerRetention {
+  cohort              String   @id // e.g., '2025-11'
+  initialCustomers    Int
+  retainedCustomers   Int[]    // Array of retained counts for subsequent months [m1, m2, m3...]
+  retentionPercentage Float[]  // Array of percentages [p1, p2, p3...]
+}
+
+
+// =====================================================
+// PRODUCT ANALYTICS
+// =====================================================
+
+model AnalyticsBestSellingProducts {
+  dateKey      DateTime @db.Date
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId    String
+  productName  String   // Denormalized for speed
+  sku          String?  // Denormalized for speed
+  unitsSold    Int
+  revenue      Decimal  @db.Decimal(14, 2)
+
+  @@id([dateKey, productId])
+}
+
+model AnalyticsProductMetrics {
+  dateKey              DateTime @id @db.Date
+  totalProducts        Int
+  activeProducts       Int
+  inactiveProducts     Int
+  lowStockProducts     Int
+  outOfStockProducts   Int
+  totalInventoryValue  Decimal  @db.Decimal(14, 2)
+}
+
+// Note: Inactive products might not need a separate table;
+// it can often be a query on the main Products table,
+// but if you precompute it for performance, the model is fine.
+model AnalyticsInactiveProducts {
+  productId         String    @id
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  lastSaleDate      DateTime?
+  daysSinceLastSale Int
+  currentStock      Int
+}

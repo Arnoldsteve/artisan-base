@@ -72,59 +72,63 @@ export function ShippingInfoTab() {
     <div className="space-y-10">
       {/* SECTION 1: Overview */}
       <section>
-        <h3 className="text-lg font-semibold mb-4">Shipping Options</h3>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-          {shippingOptions.map((option) => (
-            <ShippingMethodCard
-              key={option.id}
-              icon={ICONS[option.id]}
-              title={option.name}
-              deliveryTime={option.estimatedDays}
-              cost={option.costLabel}
-              description={option.description}
-              bestFor={option.bestFor}
-              color={COLORS[option.id]}
-              cutoff={option.cutoff || undefined}
-            />
-          ))}
-        </div>
+        <Card className="rounded-sm w-full mx-auto py-4 px-2">
+          <h3 className="text-lg font-semibold mb-4">Shipping Options</h3>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+            {shippingOptions.map((option) => (
+              <ShippingMethodCard
+                key={option.id}
+                icon={ICONS[option.id]}
+                title={option.name}
+                deliveryTime={option.estimatedDays}
+                cost={option.costLabel}
+                description={option.description}
+                bestFor={option.bestFor}
+                color={COLORS[option.id]}
+                cutoff={option.cutoff || undefined}
+              />
+            ))}
+          </div>
+        </Card>
       </section>
 
       {/* SECTION 2: Summary Table */}
       <section>
-        <h3 className="text-lg font-semibold mb-2">
-          Shipping Cost & Delivery Summary
-        </h3>
-        <div className="overflow-x-auto rounded-sm shadow-none bg-[#fff] p-4">
-          <Table className="">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Method</TableHead>
-                <TableHead>Delivery Time</TableHead>
-                <TableHead>Cost</TableHead>
-                <TableHead>Best For</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {shippingOptions.map((option) => (
-                <TableRow key={option.id}>
-                  <TableCell>{option.name}</TableCell>
-                  <TableCell>{option.estimatedDays}</TableCell>
-                  <TableCell>{option.costLabel}</TableCell>
-                  <TableCell>{option.bestFor}</TableCell>
+        <Card className="rounded-sm w-full mx-auto py-4">
+          <h3 className="text-lg font-semibold mb-2 mx-2">
+            Shipping Cost & Delivery Summary
+          </h3>
+          <div className="overflow-x-auto rounded-sm shadow-none bg-[#fff] p-4">
+            <Table className="">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Delivery Time</TableHead>
+                  <TableHead>Cost</TableHead>
+                  <TableHead>Best For</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {shippingOptions.map((option) => (
+                  <TableRow key={option.id}>
+                    <TableCell>{option.name}</TableCell>
+                    <TableCell>{option.estimatedDays}</TableCell>
+                    <TableCell>{option.costLabel}</TableCell>
+                    <TableCell>{option.bestFor}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       </section>
 
       {/* SECTION 3: Estimated Delivery Calendar */}
       <section>
-        <h3 className="text-lg font-semibold mb-2">
-         Estimated Delivery Calendar
-        </h3>
         <Card className="rounded-sm w-full mx-auto py-4">
+          <h3 className="text-lg font-semibold mb-2 mx-2">
+            Estimated Delivery Calendar
+          </h3>
           <CardContent>
             {/* Current date display */}
             <div className="flex flex-wrap items-center justify-between text-sm text-gray-500 mb-4">
