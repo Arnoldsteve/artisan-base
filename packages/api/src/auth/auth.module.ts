@@ -11,18 +11,19 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository'
 import { UserModule } from '@/user/user.module';
 import { TenantModule } from '@/tenant/tenant.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 /**
  * SOLID Principle: Dependency Injection / Modularization
- * This module configures the security infrastructure, including 
+ * This module configures the security infrastructure, including
  * JWT settings and session management.
  */
 @Module({
   imports: [
-    UserModule,   // Needed to find users during login
+    UserModule, // Needed to find users during login
     TenantModule, // Needed to discover tenants for the logged-in user
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    
+
     // Configure JWT dynamically using Environment Variables
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -38,8 +39,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   controllers: [AuthController],
   providers: [
     AuthService,
+    JwtStrategy, // The strategy we wrote earlier
+    JwtAuthGuard, // The guard we just wrote
     RefreshTokenRepository,
-    JwtStrategy,
   ],
   exports: [AuthService, PassportModule],
 })
