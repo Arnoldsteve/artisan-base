@@ -1,56 +1,46 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
-// --- CORE MODULES ---
-import { PrismaModule } from './prisma/prisma.module'; 
-import { TenantMiddleware } from './tenant/middleware/tenant.middleware';
+// --- CORE & INFRASTRUCTURE ---
+import { PrismaModule } from '@/prisma/prisma.module';
+import { TenantContextMiddleware } from '@/common/tenant-context/tenant-context.middleware';
 
 // --- FEATURE MODULES ---
+import { OnboardingModule } from '@/onboarding/onboarding.module';
+import { TenantModule } from '@/tenant/tenant.module';
+import { UserModule } from '@/user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { TenantModule } from './tenant/tenant.module';
-import { StorefrontModule } from './storefront/storefront.module';
-import { TenantContextService } from './common/tenant-context.service';
-import { TenantContextMiddleware } from './tenant/middleware/tenant-context.middleware';
-import { SupabaseModule } from './supabase/supabase.module';
-import { PlatformPlansModule } from './platform/plans/platform-plans.module'; 
-import { DashboardModule } from './dashboard/dashboard.module';
-import { BillingModule } from './billing/billing.module';
-import { RedisModule } from './redis/redis.module';
-
 
 @Module({
   imports: [
+    // 1. Global Configurations
     ConfigModule.forRoot({ isGlobal: true }),
+    
+    // 2. Core Modules (Single instances shared across the app)
     PrismaModule, 
-
+    TenantModule,     // Manages Organization & Membership logic
+    UserModule,       // Manages Global Identity logic
+    
+    // 3. Orchestration Modules
+    OnboardingModule, // Handles the Atomic registration flow
     AuthModule,
-    TenantModule,
-    DashboardModule,
-    StorefrontModule,
-    SupabaseModule,
-    PlatformPlansModule, 
-    // Billing
-    BillingModule,
-    RedisModule,
+    
+    // Note: Other modules (Dashboard, Billing, etc.) remain commented 
+    // to keep the TypeScript compiler clean during the scale-up.
   ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    TenantContextService,
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule implements NestModule {
+  /**
+   * SOLID Principle: Open/Closed
+   * We apply the TenantContextMiddleware globally to all routes.
+   * The middleware itself handles the logic of which routes require 
+   * a Tenant ID and which are public. This follows the DRY principle.
+   */
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(TenantMiddleware, TenantContextMiddleware)
-      .exclude(
-        'dashboard/payments/webhook/mpesa',
-        'dashboard/payments/webhook/stripe',
-        'dashboard/payments/webhook/paypal',
-      )
-      .forRoutes('*');
+      .apply(TenantContextMiddleware)
+      .forRoutes('(.*)') 
   }
 }

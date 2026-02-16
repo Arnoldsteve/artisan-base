@@ -1,77 +1,46 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { UserProfileResponseDto } from './dto/user-profile.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
+/**
+ * SOLID Principle: Interface Segregation
+ * This controller handles global authentication. It allows users to 
+ * verify their identity before they choose which tenant to manage.
+ */
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name);
-
   constructor(private readonly authService: AuthService) {}
 
-  // ------------------- SIGNUP -------------------
-  @Post('signup')
-  @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body() signUpDto: SignUpDto, @Req() req) {
-    const ipAddress = req.ip || req.headers['x-forwarded-for'];
-    const userAgent = req.headers['user-agent'];
-    return this.authService.signUp(signUpDto, ipAddress, userAgent);
-  }
-
-  // ------------------- LOGIN -------------------
+  /**
+   * Global Login Endpoint.
+   * Returns a JWT and a list of tenants the user belongs to.
+   */
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto, @Req() req) {
-    const ipAddress = req.ip || req.headers['x-forwarded-for'];
-    const userAgent = req.headers['user-agent'];
-    Logger.log(ipAddress, "Ip address")
-    return this.authService.login(loginDto, ipAddress, userAgent);
+  @ApiOperation({ summary: 'Authenticate user and return accessible tenants' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Successfully authenticated.' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Invalid credentials provided.' 
+  })
+  async login(@Body() loginDto: LoginDto) {
+    // 1. Verify the user (Email & Password)
+    const user = await this.authService.validateUser(loginDto);
+    
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // 2. Generate Tokens and find associated Tenants
+    return this.authService.login(user);
   }
 
-  // ------------------- REFRESH TOKEN -------------------
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  async refresh(@Body('refreshToken') refreshToken: string, @Req() req) {
-    const ipAddress = req.ip || req.headers['x-forwarded-for'];
-    const userAgent = req.headers['user-agent'];
-    return this.authService.refreshSession(refreshToken, ipAddress, userAgent);
-  }
-
-  // ------------------- LOGOUT -------------------
-  @Post('logout')
-  @HttpCode(HttpStatus.OK)
-  async logout(@Body('refreshToken') refreshToken: string) {
-    return this.authService.logout(refreshToken);
-  }
-
-  // ------------------- PROFILE -------------------
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  async getProfile(@Req() req): Promise<UserProfileResponseDto> {
-    this.logger.log(`Fetching profile for user ID: ${req.user.id}`);
-    return this.authService.getProfile(req.user.id);
-  }
-
-  @Post('forgot-password')
-@HttpCode(HttpStatus.OK)
-async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Req() req) {
-  const ipAddress = req.ip || req.headers['x-forwarded-for'];
-  const userAgent = req.headers['user-agent'];
-  this.logger.log(`Password reset requested for email: ${forgotPasswordDto.email}`);
-  return this.authService.forgotPassword(forgotPasswordDto.email, ipAddress, userAgent);
-}
+  /**
+   * Note: We will add 'Logout' and 'Refresh Token' endpoints here next.
+   */
 }

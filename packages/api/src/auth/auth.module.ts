@@ -1,30 +1,44 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport'; 
-import { JwtStrategy } from './jwt.strategy'; 
-import { ConfigModule } from '@nestjs/config';
-import { AuthRepository } from './auth.repository';
-import { IAuthRepository } from './interfaces/auth-repository.interface';
+import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 
+// --- Internal Domain Modules ---
+import { UserModule } from '@/user/user.module';
+import { TenantModule } from '@/tenant/tenant.module';
+
+/**
+ * SOLID Principle: Dependency Injection / Modularization
+ * This module configures the security infrastructure, including 
+ * JWT settings and session management.
+ */
 @Module({
   imports: [
-    ConfigModule, 
+    UserModule,   // Needed to find users during login
+    TenantModule, // Needed to discover tenants for the logged-in user
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      // You can even configure this part using the ConfigService for more power
-      // but for now, this is fine.
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '7d' },
+    
+    // Configure JWT dynamically using Environment Variables
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET') || 'platform-secret-123',
+        signOptions: {
+          expiresIn: '1h', // Access token expires in 1 hour
+        },
+      }),
     }),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
-    { provide: 'AuthRepository', useClass: AuthRepository },
-    JwtStrategy, 
+    RefreshTokenRepository,
   ],
-  exports: [JwtStrategy, PassportModule],   
+  exports: [AuthService, PassportModule],
 })
 export class AuthModule {}

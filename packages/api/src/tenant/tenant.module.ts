@@ -1,18 +1,24 @@
-import { Module } from '@nestjs/common';
-import { TenantController } from './tenant.controller';
-import { TenantService } from './tenant.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { JwtModule } from '@nestjs/jwt';
-import { TenantRepository } from './tenant.repository';
-import { ITenantRepository } from './interfaces/tenant-repository.interface';
+import { Global, Module } from '@nestjs/common';
+import { TenantRepository } from './repositories/tenant.repository';
+import { TenantMemberRepository } from './repositories/tenant-member.repository';
 
+/**
+ * SOLID Principle: Interface Segregation & Dependency Injection
+ * This module is responsible for managing Tenant-related data and 
+ * access control logic. 
+ * 
+ * We mark it as @Global() so that any module in the system (like Auth or Products)
+ * can easily inject the repositories to verify tenant membership.
+ */
+@Global()
 @Module({
-  imports: [JwtModule.register({})],
-  controllers: [TenantController],
   providers: [
-    TenantService,
-    // PrismaService,
-    { provide: 'TenantRepository', useClass: TenantRepository },
+    TenantRepository,
+    TenantMemberRepository,
+  ],
+  exports: [
+    TenantRepository,
+    TenantMemberRepository,
   ],
 })
 export class TenantModule {}
