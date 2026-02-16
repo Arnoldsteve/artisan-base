@@ -2,37 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, Tenant } from '@generated/prisma/client';
 
-/**
- * SOLID Principle: Single Responsibility
- * This repository is the ONLY place that handles direct database 
- * operations for the Tenant model.
- */
 @Injectable()
 export class TenantRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Creates a new tenant. 
-   * This is used during the first step of onboarding.
+   * Global: Registration flow.
    */
   async create(data: Prisma.TenantCreateInput): Promise<Tenant> {
-    return this.prisma.tenant.create({
-      data,
-    });
+    return this.prisma.tenant.create({ data });
   }
 
   /**
-   * Finds a tenant by its unique subdomain.
-   * Essential for global scale to ensure no two stores have the same URL.
+   * Global: Availability check across the whole platform.
    */
-  async findBySubdomain(subdomain: string): Promise<Tenant | null> {
-    return this.prisma.tenant.findUnique({
+  async existsBySubdomain(subdomain: string): Promise<boolean> {
+    const count = await this.prisma.tenant.count({
       where: { subdomain },
     });
+    return count > 0;
   }
 
   /**
-   * Finds a tenant by its ID.
+   * Isolated: Fetch store profile safely.
    */
   async findById(id: string): Promise<Tenant | null> {
     return this.prisma.tenant.findUnique({
@@ -41,24 +33,12 @@ export class TenantRepository {
   }
 
   /**
-   * Updates tenant settings (like currency or timezone).
-   * Important for African/Global localization after onboarding.
+   * Isolated: Update store settings.
    */
   async update(id: string, data: Prisma.TenantUpdateInput): Promise<Tenant> {
     return this.prisma.tenant.update({
       where: { id },
       data,
     });
-  }
-
-  /**
-   * Checks if a subdomain is already taken.
-   * Prevents collisions before we even try to create the record.
-   */
-  async existsBySubdomain(subdomain: string): Promise<boolean> {
-    const count = await this.prisma.tenant.count({
-      where: { subdomain },
-    });
-    return count > 0;
   }
 }

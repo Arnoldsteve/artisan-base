@@ -1,6 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { TenantRepository } from './repositories/tenant.repository';
 import { TenantMemberRepository } from './repositories/tenant-member.repository';
+import { TenantController } from './tenant.controller';
+import { TenantService } from './tenant.service';
 
 /**
  * SOLID Principle: Interface Segregation & Dependency Injection
@@ -12,11 +14,15 @@ import { TenantMemberRepository } from './repositories/tenant-member.repository'
  */
 @Global()
 @Module({
+  imports: [],
+  controllers: [TenantController], 
   providers: [
+    TenantService,                
     TenantRepository,
     TenantMemberRepository,
   ],
   exports: [
+    TenantService,
     TenantRepository,
     TenantMemberRepository,
   ],

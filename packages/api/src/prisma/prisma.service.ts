@@ -45,7 +45,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    * This is the version that is automatically isolated by tenantId.
    */
   get client() {
-    return this._tenantPrisma.tenant;
+    return this._tenantPrisma;
   }
 
   async onModuleDestroy() {

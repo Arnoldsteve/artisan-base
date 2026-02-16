@@ -10,6 +10,7 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository'
 // --- Internal Domain Modules ---
 import { UserModule } from '@/user/user.module';
 import { TenantModule } from '@/tenant/tenant.module';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 /**
  * SOLID Principle: Dependency Injection / Modularization
@@ -38,6 +39,7 @@ import { TenantModule } from '@/tenant/tenant.module';
   providers: [
     AuthService,
     RefreshTokenRepository,
+    JwtStrategy,
   ],
   exports: [AuthService, PassportModule],
 })

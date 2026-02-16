@@ -1,9 +1,10 @@
-import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
 import { PrismaClient } from '@generated/prisma/client';
+import { TenantContextService } from '../common/tenant-context/tenant-context.service';
 
 /**
- * List of models that have a 'tenantId' field and require row-level isolation.
- * Models NOT in this list (User, Tenant, SubscriptionPlan) are global.
+ * SOLID Principle: Open/Closed
+ * Models NOT in this list (User, Tenant, SubscriptionPlan) are global 
+ * and will bypass the tenantId injection.
  */
 const TENANT_ISOLATED_MODELS = [
   'TenantMember',
@@ -28,67 +29,69 @@ export const extendedPrismaClient = (
     query: {
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
-          // 1. Check if the model requires isolation
           const isIsolated = TENANT_ISOLATED_MODELS.includes(model);
           const tenantId = tenantContext.getTenantId();
 
-          // If the model is not isolated OR we have no tenantId (e.g. login), proceed normally
+          // 1. GLOBAL BYPASS: Skip isolation if model isn't isolated or no context exists
           if (!isIsolated || !tenantId) {
             return query(args);
           }
 
-          // 2. Handle Capitalization for findUnique fallback
-          // Prisma sends 'Product', we need 'product' to access prisma[model]
+          // cast to any to handle dynamic property injection safely
+          const _args = args as any;
+          
+          // Map PascalCase 'Product' to camelCase 'product' for prisma[modelKey] access
           const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
 
-          // 3. READ Operations (Filter by tenantId)
-          if (
-            [
-              'findFirst',
-              'findFirstOrThrow',
-              'findMany',
-              'count',
-              'aggregate',
-              'groupBy',
-              'update',
-              'updateMany',
-              'delete',
-              'deleteMany',
-              'upsert',
-            ].includes(operation)
-          ) {
-            const castedArgs = args as any;
-            castedArgs.where = { ...castedArgs.where, tenantId };
-          }
-
-          // 4. UNIQUE Operations (Redirect to findFirst to allow tenantId filter)
+          // 2. UNIQUE REDIRECTION: findUnique -> findFirst (and flatten compound keys)
           if (operation === 'findUnique' || operation === 'findUniqueOrThrow') {
             const op = operation === 'findUnique' ? 'findFirst' : 'findFirstOrThrow';
-            const castedArgs = args as any;
             
+            let newWhere = { ..._args.where };
+
+            // SMART FLATTEN: Convert { tenantId_userId: { userId } } to { userId }
+            // findFirst does not understand compound key object syntax
+            for (const key of Object.keys(newWhere)) {
+              if (
+                typeof newWhere[key] === 'object' && 
+                !Array.isArray(newWhere[key]) && 
+                newWhere[key] !== null
+              ) {
+                const compoundValue = newWhere[key];
+                delete newWhere[key];
+                newWhere = { ...newWhere, ...compoundValue };
+              }
+            }
+
             return (prisma[modelKey] as any)[op]({
-              ...castedArgs,
-              where: { ...castedArgs.where, tenantId },
+              ..._args,
+              where: { ...newWhere, tenantId },
             });
           }
 
-          // 5. WRITE Operations (Assign tenantId)
+          // 3. READ ISOLATION: Inject tenantId into where clause
+          const filteredOps = [
+            'findFirst', 'findFirstOrThrow', 'findMany', 'count', 
+            'aggregate', 'groupBy', 'update', 'updateMany', 
+            'delete', 'deleteMany', 'upsert'
+          ];
+          
+          if (filteredOps.includes(operation)) {
+            _args.where = { ...(_args.where || {}), tenantId };
+          }
+
+          // 4. WRITE ISOLATION: Automatically assign tenantId to new records
           if (operation === 'create') {
-            const castedArgs = args as any;
-            castedArgs.data = { ...castedArgs.data, tenantId };
+            _args.data = { ...(_args.data || {}), tenantId };
           }
 
           if (operation === 'createMany') {
-            const castedArgs = args as any;
-            if (Array.isArray(castedArgs.data)) {
-              castedArgs.data = castedArgs.data.map((item: any) => ({
-                ...item,
-                tenantId,
-              }));
+            if (Array.isArray(_args.data)) {
+              _args.data = _args.data.map((item: any) => ({ ...item, tenantId }));
             }
           }
 
-          return query(args);
+          return query(_args);
         },
       },
     },

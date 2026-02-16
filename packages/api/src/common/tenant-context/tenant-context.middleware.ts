@@ -1,46 +1,45 @@
-import { Injectable, NestMiddleware, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { TenantContextService } from './tenant-context.service';
 
 /**
- * SOLID Principle: Single Responsibility
- * This middleware manages the entry into the "Tenant Context".
- * It allows public routes (Onboarding/Login) to pass through, 
- * but enforces the X-Tenant-ID header for everything else.
+ * SOLID Principle: Open/Closed
+ * This middleware is now open to public platform routes while 
+ * remaining closed (strict) for tenant-specific data routes.
  */
 @Injectable()
 export class TenantContextMiddleware implements NestMiddleware {
-  private readonly logger = new Logger('TenantMiddleware');
-
   constructor(private readonly tenantContextService: TenantContextService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     const tenantId = req.headers['x-tenant-id'] as string;
-    
-    // ✅ Using originalUrl ensures we match correctly even with the /api/v1 prefix
-    const currentPath = req.originalUrl;
 
-    // ✅ Added /auth/login to the public route whitelist
-    const isPublicRoute =
-      currentPath.includes('/platform') ||
-      currentPath.includes('/auth/register-tenant') ||
-      currentPath.includes('/onboarding/register') ||
-      currentPath.includes('/auth/login');
+    // 1. Identify "Global Platform" routes that DO NOT require a Tenant ID.
+    // These are routes used for registration, login, or checking subdomains.
+    const publicPaths = [
+      '/onboarding',
+      '/auth/login',
+      '/auth/register',
+      '/health'
+    ];
 
-    // Logging is active to help debug the "Millions of Users" scale-up
-    this.logger.debug(`Path: ${currentPath} | Public: ${isPublicRoute} | Tenant: ${tenantId}`);
+    // Check if the current request path matches any of our public paths
+    const isPublicRoute = publicPaths.some(path => req.originalUrl.includes(path));
 
-    // 1. Block access if it's a private route and no Tenant ID is provided
+    // 2. Strict Check: If it's NOT a public route and NO tenantId is provided, block it.
     if (!tenantId && !isPublicRoute) {
-      throw new UnauthorizedException('Missing X-Tenant-ID header');
+      throw new UnauthorizedException('Missing X-Tenant-ID header for this protected resource');
     }
 
-    // 2. If a Tenant ID is present, wrap the request in the AsyncLocalStorage context
+    // 3. Context Injection: 
+    // If we have a tenantId, enter the "storage bubble".
+    // If not (it's a public route), just proceed normally.
     if (tenantId) {
-      return this.tenantContextService.run(tenantId, () => next());
+      this.tenantContextService.run(tenantId, () => {
+        next();
+      });
+    } else {
+      next();
     }
-
-    // 3. For public routes without a Tenant ID, simply proceed
-    next();
   }
 }

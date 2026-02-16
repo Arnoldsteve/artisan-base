@@ -2,99 +2,73 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, TenantMember, TenantUserRole } from '@generated/prisma/client';
 
-/**
- * SOLID Principle: Single Responsibility
- * This repository manages memberships. It uses the extended 'client'
- * to ensure all queries are automatically scoped to the current tenant.
- */
 @Injectable()
 export class TenantMemberRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Links a user to a tenant.
-   * Note: During onboarding, use the base 'this.prisma' if no context exists.
-   * For general app use, 'this.prisma.client' is preferred.
+   * Global: Used during onboarding.
    */
   async create(data: Prisma.TenantMemberUncheckedCreateInput): Promise<TenantMember> {
-    return this.prisma.tenantMember.create({
-      data,
-    });
+    return this.prisma.client.tenantMember.create({ data });
   }
 
   /**
-   * Finds a specific membership for the current tenant context.
+   * Isolated: Finds membership within current tenant context.
    */
   async findByTenantAndUser(tenantId: string, userId: string): Promise<TenantMember | null> {
-    return this.prisma.tenantMember.findUnique({
+    return this.prisma.client.tenantMember.findUnique({
       where: {
-        tenantId_userId: {
-          tenantId,
-          userId,
+        tenantId_userId: { tenantId, userId },
+      },
+    });
+  }
+
+  /**
+   * Isolated: Lists members with pagination.
+   */
+  async listByTenant(skip?: number, take?: number) {
+    return this.prisma.client.tenantMember.findMany({
+      skip,
+      take,
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
         },
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   /**
-   * Updates a member's role.
+   * Isolated: Counts members for pagination metadata.
    */
-  async updateRole(id: string, role: TenantUserRole): Promise<TenantMember> {
-    return this.prisma.tenantMember.update({
-      where: { id },
-      data: { role },
-    });
+  async countByTenant(): Promise<number> {
+    return this.prisma.client.tenantMember.count();
   }
 
   /**
-   * Deactivates a member.
-   */
-  async setStatus(id: string, isActive: boolean): Promise<TenantMember> {
-    return this.prisma.tenantMember.update({
-      where: { id },
-      data: { isActive },
-    });
-  }
-
-   /**
-   * Lists all stores (tenants) a specific user belongs to.
-   * NOTE: We use 'this.prisma' (Base Client) because this is a Global 
-   * search that crosses tenant boundaries.
+   * Global: Lists all stores a user belongs to (Cross-tenant).
    */
   async listByUser(userId: string) {
-    return this.prisma.tenantMember.findMany({
-      where: { 
-        userId, 
-        isActive: true 
-      },
+    return this.prisma.client.tenantMember.findMany({
+      where: { userId, isActive: true },
       include: { 
         tenant: {
-          select: {
-            id: true,
-            name: true,
-            subdomain: true,
-            status: true
-          }
+          select: { id: true, name: true, subdomain: true, status: true }
         } 
       },
     });
   }
-  
-  /**
-   * Lists all members of the current tenant.
-   * 'this.prisma.client' automatically adds the 'where: { tenantId }' filter.
-   */
-  async listByTenant(): Promise<TenantMember[]> {
-    return this.prisma.tenantMember.findMany({
-      include: {
-        user: {
-          select: {
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
+
+  async updateRole(id: string, role: TenantUserRole): Promise<TenantMember> {
+    return this.prisma.client.tenantMember.update({
+      where: { id },
+      data: { role },
     });
   }
 }
