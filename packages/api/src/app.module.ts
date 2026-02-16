@@ -11,6 +11,7 @@ import { TenantModule } from '@/tenant/tenant.module';
 import { UserModule } from '@/user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProductModule } from './product/product.module';
     OnboardingModule, // Handles the Atomic registration flow
     AuthModule,
     ProductModule,
+    CategoryModule,
     
     // Note: Other modules (Dashboard, Billing, etc.) remain commented 
     // to keep the TypeScript compiler clean during the scale-up.

@@ -65,12 +65,12 @@ export class CategoryService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    await this.findOne(id); // Ensures tenant isolation
+    await this.findOne(id); 
     return this.categoryRepo.update(id, dto);
   }
 
   async remove(id: string) {
-    await this.findOne(id); // Ensures tenant isolation
+    await this.findOne(id); 
     return this.categoryRepo.delete(id);
   }
 }
