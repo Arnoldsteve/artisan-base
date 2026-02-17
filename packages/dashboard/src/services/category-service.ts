@@ -11,7 +11,7 @@ export class CategoryService {
 
   async searchCategories(searchTerm: string): Promise<Category[]> {
     // console.log("search category api response in service", searchTerm);
-    const response = await apiClient.get<Category[]>("dashboard/categories", { 
+    const response = await apiClient.get<Category[]>("/categories", { 
       search: searchTerm,
       page: 1,
       limit: 5,
@@ -25,7 +25,7 @@ export class CategoryService {
     limit = 10,
     search?: string
   ): Promise<PaginatedResponse<Category>> {
-    return apiClient.get<PaginatedResponse<Category>>("dashboard/categories", {
+    return apiClient.get<PaginatedResponse<Category>>("/categories", {
       page,
       limit,
       search,
@@ -33,11 +33,11 @@ export class CategoryService {
   }
 
   async getCategoryById(id: string): Promise<Category> {
-    return apiClient.get<Category>(`dashboard/categories/${id}`);
+    return apiClient.get<Category>(`/categories/${id}`);
   }
 
   async createCategory(categoryData: CreateCategoryDto): Promise<Category> {
-    return apiClient.post<Category>("dashboard/categories", categoryData);
+    return apiClient.post<Category>("/categories", categoryData);
   }
 
   async updateCategory(
@@ -45,13 +45,13 @@ export class CategoryService {
     categoryData: UpdateCategoryDto
   ): Promise<Category> {
     return apiClient.patch<Category>(
-      `dashboard/categories/${id}`,
+      `/categories/${id}`,
       categoryData
     );
   }
 
   async deleteCategory(id: string): Promise<void> {
-    await apiClient.delete(`dashboard/categories/${id}`);
+    await apiClient.delete(`/categories/${id}`);
   }
 }
 

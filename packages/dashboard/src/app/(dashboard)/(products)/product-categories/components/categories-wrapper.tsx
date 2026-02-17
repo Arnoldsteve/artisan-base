@@ -58,12 +58,8 @@ export function CategoriesWrapper({
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
-  const {
-    data: paginatedResponse,
-    isLoading,
-    isError,
-    isFetching,
-  } = useCategories(pageIndex + 1, pageSize, "", initialCategoryData);
+  const { data: paginatedResponse, isLoading, isError, isFetching } = useCategories(pageIndex + 1, pageSize);
+  
 
   const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
   const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
@@ -182,7 +178,7 @@ export function CategoriesWrapper({
   };
 
   // --- Render Logic ---
-  if (isFetching || (isLoading && !initialCategoryData)) {
+  if (isFetching || (isLoading )) {
     return <DataTableSkeleton />;
   }
   if (isError) {

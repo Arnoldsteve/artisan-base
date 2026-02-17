@@ -60,7 +60,7 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
     isLoading,
     isError,
     isFetching,
-  } = useOrders(pageIndex + 1, pageSize, "", initialOrderData);
+  } = useOrders(pageIndex + 1, pageSize, "",);
 
   // console.log("Order data from product view: ", paginatedResponse);
 
@@ -141,7 +141,7 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
   };
 
   // --- Render Logic ---
-  if (isFetching || (isLoading && !initialOrderData)) {
+  if (isFetching || (isLoading )) {
     return <DataTableSkeleton />;
   }
   if (isError) {

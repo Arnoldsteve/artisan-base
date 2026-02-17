@@ -16,21 +16,21 @@ export class OrderService {
     limit?: number;
     search?: string;
   }): Promise<PaginatedResponse<Order>> { 
-    return apiClient.get<PaginatedResponse<Order>>("/dashboard/orders", params);
+    return apiClient.get<PaginatedResponse<Order>>("/orders", params);
   }
 
    async getById(orderId: string): Promise<Order> {
-    return apiClient.get<Order>(`/dashboard/orders/${orderId}`);
+    return apiClient.get<Order>(`/orders/${orderId}`);
   }
 
   async createOrder(orderData: CreateOrderDto): Promise<Order> {
     console.log("Creating order from service with data:", orderData);
-    return apiClient.post<Order>("/dashboard/orders", orderData);
+    return apiClient.post<Order>("/orders", orderData);
   }
 
 
   async updateStatus(orderId: string, newStatus: OrderStatus): Promise<Order> {
-    return apiClient.patch<Order>(`/dashboard/orders/${orderId}/status`, {
+    return apiClient.patch<Order>(`/orders/${orderId}/status`, {
       status: newStatus,
     });
   }
@@ -41,17 +41,17 @@ export class OrderService {
     newPaymentStatus: PaymentStatus
   ): Promise<Order> {
     return apiClient.patch<Order>(
-      `/dashboard/orders/${orderId}/payment-status`,
+      `/orders/${orderId}/payment-status`,
       { paymentStatus: newPaymentStatus }
     );
   }
 
   async deleteOrder(orderId: string): Promise<void> {
-    await apiClient.delete(`/dashboard/orders/${orderId}`);
+    await apiClient.delete(`/orders/${orderId}`);
   }
 
   async batchDeleteOrders(orderIds: string[]): Promise<void> {
-    await apiClient.post("/dashboard/orders/batch-delete", {
+    await apiClient.post("/orders/batch-delete", {
       ids: orderIds,
     });
   }

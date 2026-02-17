@@ -3,10 +3,10 @@ export interface Category {
   name: string;
   slug: string;
   description: string | null;
-  isActive: boolean;       
-  isFeatured: boolean;   
-  createdAt: string;
-  updatedAt: string;
+  // isActive: boolean;       
+  // isFeatured: boolean;   
+  // createdAt: string;
+  // updatedAt: string;
 }
 
 export interface CreateCategoryDto {

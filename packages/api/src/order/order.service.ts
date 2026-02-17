@@ -53,13 +53,13 @@ export class OrderService {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
     const skip = (page - 1) * limit;
 
-    const [items, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       this.orderRepo.list({ tenantId, skip, take: limit }),
       this.orderRepo.count(tenantId),
     ]);
 
     return {
-      items,
+      data,
       meta: {
         total,
         page,
