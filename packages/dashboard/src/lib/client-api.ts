@@ -8,11 +8,10 @@ export class ApiClient extends BaseApiClient {
   private tenantId: string | null = null;
 
   constructor() {
-    super(); 
+    super();
     this.setupClientInterceptors();
   }
 
-  // Public methods to manage state during the app's lifecycle
   public setAuthToken(token: string | null) {
     this.authToken = token;
   }
@@ -21,15 +20,38 @@ export class ApiClient extends BaseApiClient {
     this.tenantId = id;
   }
 
+  /**
+   * Reads a cookie value by name.
+   * Safe to call — returns null if not in browser or cookie not found.
+   */
+  private getCookie(name: string): string | null {
+    if (typeof document === "undefined") return null;
+    const match = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(`${name}=`));
+    return match ? decodeURIComponent(match.split("=")[1]) : null;
+  }
+
   private setupClientInterceptors(): void {
     this.client.interceptors.request.use(
       (config) => {
-        if (this.authToken) {
-          config.headers.Authorization = `Bearer ${this.authToken}`;
+        // --- Auth Token ---
+        // Read from memory first, fall back to cookie
+        const token =
+          this.authToken || this.getCookie("accessToken");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
         }
-        if (this.tenantId) {
-          config.headers["x-tenant-id"] = this.tenantId;
+
+        // --- Tenant ID ---
+        // Read from memory first, fall back to cookie
+        // Uses subdomain (selectedOrgSubdomain) as the x-tenant-id header value
+        const tenantId =
+          this.tenantId || this.getCookie("selectedTenantId");
+        if (tenantId) {
+          config.headers["x-tenant-id"] = tenantId;
         }
+
         return config;
       },
       (error) => Promise.reject(error)

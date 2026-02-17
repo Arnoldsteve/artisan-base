@@ -51,13 +51,13 @@ export class ProductService {
     /**
      * FIX: Added both promises to the array so destructuring works.
      */
-    const [items, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       this.productRepo.list({ skip, take: limit }),
       this.productRepo.count(),
     ]);
 
     return {
-      items,
+      data,
       meta: {
         total,
         page,

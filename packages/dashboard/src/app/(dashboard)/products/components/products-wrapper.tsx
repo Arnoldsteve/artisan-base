@@ -42,7 +42,7 @@ import { BulkProductRow, BulkUploadModal } from "./bulk-upload-preview-modal";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface ProductsWrapperProps {
-  initialProductData: PaginatedResponse<Product>;
+  initialProductData?: PaginatedResponse<Product>; 
 }
 
 export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
@@ -81,12 +81,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   // --- Data Fetching & Mutations ---
-  const {
-    data: paginatedResponse,
-    isLoading,
-    isError,
-    isFetching,
-  } = useProducts(pageIndex + 1, pageSize, "", initialProductData);
+  const { data: paginatedResponse, isLoading, isError, isFetching } = useProducts(pageIndex + 1, pageSize);
 
   // console.log("product data from product view: ", paginatedResponse);
 
@@ -262,7 +257,7 @@ export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
     });
   };
 
-  if (isFetching || (isLoading && !initialProductData)) {
+  if (isFetching || (isLoading )) {
     return <DataTableSkeleton />;
   }
 

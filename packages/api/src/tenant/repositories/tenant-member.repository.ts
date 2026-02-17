@@ -17,7 +17,7 @@ export class TenantMemberRepository {
    * Isolated: Finds membership within current tenant context.
    */
   async findByTenantAndUser(tenantId: string, userId: string): Promise<TenantMember | null> {
-    return this.prisma.client.tenantMember.findUnique({
+    return this.prisma.tenantMember.findUnique({
       where: {
         tenantId_userId: { tenantId, userId },
       },
@@ -55,7 +55,7 @@ export class TenantMemberRepository {
    * Global: Lists all stores a user belongs to (Cross-tenant).
    */
   async listByUser(userId: string) {
-    return this.prisma.client.tenantMember.findMany({
+    return this.prisma.tenantMember.findMany({
       where: { userId, isActive: true },
       include: { 
         tenant: {

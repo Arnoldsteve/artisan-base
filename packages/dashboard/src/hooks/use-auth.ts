@@ -27,7 +27,7 @@ export function useAuth() {
 
       if (tokenFromCookie && subdomainFromCookie) {
         apiClient.setAuthToken(tokenFromCookie);
-        apiClient.setTenantId(subdomainFromCookie);
+        apiClient.setTenantId(tenantIdFromCookie);
         setToken(tokenFromCookie);
         setSubdomain(subdomainFromCookie);
         setTenantId(tenantIdFromCookie ?? null);
@@ -81,7 +81,7 @@ export function useAuth() {
     setTenants(organizations);
     setTenantId(selectedTenant.id);
     setSubdomain(selectedTenant.subdomain);
-    apiClient.setTenantId(selectedTenant.subdomain);
+    apiClient.setTenantId(selectedTenant.id);
 
     Cookies.set("selectedOrgSubdomain", selectedTenant.subdomain, {
       expires: 1,
@@ -135,7 +135,7 @@ export function useAuth() {
     (tenant: Tenant) => {
       setTenantId(tenant.id);
       setSubdomain(tenant.subdomain);
-      apiClient.setTenantId(tenant.subdomain);
+      apiClient.setTenantId(tenant.id);
       Cookies.set("selectedOrgSubdomain", tenant.subdomain, {
         expires: 1,
         secure: process.env.NODE_ENV === "production",
