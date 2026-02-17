@@ -1,7 +1,14 @@
+import { PaymentProvider } from '@generated/prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
-import { PaymentProvider } from '../enums/payment-provider.enum';
-import { PaymentMethod } from '../enums/payment-method.enum';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Min,
+} from 'class-validator';
 
 export class InitializePaymentDto {
   @ApiProperty({ description: 'Order ID to be paid for' })
@@ -13,9 +20,10 @@ export class InitializePaymentDto {
   @IsEnum(PaymentProvider)
   provider: PaymentProvider;
 
-  @ApiProperty({ enum: PaymentMethod })
-  @IsEnum(PaymentMethod)
-  method: PaymentMethod;
+  @ApiProperty({ description: 'Payment amount' })
+  @IsNumber()
+  @Min(0)
+  amount: number;
 
   @ApiPropertyOptional({
     description: 'Optional redirect URL after successful payment',

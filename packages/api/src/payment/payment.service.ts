@@ -1,157 +1,77 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PaymentStatus, PaymentProvider } from '@generated/prisma/client';
 import { PaymentRepository } from './repositories/payment.repository';
-import { InitializePaymentDto } from './dto/initialize-payment.dto';
-import { VerifyPaymentDto } from './dto/verify-payment.dto';
-import { PaymentProvider } from './enums/payment-provider.enum';
-import { PaymentStatus } from './enums/payment-status.enum';
-import { PaymentProviderInterface } from './interfaces/payment-provider.interface';
-import { MpesaProvider } from './providers/mpesa.provider';
-import { StripeProvider } from './providers/stripe.provider';
+import { PaymentProviderRegistry } from './providers/payment-provider.registry';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
-import { randomUUID } from 'crypto';
+import { InitializePaymentDto } from './dto/initialize-payment.dto';
 
 @Injectable()
 export class PaymentService {
+  private readonly logger = new Logger(PaymentService.name);
+
   constructor(
     private readonly paymentRepo: PaymentRepository,
+    private readonly registry: PaymentProviderRegistry,
     private readonly tenantContext: TenantContextService,
-    private readonly mpesaProvider: MpesaProvider,
-    private readonly stripeProvider: StripeProvider,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  /*
-   ---------------------------------------------------------
-   Provider Resolver (Open/Closed Principle)
-   ---------------------------------------------------------
-  */
-  private resolveProvider(provider: PaymentProvider): PaymentProviderInterface {
-    switch (provider) {
-      case PaymentProvider.MPESA:
-        return this.mpesaProvider;
-
-      case PaymentProvider.STRIPE:
-        return this.stripeProvider;
-
-      default:
-        throw new BadRequestException('Unsupported payment provider');
-    }
-  }
-
-  /*
-   ---------------------------------------------------------
-   Initialize Payment
-   ---------------------------------------------------------
-  */
   async initialize(dto: InitializePaymentDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
+    const providerStrategy = this.registry.get(dto.provider);
 
-    const provider = this.resolveProvider(dto.provider);
+    // 1. Get transaction info from external provider (Stripe/Mpesa)
+    const result = await providerStrategy.initialize(dto);
 
-    const providerResult = await provider.initialize(dto);
+    // 2. Idempotency Check (Essential for African mobile money networks)
+    const existing = await this.paymentRepo.findByProviderTransactionId(result.providerTransactionId);
+    if (existing) return existing;
 
-    const payment = await this.paymentRepo.create({
-      id: randomUUID(),
+    // 3. Persist via Repository
+    return this.paymentRepo.create({
       tenantId,
       orderId: dto.orderId,
       provider: dto.provider,
-      method: dto.method,
+      amount: dto.amount,
+      // currency: dto.currency,
       status: PaymentStatus.PENDING,
-      providerTransactionId: providerResult.providerTransactionId,
-      metadata: providerResult.metadata ?? {},
+      providerTransactionId: result.providerTransactionId,
+      metadata: result.metadata ?? {},
     });
-
-    return {
-      paymentId: payment.id,
-      checkoutUrl: providerResult.checkoutUrl,
-      status: payment.status,
-    };
   }
 
-  /*
-   ---------------------------------------------------------
-   Verify Payment
-   ---------------------------------------------------------
-  */
-  async verify(dto: VerifyPaymentDto) {
-    const tenantId = this.tenantContext.getTenantIdOrThrow();
+  async handleWebhook(providerType: PaymentProvider, payload: any, signature?: string) {
+    const strategy = this.registry.get(providerType);
+    
+    // 1. Strategy parses the specific provider's payload
+    const result = await strategy.handleWebhook(payload, signature);
 
-    const payment = await this.paymentRepo.findById(dto.paymentId, tenantId);
-    if (!payment) {
-      throw new NotFoundException('Payment not found');
+    // 2. Locate the record via Repo
+    const payment = await this.paymentRepo.findByProviderTransactionId(result.providerTransactionId);
+    if (!payment) throw new NotFoundException(`Payment ${result.providerTransactionId} not found`);
+
+    // 3. Update status if changed
+    if (payment.status !== result.status) {
+      const updatedPayment = await this.paymentRepo.updateStatus(
+        payment.id, 
+        payment.tenantId, 
+        result.status, 
+        result.rawPayload
+      );
+
+      // 4. Emit Event: This notifies the OrderModule to mark order as PAID/SHIPPED
+      // This decouples Payment from Order (SOLID)
+      this.eventEmitter.emit('payment.updated', {
+        tenantId: payment.tenantId,
+        orderId: payment.orderId,
+        paymentId: payment.id,
+        status: result.status,
+      });
+
+      this.logger.log(`Payment ${payment.id} updated to ${result.status}`);
     }
 
-    const provider = this.resolveProvider(payment.provider);
-
-    const verificationResult = await provider.verify(dto);
-
-    await this.paymentRepo.updateStatus(
-      payment.id,
-      tenantId,
-      verificationResult.status,
-      verificationResult.rawResponse,
-    );
-
-    return {
-      paymentId: payment.id,
-      status: verificationResult.status,
-    };
-  }
-
-  /*
-   ---------------------------------------------------------
-   Handle Webhook
-   ---------------------------------------------------------
-  */
-  async handleWebhook(
-    providerType: PaymentProvider,
-    payload: Record<string, any>,
-    signature?: string,
-  ) {
-    const provider = this.resolveProvider(providerType);
-
-    const result = await provider.handleWebhook(payload, signature);
-
-    const payment = await this.paymentRepo.findByProviderTransactionId(
-      result.providerTransactionId,
-    );
-
-    if (!payment) {
-      throw new NotFoundException('Payment not found for webhook');
-    }
-
-    await this.paymentRepo.updateStatus(
-      payment.id,
-      payment.tenantId,
-      result.status,
-      result.rawPayload,
-    );
-
-    return { received: true };
-  }
-
-  /*
-   ---------------------------------------------------------
-   Get Payment
-   ---------------------------------------------------------
-  */
-  async findById(id: string) {
-    const tenantId = this.tenantContext.getTenantIdOrThrow();
-
-    const payment = await this.paymentRepo.findById(id, tenantId);
-    if (!payment) {
-      throw new NotFoundException('Payment not found');
-    }
-
-    return payment;
-  }
-
-  /*
-   ---------------------------------------------------------
-   Get Payments by Order
-   ---------------------------------------------------------
-  */
-  async findByOrder(orderId: string) {
-    const tenantId = this.tenantContext.getTenantIdOrThrow();
-    return this.paymentRepo.findByOrderId(orderId, tenantId);
+    return { success: true };
   }
 }

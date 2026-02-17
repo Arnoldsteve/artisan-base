@@ -13,11 +13,17 @@ import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     // 1. Global Configurations
     ConfigModule.forRoot({ isGlobal: true }),
+     EventEmitterModule.forRoot({
+      wildcard: true,
+      delimiter: '.',
+    }),
     
     // 2. Core Modules (Single instances shared across the app)
     PrismaModule, 
@@ -30,6 +36,7 @@ import { OrderModule } from './order/order.module';
     ProductModule,
     CategoryModule,
     OrderModule,
+    PaymentModule,
     // Note: Other modules (Dashboard, Billing, etc.) remain commented 
     // to keep the TypeScript compiler clean during the scale-up.
   ],

@@ -1,51 +1,50 @@
-import { Injectable } from '@nestjs/common';
-import { PaymentProviderInterface } from '../interfaces/payment-provider.interface';
-import { InitializePaymentDto } from '../dto/initialize-payment.dto';
-import { VerifyPaymentDto } from '../dto/verify-payment.dto';
-import { 
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
+import {
+  PaymentProviderInterface,
   PaymentInitializationResult,
   PaymentVerificationResult,
-  PaymentWebhookResult,
 } from '../interfaces/payment-provider.interface';
-import { PaymentStatus } from '../enums/payment-status.enum';
+import { PaymentProviderRegistry } from './payment-provider.registry';
+import { InitializePaymentDto } from '../dto/initialize-payment.dto';
 
 @Injectable()
-export class StripeProvider implements PaymentProviderInterface {
+export class StripeProvider implements PaymentProviderInterface, OnModuleInit {
+  constructor(private readonly registry: PaymentProviderRegistry) {}
+
+  onModuleInit() {
+    this.registry.register(this);
+  }
+
+  getName(): PaymentProvider {
+    return PaymentProvider.STRIPE;
+  }
 
   async initialize(
     dto: InitializePaymentDto,
   ): Promise<PaymentInitializationResult> {
-    // TODO: Create Stripe Checkout Session
+    // Logic for Stripe Checkout Session
 
     return {
-      providerTransactionId: 'stripe_tx_placeholder',
+      providerTransactionId: 'stripe_123',
       checkoutUrl: 'https://stripe.com/checkout-placeholder',
       metadata: {},
     };
   }
 
-  async verify(
-    dto: VerifyPaymentDto,
-  ): Promise<PaymentVerificationResult> {
-    // TODO: Retrieve Stripe payment intent
-
+  async verify(): Promise<PaymentVerificationResult> {
     return {
-      providerTransactionId: dto.providerTransactionId,
+      providerTransactionId: '...',
       status: PaymentStatus.PENDING,
-      rawResponse: {},
     };
   }
 
-  async handleWebhook(
-    payload: Record<string, any>,
-    signature?: string,
-  ): Promise<PaymentWebhookResult> {
-    // TODO: Verify Stripe signature & parse event
+  async handleWebhook(payload: any): Promise<PaymentVerificationResult> {
+    // Logic to parse Stripe event type
 
     return {
-      providerTransactionId: 'stripe_webhook_placeholder',
-      status: PaymentStatus.SUCCESS,
-      rawPayload: payload,
+      providerTransactionId: '...',
+      status: PaymentStatus.PAID,
     };
   }
 }

@@ -221,6 +221,8 @@ model Payment {
   amount                  Decimal       @db.Decimal(10, 2)
   status                  PaymentStatus @default(PENDING)
   
+  metadata                Json?          
+
   order                   Order         @relation(fields: [orderId], references: [id])
   
   createdAt               DateTime      @default(now())

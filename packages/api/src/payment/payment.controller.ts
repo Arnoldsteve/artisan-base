@@ -1,19 +1,19 @@
 import {
   Controller,
   Post,
-  Get,
   Body,
   Param,
-  Query,
   Headers,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
-import { VerifyPaymentDto } from './dto/verify-payment.dto';
-import { PaymentProvider } from './enums/payment-provider.enum';
+import { PaymentProvider } from '@generated/prisma/client';
 
+@ApiTags('Payments')
+@ApiHeader({ name: 'x-tenant-id', required: true })
 @Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
@@ -24,38 +24,10 @@ export class PaymentController {
    ---------------------------------------------------------
    */
   @Post('initialize')
+  @ApiOperation({ summary: 'Initialize a payment for an order' })
+  @ApiBearerAuth()
   async initialize(@Body() dto: InitializePaymentDto) {
     return this.paymentService.initialize(dto);
-  }
-
-  /*
-   ---------------------------------------------------------
-   Verify Payment (Manual Trigger)
-   ---------------------------------------------------------
-   */
-  @Post('verify')
-  async verify(@Body() dto: VerifyPaymentDto) {
-    return this.paymentService.verify(dto);
-  }
-
-  /*
-   ---------------------------------------------------------
-   Get Payment by ID
-   ---------------------------------------------------------
-   */
-  @Get(':id')
-  async findById(@Param('id') id: string) {
-    return this.paymentService.findById(id);
-  }
-
-  /*
-   ---------------------------------------------------------
-   Get Payments by Order
-   ---------------------------------------------------------
-   */
-  @Get('order/:orderId')
-  async findByOrder(@Param('orderId') orderId: string) {
-    return this.paymentService.findByOrder(orderId);
   }
 
   /*
@@ -68,6 +40,7 @@ export class PaymentController {
    */
   @Post('webhook/:provider')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Receive payment provider webhooks' })
   async handleWebhook(
     @Param('provider') provider: PaymentProvider,
     @Body() payload: Record<string, any>,

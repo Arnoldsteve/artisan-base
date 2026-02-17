@@ -1,50 +1,32 @@
-import { Injectable } from '@nestjs/common';
-import { PaymentProviderInterface } from '../interfaces/payment-provider.interface';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
+import { PaymentProviderInterface, PaymentInitializationResult, PaymentVerificationResult } from '../interfaces/payment-provider.interface';
+import { PaymentProviderRegistry } from './payment-provider.registry';
 import { InitializePaymentDto } from '../dto/initialize-payment.dto';
-import { VerifyPaymentDto } from '../dto/verify-payment.dto';
-import { 
-  PaymentInitializationResult,
-  PaymentVerificationResult,
-  PaymentWebhookResult,
-} from '../interfaces/payment-provider.interface';
-import { PaymentStatus } from '../enums/payment-status.enum';
 
 @Injectable()
-export class MpesaProvider implements PaymentProviderInterface {
+export class MpesaProvider implements PaymentProviderInterface, OnModuleInit {
+  constructor(private readonly registry: PaymentProviderRegistry) {}
 
-  async initialize(
-    dto: InitializePaymentDto,
-  ): Promise<PaymentInitializationResult> {
-    // TODO: Implement STK Push logic
-
-    return {
-      providerTransactionId: 'mpesa_tx_placeholder',
-      metadata: {},
-    };
+  onModuleInit() {
+    this.registry.register(this);
   }
 
-  async verify(
-    dto: VerifyPaymentDto,
-  ): Promise<PaymentVerificationResult> {
-    // TODO: Call Mpesa verification API
-
-    return {
-      providerTransactionId: dto.providerTransactionId,
-      status: PaymentStatus.PENDING,
-      rawResponse: {},
-    };
+  getName(): PaymentProvider {
+    return PaymentProvider.MPESA;
   }
 
-  async handleWebhook(
-    payload: Record<string, any>,
-    signature?: string,
-  ): Promise<PaymentWebhookResult> {
-    // TODO: Validate signature & parse callback
+  async initialize(dto: InitializePaymentDto): Promise<PaymentInitializationResult> {
+    // Logic for Mpesa STK Push
+    return { providerTransactionId: 'mpesa_123', metadata: { phone: '254...' } };
+  }
 
-    return {
-      providerTransactionId: 'mpesa_webhook_placeholder',
-      status: PaymentStatus.SUCCESS,
-      rawPayload: payload,
-    };
+  async verify(): Promise<PaymentVerificationResult> {
+    return { providerTransactionId: '...', status: PaymentStatus.PENDING };
+  }
+
+  async handleWebhook(payload: any): Promise<PaymentVerificationResult> {
+    // Logic to parse Mpesa ResultCode
+    return { providerTransactionId: '...', status: PaymentStatus.PAID };
   }
 }
