@@ -4,19 +4,20 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '../hooks/use-auth';
 import { LoginDto, SignUpDto } from '@/types/auth';
 import { User } from '@/types/users';
-import { Tenant } from '@/types/tenant'; 
+import { Tenant } from '@/types/tenant';
 
 interface AuthContextType {
   user: User | null;
-  tenants: Tenant[]; 
+  tenants: Tenant[];
   token: string | null;
-  tenantId: string | null; 
+  tenantId: string | null;   // real DB id — for bootstrap
+  subdomain: string | null;  // subdomain — for x-tenant-id header
   isLoading: boolean;
   isAuthenticated: boolean;
-  signUp: (data: SignUpDto) => Promise<void>; 
+  signUp: (data: SignUpDto) => Promise<void>;
   login: (data: LoginDto) => Promise<void>;
   logout: () => void;
-  selectTenant: (tenantId: string) => void;
+  selectTenant: (tenant: Tenant) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

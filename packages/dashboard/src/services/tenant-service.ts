@@ -9,12 +9,12 @@ import {
 export class TenantService {
 
   async createTenant(tenantData: CreateTenantDto): Promise<CreateTenantResponse> {
-    return apiClient.post<CreateTenantResponse>("/tenants", tenantData);
+    return apiClient.post<CreateTenantResponse>("/onboarding/register", tenantData);
   }
 
  
   async checkSubdomainAvailability(subdomain: string): Promise<AvailabilityResponse> {
-    return apiClient.get<AvailabilityResponse>(`/tenants/availability?subdomain=${subdomain}`);
+    return apiClient.get<AvailabilityResponse>(`/onboarding/check-subdomain?subdomain=${subdomain}`);
 
   }
 

@@ -55,12 +55,8 @@ export class CategoryRepository {
     });
   }
 
-  async count(tenantId: string): Promise<number> {
-    return this.prisma.client.category.count({
-      where: {
-        tenantId,
-      },
-    });
+  async count(where?: Prisma.CategoryWhereInput): Promise<number> {
+    return this.prisma.client.category.count({ where });
   }
 
   async update(

@@ -18,8 +18,9 @@ export class TenantContextMiddleware implements NestMiddleware {
     // These are routes used for registration, login, or checking subdomains.
     const publicPaths = [
       '/onboarding',
+      // '/auth/register',
       '/auth/login',
-      '/auth/register',
+      '/auth/bootstrap', 
       '/health'
     ];
 

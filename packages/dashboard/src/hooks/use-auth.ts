@@ -15,32 +15,31 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [token, setToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [tenantId, setTenantId] = useState<string | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null); // real DB id
+  const [subdomain, setSubdomain] = useState<string | null>(null); // for x-tenant-id header
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadUserFromCookies() {
       const tokenFromCookie = Cookies.get("accessToken");
-      const refreshTokenFromCookie = Cookies.get("refreshToken");
-      const tenantIdFromCookie = Cookies.get("selectedOrgSubdomain");
+      const subdomainFromCookie = Cookies.get("selectedOrgSubdomain");
+      const tenantIdFromCookie = Cookies.get("selectedTenantId");
 
-      if (tokenFromCookie && tenantIdFromCookie) {
+      if (tokenFromCookie && subdomainFromCookie) {
         apiClient.setAuthToken(tokenFromCookie);
-        apiClient.setTenantId(tenantIdFromCookie);
+        apiClient.setTenantId(subdomainFromCookie);
         setToken(tokenFromCookie);
-        setRefreshToken(refreshTokenFromCookie ?? null);
-        setTenantId(tenantIdFromCookie);
+        setSubdomain(subdomainFromCookie);
+        setTenantId(tenantIdFromCookie ?? null);
+
         try {
           const profile = await authService.getProfile();
           setUser(profile.user);
           setTenants(profile.organizations);
         } catch (error) {
           console.log("Error loading profile:", error);
-          // Try to refresh token if profile fetch fails
           const newToken = await refreshAccessToken();
           if (newToken) {
-            // Retry getting profile
             try {
               apiClient.setAuthToken(newToken);
               const profile = await authService.getProfile();
@@ -48,10 +47,7 @@ export function useAuth() {
               setTenants(profile.organizations);
               setToken(newToken);
             } catch (retryError) {
-              console.error(
-                "Failed to load profile after token refresh:",
-                retryError
-              );
+              console.error("Failed to load profile after token refresh:", retryError);
             }
           }
         }
@@ -61,80 +57,67 @@ export function useAuth() {
     loadUserFromCookies();
   }, []);
 
-  const signUp = useCallback(async (data: SignUpDto) => {
-    const response = await authService.signUp(data);
-    const { user: signedUpUser, accessToken, refreshToken } = response;
+  const login = useCallback(async (data: LoginDto) => {
+    const response = await authService.login(data);
+    const { user: loggedInUser, backend_tokens, tenants: organizations } = response;
+    const { accessToken, refreshToken } = backend_tokens;
 
-    setUser(signedUpUser);
+    Cookies.set("accessToken", accessToken, { expires: 1, sameSite: "lax" });
+    Cookies.set("refreshToken", refreshToken, { expires: 30, sameSite: "lax" });
+
+    setUser(loggedInUser);
     setToken(accessToken);
-    setRefreshToken(refreshToken);
     apiClient.setAuthToken(accessToken);
 
-    Cookies.set("accessToken", accessToken, {
+    // ✅ Case 1: No tenant yet → onboarding to create store
+    if (!organizations || organizations.length === 0) {
+      router.push("/onboarding/create-store");
+      return;
+    }
+
+    // ✅ Case 2: Has tenant → store both subdomain and real id
+    const selectedTenant = organizations[0];
+
+    setTenants(organizations);
+    setTenantId(selectedTenant.id);
+    setSubdomain(selectedTenant.subdomain);
+    apiClient.setTenantId(selectedTenant.subdomain);
+
+    Cookies.set("selectedOrgSubdomain", selectedTenant.subdomain, {
       expires: 1,
-      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
     });
-    Cookies.set("refreshToken", refreshToken, {
-      expires: 30,
-      secure: process.env.NODE_ENV === "production",
+    Cookies.set("selectedTenantId", selectedTenant.id, {
+      expires: 1,
       sameSite: "lax",
     });
-  }, []);
 
-  const login = useCallback(async (data: LoginDto) => {
-  const response = await authService.login(data);
-  const { user: loggedInUser, accessToken, refreshToken, organizations } = response;
+    router.push("/home");
+  }, [router]);
 
-  console.log("logged user organisation", organizations)
-
-  // Save tokens first so user is authenticated during onboarding too
-  Cookies.set("accessToken", accessToken, { expires: 1, sameSite: "lax" });
-  Cookies.set("refreshToken", refreshToken, { expires: 30, sameSite: "lax" });
-
-  setUser(loggedInUser);
-  setToken(accessToken);
-  setRefreshToken(refreshToken);
-  apiClient.setAuthToken(accessToken);
-
-  // ✅ Case 1: User has no tenant yet → go to setup flow
-  if (!organizations || organizations.length === 0) {
-    router.push("/onboarding/create-store");
-    return;
-  }
-
-  // ✅ Case 2: User has at least one tenant → continue
-  const selectedTenant = organizations[0].subdomain;
-
-  setTenants(organizations);
-  setTenantId(selectedTenant);
-  apiClient.setTenantId(selectedTenant);
-
-  Cookies.set("selectedOrgSubdomain", selectedTenant, {
-    expires: 1,
-    sameSite: "lax",
-  });
-
-  // Finally → go to dashboard
-  router.push("/home");
-}, []);
+  /**
+   * Register → then auto-login to get JWT.
+   * Backend /onboarding/register returns no token, so we login immediately after.
+   */
+  const signUp = useCallback(async (data: SignUpDto) => {
+    await authService.signUp(data);
+    await login({ email: data.email, password: data.password });
+  }, [login]);
 
   const logout = useCallback(async () => {
+    const refreshToken = Cookies.get("refreshToken");
     try {
       if (refreshToken) {
         await authService.logout(refreshToken);
       }
     } catch (error) {
-      console.warn(
-        "Server logout failed, proceeding with client-side cleanup.",
-        error
-      );
+      console.warn("Server logout failed, proceeding with client-side cleanup.", error);
     }
 
     setUser(null);
     setToken(null);
-    setRefreshToken(null);
     setTenantId(null);
+    setSubdomain(null);
     setTenants([]);
 
     apiClient.setAuthToken(null);
@@ -143,15 +126,22 @@ export function useAuth() {
     Cookies.remove("accessToken");
     Cookies.remove("refreshToken");
     Cookies.remove("selectedOrgSubdomain");
+    Cookies.remove("selectedTenantId");
 
     window.location.href = "/";
-  }, [refreshToken]);
+  }, []);
 
   const selectTenant = useCallback(
-    (newTenantId: string) => {
-      setTenantId(newTenantId);
-      apiClient.setTenantId(newTenantId);
-      Cookies.set("selectedOrgSubdomain", newTenantId, {
+    (tenant: Tenant) => {
+      setTenantId(tenant.id);
+      setSubdomain(tenant.subdomain);
+      apiClient.setTenantId(tenant.subdomain);
+      Cookies.set("selectedOrgSubdomain", tenant.subdomain, {
+        expires: 1,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+      Cookies.set("selectedTenantId", tenant.id, {
         expires: 1,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -165,8 +155,8 @@ export function useAuth() {
     user,
     tenants,
     token,
-    refreshToken,
-    tenantId,
+    tenantId,   // real DB id — used for bootstrap
+    subdomain,  // subdomain — used for x-tenant-id header
     isLoading,
     isAuthenticated: !isLoading && !!user,
     signUp,

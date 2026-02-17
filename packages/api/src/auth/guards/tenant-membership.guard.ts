@@ -5,15 +5,16 @@ import {
   ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core'; // Added
+import { Reflector } from '@nestjs/core';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
 import { TenantMemberRepository } from '@/tenant/repositories/tenant-member.repository';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator'; // Added
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+
 
 @Injectable()
 export class TenantMembershipGuard implements CanActivate {
   constructor(
-    private readonly reflector: Reflector, // Added
+    private readonly reflector: Reflector,
     private readonly tenantContext: TenantContextService,
     private readonly memberRepo: TenantMemberRepository,
   ) {}
@@ -24,11 +25,8 @@ export class TenantMembershipGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-
     // If it's public, we don't need to check user membership
-    if (isPublic) {
-      return true;
-    }
+    if (isPublic ) return true;
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
@@ -44,11 +42,16 @@ export class TenantMembershipGuard implements CanActivate {
     }
 
     if (!tenantId) {
-      throw new ForbiddenException('No Store context identified (Missing X-Tenant-ID)');
+      throw new ForbiddenException(
+        'No Store context identified (Missing X-Tenant-ID)',
+      );
     }
 
     // 3. Membership Check
-    const membership = await this.memberRepo.findByTenantAndUser(tenantId, user.id);
+    const membership = await this.memberRepo.findByTenantAndUser(
+      tenantId,
+      user.id,
+    );
 
     if (!membership || !membership.isActive) {
       throw new ForbiddenException('You do not have access to this store');

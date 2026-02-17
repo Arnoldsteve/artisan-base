@@ -12,6 +12,8 @@ import { UserModule } from '@/user/user.module';
 import { TenantModule } from '@/tenant/tenant.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ProductModule } from '@/product/product.module';
+import { CategoryModule } from '@/category/category.module';
 
 /**
  * SOLID Principle: Dependency Injection / Modularization
@@ -20,8 +22,10 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
  */
 @Module({
   imports: [
-    UserModule, // Needed to find users during login
-    TenantModule, // Needed to discover tenants for the logged-in user
+    UserModule, 
+    TenantModule, 
+    ProductModule,   
+    CategoryModule,  
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
     // Configure JWT dynamically using Environment Variables

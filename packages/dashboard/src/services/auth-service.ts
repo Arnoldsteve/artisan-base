@@ -3,15 +3,18 @@ import {
   LoginDto,
   SignUpDto,
   LoginResponse,
-  SignUpResponse,
   ForgotPassword,
   ResetPassword,
 } from "@/types/auth";
 import { ProfileResponse } from "@/types/users";
 
 export class AuthService {
-  async signUp(signUpData: SignUpDto): Promise<SignUpResponse> {
-    return apiClient.post<SignUpResponse>("/auth/signup", signUpData);
+  /**
+   * Calls /onboarding/register — returns userId, tenantId, subdomain (no JWT).
+   * After this, we auto-login to get the token.
+   */
+  async signUp(signUpData: SignUpDto): Promise<{ userId: string; tenantId: string; subdomain: string }> {
+    return apiClient.post("/onboarding/register", signUpData);
   }
 
   async login(credentials: LoginDto): Promise<LoginResponse> {
@@ -19,7 +22,6 @@ export class AuthService {
   }
 
   async forgotPassword(data: ForgotPassword): Promise<{ message: string }> {
-    console.log("User account email", data);
     return apiClient.post<{ message: string }>("/auth/forgot-password", data);
   }
 
@@ -35,13 +37,9 @@ export class AuthService {
     try {
       await apiClient.post("/auth/logout", { refreshToken });
     } catch (error) {
-      console.warn(
-        "Server logout failed, proceeding with client-side cleanup.",
-        error
-      );
+      console.warn("Server logout failed, proceeding with client-side cleanup.", error);
     }
   }
-  
 }
 
 export const authService = new AuthService();

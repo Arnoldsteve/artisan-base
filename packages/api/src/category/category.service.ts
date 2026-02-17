@@ -39,7 +39,7 @@ export class CategoryService {
         skip,
         take: limit,
       }),
-      this.categoryRepo.count(tenantId),
+      this.categoryRepo.count(),
     ]);
 
     return {

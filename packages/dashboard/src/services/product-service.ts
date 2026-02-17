@@ -12,7 +12,7 @@ export class ProductService {
    */
   async searchProducts(searchTerm: string): Promise<Product[]> {
     const response = await apiClient.get<PaginatedResponse<Product>>(
-      "dashboard/products",
+      "/products",
       { page: 1, limit: 5, search: searchTerm }
     );
     return response.data;
@@ -24,17 +24,17 @@ export class ProductService {
     search?: string
   ): Promise<PaginatedResponse<Product>> {
     return apiClient.get<PaginatedResponse<Product>>(
-      "dashboard/products",
+      "/products",
       { page, limit, search }
     );
   }
 
   async getProductById(id: string): Promise<Product> {
-    return apiClient.get<Product>(`dashboard/products/${id}`);
+    return apiClient.get<Product>(`/products/${id}`);
   }
 
   async createProduct(productData: CreateProductDto): Promise<Product> {
-    return apiClient.post<Product>("dashboard/products", productData);
+    return apiClient.post<Product>("/products", productData);
   }
 
     /**
@@ -43,26 +43,26 @@ export class ProductService {
    * @returns A response object with the count of created products.
    */
   async bulkCreateProducts(products: CreateProductDto[]): Promise<{ count: number }> {
-    return apiClient.post<{ count: number }>("dashboard/products/bulk-upload", products);
+    return apiClient.post<{ count: number }>("/products/bulk-upload", products);
   }
   async updateProduct(id: string, productData: UpdateProductDto): Promise<Product> {
-    return apiClient.patch<Product>(`dashboard/products/${id}`, productData);
+    return apiClient.patch<Product>(`/products/${id}`, productData);
   }
 
   async deleteProduct(id: string): Promise<void> {
-    await apiClient.delete(`dashboard/products/${id}`);
+    await apiClient.delete(`/products/${id}`);
   }
 
   async assignCategories(productId: string, dto: AssignCategoriesToProductDto): Promise<void> {
-    await apiClient.patch(`/dashboard/products/${productId}/categories`, dto);
+    await apiClient.patch(`//products/${productId}/categories`, dto);
   }
 
   async assignCategory(productId: string, categoryId: string): Promise<void> {
-    await apiClient.post("/dashboard/product-categories", { productId, categoryId });
+    await apiClient.post("//product-categories", { productId, categoryId });
   }
 
   // async unassignCategory(productId: string, categoryId: string): Promise<void> {
-  //   await apiClient.delete("/dashboard/product-categories", { data: { productId, categoryId } });
+  //   await apiClient.delete("//product-categories", { data: { productId, categoryId } });
   // }
 
 

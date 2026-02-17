@@ -1,26 +1,25 @@
 export interface CreateTenantDto {
-    storeName: string;
-    subdomain: string;
+  name: string;
+  subdomain: string;
 }
-
 export interface Tenant {
-    id: string;
-    subdomain: string;
-    customDomain?: string | null
-    name: string;
-    dbSchema: string;
-    status: string;
-    createdAt: string;
+  id: string;
+  subdomain: string;
+  customDomain?: string | null;
+  name: string;
+//   dbSchema: string;
+  status: string;
+  createdAt: string;
 }
 
 export interface CreateTenantResponse {
-    success: boolean;
-    tenant: Tenant;
-    message: string;
-    url: string;
+  message: string;
+  data: {
+    userId: string;
+    tenantId: string;
+    subdomain: string;
+  };
 }
-
 export interface AvailabilityResponse {
-    isAvailable: boolean;
-    suggestions: string[];
+  available: boolean;
 }

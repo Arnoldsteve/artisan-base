@@ -2,11 +2,12 @@
 
 import { ReactNode, useEffect } from "react";
 import { ClientSidebarLayout } from "@/components/dashboard/ClientSidebar";
-import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
+import { TenantProvider } from "@/contexts/tenant-context";
+import { useAuthContext } from "@/contexts/auth-context";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -23,5 +24,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  return <ClientSidebarLayout>{children}</ClientSidebarLayout>;
+  return (
+    <TenantProvider>
+      <ClientSidebarLayout>{children}</ClientSidebarLayout>
+    </TenantProvider>
+  );
 }
