@@ -15,9 +15,23 @@ export class CustomerService {
     return this.customerRepo.create(dto as any);
   }
 
-  async findAll(page = 1, limit = 20) {
+  async findAll(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
-    return this.customerRepo.findAll(skip, limit);
+
+    const[data, total]= await Promise.all([
+       this.customerRepo.list({ skip, take:limit }),
+       this.customerRepo.count(),
+    ]);
+
+    return{
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        lastPage: Math.ceil(total /limit),
+      }
+    }
   }
 
   async findOne(id: string) {

@@ -71,7 +71,7 @@ export function CustomersWrapper({
     isLoading,
     isError,
     isFetching,
-  } = useCustomers(pageIndex + 1, pageSize, "", initialCustomerData);
+  } = useCustomers(pageIndex + 1, pageSize);
 
   const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
   const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();

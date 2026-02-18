@@ -53,6 +53,7 @@ export function EditCategorySheet({
     defaultValues: {
       name: "",
       description: "",
+      slug: "",
     },
   });
 
@@ -62,26 +63,45 @@ export function EditCategorySheet({
       if (category) {
         form.reset({
           name: category.name,
+          slug: category.slug,
           description: category.description || "",
         });
       } else {
         form.reset({
           name: "",
+          slug: "",
           description: "",
         });
       }
     }
   }, [category, isOpen, form]);
+
   const onSubmit = (data: CategoryFormData) => {
     const payload = {
       ...data,
-      description: data.description?.trim() || undefined, 
+      id: category?.id, 
+      description: data.description?.trim() || undefined,
     };
 
-    console.log("payload",payload)
+    console.log("payload", payload);
     // return;
     onSave(payload);
   };
+
+  const nameValue = form.watch("name");
+
+  useEffect(() => {
+    if (nameValue) {
+      const generatedSlug = nameValue
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\-\-+/g, "-");
+
+      form.setValue("slug", generatedSlug, { shouldValidate: true });
+    }
+  }, [nameValue, form]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -122,6 +142,24 @@ export function EditCategorySheet({
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Slug *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., kitchen-appliances"
+                        {...field}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Description */}
               <FormField
                 control={form.control}
@@ -145,25 +183,6 @@ export function EditCategorySheet({
                   </FormItem>
                 )}
               />
-
-              {/* Auto-generated slug preview */}
-              {form.watch("name") && (
-                <div className="bg-gray-50 p-3 rounded-md">
-                  <FormLabel className="text-xs text-gray-600">
-                    URL Slug Preview:
-                  </FormLabel>
-                  <code className="text-xs text-gray-800 block mt-1">
-                    /categories/
-                    {form
-                      .watch("name")
-                      .toLowerCase()
-                      .trim()
-                      .replace(/\s+/g, "-")
-                      .replace(/[^\w\-]+/g, "")
-                      .replace(/\-\-+/g, "-")}
-                  </code>
-                </div>
-              )}
             </div>
 
             <SheetFooter className="gap-2">

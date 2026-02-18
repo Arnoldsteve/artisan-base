@@ -142,11 +142,13 @@ export function CategoriesWrapper({
 
   const handleSaveChanges = (formData: {
     id?: string;
+    slug: string;
     name: string;
     description?: string;
   }) => {
     const categoryData = {
       name: formData.name,
+      slug: formData.slug,
       description: formData.description || "",
     };
 

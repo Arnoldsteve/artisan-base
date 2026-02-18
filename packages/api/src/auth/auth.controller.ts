@@ -10,7 +10,12 @@ import {
   Query,
   Logger,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { GetUser } from './decorators/get-user.decorator';
@@ -45,7 +50,7 @@ export class AuthController {
     description: 'Invalid credentials provided.',
   })
   async login(@Body() loginDto: LoginDto) {
-    Logger.debug("login  dto in the controller", loginDto)
+    Logger.debug('login  dto in the controller', loginDto);
     // 1. Verify the user (Email & Password)
     const user = await this.authService.validateUser(loginDto);
 
@@ -55,6 +60,13 @@ export class AuthController {
 
     // 2. Generate Tokens and find associated Tenants
     return this.authService.login(user);
+  }
+
+  @Get('profile')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
+  async getProfile(@GetUser('id') userId: string) {
+    return this.authService.getProfile(userId);
   }
 
   /**
@@ -71,7 +83,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Bootstrap successful' })
   async bootstrap(
     @GetUser('id') userId: string,
-    @Query('tenantId') tenantId: string,  
+    @Query('tenantId') tenantId: string,
   ) {
     return this.authService.bootstrap(userId, tenantId);
   }

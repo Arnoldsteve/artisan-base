@@ -91,6 +91,29 @@ export class AuthService {
     };
   }
 
+  async getProfile(userId: string) {
+  const user = await this.userRepo.findById(userId);
+  if (!user) throw new NotFoundException('User not found');
+  
+  const memberships = await this.memberRepo.listByUser(userId);
+  
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      globalRole: user.globalRole,
+    },
+    organizations: memberships.map(m => ({
+      id: m.tenantId,
+      name: m.tenant.name,
+      subdomain: m.tenant.subdomain,
+      role: m.role,
+    })),
+  };
+}
+
   /**
    * The Master Handshake.
    * Aggregates everything the dashboard needs on first load:
@@ -128,6 +151,7 @@ export class AuthService {
       categoriesCount,
     };
   }
+
 
   /**
    * Helper to create and persist a refresh token.

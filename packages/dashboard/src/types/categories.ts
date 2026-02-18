@@ -11,9 +11,10 @@ export interface Category {
 
 export interface CreateCategoryDto {
   name: string;
+  slug: string;              
   description?: string;
-  isActive?: boolean;
-  isFeatured?: boolean;
+  // isActive?: boolean;
+  // isFeatured?: boolean;
 }
 
 export type UpdateCategoryDto = Partial<CreateCategoryDto>;

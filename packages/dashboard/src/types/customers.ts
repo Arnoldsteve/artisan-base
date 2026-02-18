@@ -1,41 +1,29 @@
-import { Decimal } from 'decimal.js';
 import { Order } from './orders'; 
-import { PaginatedResponse } from './shared';
-
-export interface CustomerAddress {
-  id: string;
-  type: string; // e.g., 'shipping', 'billing'
-  firstName: string;
-  lastName: string;
-  addressLine1: string;
-  addressLine2: string ;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  isDefault: boolean;
-}
 
 export interface Customer {
   id: string;
+  tenantId: string;
   email: string;
-  firstName?: string ;
-  lastName?: string ;
-  phone?: string ;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
   createdAt: string; 
-  updatedAt: string; 
-  addresses?: CustomerAddress[];
-  orders?: Order[]; 
+  updatedAt: string;
+  
+  // Relations (Optional for list views)
+  orders?: Order[];
+
+  // Computed stats for the dashboard
+  _count?: {
+    orders: number;
+  };
 }
 
 export interface CustomerDetails extends Customer {
-  addresses: CustomerAddress[];
-  orders: Order[];
-  
-  _stats?: {
-    totalSpent: Decimal;
-    orderCount: number;
-  };
+  // Aggregate stats often used in the "Customer Profile" page
+  totalSpent: number;
+  orderCount: number;
+  lastOrderDate?: string;
 }
 
 export interface CreateCustomerDto {

@@ -50,12 +50,17 @@ export class CustomerRepository {
   /**
    * Paginated list of customers for this tenant.
    */
-  async findAll(skip = 0, take = 20): Promise<Customer[]> {
+
+  async list(params: { skip?: number; take?: number; where?: Prisma.CustomerWhereInput }) {
     return this.prisma.client.customer.findMany({
-      skip,
-      take,
+      ...params,
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+
+  async count(where?: Prisma.CustomerWhereInput): Promise<number> {
+    return this.prisma.client.customer.count({where});
   }
 
   async update(
