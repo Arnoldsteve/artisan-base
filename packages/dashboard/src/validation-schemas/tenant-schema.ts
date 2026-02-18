@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Currency } from "@/types/currency"; 
 
 export const createTenantSchema = z.object({
-  storeName: z
+  name: z
     .string()
     .min(1, "Store name is required")
     .max(80, "Store name must be less than 80 characters"),
