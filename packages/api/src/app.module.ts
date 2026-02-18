@@ -15,6 +15,7 @@ import { CategoryModule } from './category/category.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -37,8 +38,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CategoryModule,
     OrderModule,
     PaymentModule,
-    // Note: Other modules (Dashboard, Billing, etc.) remain commented 
-    // to keep the TypeScript compiler clean during the scale-up.
+    CustomerModule,
   ],
   controllers: [],
   providers: [],
