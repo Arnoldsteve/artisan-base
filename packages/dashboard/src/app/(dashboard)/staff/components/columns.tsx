@@ -4,12 +4,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
-import { UserTableMeta, TableWithMeta } from "@/types/table-meta";
-import { DashboardUser } from "@/types/users";
+import { UserTableMeta } from "@/types/table-meta";
+import { StaffMember } from "@/types/staff";
 import { CellAction } from "./cell-action";
 import { formatDate } from "@/utils/date";
 
-export const columns: ColumnDef<DashboardUser>[] = [
+export const columns: ColumnDef<StaffMember>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -30,23 +30,32 @@ export const columns: ColumnDef<DashboardUser>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
-    header: "User",
+    id: "user", // Changed from accessorKey: "name" to id for custom rendering
+    header: "Staff Member",
     cell: ({ row }) => {
-      const user = row.original;
-      const name =
+      const { user } = row.original; // Accessing nested user object
+      
+      const fullName =
         user.firstName && user.lastName
           ? `${user.firstName} ${user.lastName}`
-          : user.email;
-      const fallback = name.substring(0, 2).toUpperCase();
+          : user.email.split('@')[0]; // Fallback to email prefix
+          
+      const fallback = fullName.substring(0, 2).toUpperCase();
+
       return (
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback>{fallback}</AvatarFallback>
+          <Avatar className="h-9 w-9 border">
+            <AvatarFallback className="text-xs bg-muted">
+              {fallback}
+            </AvatarFallback>
           </Avatar>
-          <div>
-            <div className="font-medium">{name}</div>
-            <div className="text-sm text-muted-foreground">{user.email}</div>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm leading-none">
+              {fullName}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">
+              {user.email}
+            </span>
           </div>
         </div>
       );
@@ -54,28 +63,33 @@ export const columns: ColumnDef<DashboardUser>[] = [
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: "Store Role",
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
-      return <span className="capitalize text-sm">{role.toLowerCase()}</span>;
-    },
-  },
-
-  {
-    accessorKey: "isActive",
-    header: "Status",
-    cell: ({ row }) => {
-      const isActive = row.getValue("isActive");
+      // Using a secondary badge variant for roles makes them distinct from status
       return (
-        <Badge variant={isActive ? "default" : "destructive"}>
-          {isActive ? "Active" : "Inactive"}
+        <Badge variant="secondary" className="capitalize font-normal text-[11px]">
+          {role.toLowerCase()}
         </Badge>
       );
     },
   },
   {
+    accessorKey: "isActive",
+    header: "Status",
+    cell: ({ row }) => {
+      const isActive = row.getValue("isActive") as boolean;
+      return (
+        <div className="flex items-center gap-2">
+          <div className={`h-2 w-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span className="text-sm">{isActive ? "Active" : "Suspended"}</span>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "createdAt",
-    header: "Member Since",
+    header: "Joined Store",
     cell: ({ row }) => {
       const createdAt = row.getValue("createdAt") as string | Date;
 
@@ -85,9 +99,11 @@ export const columns: ColumnDef<DashboardUser>[] = [
         .trim();
 
       return (
-        <div>
+        <div className="text-sm">
           <div>{formattedDate}</div>
-          <div className="text-xs text-muted-foreground">{formattedTime}</div>
+          <div className="text-[10px] text-muted-foreground uppercase tracking-tight">
+            {formattedTime}
+          </div>
         </div>
       );
     },
@@ -95,12 +111,13 @@ export const columns: ColumnDef<DashboardUser>[] = [
   {
     id: "actions",
     cell: ({ row, table }) => {
-      const user = row.original;
-      const meta = table.options.meta as UserTableMeta<DashboardUser>;
+      const member = row.original;
+      // Using correct Type for meta
+      const meta = table.options.meta as UserTableMeta<StaffMember>;
 
       return (
         <CellAction
-          data={user}
+          data={member}
           onEditUser={meta.openEditSheet}
           onDeleteUser={meta.openDeleteDialog}
         />

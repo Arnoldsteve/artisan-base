@@ -32,67 +32,70 @@ import {
 } from "@repo/ui/components/ui/select";
 
 import {
-  DashboardUserSchema,
-  DashboardUserFormData,
-} from "@/validation-schemas/dashboardUserSchema";
-import { DashboardUserRole } from "@/types/roles";
-import { DashboardUser } from "@/types/users";
+  StaffMemberSchema,
+  StaffMemberFormData,
+} from "@/validation-schemas/staffMemberSchema";
+import { TenantUserRole } from "@/types/roles";
+import { StaffMember } from "@/types/staff";
 import { capitalizeFirstLetter } from "@/utils/string-utils";
 
 interface EditAddUserSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  dashboardUser: Partial<DashboardUser> | null;
-  onSave: (dashboardUser: DashboardUserFormData) => void;
+  staffMember: StaffMember | null;
+  onSave: (data: StaffMemberFormData) => void;
   isPending?: boolean;
 }
 
 export function EditAddUserSheet({
   isOpen,
   onClose,
-  dashboardUser,
+  staffMember,
   onSave,
   isPending,
 }: EditAddUserSheetProps) {
-  const isNewDashboardUser = !dashboardUser?.id;
+  const isEditing = !!staffMember?.id;
 
-  const form = useForm<DashboardUserFormData>({
-    resolver: zodResolver(DashboardUserSchema),
+  const form = useForm<StaffMemberFormData>({
+    resolver: zodResolver(StaffMemberSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       password: "",
-      role: DashboardUserRole.STAFF,
+      role: TenantUserRole.STAFF,
+      isActive: true,
     },
   });
 
-  // populate form when editing
+  // Populate form when editing or clear when adding
   useEffect(() => {
     if (isOpen) {
-      if (dashboardUser) {
+      if (staffMember) {
         form.reset({
-          id: dashboardUser.id,
-          email: dashboardUser.email,
-          password: dashboardUser.password,
-          firstName: dashboardUser.firstName,
-          lastName: dashboardUser.lastName,
-          role: dashboardUser.role,
+          id: staffMember.id,
+          // ✅ Mapping nested user data to flat form fields
+          email: staffMember.user.email,
+          firstName: staffMember.user.firstName || "",
+          lastName: staffMember.user.lastName || "",
+          role: staffMember.role,
+          isActive: staffMember.isActive,
+          password: "", // Never populate password field
         });
       } else {
         form.reset({
-          id: undefined,
-          email: "",
-          password: "",
           firstName: "",
           lastName: "",
-          role: DashboardUserRole.STAFF,
+          email: "",
+          password: "",
+          role: TenantUserRole.STAFF,
+          isActive: true,
         });
       }
     }
-  }, [dashboardUser, isOpen, form]);
+  }, [staffMember, isOpen, form]);
 
-  const onSubmit = (data: DashboardUserFormData) => {
+  const onSubmit = (data: StaffMemberFormData) => {
     onSave(data);
   };
 
@@ -101,12 +104,12 @@ export function EditAddUserSheet({
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
-            {isNewDashboardUser ? "Invite New User" : " Edit User"}
+            {!isEditing ? "Invite Staff Member" : "Update Staff Role"}
           </SheetTitle>
           <SheetDescription>
-            {isNewDashboardUser
-              ? "Enter the user's name, email and assign a role."
-              : "Update the user's info and role."}
+            {!isEditing
+              ? "Send an invite to a new team member to join your store."
+              : "Change permissions or status for this staff member."}
           </SheetDescription>
         </SheetHeader>
 
@@ -115,7 +118,7 @@ export function EditAddUserSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 py-4"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -124,21 +127,16 @@ export function EditAddUserSheet({
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
                       <Input
-                        type="text"
-                        placeholder="Enter first name"
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(capitalizeFirstLetter(e.target.value))
-                        }
-                        disabled={isPending}
-                        className="text-sm sm:text-base"
+                        placeholder="John"
+                        {...field}
+                        onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
+                        disabled={isPending || isEditing} // Names usually managed by user profile
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="lastName"
@@ -147,14 +145,10 @@ export function EditAddUserSheet({
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
                       <Input
-                        type="text"
-                        placeholder="Enter last name"
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(capitalizeFirstLetter(e.target.value))
-                        }
-                        disabled={isPending}
-                        className="text-sm sm:text-base"
+                        placeholder="Doe"
+                        {...field}
+                        onChange={(e) => field.onChange(capitalizeFirstLetter(e.target.value))}
+                        disabled={isPending || isEditing}
                       />
                     </FormControl>
                     <FormMessage />
@@ -172,10 +166,9 @@ export function EditAddUserSheet({
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="staff@artisan.com"
                       {...field}
-                      disabled={isPending}
-                      className="text-sm sm:text-base"
+                      disabled={isPending || isEditing} // ✅ Disable email on edit
                     />
                   </FormControl>
                   <FormMessage />
@@ -183,32 +176,33 @@ export function EditAddUserSheet({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter user's password"
-                      {...field}
-                      disabled={isPending}
-                      className="text-sm sm:text-base"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temporary Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Min 8 characters"
+                        {...field}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>Store Role</FormLabel>
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
@@ -220,10 +214,9 @@ export function EditAddUserSheet({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(DashboardUserRole).map((role) => (
+                      {Object.values(TenantUserRole).map((role) => (
                         <SelectItem key={role} value={role}>
-                          {role.charAt(0).toUpperCase() +
-                            role.slice(1).toLowerCase()}
+                          {role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -233,16 +226,16 @@ export function EditAddUserSheet({
               )}
             />
 
-            <SheetFooter className="pt-4">
+            <SheetFooter className="pt-6">
               <SheetClose asChild>
-                <Button type="button" variant="outline" disabled={isPending}>
+                <Button type="button" variant="ghost" disabled={isPending}>
                   Cancel
                 </Button>
               </SheetClose>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="min-w-[120px]">
                 {isPending
-                  ? "Saving..."
-                  : isNewDashboardUser
+                  ? "Processing..."
+                  : !isEditing
                     ? "Send Invite"
                     : "Save Changes"}
               </Button>

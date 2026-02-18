@@ -5,8 +5,8 @@ import {
   LoginResponse,
   ForgotPassword,
   ResetPassword,
+  ProfileResponse,
 } from "@/types/auth";
-import { ProfileResponse } from "@/types/users";
 
 export class AuthService {
   /**

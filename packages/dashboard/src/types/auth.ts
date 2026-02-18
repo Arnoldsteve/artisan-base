@@ -1,4 +1,4 @@
-import { User } from "./users";
+import { StaffMember } from "./staff";
 import { Tenant } from "./tenant";
 
 export interface LoginDto {
@@ -14,7 +14,7 @@ export interface SignUpDto {
 }
 
 export interface LoginResponse {
-  user: User;
+  user: StaffMember;
   tenants: Tenant[];         // ← was organizations
   backend_tokens: {          // ← was flat accessToken/refreshToken
     accessToken: string;
@@ -38,4 +38,9 @@ export interface ForgotPassword {
 export interface ResetPassword {
   token: string;
   newPassword: string;
+}
+
+export interface ProfileResponse {
+  user: StaffMember;
+  organizations: Tenant[];
 }

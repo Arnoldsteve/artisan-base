@@ -1,25 +1,69 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { TenantRepository } from './repositories/tenant.repository';
 import { TenantMemberRepository } from './repositories/tenant-member.repository';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { CreateStoreDto } from './dto/create-store.dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import { TenantUserRole } from '@generated/prisma/client';
 
 @Injectable()
 export class TenantService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly tenantRepo: TenantRepository,
     private readonly memberRepo: TenantMemberRepository,
   ) {}
+
+  /**
+   * SOLID Principle: Single Responsibility
+   * This is the REUSABLE "provisioning" logic.
+   * It ensures a Store and its Owner Membership are created together or not at all.
+   */
+  async provisionStore(userId: string, dto: CreateStoreDto) {
+    // 1. Global uniqueness check for subdomain
+    const exists = await this.tenantRepo.existsBySubdomain(dto.subdomain);
+    if (exists) {
+      throw new ConflictException('This subdomain is already taken');
+    }
+
+    // 2. Atomic Transaction (Platform Level)
+    // We use the base 'this.prisma' because the tenant context is not yet established.
+    return this.prisma.$transaction(async (tx) => {
+      // Step A: Create Tenant
+      const tenant = await tx.tenant.create({
+        data: {
+          name: dto.name,
+          subdomain: dto.subdomain,
+          ownerId: userId,
+          status: 'ACTIVE',
+          baseCurrency: dto.currency || 'KES',
+          timezone: dto.timezone || 'Africa/Nairobi',
+          settings: {},
+        },
+      });
+
+      // Step B: Create Membership linkage
+      await tx.tenantMember.create({
+        data: {
+          tenantId: tenant.id,
+          userId: userId,
+          role: TenantUserRole.OWNER,
+          isActive: true,
+        },
+      });
+
+      return tenant;
+    });
+  }
 
   /**
    * Business Logic: Get store profile via Repository.
    */
   async getStoreProfile(tenantId: string) {
     const store = await this.tenantRepo.findById(tenantId);
-    
     if (!store || store.deletedAt) {
       throw new NotFoundException('Store not found');
     }
-
     return store;
   }
 
@@ -28,33 +72,24 @@ export class TenantService {
    */
   async updateStore(tenantId: string, dto: UpdateTenantDto) {
     const store = await this.getStoreProfile(tenantId);
-    
     if (store.status !== 'ACTIVE') {
       throw new ForbiddenException('Cannot update a non-active store');
     }
-
-    return this.tenantRepo.update(tenantId, {
-      name: dto.name,
-      settings: dto.settings as any,
-      timezone: dto.timezone,
-      baseCurrency: dto.currency,
-    });
+    return this.tenantRepo.update(tenantId, dto);
   }
 
   /**
-   * Business Logic: Paginated staff listing using Repository methods.
+   * Business Logic: Paginated staff listing.
    */
   async listStaffMembers(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
-
-    // We delegate the DB calls to the Member Repository
-    const [items, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       this.memberRepo.listByTenant(skip, limit),
       this.memberRepo.countByTenant(),
     ]);
 
     return {
-      items,
+      data,
       meta: {
         total,
         page,

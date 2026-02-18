@@ -1,83 +1,52 @@
 import { useAuthContext } from "@/contexts/auth-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PaginatedResponse } from "@/types/shared";
-import {
-  CreateDashboardUserDto,
-  DashboardUser,
-  UpdateDashboardUserDto,
-} from "@/types/users";
+import { StaffMember, CreateStaffDto } from "@/types/staff";
 import { toast } from "sonner";
-import { dashboardUserService } from "@/services/dashboard-user";
+import { staffService } from "@/services/dashboard-user";
+import { TenantUserRole } from "@/types/roles";
 
-export const DASHBOARD_USER_QUERY_KEY = ["dashboard-dashboardUsers"];
+export const STAFF_QUERY_KEY = ["tenant-staff"];
 
-/** Fetch paginated users */
-export function useDashboardUsers(
-  page = 1,
-  limit = 10,
-  search = "",
-  initialData?: PaginatedResponse<DashboardUser>
-) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+/** Fetch paginated staff members */
+export function useStaffMembers(page = 1, limit = 10) {
+  const { isAuthenticated } = useAuthContext();
 
-  return useQuery<PaginatedResponse<DashboardUser>>({
-    queryKey: [...DASHBOARD_USER_QUERY_KEY, { page, limit, search }],
-    queryFn: () => dashboardUserService.getAll(page, limit, search),
-    enabled: !isAuthLoading && isAuthenticated,
-    initialData: page === 1 ? initialData : undefined,
+  return useQuery({
+    queryKey: [...STAFF_QUERY_KEY, { page, limit }],
+    queryFn: () => staffService.getAll(page, limit),
+    enabled: isAuthenticated,
   });
 }
 
-/** Create user */
-export function useCreateDashboardUser() {
-  const queryClient = useQueryClient();
-
-  return useMutation<DashboardUser, Error, CreateDashboardUserDto>({
-    mutationFn: (data: CreateDashboardUserDto) =>
-      dashboardUserService.create(data),
-    onSuccess: (newUser) => {
-      toast.success(
-        `User "${[newUser.firstName, newUser.lastName].filter(Boolean).join(" ") || newUser.email}" created successfully.`
-      );
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create user.");
-    },
-  });
-}
-
-/** Update user */
-export function useUpdateDashboardUser() {
+/** Update a member's role */
+export function useUpdateStaffRole() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateDashboardUserDto }) =>
-      dashboardUserService.update(id, data),
-    onSuccess: (updatedUser) => {
-      toast.success(
-        `User "${[updatedUser.firstName, updatedUser.lastName].filter(Boolean).join(" ") || updatedUser.email} updated successfully.`
-      );
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
+    mutationFn: ({ id, role }: { id: string; role: TenantUserRole }) =>
+      staffService.updateRole(id, role),
+    onSuccess: (updatedMember) => {
+      toast.success(`Role updated to ${updatedMember.role}`);
+      queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEY });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update user.");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update role");
     },
   });
 }
 
-/** Delete user */
-export function useDeleteDashboardUser() {
+/** Remove a staff member from the tenant */
+export function useRemoveStaff() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => dashboardUserService.delete(id),
+    mutationFn: (id: string) => staffService.remove(id),
     onSuccess: () => {
-      toast.success("User deleted successfully.");
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
+      toast.success("Staff member removed successfully");
+      queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEY });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete user.");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to remove staff");
     },
   });
 }

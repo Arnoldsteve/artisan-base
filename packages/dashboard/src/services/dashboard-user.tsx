@@ -1,35 +1,35 @@
 import { apiClient } from "@/lib/client-api";
-import { CreateDashboardUserDto, DashboardUser, UpdateDashboardUserDto } from "@/types/users";
+import { StaffMember, CreateStaffDto, UpdateStaffRoleDto } from "@/types/staff";
 import { PaginatedResponse } from "@/types/shared";
+import { TenantUserRole } from "@/types/roles";
 
-export class DashboardUserService {
+export class StaffService {
+  /**
+   * Hits GET /api/v1/tenant/staff
+   */
   async getAll(
     page = 1,
-    limit = 10,
-    search?: string
-  ): Promise<PaginatedResponse<DashboardUser>> {
-    return apiClient.get<PaginatedResponse<DashboardUser>>("dashboard/users", {
-      page,
-      limit,
-      search,
+    limit = 10
+  ): Promise<PaginatedResponse<StaffMember>> {
+    return apiClient.get<PaginatedResponse<StaffMember>>("/tenant/staff", {
+      params: { page, limit },
     });
   }
 
-  async getById(id: string): Promise<DashboardUser> {
-    return apiClient.get<DashboardUser>(`dashboard/users/${id}`);
+  /**
+   * Hits PATCH /api/v1/tenant/member/:id/role
+   * Note: You might need a specific endpoint for this in your Controller
+   */
+  async updateRole(memberId: string, role: TenantUserRole): Promise<StaffMember> {
+    return apiClient.patch<StaffMember>(`/tenant/member/${memberId}/role`, { role });
   }
 
-  async create(data: CreateDashboardUserDto): Promise<DashboardUser> {
-    return apiClient.post<DashboardUser>("dashboard/users", data);
-  }
-
-  async update(id: string, data: UpdateDashboardUserDto): Promise<DashboardUser> {
-    return apiClient.patch<DashboardUser>(`dashboard/users/${id}`, data);
-  }
-
-  async delete(id: string): Promise<void> {
-    await apiClient.delete(`dashboard/users/${id}`);
+  /**
+   * Hits DELETE /api/v1/tenant/member/:id
+   */
+  async remove(memberId: string): Promise<void> {
+    await apiClient.delete(`/tenant/member/${memberId}`);
   }
 }
 
-export const dashboardUserService = new DashboardUserService();
+export const staffService = new StaffService();

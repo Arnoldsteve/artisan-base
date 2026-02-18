@@ -1,85 +1,81 @@
-import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { UserRepository } from '../user/repositories/user.repository';
 import { TenantRepository } from '../tenant/repositories/tenant.repository';
-import { TenantMemberRepository } from '../tenant/repositories/tenant-member.repository';
+import { TenantService } from '../tenant/tenant.service';
 import { RegisterTenantDto } from './dto/register-tenant.dto';
 import { CheckSubdomainDto } from '../tenant/dto/check-subdomain.dto';
-import * as bcrypt from 'bcrypt'; 
+import * as bcrypt from 'bcrypt';
 
 /**
- * SOLID Principle: Facade Pattern / Orchestrator
- * Updated to include public utility checks for the onboarding flow.
+ * SOLID Principle: Facade Pattern
+ * This service orchestrates the high-level onboarding flow.
+ * It handles Scenario 1: Re-using existing identities for new stores.
  */
 @Injectable()
 export class OnboardingService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly userRepo: UserRepository,
     private readonly tenantRepo: TenantRepository,
-    private readonly memberRepo: TenantMemberRepository,
+    private readonly tenantService: TenantService,
   ) {}
 
   /**
    * Public utility to check if a subdomain is available.
-   * Millions of Users: This allows the frontend to validate names instantly.
    */
-  async checkSubdomainAvailability(dto: CheckSubdomainDto): Promise<{ available: boolean }> {
+  async checkSubdomainAvailability(dto: CheckSubdomainDto) {
     const exists = await this.tenantRepo.existsBySubdomain(dto.subdomain);
     return { available: !exists };
   }
 
   /**
-   * The core onboarding flow (remains unchanged but included for context).
+   * Intelligent Registration logic.
+   * Handles both brand-new users and existing users adding stores.
    */
   async register(dto: RegisterTenantDto) {
-    const emailExists = await this.userRepo.existsByEmail(dto.email);
-    if (emailExists) throw new ConflictException('Email already registered');
+    // 1. Identify the user (Scenario 1 check)
+    const existingUser = await this.userRepo.findByEmail(dto.email);
+    let userId: string;
 
-    const subdomainExists = await this.tenantRepo.existsBySubdomain(dto.subdomain);
-    if (subdomainExists) throw new ConflictException('Subdomain already taken');
-
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
-
-    try {
-      return await this.prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            email: dto.email,
-            hashedPassword,
-            firstName: dto.firstName,
-            lastName: dto.lastName,
-          },
-        });
-
-        const tenant = await tx.tenant.create({
-          data: {
-            name: dto.name,
-            subdomain: dto.subdomain,
-            ownerId: user.id,
-            baseCurrency: dto.currency || 'KES',
-            timezone: dto.timezone || 'Africa/Nairobi',
-          },
-        });
-
-        await tx.tenantMember.create({
-          data: {
-            userId: user.id,
-            tenantId: tenant.id,
-            role: 'OWNER',
-            isActive: true,
-          },
-        });
-
-        return {
-          userId: user.id,
-          tenantId: tenant.id,
-          subdomain: tenant.subdomain,
-        };
+    if (existingUser) {
+      // SECURITY: If email exists, we MUST verify the password before adding a store
+      const isPasswordValid = await bcrypt.compare(dto.password, existingUser.hashedPassword);
+      if (!isPasswordValid) {
+        // We throw Unauthorized instead of Conflict to prevent email fishing 
+        // while ensuring only the real owner can add stores to this account.
+        throw new UnauthorizedException('Invalid credentials for this existing account');
+      }
+      userId = existingUser.id;
+    } else {
+      // 2. New User flow
+      const hashedPassword = await bcrypt.hash(dto.password, 12);
+      const newUser = await this.userRepo.create({
+        email: dto.email,
+        hashedPassword,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
       });
+      userId = newUser.id;
+    }
+
+    // 3. Provision the Store (Scenario 2 DRY reuse)
+    // We delegate the transaction and membership logic to the TenantService
+    try {
+      const tenant = await this.tenantService.provisionStore(userId, {
+        name: dto.name,
+        subdomain: dto.subdomain,
+        currency: dto.currency,
+        timezone: dto.timezone,
+      });
+
+      return {
+        userId,
+        tenantId: tenant.id,
+        subdomain: tenant.subdomain,
+      };
     } catch (error) {
-      console.error('Onboarding Transaction Failed:', error);
-      throw new InternalServerErrorException('Failed to complete onboarding');
+      // Handle potential race conditions where subdomain was taken in the last millisecond
+      if (error.status === 409) throw error;
+      throw new InternalServerErrorException('Failed to provision store');
     }
   }
 }

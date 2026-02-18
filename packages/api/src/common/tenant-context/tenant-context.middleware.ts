@@ -4,8 +4,8 @@ import { TenantContextService } from './tenant-context.service';
 
 /**
  * SOLID Principle: Open/Closed
- * This middleware is now open to public platform routes while 
- * remaining closed (strict) for tenant-specific data routes.
+ * This middleware manages the entry into the Tenant Isolation context.
+ * It is updated to exempt the "Store Creation" action from the Tenant ID requirement.
  */
 @Injectable()
 export class TenantContextMiddleware implements NestMiddleware {
@@ -14,27 +14,31 @@ export class TenantContextMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const tenantId = req.headers['x-tenant-id'] as string;
 
-    // 1. Identify "Global Platform" routes that DO NOT require a Tenant ID.
-    // These are routes used for registration, login, or checking subdomains.
+    // 1. Identify standard Global Platform routes
     const publicPaths = [
       '/onboarding',
-      // '/auth/register',
       '/auth/login',
       '/auth/bootstrap', 
       '/health'
     ];
 
-    // Check if the current request path matches any of our public paths
-    const isPublicRoute = publicPaths.some(path => req.originalUrl.includes(path));
+    const isPublicPath = publicPaths.some(path => req.originalUrl.includes(path));
 
-    // 2. Strict Check: If it's NOT a public route and NO tenantId is provided, block it.
+    /**
+     * 2. SCENARIO 2 EXEMPTION:
+     * POST /api/v1/tenant is the action of creating a new store.
+     * We check if the URL ends with '/tenant' AND the method is 'POST'.
+     */
+    const isStoreCreation = req.originalUrl.endsWith('/tenant') && req.method === 'POST';
+
+    const isPublicRoute = isPublicPath || isStoreCreation;
+
+    // 3. Strict Check: Block if not public and header is missing
     if (!tenantId && !isPublicRoute) {
       throw new UnauthorizedException('Missing X-Tenant-ID header for this protected resource');
     }
 
-    // 3. Context Injection: 
-    // If we have a tenantId, enter the "storage bubble".
-    // If not (it's a public route), just proceed normally.
+    // 4. Enter the "Context Bubble"
     if (tenantId) {
       this.tenantContextService.run(tenantId, () => {
         next();

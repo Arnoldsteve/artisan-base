@@ -143,30 +143,25 @@ const data = {
   ],
   projects: [
     {
-      name: "Users",
-      url: "/users",
+      name: "Staff",
+      url: "/staff",
       icon: Users,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // const { user, tenants } = useAuthContext();
-  // const mappedTeams = tenants.map((tenant) => ({
-  //   name: tenant.name,
-  //   logo: GalleryVerticalEnd,
-  //   plan: "Active", 
-  // }));
-
-
-  // console.log("tenants from context:", tenants);
-  // console.log("mappedTeams", mappedTeams);
-
+  const { tenants } = useAuthContext();
+  const mappedTeams = tenants.map((tenant) => ({
+    name: tenant.name,
+    logo: GalleryVerticalEnd,
+    plan: tenant.status || "Active",
+  }));
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={mappedTeams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
