@@ -7,231 +7,143 @@ import { columns, CustomerColumn } from "./columns";
 import {
   useReactTable,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
   SortingState,
   ColumnFiltersState,
   VisibilityState,
-  PaginationState,
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
-import {
-  Customer,
-  UpdateCustomerDto,
-  CreateCustomerDto,
-} from "@/types/customers";
-import {
-  useCustomers,
-  useDeleteCustomer,
-  useCreateCustomer,
-  useUpdateCustomer,
-} from "@/hooks/use-customers";
+import { Customer, CreateCustomerDto } from "@/types/customers";
+import { useCustomers } from "@/hooks/use-customers";
 
 // UI Components
 import { DeleteCustomerDialog } from "./delete-customer-dialog";
 import { EditCustomerSheet } from "./edit-customer-sheet";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
-import { Plus } from "lucide-react";
-import { CustomerFormData } from "@/validation-schemas/customers";
-import { PaginatedResponse } from "@/types/shared";
 import { CustomerTableMeta } from "@/types/table-meta";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
 
-interface CustomersWrapperProps {
-  initialCustomerData: PaginatedResponse<Customer>;
-}
-
-export function CustomersWrapper({
-  initialCustomerData,
-}: CustomersWrapperProps) {
+export function CustomersWrapper() {
   const router = useRouter();
 
-  // --- Component State ---
+  // --- Unified Data Hook ---
+  const {
+    customers,
+    meta,
+    isLoading,
+    isFetching,
+    isError,
+    page,
+    setPage,
+    setSearch,
+    createCustomer,
+    isCreating,
+    updateCustomer,
+    isUpdating,
+    deleteCustomer,
+    isDeleting,
+  } = useCustomers(10);
+
+  // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    email: false,
-  });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ email: false });
   const [rowSelection, setRowSelection] = useState({});
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
-  const [customerToDelete, setCustomerToDelete] =
-    useState<CustomerColumn | null>(null);
+  // --- Modal UI State ---
+  const [customerToDelete, setCustomerToDelete] = useState<CustomerColumn | null>(null);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // --- Data Fetching & Mutations ---
-  const {
-    data: paginatedResponse,
-    isLoading,
-    isError,
-    isFetching,
-  } = useCustomers(pageIndex + 1, pageSize);
-
-  const { mutate: createCustomer, isPending: isCreating } = useCreateCustomer();
-  const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
-  const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
-
-  // --- Data Transformation (Mapper) ---
+  // --- Data Transformation for display ---
   const mappedCustomers = useMemo(() => {
-    const apiCustomers = paginatedResponse?.data || [];
-    return apiCustomers.map(
-      (customer: Customer): CustomerColumn => ({
-        id: customer.id,
-        name:
-          `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
-          customer.email,
-        email: customer.email,
-        phone: customer.phone || "",
-        orderCount: (customer as any)._count?.orders ?? 0,
-        totalSpent: parseFloat((customer as any).totalSpent) || 0,
-        createdAt: new Date(customer.createdAt).toLocaleDateString(),
-      })
-    );
-  }, [paginatedResponse]);
+    return customers.map((customer: Customer): CustomerColumn => ({
+      id: customer.id,
+      name: `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || customer.email,
+      email: customer.email,
+      phone: customer.phone || "",
+      orderCount: (customer as any)._count?.orders ?? 0,
+      totalSpent: parseFloat((customer as any).totalSpent) || 0,
+      createdAt: new Date(customer.createdAt).toLocaleDateString(),
+    }));
+  }, [customers]);
 
-  const totalCustomers = paginatedResponse?.meta?.total || 0;
-
-  // Helper to find the original customer object from the API response
-  const findOriginalCustomer = (id: string): Customer | undefined => {
-    return paginatedResponse?.data.find((c) => c.id === id);
-  };
-
-  // --- Action Handlers ---
-  const openDeleteDialog = (customer: CustomerColumn) =>
-    setCustomerToDelete(customer);
-  const viewCustomerDetails = (customer: CustomerColumn) =>
-    router.push(`/customers/${customer.id}`);
-  const openEditSheet = (customerRow: CustomerColumn) => {
-    const originalCustomer = findOriginalCustomer(customerRow.id);
-    if (originalCustomer) {
-      setCustomerToEdit(originalCustomer);
-      setIsSheetOpen(true);
-    }
-  };
-
-  // --- Create the meta object with proper typing ---
   const tableMeta: CustomerTableMeta<CustomerColumn> = {
-    openDeleteDialog,
-    viewCustomerDetails,
-    openEditSheet,
+    openDeleteDialog: setCustomerToDelete,
+    viewCustomerDetails: (c) => router.push(`/customers/${c.id}`),
+    openEditSheet: (c) => {
+      const original = customers.find((apiC) => apiC.id === c.id);
+      if (original) {
+        setCustomerToEdit(original);
+        setIsSheetOpen(true);
+      }
+    },
   };
 
-  // --- Table Instance Initialization ---
   const table = useReactTable({
     data: mappedCustomers,
     columns,
-    pageCount:
-      paginatedResponse?.meta?.totalPages ??
-      (totalCustomers > 0 ? Math.ceil(totalCustomers / pageSize) : 1),
+    pageCount: meta?.totalPages || 1,
     manualPagination: true,
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination: { pageIndex, pageSize },
+      pagination: { pageIndex: page - 1, pageSize: 10 },
     },
-    enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      if (typeof updater === "function") {
+        const newState = updater({ pageIndex: page - 1, pageSize: 10 });
+        setPage(newState.pageIndex + 1);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     meta: tableMeta,
   });
 
-  // --- Event Handlers ---
-  const openAddSheet = () => {
-    setCustomerToEdit(null);
-    setIsSheetOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (customerToDelete) {
-      deleteCustomer(customerToDelete.id, {
-        onSuccess: () => setCustomerToDelete(null),
-      });
-    }
-  };
-
-  const handleSaveChanges = (formData: CustomerFormData) => {
-    if (formData.id) {
-      const { id, ...updateData } = formData;
-      updateCustomer(
-        { id: id, data: updateData },
-        {
-          onSuccess: () => setIsSheetOpen(false),
-        }
-      );
-    } else {
-      createCustomer(formData as CreateCustomerDto, {
-        onSuccess: () => setIsSheetOpen(false),
-      });
-    }
-  };
-
-  // --- Render Logic ---
-  if (isFetching || (isLoading && !paginatedResponse)) {
-    return <DataTableSkeleton />;
-  }
-
-  if (isError) {
-    return (
-      <div className="p-8 text-red-500">Failed to load customer data.</div>
-    );
-  }
-
-  const numSelected = Object.keys(rowSelection).length;
+  if (isLoading || isFetching) return <DataTableSkeleton />;
+  if (isError) return <div className="p-8 text-red-500">Error loading customers.</div>;
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1">
         <PageHeader title="Customers">
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            onClick={openAddSheet}
-            disabled={isCreating || isUpdating}
-          >
+          <Button variant="outline" size="sm" onClick={() => { setCustomerToEdit(null); setIsSheetOpen(true); }}>
             Add Customer
           </Button>
         </PageHeader>
 
-        <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
+        <div className="px-4 md:px-2 lg:px-4 md:pb-10">
           <DataTableViewOptions table={table} />
           <DataTable table={table} />
         </div>
       </div>
-      <DataTablePagination table={table} totalCount={totalCustomers} />
-
-      <div
-        className={`fixed inset-x-4 bottom-4 z-50 transition-transform duration-300 ease-in-out ${numSelected > 0 ? "translate-y-0" : "translate-y-24"}`}
-      >
-        {/* Bulk action bar would go here */}
-      </div>
+      
+      <DataTablePagination table={table} totalCount={meta?.total || 0} />
 
       <DeleteCustomerDialog
         isOpen={!!customerToDelete}
         onClose={() => setCustomerToDelete(null)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={() => deleteCustomer(customerToDelete!.id, { onSuccess: () => setCustomerToDelete(null) })}
         customerName={customerToDelete?.name || ""}
         isPending={isDeleting}
       />
+      
       <EditCustomerSheet
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         customer={customerToEdit}
-        onSave={handleSaveChanges}
+        onSave={(data) => {
+          if (data.id) updateCustomer({ id: data.id, data }, { onSuccess: () => setIsSheetOpen(false) });
+          else createCustomer(data as CreateCustomerDto, { onSuccess: () => setIsSheetOpen(false) });
+        }}
         isPending={isCreating || isUpdating}
       />
     </div>

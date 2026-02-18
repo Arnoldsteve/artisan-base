@@ -1,113 +1,125 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { orderService } from "@/services/order-service";
-import { toast } from "sonner";
+"use client";
+
 import {
-  Order,
-  CreateOrderDto,
-  OrderStatus,
-  PaymentStatus,
-} from "@/types/orders";
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import { orderService } from "@/services/order-service";
 import { useAuthContext } from "@/contexts/auth-context";
-import { PaginatedResponse } from "@/types/shared";
+import { 
+  Order, 
+  CreateOrderDto, 
+  OrderStatus, 
+  PaymentStatus 
+} from "@/types/orders";
 
-const ORDERS_QUERY_KEY = ["dashboard-orders"];
-
-export function useOrders(
-  page = 1,
-  limit = 10,
-  search = '', 
-  initialData?: PaginatedResponse<Order>
-) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<PaginatedResponse<Order>>({
-    queryKey: [...ORDERS_QUERY_KEY, { page, limit, search }],
-    queryFn: () => orderService.getAll({ page, limit, search }),
-    enabled: !isAuthLoading && isAuthenticated,
-    initialData: page === 1 ? initialData : undefined,
-  });
-}
-
-export function useOrder(orderId: string | null) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<Order>({
-    queryKey: [...ORDERS_QUERY_KEY, orderId],
-    queryFn: () => orderService.getById(orderId!),
-    enabled: !isAuthLoading && isAuthenticated && !!orderId,
-  });
-}
-
-export function useCreateOrder() {
+// ---------------------------------------------------------
+// 1. Unified Hook for Managing the Orders List
+// ---------------------------------------------------------
+export const useOrders = (initialLimit = 10) => {
   const queryClient = useQueryClient();
-  return useMutation({
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+  
+  // Internal State for List Management
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const ORDERS_QUERY_KEY = ["orders", tenantId];
+
+  // --- Fetch Query ---
+  const ordersQuery = useQuery({
+    // Include tenantId in Key for strict multi-tenant isolation
+    queryKey: [...ORDERS_QUERY_KEY, "list", { page, search, initialLimit }],
+    queryFn: () => orderService.getAll({ page, limit: initialLimit, search }),
+    // Only fetch if we have a valid store context
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
+
+  // --- Mutations ---
+  const createOrderMutation = useMutation({
     mutationFn: (data: CreateOrderDto) => orderService.createOrder(data),
     onSuccess: (newOrder) => {
+      queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
       toast.success(`Order #${newOrder.orderNumber} created successfully.`);
-      queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create order.");
-    },
+    onError: (err: any) => toast.error(err.message || "Failed to create order"),
   });
-}
 
-export function useUpdateOrderStatus() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (variables: { orderId: string; status: OrderStatus }) =>
-      orderService.updateStatus(variables.orderId, variables.status),
-    onSuccess: (updatedOrder) => {
-      toast.success(`Order #${updatedOrder.orderNumber}'s status has been updated.`);
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
+      orderService.updateStatus(id, status),
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: [...ORDERS_QUERY_KEY, updatedOrder.id] });
+      queryClient.invalidateQueries({ queryKey: ["order", tenantId, updated.id] });
+      toast.success(`Order status updated to ${updated.status}`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update order status.");
-    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
   });
-}
 
-export function useUpdateOrderPaymentStatus() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (variables: { orderId: string; paymentStatus: PaymentStatus }) =>
-      orderService.updatePaymentStatus(variables.orderId, variables.paymentStatus),
-    onSuccess: (updatedOrder) => {
-      toast.success(`Order #${updatedOrder.orderNumber}'s payment status has been updated.`);
+  const updatePaymentStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: PaymentStatus }) =>
+      orderService.updatePaymentStatus(id, status),
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: [...ORDERS_QUERY_KEY, updatedOrder.id] });
+      queryClient.invalidateQueries({ queryKey: ["order", tenantId, updated.id] });
+      toast.success(`Payment status updated to ${updated.paymentStatus}`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update payment status.");
-    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
   });
-}
 
-export function useDeleteOrder() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (orderId: string) => orderService.deleteOrder(orderId),
+  const deleteOrderMutation = useMutation({
+    mutationFn: (id: string) => orderService.deleteOrder(id),
     onSuccess: () => {
-      toast.success("Order deleted successfully.");
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+      toast.success("Order deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete order.");
-    },
+    onError: () => toast.error("Failed to delete order"),
   });
-}
 
-export function useBatchDeleteOrders() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (orderIds: string[]) => orderService.batchDeleteOrders(orderIds),
-        onSuccess: (data, variables) => {
-            toast.success(`${variables.length} order(s) deleted successfully.`);
-            queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || "Failed to delete orders.");
-        }
-    });
-}
+  // --- Return Unified Interface ---
+  return {
+    // Data & Meta
+    orders: ordersQuery.data?.data || [],
+    meta: ordersQuery.data?.meta,
+    isLoading: ordersQuery.isLoading,
+    isError: ordersQuery.isError,
+    error: ordersQuery.error,
+
+    // State Management
+    page,
+    setPage,
+    search,
+    setSearch,
+
+    // Actions
+    createOrder: createOrderMutation.mutate,
+    isCreating: createOrderMutation.isPending,
+
+    updateStatus: updateStatusMutation.mutate,
+    isUpdatingStatus: updateStatusMutation.isPending,
+
+    updatePaymentStatus: updatePaymentStatusMutation.mutate,
+    isUpdatingPayment: updatePaymentStatusMutation.isPending,
+
+    deleteOrder: deleteOrderMutation.mutate,
+    isDeleting: deleteOrderMutation.isPending,
+  };
+};
+
+// ---------------------------------------------------------
+// 2. Hook for Fetching a Single Order
+// ---------------------------------------------------------
+export const useOrder = (id: string | null) => {
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+
+  return useQuery({
+    queryKey: ["order", tenantId, id],
+    queryFn: () => orderService.getById(id!),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId && !!id,
+  });
+};

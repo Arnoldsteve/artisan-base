@@ -1,73 +1,104 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { useState } from "react";
 import { customerService } from "@/services/customer-service";
 import { toast } from "sonner";
-import { CreateCustomerDto, Customer, UpdateCustomerDto } from "@/types/customers";
+import { 
+  Customer, 
+  CreateCustomerDto, 
+  UpdateCustomerDto 
+} from "@/types/customers";
 import { useAuthContext } from "@/contexts/auth-context";
-import { PaginatedResponse } from "@/types/shared";
 
-const CUSTOMERS_KEY = "customers";
-
-// 1. Hook for Paginated List
-export function useCustomers(page = 1, limit = 20, search = "") {
-  const { isAuthenticated } = useAuthContext();
-
-  return useQuery({
-    queryKey: [CUSTOMERS_KEY, "list", { page, limit, search }],
-    queryFn: () => customerService.getAll(page, limit, search),
-    enabled: isAuthenticated,
-    placeholderData: (previousData) => previousData, // Smooth pagination transition
-  });
-}
-
-// 2. Hook for Single Customer Details
-export function useCustomer(id?: string) {
-  const { isAuthenticated } = useAuthContext();
-
-  return useQuery({
-    queryKey: [CUSTOMERS_KEY, "detail", id],
-    queryFn: () => customerService.getById(id!),
-    enabled: isAuthenticated && !!id,
-  });
-}
-
-// 3. Hook for Creation
-export function useCreateCustomer() {
+// ---------------------------------------------------------
+// 1. Unified Hook for Managing the Customers List
+// ---------------------------------------------------------
+export const useCustomers = (initialLimit = 10) => {
   const queryClient = useQueryClient();
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+  
+  // Internal state for list management
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
-  return useMutation({
+  // TOP 1% ARCHITECTURE: Keys are isolated by tenantId
+  const CUSTOMERS_QUERY_KEY = ["customers", tenantId];
+
+  // --- Fetch Query ---
+  const customersQuery = useQuery({
+    queryKey: [...CUSTOMERS_QUERY_KEY, "list", { page, search, limit: initialLimit }],
+    queryFn: () => customerService.getAll(page, initialLimit, search),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
+
+  // --- Mutations ---
+  const createCustomerMutation = useMutation({
     mutationFn: (data: CreateCustomerDto) => customerService.create(data),
     onSuccess: (newCustomer) => {
-      toast.success(`Customer ${newCustomer.email} created`);
-      queryClient.invalidateQueries({ queryKey: [CUSTOMERS_KEY, "list"] });
+      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
+      toast.success(`Customer ${newCustomer.email} added successfully.`);
     },
+    onError: (err: any) => toast.error(err.message || "Failed to create customer"),
   });
-}
 
-// 4. Hook for Update
-export function useUpdateCustomer() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const updateCustomerMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCustomerDto }) =>
       customerService.update(id, data),
     onSuccess: (updated) => {
-      toast.success("Customer updated");
-      // Invalidate both the list and the specific detail
-      queryClient.invalidateQueries({ queryKey: [CUSTOMERS_KEY, "list"] });
-      queryClient.invalidateQueries({ queryKey: [CUSTOMERS_KEY, "detail", updated.id] });
+      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["customer", tenantId, updated.id] });
+      toast.success("Customer updated successfully.");
     },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
   });
-}
 
-// 5. Hook for Delete
-export function useDeleteCustomer() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const deleteCustomerMutation = useMutation({
     mutationFn: (id: string) => customerService.delete(id),
     onSuccess: () => {
-      toast.success("Customer deleted");
-      queryClient.invalidateQueries({ queryKey: [CUSTOMERS_KEY, "list"] });
+      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
+      toast.success("Customer deleted successfully.");
     },
+    onError: (err: any) => toast.error(err.message || "Delete failed"),
   });
-}
+
+  return {
+    // Data & State
+    customers: customersQuery.data?.data || [],
+    meta: customersQuery.data?.meta,
+    isLoading: customersQuery.isLoading,
+    isFetching: customersQuery.isFetching,
+    isError: customersQuery.isError,
+    page,
+    setPage,
+    search,
+    setSearch,
+
+    // Actions
+    createCustomer: createCustomerMutation.mutate,
+    isCreating: createCustomerMutation.isPending,
+    updateCustomer: updateCustomerMutation.mutate,
+    isUpdating: updateCustomerMutation.isPending,
+    deleteCustomer: deleteCustomerMutation.mutate,
+    isDeleting: deleteCustomerMutation.isPending,
+  };
+};
+
+// ---------------------------------------------------------
+// 2. Hook for Single Customer Details
+// ---------------------------------------------------------
+export const useCustomer = (id: string | null) => {
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+
+  return useQuery({
+    queryKey: ["customer", tenantId, id],
+    queryFn: () => customerService.getById(id!),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId && !!id,
+  });
+};

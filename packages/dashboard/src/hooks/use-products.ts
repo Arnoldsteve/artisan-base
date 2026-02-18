@@ -1,114 +1,111 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { useState } from "react";
 import { productService } from "@/services/product-service";
 import { toast } from "sonner";
 import { CreateProductDto, Product, UpdateProductDto } from "@/types/products";
 import { useAuthContext } from "@/contexts/auth-context";
-import { PaginatedResponse } from "@/types/shared";
 
-export const PRODUCTS_QUERY_KEY = ["dashboard-products"];
-
-export function useProducts(
-  page = 1,
-  limit = 10,
-  search = '',
-  initialData?: PaginatedResponse<Product>
-) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<PaginatedResponse<Product>>({
-    queryKey: [...PRODUCTS_QUERY_KEY, { page, limit, search }],
-    queryFn: () => productService.getProducts(page, limit, search),
-    enabled: !isAuthLoading && isAuthenticated,
-    initialData: page === 1 ? initialData : undefined,
-  });
-}
-
-export function useProduct(productId: string | null) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<Product>({
-    queryKey: [...PRODUCTS_QUERY_KEY, productId],
-    queryFn: () => productService.getProductById(productId!),
-    enabled: !isAuthLoading && isAuthenticated && !!productId,
-  });
-}
-
-export function useCreateProduct() {
+// ---------------------------------------------------------
+// 1. Unified Hook for Managing the Product List
+// ---------------------------------------------------------
+export const useProducts = (initialLimit = 10) => {
   const queryClient = useQueryClient();
-  return useMutation({
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+  
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const PRODUCTS_QUERY_KEY = ["products", tenantId];
+
+  // --- Fetch Query ---
+  const productsQuery = useQuery({
+    queryKey: [...PRODUCTS_QUERY_KEY, "list", { page, search, limit: initialLimit }],
+    queryFn: () => productService.getProducts(page, initialLimit, search),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
+
+  // --- Mutations ---
+  const createProductMutation = useMutation({
     mutationFn: (data: CreateProductDto) => productService.createProduct(data),
     onSuccess: (newProduct) => {
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
       toast.success(`Product "${newProduct.name}" created successfully.`);
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create product.");
-    },
+    onError: (err: any) => toast.error(err.message || "Failed to create product"),
   });
-}
 
-export function useBulkCreateProducts() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const bulkCreateMutation = useMutation({
     mutationFn: (data: CreateProductDto[]) => productService.bulkCreateProducts(data),
-    onSuccess: (response) => {
-      toast.success(`${response.count} products have been created successfully.`);
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      toast.success(`${res.count} products created successfully.`);
     },
-    
-    onError: (error: Error) => {
-      toast.error(error.message || "An error occurred during the bulk upload.");
-    },
+    onError: (err: any) => toast.error(err.message || "Bulk upload failed"),
   });
-}
 
-
-export function useUpdateProduct() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (variables: { id: string; data: UpdateProductDto }) =>
-      productService.updateProduct(variables.id, variables.data),
-    onSuccess: (updatedProduct) => {
-      toast.success(`Product "${updatedProduct.name}" updated successfully.`);
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateProductDto }) =>
+      productService.updateProduct(id, data),
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: [...PRODUCTS_QUERY_KEY, updatedProduct.id] });
+      queryClient.invalidateQueries({ queryKey: ["product", tenantId, updated.id] });
+      toast.success(`Product "${updated.name}" updated.`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update product.");
-    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
   });
-}
 
-export function useDeleteProduct() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  const deleteProductMutation = useMutation({
     mutationFn: (id: string) => productService.deleteProduct(id),
     onSuccess: () => {
-      toast.success("Product deleted successfully.");
       queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      toast.success("Product deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete product.");
-    },
+    onError: () => toast.error("Failed to delete product"),
   });
-}
 
-export function useAssignCategories() {
-  const queryClient = useQueryClient();
+  return {
+    products: productsQuery.data?.data || [],
+    meta: productsQuery.data?.meta,
+    isLoading: productsQuery.isLoading,
+    isFetching: productsQuery.isFetching,
+    isError: productsQuery.isError,
 
-  return useMutation({
-    mutationFn: async ({ productId, categoryIds }: { productId: string; categoryIds: string[] }) => {
-      for (const categoryId of categoryIds) {
-        await productService.assignCategory(productId, categoryId); 
-      }
-    },
-    onSuccess: () => {
-      toast.success("Product categories updated successfully");
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update product categories");
-    },
+    page,
+    setPage,
+    search,
+    setSearch,
+
+    createProduct: createProductMutation.mutate,
+    isCreating: createProductMutation.isPending,
+
+    bulkCreate: bulkCreateMutation.mutate,
+    isBulkCreating: bulkCreateMutation.isPending,
+
+    updateProduct: updateProductMutation.mutate,
+    isUpdating: updateProductMutation.isPending,
+
+    deleteProduct: deleteProductMutation.mutate,
+    isDeleting: deleteProductMutation.isPending,
+  };
+};
+
+// ---------------------------------------------------------
+// 2. Hook for Single Product Details
+// ---------------------------------------------------------
+export const useProduct = (id: string | null) => {
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+
+  return useQuery({
+    queryKey: ["product", tenantId, id],
+    queryFn: () => productService.getProductById(id!),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId && !!id,
   });
-}
+};

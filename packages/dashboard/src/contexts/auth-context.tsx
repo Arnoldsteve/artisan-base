@@ -3,11 +3,11 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '../hooks/use-auth';
 import { LoginDto, SignUpDto } from '@/types/auth';
-import { User } from '@/types/users';
+import { StaffMember } from '@/types/staff';
 import { Tenant } from '@/types/tenant';
 
 interface AuthContextType {
-  user: User | null;
+  user: StaffMember | null;
   tenants: Tenant[];
   token: string | null;
   tenantId: string | null;   // real DB id — for bootstrap

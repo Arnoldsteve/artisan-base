@@ -7,6 +7,7 @@ import {
   ResetPassword,
   ProfileResponse,
 } from "@/types/auth";
+import { StaffMember } from "@/types/staff";
 
 export class AuthService {
   /**
@@ -19,6 +20,22 @@ export class AuthService {
 
   async login(credentials: LoginDto): Promise<LoginResponse> {
     return apiClient.post<LoginResponse>("/auth/login", credentials);
+  }
+
+  /**
+   * UPDATED: Global Profile Update
+   * This updates the User's identity across the entire system.
+   */
+  async updateProfile(data: { firstName: string; lastName: string }): Promise<StaffMember> {
+    return apiClient.patch<StaffMember>("/auth/profile", data);
+  }
+
+  /**
+   * UPDATED: Password Change
+   * Standard security practice for settings pages.
+   */
+  async changePassword(data: any): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>("/auth/change-password", data);
   }
 
   async forgotPassword(data: ForgotPassword): Promise<{ message: string }> {

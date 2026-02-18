@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Currency } from "@/types/currency"; 
 
 export const createTenantSchema = z.object({
   storeName: z
@@ -11,4 +12,18 @@ export const createTenantSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Only letters, numbers and hyphens allowed."),
 });
 
+// TOP 1% ARCHITECTURE: Specific schema for updates to maintain SOLID principles
+export const updateTenantSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Store name must be at least 3 characters")
+    .max(100)
+    .trim(),
+  currency: z.nativeEnum(Currency, {
+    errorMap: () => ({ message: "Please select a valid currency" }),
+  }),
+  timezone: z.string().min(1, "Timezone is required"),
+});
+
 export type CreateTenantFormData = z.infer<typeof createTenantSchema>;
+export type UpdateTenantFormData = z.infer<typeof updateTenantSchema>;

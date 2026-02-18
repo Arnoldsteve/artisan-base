@@ -153,6 +153,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tenants } = useAuthContext();
   const mappedTeams = tenants.map((tenant) => ({
+    id: tenant.id, // Ensure this is added!
     name: tenant.name,
     logo: GalleryVerticalEnd,
     plan: tenant.status || "Active",

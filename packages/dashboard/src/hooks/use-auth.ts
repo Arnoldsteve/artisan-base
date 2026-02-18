@@ -2,17 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query"; 
 import { authService } from "@/services/auth-service";
 import { apiClient } from "@/lib/client-api";
 import Cookies from "js-cookie";
-import { User } from "@/types/users";
+import { StaffMember } from "@/types/staff";
 import { LoginDto, SignUpDto } from "@/types/auth";
 import { Tenant } from "@/types/tenant";
 import { refreshAccessToken } from "@/lib/refresh-token";
 
 export function useAuth() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const queryClient = useQueryClient(); 
+  const [user, setUser] = useState<StaffMember | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [token, setToken] = useState<string | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null); // real DB id
@@ -47,7 +49,10 @@ export function useAuth() {
               setTenants(profile.organizations);
               setToken(newToken);
             } catch (retryError) {
-              console.error("Failed to load profile after token refresh:", retryError);
+              console.error(
+                "Failed to load profile after token refresh:",
+                retryError,
+              );
             }
           }
         }
@@ -57,52 +62,65 @@ export function useAuth() {
     loadUserFromCookies();
   }, []);
 
-  const login = useCallback(async (data: LoginDto) => {
-    const response = await authService.login(data);
-    const { user: loggedInUser, backend_tokens, tenants: organizations } = response;
-    const { accessToken, refreshToken } = backend_tokens;
+  const login = useCallback(
+    async (data: LoginDto) => {
+      const response = await authService.login(data);
+      const {
+        user: loggedInUser,
+        backend_tokens,
+        tenants: organizations,
+      } = response;
+      const { accessToken, refreshToken } = backend_tokens;
 
-    Cookies.set("accessToken", accessToken, { expires: 1, sameSite: "lax" });
-    Cookies.set("refreshToken", refreshToken, { expires: 30, sameSite: "lax" });
+      Cookies.set("accessToken", accessToken, { expires: 1, sameSite: "lax" });
+      Cookies.set("refreshToken", refreshToken, {
+        expires: 30,
+        sameSite: "lax",
+      });
 
-    setUser(loggedInUser);
-    setToken(accessToken);
-    apiClient.setAuthToken(accessToken);
+      setUser(loggedInUser);
+      setToken(accessToken);
+      apiClient.setAuthToken(accessToken);
 
-    // ✅ Case 1: No tenant yet → onboarding to create store
-    if (!organizations || organizations.length === 0) {
-      router.push("/onboarding/create-store");
-      return;
-    }
+      // ✅ Case 1: No tenant yet → onboarding to create store
+      if (!organizations || organizations.length === 0) {
+        router.push("/onboarding/create-store");
+        return;
+      }
 
-    // ✅ Case 2: Has tenant → store both subdomain and real id
-    const selectedTenant = organizations[0];
+      // ✅ Case 2: Has tenant → store both subdomain and real id
+      const selectedTenant = organizations[0];
 
-    setTenants(organizations);
-    setTenantId(selectedTenant.id);
-    setSubdomain(selectedTenant.subdomain);
-    apiClient.setTenantId(selectedTenant.id);
+      setTenants(organizations);
+      setTenantId(selectedTenant.id);
+      setSubdomain(selectedTenant.subdomain);
+      apiClient.setTenantId(selectedTenant.id);
 
-    Cookies.set("selectedOrgSubdomain", selectedTenant.subdomain, {
-      expires: 1,
-      sameSite: "lax",
-    });
-    Cookies.set("selectedTenantId", selectedTenant.id, {
-      expires: 1,
-      sameSite: "lax",
-    });
+      Cookies.set("selectedOrgSubdomain", selectedTenant.subdomain, {
+        expires: 1,
+        sameSite: "lax",
+      });
+      Cookies.set("selectedTenantId", selectedTenant.id, {
+        expires: 1,
+        sameSite: "lax",
+      });
 
-    router.push("/home");
-  }, [router]);
+      router.push("/home");
+    },
+    [router],
+  );
 
   /**
    * Register → then auto-login to get JWT.
    * Backend /onboarding/register returns no token, so we login immediately after.
    */
-  const signUp = useCallback(async (data: SignUpDto) => {
-    await authService.signUp(data);
-    await login({ email: data.email, password: data.password });
-  }, [login]);
+  const signUp = useCallback(
+    async (data: SignUpDto) => {
+      await authService.signUp(data);
+      await login({ email: data.email, password: data.password });
+    },
+    [login],
+  );
 
   const logout = useCallback(async () => {
     const refreshToken = Cookies.get("refreshToken");
@@ -111,7 +129,10 @@ export function useAuth() {
         await authService.logout(refreshToken);
       }
     } catch (error) {
-      console.warn("Server logout failed, proceeding with client-side cleanup.", error);
+      console.warn(
+        "Server logout failed, proceeding with client-side cleanup.",
+        error,
+      );
     }
 
     setUser(null);
@@ -133,30 +154,41 @@ export function useAuth() {
 
   const selectTenant = useCallback(
     (tenant: Tenant) => {
+      // A. Update Context State
       setTenantId(tenant.id);
       setSubdomain(tenant.subdomain);
+
+      // B. Update API Singleton Headers
       apiClient.setTenantId(tenant.id);
-      Cookies.set("selectedOrgSubdomain", tenant.subdomain, {
+
+      // C. Persist Selection in Cookies
+      const cookieOptions = {
         expires: 1,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
-      Cookies.set("selectedTenantId", tenant.id, {
-        expires: 1,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
+        sameSite: "lax" as const,
+      };
+      Cookies.set("selectedOrgSubdomain", tenant.subdomain, cookieOptions);
+      Cookies.set("selectedTenantId", tenant.id, cookieOptions);
+
+      /**
+       * TOP 1% ENTERPRISE LOGIC: The Cache Nuke
+       * We physically remove all data from the React Query cache.
+       * This prevents "Ghost Data" from the previous store from appearing.
+       */
+      queryClient.clear();
+
+      // D. Trigger Next.js Data Refresh
       router.refresh();
     },
-    [router]
+    [router, queryClient],
   );
 
   return {
     user,
     tenants,
     token,
-    tenantId,   // real DB id — used for bootstrap
-    subdomain,  // subdomain — used for x-tenant-id header
+    tenantId, // real DB id — used for bootstrap
+    subdomain, // subdomain — used for x-tenant-id header
     isLoading,
     isAuthenticated: !isLoading && !!user,
     signUp,

@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -22,8 +21,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@repo/ui/components/ui/form";
+import { useUpdateProfile } from "@/hooks/use-profile"; // Import the real hook
 
-// Define the shape of the data for this specific form
 interface ProfileInfoFormProps {
   initialData: {
     firstName: string | null;
@@ -32,18 +31,24 @@ interface ProfileInfoFormProps {
   };
 }
 
-// Define the validation schema using Zod
 const formSchema = z.object({
   firstName: z
     .string()
-    .min(2, { message: "First name must be at least 2 characters." }),
+    .min(2, { message: "First name must be at least 2 characters." })
+    .trim(),
   lastName: z
     .string()
-    .min(2, { message: "Last name must be at least 2 characters." }),
+    .min(2, { message: "Last name must be at least 2 characters." })
+    .trim(),
 });
 
+type ProfileFormValues = z.infer<typeof formSchema>;
+
 export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  // 1. Inject the Global Identity Mutation
+  const { mutate: updateProfile, isPending: isUpdating } = useUpdateProfile();
+
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: initialData.firstName || "",
@@ -51,22 +56,27 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
     },
   });
 
-  const { isSubmitting, isDirty } = form.formState;
+  const { isDirty } = form.formState;
 
-  // Mock submission handler
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Simulate an API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Updated Profile Info:", values);
-    toast.success("Your profile has been updated.");
+  // 2. Real Submission Handler
+  const onSubmit = (values: ProfileFormValues) => {
+    updateProfile(values, {
+      onSuccess: () => {
+        // Reset the "isDirty" state so the button disables again
+        form.reset(values);
+      },
+    });
   };
 
   return (
-    <Card className="bg-[#ffffff] rounded-sm shadow-xs">
+    <Card className="bg-white rounded-sm shadow-sm border border-border">
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
-        <CardDescription>Update your first and last name.</CardDescription>
+        <CardTitle className="text-lg font-semibold">Personal Information</CardTitle>
+        <CardDescription>
+          Your identity is global across all stores you manage.
+        </CardDescription>
       </CardHeader>
+      
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
@@ -78,7 +88,11 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} />
+                      <Input 
+                        placeholder="Arnold" 
+                        disabled={isUpdating} 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -91,24 +105,37 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Doe" {...field} />
+                      <Input 
+                        placeholder="Saka" 
+                        disabled={isUpdating} 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+            
             <FormItem>
               <FormLabel>Email Address</FormLabel>
               <FormControl>
-                {/* Email is typically not editable */}
-                <Input readOnly disabled value={initialData.email} />
+                {/* Email is a unique identifier; changes should happen via a verified flow */}
+                <Input readOnly disabled value={initialData.email} className="bg-muted/50" />
               </FormControl>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Email cannot be changed directly for security reasons.
+              </p>
             </FormItem>
           </CardContent>
-          <CardFooter className="border-t px-6 py-4">
-            <Button type="submit" disabled={isSubmitting || !isDirty}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
+
+          <CardFooter className="border-t px-6 py-4 bg-muted/10">
+            <Button 
+              type="submit" 
+              disabled={isUpdating || !isDirty}
+              className="min-w-[120px]"
+            >
+              {isUpdating ? "Saving Changes..." : "Save Changes"}
             </Button>
           </CardFooter>
         </form>

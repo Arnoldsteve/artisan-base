@@ -1,42 +1,29 @@
 "use client";
 
 import React from "react";
-import { useAuthContext } from "@/contexts/auth-context";
 import { PageHeader } from "@/components/shared/page-header";
-import { Tenant } from "@/types/tenant";
+import { useTenant } from "@/hooks/use-tenant";
 import { StoreDetailsForm } from "./components/store-details-form";
 import { StoreDomainsForm } from "./components/store-domains-form";
 import { StoreDangerZone } from "./components/store-danger-zone";
+import { DataTableSkeleton } from "@/components/shared/data-table";
 
 export default function StorePage() {
-  const { tenants, isLoading } = useAuthContext();
+  const { tenant, isLoading, isError } = useTenant();
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-6 w-1/3 bg-gray-300 rounded" />
-        <div className="h-4 w-full bg-gray-200 rounded" />
-        <div className="h-4 w-full bg-gray-200 rounded" />
-      </div>
-    );
-  }
-
-  if (!tenants || tenants.length === 0) {
-    return <p className="text-muted-foreground">Could not load store information.</p>;
-  }
-
-  const tenant: Tenant = tenants[0];
+  if (isLoading) return <DataTableSkeleton />;
+  if (isError || !tenant) return <p className="p-4 text-destructive">Failed to load store configuration.</p>;
 
   return (
     <>
       <PageHeader title="Store Settings" />
-      <div className="px-4 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <StoreDetailsForm initialData={{ name: tenant.name }} />
+      <div className="px-4 space-y-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <StoreDetailsForm initialData={tenant} />
           <StoreDomainsForm
             initialData={{
               subdomain: tenant.subdomain,
-              customDomain: tenant.customDomain || null,
+              customDomain: tenant.customDomain,
             }}
           />
         </div>

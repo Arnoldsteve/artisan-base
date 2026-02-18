@@ -1,52 +1,78 @@
-import { useAuthContext } from "@/contexts/auth-context";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { StaffMember, CreateStaffDto } from "@/types/staff";
-import { toast } from "sonner";
+"use client";
+
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { useState } from "react";
 import { staffService } from "@/services/dashboard-user";
+import { toast } from "sonner";
+import { StaffMember } from "@/types/staff";
 import { TenantUserRole } from "@/types/roles";
+import { useAuthContext } from "@/contexts/auth-context";
 
-export const STAFF_QUERY_KEY = ["tenant-staff"];
-
-/** Fetch paginated staff members */
-export function useStaffMembers(page = 1, limit = 10) {
-  const { isAuthenticated } = useAuthContext();
-
-  return useQuery({
-    queryKey: [...STAFF_QUERY_KEY, { page, limit }],
-    queryFn: () => staffService.getAll(page, limit),
-    enabled: isAuthenticated,
-  });
-}
-
-/** Update a member's role */
-export function useUpdateStaffRole() {
+// ---------------------------------------------------------
+// 1. Unified Hook for Managing the Staff List
+// ---------------------------------------------------------
+export const useStaffMembers = (initialLimit = 10) => {
   const queryClient = useQueryClient();
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
 
-  return useMutation({
+  // Internal State for List Management
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(initialLimit);
+
+  // Cache key partitioned by tenantId
+  const STAFF_QUERY_KEY = ["staff", tenantId];
+
+  // --- Fetch Query ---
+  const staffQuery = useQuery({
+    queryKey: [...STAFF_QUERY_KEY, "list", { page, limit }],
+    queryFn: () => staffService.getAll(page, limit),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
+
+  // --- Mutations ---
+  const updateRoleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: TenantUserRole }) =>
       staffService.updateRole(id, role),
-    onSuccess: (updatedMember) => {
-      toast.success(`Role updated to ${updatedMember.role}`);
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEY });
+      toast.success(`Role updated to ${updated.role}`);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to update role");
-    },
+    onError: (err: any) => toast.error(err.response?.data?.message || "Update failed"),
   });
-}
 
-/** Remove a staff member from the tenant */
-export function useRemoveStaff() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const removeStaffMutation = useMutation({
     mutationFn: (id: string) => staffService.remove(id),
     onSuccess: () => {
-      toast.success("Staff member removed successfully");
       queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEY });
+      toast.success("Staff member removed successfully");
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to remove staff");
-    },
+    onError: (err: any) => toast.error(err.response?.data?.message || "Removal failed"),
   });
-}
+
+  return {
+    // Data & Meta
+    staff: staffQuery.data?.data || [],
+    meta: staffQuery.data?.meta,
+    isLoading: staffQuery.isLoading,
+    isFetching: staffQuery.isFetching,
+    isError: staffQuery.isError,
+
+    // State Management
+    page,
+    setPage,
+    limit,
+    setLimit,
+
+    // Actions
+    updateRole: updateRoleMutation.mutate,
+    isUpdating: updateRoleMutation.isPending,
+    removeStaff: removeStaffMutation.mutate,
+    isRemoving: removeStaffMutation.isPending,
+  };
+};
