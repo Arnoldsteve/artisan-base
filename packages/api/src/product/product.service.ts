@@ -3,6 +3,7 @@ import { ProductRepository } from './repositories/product.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @Injectable()
 export class ProductService {
@@ -45,26 +46,12 @@ export class ProductService {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-
-    /**
-     * FIX: Added both promises to the array so destructuring works.
-     */
-    const [data, total] = await Promise.all([
-      this.productRepo.list({ skip, take: limit }),
-      this.productRepo.count(),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        lastPage: Math.ceil(total / limit),
-      }
-    };
+  /**
+   * Enterprise Standard: Clean "One-Liner" Service.
+   * Business logic only orchestrates; pagination and data shape are delegated to the Repository.
+   */
+  async findAll(options: PageOptionsDto) {
+    return this.productRepo.list(options);
   }
 
   async findOne(id: string) {

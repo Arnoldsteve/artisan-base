@@ -23,6 +23,8 @@ import { Public } from '@/auth/decorators/public.decorator';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Pagination } from '@/common/pagination/decorators/get-pagination.decorator';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @ApiTags('Product Management')
 @ApiHeader({ name: 'x-tenant-id', required: true })
@@ -31,18 +33,15 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  /**
+ /**
    * PUBLIC: List products for the storefront.
-   * @Public() allows guests to browse while the Middleware still filters by Tenant.
+   * Now using the Enterprise Pagination Decorator.
    */
   @Public()
   @Get()
   @ApiOperation({ summary: 'List products (Public Storefront)' })
-  async findAll(
-    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
-  ) {
-    return this.productService.findAll(page, limit);
+  async findAll(@Pagination() options: PageOptionsDto) {
+    return this.productService.findAll(options);
   }
 
   /**

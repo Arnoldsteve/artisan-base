@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, Product } from '@generated/prisma/client';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
+import { PageDto } from '@/common/pagination/dtos/page.dto';
 
 @Injectable()
 export class ProductRepository {
@@ -36,13 +38,34 @@ export class ProductRepository {
     });
   }
 
-  async list(params: { skip?: number; take?: number; where?: Prisma.ProductWhereInput }) {
-    return this.prisma.client.product.findMany({
-      ...params,
+ /**
+   * Enterprise Standard: The Repository defines the "Shape" and "Policy".
+   * It combines business search logic with the pagination engine.
+   */
+  async list(options: PageOptionsDto): Promise<PageDto<Product>> {
+    const where: Prisma.ProductWhereInput = {
+      // Base Policy: Only show active products in the general list
+      isActive: true,
+      
+      // Dynamic Search Logic
+      ...(options.search && {
+        OR: [
+          { name: { contains: options.search, mode: 'insensitive' } },
+          { sku: { contains: options.search, mode: 'insensitive' } },
+          { description: { contains: options.search, mode: 'insensitive' } },
+        ],
+      }),
+    };
+
+    // The "One-Line" Engine: isolation and pagination happen here
+    return this.prisma.client.product.paginate({
+      options,
+      where,
       include: {
-        categories: { include: { category: true } }
+        categories: {
+          include: { category: true },
+        },
       },
-      orderBy: { createdAt: 'desc' },
     });
   }
 
