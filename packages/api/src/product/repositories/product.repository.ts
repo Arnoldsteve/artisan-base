@@ -55,8 +55,7 @@ export class ProductRepository {
       options,
       where,
       include: { categories: { include: { category: true } } },
-      cache: true, // Integrated directive
-      ttl: 3600, // Optional: Cache for 1 hour
+      cache: true,
     });
   }
 

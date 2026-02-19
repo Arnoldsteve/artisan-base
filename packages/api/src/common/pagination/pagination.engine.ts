@@ -2,21 +2,17 @@ import { PageOptionsDto } from './dtos/page-options.dto';
 import { PageDto } from './dtos/page.dto';
 import { CacheHelperService } from '../cache/cache-helper.service';
 import { CacheEngine } from '../cache/cache.engine';
+import { CACHE_TTLS } from '../cache/cache-ttls.config';
 
 export async function executePagination<T>(
   modelContext: any,
-  args: any & { 
-    options: PageOptionsDto; 
-    cache?: boolean; 
-    ttl?: number 
-  },
-  cacheHelper: CacheHelperService, // Injected via the extension
+  args: any & { options: PageOptionsDto; cache?: boolean; ttl?: number },
+  cacheHelper: CacheHelperService,
   tenantId: string
 ): Promise<PageDto<T>> {
   const { options, where, cache, ttl, ...findManyArgs } = args;
   const modelName = modelContext.name;
 
-  // 1. Define the DB Execution Logic
   const queryExecutor = async () => {
     const queryOptions = {
       take: options.take,
@@ -32,9 +28,12 @@ export async function executePagination<T>(
     return new PageDto<T>(data, total, options);
   };
 
-  // 2. Logic Branch: Cache Hit or DB Miss
   if (cache) {
     const namespace = CacheEngine.getNamespaceForModel(modelName);
+    
+    // SMART POLICY LOOKUP: Use provided ttl OR lookup from policy OR use global default
+    const resolvedTtl = ttl ?? CACHE_TTLS[namespace] ?? CACHE_TTLS.DEFAULT;
+
     const subKey = CacheEngine.generateSubKey({ ...args, tenantId });
 
     return cacheHelper.getOrSet(
@@ -42,10 +41,9 @@ export async function executePagination<T>(
       namespace,
       subKey,
       queryExecutor,
-      { ttl }
+      { ttl: resolvedTtl }
     );
   }
 
-  // 3. Fallback: Direct DB Query
   return queryExecutor();
 }

@@ -17,11 +17,13 @@ export const extendedPrismaClient = (
   tenantContext: TenantContextService,
   cacheHelper: CacheHelperService,
 ) => {
-  return prisma
-    // Now both extensions are aware of the cache and context
-    .$extends(paginationExtension(cacheHelper, tenantContext))
-    .$extends(cacheExtension(cacheHelper, tenantContext))
-    .$extends(tenantIsolationExtension(tenantContext));
+  return (
+    prisma
+      .$extends(paginationExtension(cacheHelper, tenantContext))
+      .$extends(cacheExtension(cacheHelper, tenantContext))
+      // FIX: Pass 'prisma' as the first argument
+      .$extends(tenantIsolationExtension(prisma, tenantContext))
+  );
 };
 
 export type ExtendedPrismaClient = ReturnType<typeof extendedPrismaClient>;

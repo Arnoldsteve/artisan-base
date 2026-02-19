@@ -1,7 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { CACHE_NAMESPACE, CACHE_TTLS } from './cache.constants';
+import { CACHE_NAMESPACE } from './cache.constants';
+import { CACHE_TTLS } from './cache-ttls.config';
 
 export interface CacheOptions {
   ttl?: number;
@@ -45,15 +46,25 @@ export class CacheHelperService {
     const version = await this.getNamespaceVersion(tenantId, namespace);
     const dataKey = `d:${tenantId}:${namespace}:v${version}:${subKey}`;
 
+    // 1. Try Cache Lookup
     if (!options?.refresh) {
       const cached = await this.cacheManager.get<T>(dataKey);
-      if (cached) return cached;
+      
+      // FIX: Only log HIT if the data actually exists
+      if (cached !== undefined && cached !== null) {
+        this.logger.debug(`[CACHE HIT] ${dataKey}`);
+        return cached;
+      }
     }
 
+    // 2. Cache Miss
+    this.logger.debug(`[CACHE MISS] ${dataKey}`);
     const result = await factory();
+
+    // 3. Store in Cache
     const ttl = options?.ttl ?? CACHE_TTLS[namespace] ?? CACHE_TTLS['DEFAULT' as any];
-    
     await this.cacheManager.set(dataKey, result, ttl);
+
     return result;
   }
 
