@@ -9,7 +9,7 @@ const DAY = 24 * HOUR;
  * Enterprise Cache TTL Policy (in Seconds)
  * This is the ONLY place where "Magic Numbers" for time are allowed.
  */
-export const CACHE_TTLS: Record<CACHE_NAMESPACE | 'DEFAULT', number> = {
+export const CACHE_TTLS: Record<string, number> = { 
   [CACHE_NAMESPACE.PRODUCT_LIST]: 1 * HOUR,
   [CACHE_NAMESPACE.PRODUCT_PROFILE]: 2 * HOUR,
   [CACHE_NAMESPACE.CATEGORY_LIST]: 24 * HOUR,
