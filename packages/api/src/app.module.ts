@@ -16,6 +16,7 @@ import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CustomerModule } from './customer/customer.module';
+import { CommonCacheModule } from './common/cache/common-cache.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CustomerModule } from './customer/customer.module';
     }),
     
     // 2. Core Modules (Single instances shared across the app)
+    CommonCacheModule, // 1. This must be here to enable the @Global() providers
     PrismaModule, 
     TenantModule,     // Manages Organization & Membership logic
     UserModule,       // Manages Global Identity logic

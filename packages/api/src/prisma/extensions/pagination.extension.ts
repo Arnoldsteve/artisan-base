@@ -2,23 +2,39 @@ import { Prisma } from '@generated/prisma/client';
 import { PageOptionsDto } from '../../common/pagination/dtos/page-options.dto';
 import { PageDto } from '../../common/pagination/dtos/page.dto';
 import { executePagination } from '../../common/pagination/pagination.engine';
+import { CacheHelperService } from '../../common/cache/cache-helper.service';
+import { TenantContextService } from '../../common/tenant-context/tenant-context.service';
 
 /**
- * Functional Prisma Extension for Pagination
- * This satisfies the "Single Responsibility" principle by isolating 
- * pagination logic from tenant security logic.
+ * Enterprise Integrated Pagination & Cache Extension
+ * This allows a "Single-Call" approach for high-performance data listing.
  */
-export const paginationExtension = Prisma.defineExtension({
-  name: 'pagination',
-  model: {
-    $allModels: {
-      async paginate<T, A>(
-        this: T,
-        args: Prisma.Args<T, 'findMany'> & { options: PageOptionsDto }
-      ): Promise<PageDto<Prisma.Result<T, A, 'findMany'>[number]>> {
-        // Delegate to the Logic Engine
-        return executePagination<any, any>(this, args);
+export const paginationExtension = (
+  cacheHelper: CacheHelperService,
+  tenantContext: TenantContextService
+) => 
+  Prisma.defineExtension({
+    name: 'pagination',
+    model: {
+      $allModels: {
+        async paginate<T, A>(
+          this: T,
+          args: Prisma.Args<T, 'findMany'> & { 
+            options: PageOptionsDto; 
+            cache?: boolean; 
+            ttl?: number 
+          }
+        ): Promise<PageDto<Prisma.Result<T, A, 'findMany'>[number]>> {
+          const tenantId = tenantContext.getTenantIdOrThrow();
+          
+          // Delegate the orchestration to the Logic Engine
+          return executePagination<any>(
+            this, 
+            args, 
+            cacheHelper, 
+            tenantId
+          );
+        },
       },
     },
-  },
-});
+  });

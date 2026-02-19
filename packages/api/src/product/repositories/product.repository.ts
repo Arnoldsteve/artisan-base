@@ -38,34 +38,25 @@ export class ProductRepository {
     });
   }
 
- /**
+  /**
    * Enterprise Standard: The Repository defines the "Shape" and "Policy".
-   * It combines business search logic with the pagination engine.
+   * This implementation now leverages the full Cache + Pagination + Isolation pipeline.
    */
   async list(options: PageOptionsDto): Promise<PageDto<Product>> {
     const where: Prisma.ProductWhereInput = {
-      // Base Policy: Only show active products in the general list
       isActive: true,
-      
-      // Dynamic Search Logic
       ...(options.search && {
-        OR: [
-          { name: { contains: options.search, mode: 'insensitive' } },
-          { sku: { contains: options.search, mode: 'insensitive' } },
-          { description: { contains: options.search, mode: 'insensitive' } },
-        ],
+        name: { contains: options.search, mode: 'insensitive' },
       }),
     };
 
-    // The "One-Line" Engine: isolation and pagination happen here
+    // ONE CALL: Security + Pagination + Cache + Metadata
     return this.prisma.client.product.paginate({
       options,
       where,
-      include: {
-        categories: {
-          include: { category: true },
-        },
-      },
+      include: { categories: { include: { category: true } } },
+      cache: true, // Integrated directive
+      ttl: 3600, // Optional: Cache for 1 hour
     });
   }
 
