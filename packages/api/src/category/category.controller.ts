@@ -25,6 +25,8 @@ import { Public } from '@/auth/decorators/public.decorator';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
+import { Pagination } from '@/common/pagination/decorators/get-pagination.decorator';
 
 @ApiTags('Category Management')
 @ApiHeader({ name: 'x-tenant-id', required: true })
@@ -37,8 +39,8 @@ export class CategoryController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'List categories (Public Storefront)' })
-  async findAll() {
-    return this.categoryService.findAll();
+  async findAll(@Pagination() options: PageOptionsDto) {
+    return this.categoryService.findAll(options);
   }
 
   @Public()

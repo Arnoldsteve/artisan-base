@@ -2,6 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { CustomerRepository } from './repositories/customer.repository';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @Injectable()
 export class CustomerService {
@@ -15,23 +16,8 @@ export class CustomerService {
     return this.customerRepo.create(dto as any);
   }
 
-  async findAll(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-
-    const[data, total]= await Promise.all([
-       this.customerRepo.list({ skip, take:limit }),
-       this.customerRepo.count(),
-    ]);
-
-    return{
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        lastPage: Math.ceil(total /limit),
-      }
-    }
+  async findAll(options: PageOptionsDto) {
+    return this.customerRepo.list(options)
   }
 
   async findOne(id: string) {

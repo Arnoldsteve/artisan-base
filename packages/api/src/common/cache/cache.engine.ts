@@ -13,8 +13,10 @@ export class CacheEngine {
   /**
    * Convention-over-Configuration: Maps 'Product' -> 'PRODUCT_LIST'
    */
-  static getNamespaceForModel(model: string): CACHE_NAMESPACE {
-    const key = `${model.toUpperCase()}_LIST`;
-    return (CACHE_NAMESPACE as any)[key] || (model.toUpperCase() as any);
-  }
+ static getNamespaceForModel(model: string): CACHE_NAMESPACE {
+  const key = model
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .toUpperCase() + '_LIST';
+  return (CACHE_NAMESPACE as any)[key] || (key as any);
+}
 }

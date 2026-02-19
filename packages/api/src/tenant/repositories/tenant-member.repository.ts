@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, TenantMember, TenantUserRole } from '@generated/prisma/client';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
+import { PageDto } from '@/common/pagination/dtos/page.dto';
 
 @Injectable()
 export class TenantMemberRepository {
@@ -27,7 +29,7 @@ export class TenantMemberRepository {
   /**
    * Isolated: Lists members with pagination.
    */
-  async listByTenant(skip?: number, take?: number) {
+  async listByTenant1(skip?: number, take?: number) {
     return this.prisma.client.tenantMember.findMany({
       skip,
       take,
@@ -41,6 +43,56 @@ export class TenantMemberRepository {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async listByTenant(options: PageOptionsDto) {
+
+    const where: Prisma.TenantMemberWhereInput = {
+      ...(options.search && {
+        OR: [
+          {
+            user: {
+              firstName: {
+                contains: options.search,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            user: {
+              lastName: {
+                contains: options.search,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            user: {
+              email: {
+                contains: options.search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        ],
+      }),
+    };
+
+
+    return this.prisma.client.tenantMember.paginate({
+      options,
+      where,
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      cache: true,
     });
   }
 

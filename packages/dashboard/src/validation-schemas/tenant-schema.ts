@@ -19,8 +19,8 @@ export const updateTenantSchema = z.object({
     .min(3, "Store name must be at least 3 characters")
     .max(100)
     .trim(),
-  currency: z.nativeEnum(Currency, {
-    errorMap: () => ({ message: "Please select a valid currency" }),
+  baseCurrency: z.nativeEnum(Currency, {
+    errorMap: () => ({ message: "Please select a valid baseCurrency" }),
   }),
   timezone: z.string().min(1, "Timezone is required"),
 });

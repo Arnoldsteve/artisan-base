@@ -2,15 +2,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, Order, OrderItem } from '@generated/prisma/client';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
+import { PageDto } from '@/common/pagination/dtos/page.dto';
 
 @Injectable()
 export class OrderRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   // Create a new order with items
-  async create(
-    data: Prisma.OrderUncheckedCreateInput,
-  ): Promise<Order> {
+  async create(data: Prisma.OrderUncheckedCreateInput): Promise<Order> {
     return this.prisma.client.order.create({
       data,
       include: {
@@ -28,10 +28,7 @@ export class OrderRepository {
   }
 
   // Find orders by customer ID
-  async findByCustomer(
-    customerId: string,
-    tenantId: string,
-  ): Promise<Order[]> {
+  async findByCustomer(customerId: string, tenantId: string): Promise<Order[]> {
     return this.prisma.client.order.findMany({
       where: { customerId, tenantId },
       include: { items: true },
@@ -40,18 +37,17 @@ export class OrderRepository {
   }
 
   // List orders for a tenant (with pagination)
-  async list(params: {
-    tenantId: string;
-    skip?: number;
-    take?: number;
-  }): Promise<Order[]> {
-    const { tenantId, skip = 0, take = 10 } = params;
-    return this.prisma.client.order.findMany({
-      where: { tenantId },
+  async list(options: PageOptionsDto): Promise<PageDto<Order>> {
+    const where: Prisma.OrderWhereInput = {
+      ...(options.search && {
+        orderNumber: { contains: options.search, mode: 'insensitive' },
+      }),
+    };
+    return this.prisma.client.order.paginate({
+      options,
+      where,
       include: { items: true },
-      skip,
-      take,
-      orderBy: { createdAt: 'desc' },
+      cache: true,
     });
   }
 
@@ -68,28 +64,32 @@ export class OrderRepository {
     tenantId: string,
     data: Prisma.OrderUpdateInput,
   ): Promise<Order> {
-    return this.prisma.client.order.updateMany({
-      where: { id, tenantId },
-      data,
-    }).then(result => {
-      if (result.count === 0) {
-        throw new Error('Order not found or tenant mismatch');
-      }
-      return this.findById(id, tenantId) as Promise<Order>;
-    });
+    return this.prisma.client.order
+      .updateMany({
+        where: { id, tenantId },
+        data,
+      })
+      .then((result) => {
+        if (result.count === 0) {
+          throw new Error('Order not found or tenant mismatch');
+        }
+        return this.findById(id, tenantId) as Promise<Order>;
+      });
   }
 
   // Delete an order by ID
   async delete(id: string, tenantId: string): Promise<Order> {
     // Ensure tenant isolation
-    return this.prisma.client.order.deleteMany({
-      where: { id, tenantId },
-    }).then(result => {
-      if (result.count === 0) {
-        throw new Error('Order not found or tenant mismatch');
-      }
-      return { id } as Order; // Return a minimal object
-    });
+    return this.prisma.client.order
+      .deleteMany({
+        where: { id, tenantId },
+      })
+      .then((result) => {
+        if (result.count === 0) {
+          throw new Error('Order not found or tenant mismatch');
+        }
+        return { id } as Order; // Return a minimal object
+      });
   }
 
   // Add items to an existing order
@@ -98,10 +98,14 @@ export class OrderRepository {
     tenantId: string,
     items: Prisma.OrderItemUncheckedCreateInput[],
   ): Promise<OrderItem[]> {
-    return this.prisma.client.orderItem.createMany({
-      data: items.map(i => ({ ...i, orderId, tenantId })),
-    }).then(() => this.prisma.client.orderItem.findMany({
-      where: { orderId, tenantId },
-    }));
+    return this.prisma.client.orderItem
+      .createMany({
+        data: items.map((i) => ({ ...i, orderId, tenantId })),
+      })
+      .then(() =>
+        this.prisma.client.orderItem.findMany({
+          where: { orderId, tenantId },
+        }),
+      );
   }
 }

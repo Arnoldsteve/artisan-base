@@ -22,6 +22,8 @@ import { TenantRolesGuard } from '@/auth/guards/tenant-roles.guard';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { Pagination } from '@/common/pagination/decorators/get-pagination.decorator';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @ApiTags('Orders')
 @ApiHeader({ name: 'x-tenant-id', required: true })
@@ -37,11 +39,8 @@ export class OrderController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'List orders for a customer (Public Storefront)' })
-  async findAll(
-    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
-  ) {
-    return this.orderService.findAll(page, limit);
+  async findAll(@Pagination() options: PageOptionsDto) {
+    return this.orderService.findAll(options);
   }
 
   @Public()

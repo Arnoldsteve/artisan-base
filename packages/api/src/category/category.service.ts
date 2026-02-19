@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Options,
+} from '@nestjs/common';
 import { CategoryRepository } from './repositories/category.repository';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @Injectable()
 export class CategoryService {
@@ -29,28 +35,8 @@ export class CategoryService {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 10) {
-    const tenantId = this.tenantContext.getTenantIdOrThrow();
-    const skip = (page - 1) * limit;
-
-    const [data, total] = await Promise.all([
-      this.categoryRepo.list({
-        tenantId,
-        skip,
-        take: limit,
-      }),
-      this.categoryRepo.count(),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        lastPage: Math.ceil(total / limit),
-      },
-    };
+  async findAll(options: PageOptionsDto) {
+    return this.categoryRepo.list(options);
   }
 
   async findOne(id: string) {
@@ -65,12 +51,12 @@ export class CategoryService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    await this.findOne(id); 
+    await this.findOne(id);
     return this.categoryRepo.update(id, dto);
   }
 
   async remove(id: string) {
-    await this.findOne(id); 
+    await this.findOne(id);
     return this.categoryRepo.delete(id);
   }
 }

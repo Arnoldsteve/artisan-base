@@ -1,22 +1,36 @@
-import { PaymentStatus, PaymentProvider } from '@generated/prisma/client';
-import { InitializePaymentDto } from '../dto/initialize-payment.dto';
-import { VerifyPaymentDto } from '../dto/verify-payment.dto';
+import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
 
-export interface PaymentInitializationResult {
+export interface PaymentInitResult {
   providerTransactionId: string;
-  checkoutUrl?: string;
+  checkoutUrl?: string;        // Stripe
+  stkPushRequestId?: string;   // Mpesa
   metadata?: Record<string, any>;
 }
 
-export interface PaymentVerificationResult {
+export interface PaymentVerifyResult {
   providerTransactionId: string;
-  status: PaymentStatus; // Now using Prisma Enum
+  status: PaymentStatus;
   rawPayload?: Record<string, any>;
 }
 
-export interface PaymentProviderInterface {
-  getName(): PaymentProvider; // Helps the registry identify the provider
-  initialize(dto: InitializePaymentDto): Promise<PaymentInitializationResult>;
-  verify(dto: VerifyPaymentDto): Promise<PaymentVerificationResult>;
-  handleWebhook(payload: Record<string, any>, signature?: string): Promise<PaymentVerificationResult>;
+/**
+ * Pure Infrastructure Contract.
+ * Providers ONLY know how to move money.
+ * No orders, no subscriptions, no business logic.
+ */
+export interface IPaymentProvider {
+  getName(): PaymentProvider;
+  initialize(params: PaymentInitParams): Promise<PaymentInitResult>;
+  verify(providerTransactionId: string): Promise<PaymentVerifyResult>;
+  handleWebhook(payload: Record<string, any>, signature?: string): Promise<PaymentVerifyResult>;
+}
+
+export interface PaymentInitParams {
+  amount: number;
+  currency: string;
+  phone?: string;           // Mpesa
+  returnUrl?: string;       // Stripe
+  description?: string;
+  reference: string;        // Your internal reference (orderId or subscriptionId)
+  metadata?: Record<string, any>;
 }

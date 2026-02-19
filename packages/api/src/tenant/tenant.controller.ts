@@ -24,6 +24,8 @@ import { TenantId } from '@/auth/decorators/tenant-id.decorator';
 import { TenantService } from './tenant.service';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { CreateStoreDto } from './dto/create-store.dto';
+import { Pagination } from '@/common/pagination/decorators/get-pagination.decorator';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 /**
  * SOLID Principle: Interface Segregation
@@ -87,10 +89,7 @@ export class TenantController {
   @UseGuards(TenantMembershipGuard, TenantRolesGuard)
   @ApiHeader({ name: 'x-tenant-id', required: true })
   @ApiOperation({ summary: 'List all staff members' })
-  async getStaff(
-    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
-  ) {
-    return this.tenantService.listStaffMembers(page, limit);
+  async getStaff(@Pagination() options: PageOptionsDto) {
+    return this.tenantService.listStaffMembers(options);
   }
 }

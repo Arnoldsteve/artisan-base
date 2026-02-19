@@ -17,6 +17,7 @@ import { PaymentModule } from './payment/payment.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CustomerModule } from './customer/customer.module';
 import { CommonCacheModule } from './common/cache/common-cache.module';
+import { BillingModule } from './billing/billing.module'
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CommonCacheModule } from './common/cache/common-cache.module';
     PrismaModule, 
     TenantModule,     // Manages Organization & Membership logic
     UserModule,       // Manages Global Identity logic
+    BillingModule,
     
     // 3. Orchestration Modules
     OnboardingModule, // Handles the Atomic registration flow

@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { TenantRepository } from './repositories/tenant.repository';
 import { TenantMemberRepository } from './repositories/tenant-member.repository';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenantUserRole } from '@generated/prisma/client';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @Injectable()
 export class TenantService {
@@ -81,20 +87,7 @@ export class TenantService {
   /**
    * Business Logic: Paginated staff listing.
    */
-  async listStaffMembers(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
-      this.memberRepo.listByTenant(skip, limit),
-      this.memberRepo.countByTenant(),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        lastPage: Math.ceil(total / limit),
-      },
-    };
+  async listStaffMembers(options: PageOptionsDto) {
+    return this.memberRepo.listByTenant(options);
   }
 }

@@ -36,11 +36,11 @@ export class UpdateTenantDto {
 
   @ApiPropertyOptional({ 
     enum: Currency, 
-    description: 'The base currency for pricing and checkout' 
+    description: 'The base baseCurrency for pricing and checkout' 
   })
   @IsOptional()
   @IsEnum(Currency)
-  currency?: Currency;
+  baseCurrency?: Currency;
 
   @ApiPropertyOptional({ 
     example: { theme: 'dark', lowStockThreshold: 5 }, 

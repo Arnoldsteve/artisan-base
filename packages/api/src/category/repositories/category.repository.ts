@@ -1,21 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, Category } from '@generated/prisma/client';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
+import { PageDto } from '@/common/pagination/dtos/page.dto';
 
 @Injectable()
 export class CategoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: Prisma.CategoryUncheckedCreateInput,
-  ): Promise<Category> {
+  async create(data: Prisma.CategoryUncheckedCreateInput): Promise<Category> {
     return this.prisma.client.category.create({ data });
   }
 
-  async findBySlug(
-    slug: string,
-    tenantId: string,
-  ): Promise<Category | null> {
+  async findBySlug(slug: string, tenantId: string): Promise<Category | null> {
     return this.prisma.client.category.findFirst({
       where: {
         slug,
@@ -24,10 +21,7 @@ export class CategoryRepository {
     });
   }
 
-  async findById(
-    id: string,
-    tenantId: string,
-  ): Promise<Category | null> {
+  async findById(id: string, tenantId: string): Promise<Category | null> {
     return this.prisma.client.category.findFirst({
       where: {
         id,
@@ -36,22 +30,17 @@ export class CategoryRepository {
     });
   }
 
-  async list(params: {
-    tenantId: string;
-    skip?: number;
-    take?: number;
-  }): Promise<Category[]> {
-    const { tenantId, skip = 0, take = 10 } = params;
+  async list(options: PageOptionsDto): Promise<PageDto<Category>> {
+    const where: Prisma.CategoryWhereInput = {
+      ...(options.search && {
+        name: { contains: options.search, mode: 'insensitive' },
+      }),
+    };
 
-    return this.prisma.client.category.findMany({
-      where: {
-        tenantId,
-      },
-      skip,
-      take,
-      orderBy: {
-        name: 'asc',
-      },
+    return this.prisma.client.category.paginate({
+      options,
+      where,
+      cache: true,
     });
   }
 

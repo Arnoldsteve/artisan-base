@@ -41,7 +41,6 @@ export class ProductController {
   @Get()
   @ApiOperation({ summary: 'List products (Public Storefront)' })
   async findAll(@Pagination() options: PageOptionsDto) {
-    console.log("options", options)
     return this.productService.findAll(options);
   }
 

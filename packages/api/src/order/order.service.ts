@@ -7,6 +7,7 @@ import { OrderRepository } from './repositories/order.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @Injectable()
 export class OrderService {
@@ -49,24 +50,8 @@ export class OrderService {
   }
 
   // List all orders with pagination
-  async findAll(page: number = 1, limit: number = 10) {
-    const tenantId = this.tenantContext.getTenantIdOrThrow();
-    const skip = (page - 1) * limit;
-
-    const [data, total] = await Promise.all([
-      this.orderRepo.list({ tenantId, skip, take: limit }),
-      this.orderRepo.count(tenantId),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        lastPage: Math.ceil(total / limit),
-      },
-    };
+  async findAll(options: PageOptionsDto) {
+    return this.orderRepo.list(options);
   }
 
   // Find order by ID

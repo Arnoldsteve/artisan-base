@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Customer, Prisma } from '@generated/prisma/client';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
+import { PageDto } from '@/common/pagination/dtos/page.dto';
 
 @Injectable()
 export class CustomerRepository {
@@ -51,16 +53,22 @@ export class CustomerRepository {
    * Paginated list of customers for this tenant.
    */
 
-  async list(params: { skip?: number; take?: number; where?: Prisma.CustomerWhereInput }) {
-    return this.prisma.client.customer.findMany({
-      ...params,
-      orderBy: { createdAt: 'desc' },
+  async list(options: PageOptionsDto): Promise<PageDto<Customer>> {
+    const where: Prisma.CustomerWhereInput = {
+      ...(options.search && {
+        email: { contains: options.search, mode: 'insensitive' },
+      }),
+    };
+
+    return this.prisma.client.customer.paginate({
+      options,
+      where,
+      cache: true,
     });
   }
 
-
   async count(where?: Prisma.CustomerWhereInput): Promise<number> {
-    return this.prisma.client.customer.count({where});
+    return this.prisma.client.customer.count({ where });
   }
 
   async update(

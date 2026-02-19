@@ -68,7 +68,7 @@ export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
     resolver: zodResolver(updateTenantSchema),
     defaultValues: {
       name: initialData.name,
-      currency: initialData.baseCurrency,
+      baseCurrency: initialData.baseCurrency,
       timezone: initialData.timezone,
     },
   });
@@ -89,7 +89,7 @@ export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Store Profile</CardTitle>
         <CardDescription>
-          Regional settings for tax, currency, and reporting.
+          Regional settings for tax, baseCurrency, and reporting.
         </CardDescription>
       </CardHeader>
 
@@ -117,7 +117,7 @@ export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="currency"
+                name="baseCurrency"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Base Currency</FormLabel>
@@ -128,7 +128,7 @@ export function StoreDetailsForm({ initialData }: StoreDetailsFormProps) {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select currency" />
+                          <SelectValue placeholder="Select baseCurrency" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-64">

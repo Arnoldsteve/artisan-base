@@ -369,13 +369,25 @@ enum PaymentProvider {
 }
 
 enum Currency {
-  KES
+  // Global Tier 1
   USD
-  GBP
   EUR
+  GBP
+  JPY
+
+  // East Africa
+  KES
+  UGX
+  TZS
+
+  // West & South Africa
   NGN
   GHS
   ZAR
+
+  // Others
+  INR
+  CAD
 }
 
 enum BillingCycle {

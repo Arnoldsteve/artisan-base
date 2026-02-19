@@ -22,6 +22,8 @@ import { Roles } from '@/auth/decorators/roles.decorator';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { Pagination } from '@/common/pagination/decorators/get-pagination.decorator';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @ApiTags('Customer Management')
 @ApiHeader({ name: 'x-tenant-id', required: true, description: 'The ID of the tenant/store' })
@@ -38,11 +40,8 @@ export class CustomerController {
   @Get()
   @Roles('OWNER', 'ADMIN', 'MANAGER', 'STAFF')
   @ApiOperation({ summary: 'List all customers (Dashboard)' })
-  async findAll(
-    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
-  ) {
-    return this.customerService.findAll(page, limit);
+  async findAll(@Pagination() options: PageOptionsDto) {
+    return this.customerService.findAll(options);
   }
 
   /**
