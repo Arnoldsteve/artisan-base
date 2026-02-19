@@ -10,6 +10,7 @@ import { PaymentProvider } from '@generated/prisma/client';
 import {
   SubscriptionWebhookResult,
 } from './interfaces/subscription-provider.interface';
+import { PlanService } from '@/plan/plan.service';
 
 /**
  * Billing Orchestrator.
@@ -22,6 +23,7 @@ export class BillingService {
   private readonly logger = new Logger(BillingService.name);
 
   constructor(
+    private readonly planService: PlanService,
     private readonly billingRepo: BillingRepository,
     private readonly registry: SubscriptionProviderRegistry,
     private readonly tenantContext: TenantContextService,
@@ -58,7 +60,7 @@ export class BillingService {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 
     // 1. Validate plan exists
-    const plan = await this.getPlanById(dto.planId);
+    const plan = await this.planService.findById(dto.planId);
 
     // 2. Get tenant's currency for intelligent routing
     const tenant = await this.billingRepo.findByTenantId(tenantId);

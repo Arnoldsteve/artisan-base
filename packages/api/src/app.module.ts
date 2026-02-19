@@ -18,6 +18,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CustomerModule } from './customer/customer.module';
 import { CommonCacheModule } from './common/cache/common-cache.module';
 import { BillingModule } from './billing/billing.module'
+import { PlanModule } from './plan/plan.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { BillingModule } from './billing/billing.module'
     TenantModule,     // Manages Organization & Membership logic
     UserModule,       // Manages Global Identity logic
     BillingModule,
+    PlanModule,
     
     // 3. Orchestration Modules
     OnboardingModule, // Handles the Atomic registration flow

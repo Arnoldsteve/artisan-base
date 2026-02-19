@@ -299,12 +299,20 @@ model RefreshToken {
 }
 
 model SubscriptionPlan {
-  id             String               @id @default(cuid())
-  name           String
-  price          Decimal              @db.Decimal(10, 2)
-  billingCycle   BillingCycle
-  features       Json
-  tenants        Tenant[]
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal      @db.Decimal(10, 2)
+  billingCycle  BillingCycle
+  features      Json
+  stripePriceId String?      // Stripe price ID for automated billing
+  isActive      Boolean      @default(true)
+  tenants       Tenant[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("subscription_plans")
 }
 
 model TenantSubscription {
