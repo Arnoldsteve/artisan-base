@@ -161,6 +161,17 @@ export class BillingService {
     return { success: true };
   }
 
+
+  // ─── History ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Business Logic: Retrieve historical payment records for the active tenant.
+   */
+  async getHistory() {
+    const tenantId = this.tenantContext.getTenantIdOrThrow();
+    return this.billingRepo.findPaymentHistory(tenantId);
+  }
+
   // ─── Private Helpers ─────────────────────────────────────────────────────────
 
   private async processWebhookResult(result: SubscriptionWebhookResult) {

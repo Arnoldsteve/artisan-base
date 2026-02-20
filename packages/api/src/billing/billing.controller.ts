@@ -17,6 +17,7 @@ import {
   ApiHeader,
   ApiBearerAuth,
   ApiQuery,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { BillingService } from './billing.service';
@@ -96,5 +97,15 @@ export class BillingController {
       req.rawBody as any,
       signature,
     );
+  }
+
+  // ─── History ─────────────────────────────────────────────────────────────────
+
+  @Get('history')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get payment history for the current tenant' })
+  @ApiResponse({ status: 200, description: 'List of past transactions.' })
+  async getHistory() {
+    return this.billingService.getHistory();
   }
 }

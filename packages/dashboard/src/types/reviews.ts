@@ -1,3 +1,4 @@
+import { Customer } from "./customers";
 import { Product } from "./products";
 
 /**
@@ -14,6 +15,7 @@ export interface Review {
   
   // Optional relations for the admin dashboard view
   product?: Product;
+  customer?: Customer;
 }
 
 /**

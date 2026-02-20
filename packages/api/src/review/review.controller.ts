@@ -7,7 +7,8 @@ import {
   Param, 
   UseGuards, 
   HttpCode, 
-  HttpStatus 
+  HttpStatus, 
+  Req
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -33,16 +34,23 @@ import { CreateReviewDto } from './dto/create-review.dto';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  /**
-   * PUBLIC: Submit a review.
-   * millions of users: Handled without a Staff JWT via @Public()
+/**
+   * SECURE ACTION: Submit a review.
+   * millions of users: Identity is extracted from the JWT to prevent spoofing.
    */
-  @Public()
+  @ApiBearerAuth()
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Submit a new product review (Public Storefront)' })
-  async create(@Body() dto: CreateReviewDto) {
-    return this.reviewService.create(dto);
+  @ApiOperation({ summary: 'Submit a new product review' })
+  async create(
+    @Req() req: any, // Extract the request to access the authenticated user
+    @Body() dto: CreateReviewDto
+  ) {
+    // 1. Extract the ID from the secure token (req.user is populated by JwtAuthGuard)
+    const customerId = req.user.id;
+
+    // 2. Pass the secure ID and the content separately to the service
+    return this.reviewService.create(customerId, dto);
   }
 
   /**

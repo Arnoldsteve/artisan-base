@@ -22,6 +22,7 @@ export class CreateReviewDto {
   @IsNotEmpty()
   productId: string;
 
+  
   @ApiProperty({ 
     example: 5, 
     description: 'Rating score from 1 to 5',

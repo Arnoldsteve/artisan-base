@@ -179,6 +179,31 @@ export class BillingRepository {
     });
   }
 
+
+  // ─── Payment History ─────────────────────────────────────────────────────────
+
+  /**
+   * Fetches all subscription-related payments for the current tenant.
+   * millions of users: Filters by type 'SUBSCRIPTION' within the isolated context.
+   */
+  async findPaymentHistory(tenantId: string) {
+    return this.prisma.client.payment.findMany({
+      where: { 
+        type: 'SUBSCRIPTION' // Use the enum to filter for billing only
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        amount: true,
+        provider: true,
+        status: true,
+        createdAt: true,
+        metadata: true,
+        // Since type is SUBSCRIPTION, currency can be inferred or added to model if needed
+      }
+    });
+  }
+  
   // ─── Private Helpers ─────────────────────────────────────────────────────────
 
   private calculatePeriodEnd(days: number = 30): Date {

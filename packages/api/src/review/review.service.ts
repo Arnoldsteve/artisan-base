@@ -7,7 +7,8 @@ import { TenantContextService } from '@/common/tenant-context/tenant-context.ser
 
 /**
  * SOLID Principle: Single Responsibility
- * This service manages the business logic for customer reviews.
+ * This service handles the business logic for reviews, 
+ * strictly separating identity (customerId) from content (dto).
  */
 @Injectable()
 export class ReviewService {
@@ -21,15 +22,15 @@ export class ReviewService {
    * Creates a new review.
    * Logic: Ensures the product exists within the current tenant before saving.
    */
-  async create(dto: CreateReviewDto): Promise<Review> {
+  async create(customerId: string, dto: CreateReviewDto): Promise<Review> {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
-    // 1. Business Logic: Does this product belong to this store?
+    
+     // 1. Business Logic: Ensure the product exists within the current tenant context
+    // Our productRepo.findById already uses the isolated client
     const product = await this.productRepo.findById(dto.productId);
-
+    
     if (!product) {
-      throw new NotFoundException(
-        `Product with ID ${dto.productId} not found in your store.`,
-      );
+      throw new NotFoundException(`Product with ID ${dto.productId} not found in this store.`);
     }
 
     // 2. Delegate to Repository (tenantId is injected automatically)
@@ -38,6 +39,7 @@ export class ReviewService {
       rating: dto.rating,
       comment: dto.comment,
       productId: dto.productId,
+      customerId: customerId, 
     });
   }
 

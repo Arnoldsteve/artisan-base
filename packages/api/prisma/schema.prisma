@@ -243,6 +243,7 @@ model Customer {
   
   tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orders         Order[]
+  reviews        Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -258,15 +259,20 @@ model Review {
   rating     Int
   comment    String?
   
+  // Relations
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  String
+  
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+  
   tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   @@index([tenantId, productId])
+  @@index([tenantId, customerId]) // Added for fast customer-history lookups
   @@map("reviews")
 }
-
 // ===============================================
 // 3. ANALYTICS (Pre-Aggregated for Millions of Rows)
 // ===============================================

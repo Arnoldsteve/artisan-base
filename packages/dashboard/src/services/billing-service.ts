@@ -1,51 +1,55 @@
 import { apiClient } from "@/lib/client-api";
-
 import {
-  Plan,
-  Subscription,
-  Invoice,
-  ApiResponse,
-  ChangePlanResponse,
+  SubscriptionPlan,
+  TenantSubscription,
+  CreateSubscriptionDto,
+  ChangePlanDto,
 } from "@/types/billing";
 
+/**
+ * SOLID Principle: Single Responsibility
+ * This service orchestrates all financial and subscription requests.
+ */
 export class BillingService {
-  async getPlans(): Promise<Plan[]> {
-    const response =
-      await apiClient.get<ApiResponse<Plan[]>>("/platform/plans");
-    return response.data;
+  /**
+   * GLOBAL: Fetches all available platform tiers (Basic, Pro, Enterprise).
+   */
+  async getPlans(): Promise<SubscriptionPlan[]> {
+    return apiClient.get<SubscriptionPlan[]>("/billing/plans");
   }
 
-  async getSubscription(): Promise<Subscription> {
-    const response = await apiClient.get<ApiResponse<Subscription>>(
-      "/billing/subscription"
-    );
-    return response.data;
+  /**
+   * ISOLATED: Fetches the current subscription status for the active store.
+   */
+  async getSubscription(): Promise<TenantSubscription> {
+    return apiClient.get<TenantSubscription>("/billing/subscription");
   }
 
-  async getInvoices(): Promise<Invoice[]> {
-    const response = await apiClient.get<ApiResponse<Invoice[]>>(
-      "/dashboard/billing/invoices"
-    );
-    return response.data;
+  /**
+   * ACTION: Initiates a new subscription.
+   * millions of users: Backend intelligently routes to M-Pesa (KES) or Stripe (USD).
+   */
+  async subscribe(data: CreateSubscriptionDto): Promise<any> {
+    return apiClient.post("/billing/subscribe", data);
   }
 
-  async changePlan(
-    planId: string
-  ): Promise<{ success: boolean; message: string }> {
-    const response = await apiClient.post<ChangePlanResponse>(
-      "/dashboard/billing/change-plan",
-      { planId }
-    );
-    return response.data;
+  /**
+   * ACTION: Upgrades or downgrades the current plan.
+   */
+  async changePlan(data: ChangePlanDto): Promise<any> {
+    return apiClient.patch("/billing/change-plan", data);
   }
 
-  async downloadInvoice(invoiceId: string): Promise<Blob> {
-    return apiClient.get<Blob>(
-      `/dashboard/billing/invoices/${invoiceId}/download`,
-      {
-        responseType: "blob", 
-      }
-    );
+  /**
+   * ACTION: Cancels the subscription.
+   * @param immediately - if true, kills access now; if false, at period end.
+   */
+  async cancel(immediately: boolean = false): Promise<void> {
+    await apiClient.patch(`/billing/cancel?immediately=${immediately}`);
+  }
+
+  async getHistory(): Promise<any[]> {
+    return apiClient.get<any[]>("/billing/history");
   }
 }
 

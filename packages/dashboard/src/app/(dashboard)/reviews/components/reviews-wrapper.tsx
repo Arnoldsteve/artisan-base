@@ -91,7 +91,7 @@ export function ReviewsWrapper() {
       <div className="flex-1">
         <PageHeader 
           title="Product Reviews" 
-          description="Moderate and monitor customer feedback for your store."
+          // description="Moderate and monitor customer feedback for your store."
         />
 
         <div className="px-4 md:px-2 lg:px-4 md:pb-10">

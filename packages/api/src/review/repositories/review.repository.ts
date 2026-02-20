@@ -25,15 +25,22 @@ export class ReviewRepository {
    * Lists all reviews for the current tenant.
    * Uses .client for automatic Row isolation.
    */
-  async findAll(): Promise<Review[]> {
+ async findAll(): Promise<Review[]> {
     return this.prisma.client.review.findMany({
       include: {
         product: {
           select: {
             name: true,
-            images: true,
+            sku: true,
           },
         },
+        customer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          }
+        }
       },
       orderBy: { createdAt: 'desc' },
     });

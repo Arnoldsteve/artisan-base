@@ -1,37 +1,10 @@
-import { createServerApiClient } from "@/lib/server-api";
-import { PageHeader } from "@/components/shared/page-header";
-import { BillingCurrentPlan } from "./components/billing-current-plan";
-import { BillingPlanOptions } from "./components/billing-plan-options";
-import { BillingInvoiceHistory } from "./components/billing-invoice-history";
+import { BillingWrapper } from "./components/billing-wrapper";
 
-export default async function BillingPage() {
-  const api = await createServerApiClient();
-
-  const [plansRes, subscriptionRes, invoicesRes] = await Promise.all([
-    api.get<{ data: any[] }>("/platform/plans"),
-    api.get<{ data: any }>("/billing/subscription"),
-    api.get<{ data: any[] }>("/billing/invoices"),
-  ]);
-
-  const plans = plansRes.data || [];
-  const subscription = subscriptionRes.data || null;
-  const invoices = invoicesRes.data || [];
-
-  // console.log("plans data from the plans", plans);
-  // console.log("plans data from the subscription", subscription);
-  // console.log("plans data from the invoices", invoices);
-
-  return (
-    <>
-      <PageHeader title="Billing" />
-      <div className="px-4 md:px-2 lg:px-4 md:mt-0 md:pb-10">
-        <BillingCurrentPlan subscription={subscription} />
-        <BillingPlanOptions
-          availablePlans={plans}
-          currentPlanId={subscription?.plan?.id}
-        />
-        <BillingInvoiceHistory invoices={invoices} />
-      </div>
-    </>
-  );
+/**
+ * SOLID Principle: Interface Segregation
+ * The page serves as a simple entry point, delegating all 
+ * client-side state and logic to the BillingWrapper.
+ */
+export default function BillingPage() {
+  return <BillingWrapper />;
 }
