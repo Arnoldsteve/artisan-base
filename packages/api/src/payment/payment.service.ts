@@ -74,6 +74,7 @@ export class PaymentService {
     // 3. Persist payment record
     const payment = await this.paymentRepo.create({
       tenantId,
+      type: params.metadata?.type === 'SUBSCRIPTION' ? 'SUBSCRIPTION' : 'ORDER', 
       orderId: params.orderId,
       provider: params.provider,
       amount: params.amount,

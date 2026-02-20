@@ -19,7 +19,9 @@ export class TenantContextMiddleware implements NestMiddleware {
       '/onboarding',
       '/auth/login',
       '/auth/bootstrap', 
-      '/health'
+      '/health',
+      '/plans',
+      '/payments/webhook'
     ];
 
     const isPublicPath = publicPaths.some(path => req.originalUrl.includes(path));

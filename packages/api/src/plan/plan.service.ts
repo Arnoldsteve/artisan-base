@@ -24,7 +24,7 @@ export class PlanService {
       stripePriceId: dto.stripePriceId,
     });
 
-    this.logger.log(`Plan created | ${plan.name} | $${plan.price}`);
+    // this.logger.log(`Plan created | ${plan.name} | $${plan.price}`);
     return plan;
   }
 

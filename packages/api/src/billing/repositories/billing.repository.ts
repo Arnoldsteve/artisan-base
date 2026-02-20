@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { TenantStatus, SubscriptionStatus } from '@generated/prisma/client';
+import { TenantStatus, SubscriptionStatus, Currency } from '@generated/prisma/client';
 import { BillingMode } from '../interfaces/subscription-provider.interface';
 
 export interface ActivateSubscriptionParams {
@@ -14,6 +14,15 @@ export interface ActivateSubscriptionParams {
 @Injectable()
 export class BillingRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  // ─── Tenant ──────────────────────────────────────────────────────────────────
+
+  async findTenantById(tenantId: string) {
+    return this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { id: true, baseCurrency: true, status: true },
+    });
+  }
 
   // ─── Subscription Plan ───────────────────────────────────────────────────────
 
@@ -37,9 +46,9 @@ export class BillingRepository {
       include: {
         tenant: {
           select: {
-            id: true, // ← add
+            id: true,
             name: true,
-            planId: true, // ← add
+            planId: true,
             baseCurrency: true,
           },
         },
@@ -62,18 +71,10 @@ export class BillingRepository {
     });
   }
 
-  /**
-   * Upsert — creates or updates the TenantSubscription.
-   * Also reactivates the Tenant if it was SUSPENDED.
-   */
-  async activateSubscription(
-    params: ActivateSubscriptionParams,
-  ): Promise<void> {
-    const currentPeriodEnd =
-      params.currentPeriodEnd ?? this.calculatePeriodEnd();
+  async activateSubscription(params: ActivateSubscriptionParams): Promise<void> {
+    const currentPeriodEnd = params.currentPeriodEnd ?? this.calculatePeriodEnd();
 
     await this.prisma.$transaction([
-      // 1. Upsert TenantSubscription
       this.prisma.tenantSubscription.upsert({
         where: { tenantId: params.tenantId },
         create: {
@@ -88,13 +89,11 @@ export class BillingRepository {
           currentPeriodEnd,
         },
       }),
-
-      // 2. Update Tenant plan
       this.prisma.tenant.update({
         where: { id: params.tenantId },
         data: {
           planId: params.planId,
-          status: TenantStatus.ACTIVE, // Reactivate if was SUSPENDED
+          status: TenantStatus.ACTIVE,
         },
       }),
     ]);
@@ -138,10 +137,6 @@ export class BillingRepository {
 
   // ─── Scheduler Queries ───────────────────────────────────────────────────────
 
-  /**
-   * Finds subscriptions expiring within the next N days.
-   * Used by scheduler to send reminders.
-   */
   async findExpiringSubscriptions(withinDays: number) {
     const from = new Date();
     const to = new Date();
@@ -159,10 +154,7 @@ export class BillingRepository {
             name: true,
             baseCurrency: true,
             owner: {
-              select: {
-                email: true,
-                firstName: true,
-              },
+              select: { email: true, firstName: true },
             },
           },
         },
@@ -170,19 +162,13 @@ export class BillingRepository {
     });
   }
 
-  /**
-   * Finds subscriptions that have expired and are past the grace period.
-   * Used by scheduler to suspend tenants.
-   */
   async findExpiredSubscriptions(gracePeriodDays: number = 3) {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - gracePeriodDays);
 
     return this.prisma.tenantSubscription.findMany({
       where: {
-        status: {
-          in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PAST_DUE],
-        },
+        status: { in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PAST_DUE] },
         currentPeriodEnd: { lt: cutoff },
       },
       include: {
@@ -195,10 +181,6 @@ export class BillingRepository {
 
   // ─── Private Helpers ─────────────────────────────────────────────────────────
 
-  /**
-   * Default period end = 30 days from now.
-   * Used for Mpesa manual subscriptions (no Stripe to calculate this).
-   */
   private calculatePeriodEnd(days: number = 30): Date {
     const date = new Date();
     date.setDate(date.getDate() + days);

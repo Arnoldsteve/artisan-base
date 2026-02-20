@@ -29,6 +29,8 @@ import { PlanModule } from './plan/plan.module';
       delimiter: '.',
     }),
     
+    AuthModule,
+    
     // 2. Core Modules (Single instances shared across the app)
     CommonCacheModule, // 1. This must be here to enable the @Global() providers
     PrismaModule, 
@@ -39,7 +41,6 @@ import { PlanModule } from './plan/plan.module';
     
     // 3. Orchestration Modules
     OnboardingModule, // Handles the Atomic registration flow
-    AuthModule,
     ProductModule,
     CategoryModule,
     OrderModule,

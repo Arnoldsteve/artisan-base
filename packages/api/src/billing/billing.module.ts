@@ -9,6 +9,7 @@ import { StripeSubscriptionProvider } from './providers/stripe-subscription.prov
 import { MpesaSubscriptionProvider } from './providers/mpesa-subscription.provider';
 import { BillingSchedulerService } from './scheduler/billing-scheduler.service';
 import { PaymentModule } from '@/payment/payment.module';
+import { PlanModule } from '@/plan/plan.module';
 
 /**
  * Billing Module.
@@ -21,6 +22,8 @@ import { PaymentModule } from '@/payment/payment.module';
     ScheduleModule.forRoot(), // Required for @Cron decorators
     ConfigModule,
     PaymentModule,            // MpesaSubscriptionProvider needs PaymentService
+    PlanModule,
+
   ],
   controllers: [BillingController],
   providers: [

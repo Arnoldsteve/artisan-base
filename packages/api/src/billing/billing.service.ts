@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
 import { BillingRepository } from './repositories/billing.repository';
@@ -6,18 +11,9 @@ import { SubscriptionProviderRegistry } from './providers/subscription-provider.
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { ChangePlanDto } from './dto/change-plan.dto';
 import { BILLING_EVENTS } from './events/billing.events';
-import { PaymentProvider } from '@generated/prisma/client';
-import {
-  SubscriptionWebhookResult,
-} from './interfaces/subscription-provider.interface';
+import { SubscriptionWebhookResult } from './interfaces/subscription-provider.interface';
 import { PlanService } from '@/plan/plan.service';
 
-/**
- * Billing Orchestrator.
- * Knows about plans, subscriptions, tenants.
- * Delegates money movement to the correct provider via registry.
- * Emits typed business events — notification layer listens.
- */
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
@@ -36,12 +32,6 @@ export class BillingService {
     return this.billingRepo.findAllPlans();
   }
 
-  async getPlanById(planId: string) {
-    const plan = await this.billingRepo.findPlanById(planId);
-    if (!plan) throw new NotFoundException(`Plan ${planId} not found`);
-    return plan;
-  }
-
   // ─── Subscription ────────────────────────────────────────────────────────────
 
   async getSubscription() {
@@ -51,22 +41,17 @@ export class BillingService {
     return subscription;
   }
 
-  /**
-   * Subscribe a tenant to a plan.
-   * Intelligently routes to Stripe (automated) or Mpesa (manual)
-   * based on tenant's baseCurrency.
-   */
   async subscribe(dto: CreateSubscriptionDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 
     // 1. Validate plan exists
     const plan = await this.planService.findById(dto.planId);
 
-    // 2. Get tenant's currency for intelligent routing
-    const tenant = await this.billingRepo.findByTenantId(tenantId);
-    const currency = tenant?.tenant?.baseCurrency;
+    // 2. Get tenant directly — don't rely on subscription record existing
+    const tenant = await this.billingRepo.findTenantById(tenantId);
+    if (!tenant) throw new BadRequestException('Tenant not found');
 
-    if (!currency) throw new BadRequestException('Tenant currency not configured');
+    const currency = tenant.baseCurrency;
 
     // 3. Validate provider-specific fields
     if (currency === 'KES' && !dto.phone) {
@@ -94,7 +79,6 @@ export class BillingService {
       `Subscription created | Tenant: ${tenantId} | Plan: ${plan.name} | Mode: ${provider.getBillingMode()}`,
     );
 
-    // 6. Emit event — notification layer sends welcome email
     this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CREATED, {
       tenantId,
       planId: dto.planId,
@@ -108,24 +92,18 @@ export class BillingService {
     return result;
   }
 
-  /**
-   * Change tenant's subscription plan.
-   */
   async changePlan(dto: ChangePlanDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 
-    // 1. Get current subscription
     const subscription = await this.billingRepo.findByTenantId(tenantId);
     if (!subscription) throw new NotFoundException('No active subscription found');
 
-    const oldPlanId = subscription.tenant.id;
+    const oldPlanId = subscription.tenant.planId;
 
-    // 2. Resolve provider
     const provider = this.registry.getForCurrency(
       subscription.tenant.baseCurrency,
     );
 
-    // 3. Delegate to provider
     const result = await provider.changePlan({
       providerSubscriptionId: subscription.providerSubscriptionId,
       newPlanId: dto.newPlanId,
@@ -133,11 +111,8 @@ export class BillingService {
       newAmount: dto.newAmount,
     });
 
-    this.logger.log(
-      `Plan changed | Tenant: ${tenantId} | New Plan: ${dto.newPlanId}`,
-    );
+    this.logger.log(`Plan changed | Tenant: ${tenantId} | New Plan: ${dto.newPlanId}`);
 
-    // 4. Emit event
     this.eventEmitter.emit(BILLING_EVENTS.PLAN_CHANGED, {
       tenantId,
       oldPlanId,
@@ -148,9 +123,6 @@ export class BillingService {
     return result;
   }
 
-  /**
-   * Cancel tenant subscription.
-   */
   async cancel(immediately: boolean = false) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 
@@ -166,9 +138,7 @@ export class BillingService {
       immediately,
     });
 
-    this.logger.log(
-      `Subscription cancelled | Tenant: ${tenantId} | Immediately: ${immediately}`,
-    );
+    this.logger.log(`Subscription cancelled | Tenant: ${tenantId} | Immediately: ${immediately}`);
 
     this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CANCELED, {
       tenantId,
@@ -181,15 +151,7 @@ export class BillingService {
 
   // ─── Webhooks ────────────────────────────────────────────────────────────────
 
-  /**
-   * Handles Stripe billing webhooks.
-   * Mpesa subscription webhooks are handled via payment.updated event
-   * directly in MpesaSubscriptionProvider — no route needed here.
-   */
-  async handleStripeWebhook(
-    payload: Record<string, any>,
-    signature: string,
-  ) {
+  async handleStripeWebhook(payload: Record<string, any>, signature: string) {
     const provider = this.registry.getForMode('AUTOMATED');
     const result = await provider.handleWebhook(payload, signature);
 
@@ -207,8 +169,6 @@ export class BillingService {
     );
 
     if (!subscription) {
-      // First time — comes from checkout.session.completed
-      // tenantId is in metadata
       this.logger.warn(
         `Subscription not found for provider ID: ${result.providerSubscriptionId}`,
       );

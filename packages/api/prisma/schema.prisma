@@ -213,26 +213,26 @@ model OrderItem {
 }
 
 model Payment {
-  id                      String        @id @default(cuid())
+  id                      String          @id @default(cuid())
   tenantId                String
-  orderId                 String
+  type                    PaymentType     @default(ORDER)
+  orderId                 String?         // Optional — null for subscription payments
   provider                PaymentProvider
   providerTransactionId   String
-  amount                  Decimal       @db.Decimal(10, 2)
-  status                  PaymentStatus @default(PENDING)
-  
-  metadata                Json?          
+  amount                  Decimal         @db.Decimal(10, 2)
+  status                  PaymentStatus   @default(PENDING)
+  metadata                Json?
 
-  order                   Order         @relation(fields: [orderId], references: [id])
-  
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
-  
+  order                   Order?          @relation(fields: [orderId], references: [id])
+
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
   @@unique([tenantId, provider, providerTransactionId])
   @@index([tenantId])
+  @@index([type])
   @@map("payments")
 }
-
 model Customer {
   id             String    @id @default(cuid())
   tenantId       String
@@ -374,6 +374,11 @@ enum PaymentProvider {
   PAYSTACK      // Pan-African
   CASH
   BANK_TRANSFER
+}
+
+enum PaymentType {
+  ORDER
+  SUBSCRIPTION
 }
 
 enum Currency {
