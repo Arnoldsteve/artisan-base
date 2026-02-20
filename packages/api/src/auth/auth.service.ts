@@ -70,6 +70,8 @@ export class AuthService {
       name: m.tenant.name,
       subdomain: m.tenant.subdomain,
       role: m.role,
+      baseCurrency: m.tenant.baseCurrency, 
+      timezone: m.tenant.timezone,   
     }));
 
     const accessToken = this.jwtService.sign(payload);
@@ -92,27 +94,27 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-  const user = await this.userRepo.findById(userId);
-  if (!user) throw new NotFoundException('User not found');
-  
-  const memberships = await this.memberRepo.listByUser(userId);
-  
-  return {
-    user: {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      globalRole: user.globalRole,
-    },
-    organizations: memberships.map(m => ({
-      id: m.tenantId,
-      name: m.tenant.name,
-      subdomain: m.tenant.subdomain,
-      role: m.role,
-    })),
-  };
-}
+    const user = await this.userRepo.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const memberships = await this.memberRepo.listByUser(userId);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        globalRole: user.globalRole,
+      },
+      organizations: memberships.map((m) => ({
+        id: m.tenantId,
+        name: m.tenant.name,
+        subdomain: m.tenant.subdomain,
+        role: m.role,
+      })),
+    };
+  }
 
   /**
    * The Master Handshake.
@@ -120,13 +122,14 @@ export class AuthService {
    * user profile, tenant details, products, and categories.
    */
   async bootstrap(userId: string, tenantId: string) {
-    const [user, tenant, membership, productsCount, categoriesCount] = await Promise.all([
-      this.userRepo.findById(userId),
-      this.tenantRepo.findById(tenantId),
-      this.memberRepo.findByTenantAndUser(tenantId, userId),
-      this.productRepo.count(),
-      this.categoryRepo.count(),
-    ]);
+    const [user, tenant, membership, productsCount, categoriesCount] =
+      await Promise.all([
+        this.userRepo.findById(userId),
+        this.tenantRepo.findById(tenantId),
+        this.memberRepo.findByTenantAndUser(tenantId, userId),
+        this.productRepo.count(),
+        this.categoryRepo.count(),
+      ]);
 
     if (!user) throw new NotFoundException('User not found');
     if (!tenant) throw new NotFoundException('Tenant not found');
@@ -146,12 +149,13 @@ export class AuthService {
         id: tenant.id,
         name: tenant.name,
         subdomain: tenant.subdomain,
+        baseCurrency: tenant.baseCurrency, 
+        timezone: tenant.timezone, 
       },
       productsCount,
       categoriesCount,
     };
   }
-
 
   /**
    * Helper to create and persist a refresh token.

@@ -11,14 +11,19 @@ export class TenantMemberRepository {
   /**
    * Global: Used during onboarding.
    */
-  async create(data: Prisma.TenantMemberUncheckedCreateInput): Promise<TenantMember> {
+  async create(
+    data: Prisma.TenantMemberUncheckedCreateInput,
+  ): Promise<TenantMember> {
     return this.prisma.client.tenantMember.create({ data });
   }
 
   /**
    * Isolated: Finds membership within current tenant context.
    */
-  async findByTenantAndUser(tenantId: string, userId: string): Promise<TenantMember | null> {
+  async findByTenantAndUser(
+    tenantId: string,
+    userId: string,
+  ): Promise<TenantMember | null> {
     return this.prisma.tenantMember.findUnique({
       where: {
         tenantId_userId: { tenantId, userId },
@@ -47,7 +52,6 @@ export class TenantMemberRepository {
   }
 
   async listByTenant(options: PageOptionsDto) {
-
     const where: Prisma.TenantMemberWhereInput = {
       ...(options.search && {
         OR: [
@@ -79,7 +83,6 @@ export class TenantMemberRepository {
       }),
     };
 
-
     return this.prisma.client.tenantMember.paginate({
       options,
       where,
@@ -109,10 +112,17 @@ export class TenantMemberRepository {
   async listByUser(userId: string) {
     return this.prisma.tenantMember.findMany({
       where: { userId, isActive: true },
-      include: { 
+      include: {
         tenant: {
-          select: { id: true, name: true, subdomain: true, status: true }
-        } 
+          select: {
+            id: true,
+            name: true,
+            subdomain: true,
+            status: true,
+            baseCurrency: true,
+            timezone: true,
+          },
+        },
       },
     });
   }

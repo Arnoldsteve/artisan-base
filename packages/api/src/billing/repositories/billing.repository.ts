@@ -44,6 +44,7 @@ export class BillingRepository {
     return this.prisma.tenantSubscription.findUnique({
       where: { tenantId },
       include: {
+        plan: true,
         tenant: {
           select: {
             id: true,
@@ -60,6 +61,7 @@ export class BillingRepository {
     return this.prisma.tenantSubscription.findFirst({
       where: { providerSubscriptionId },
       include: {
+        plan: true,
         tenant: {
           select: {
             id: true,
@@ -79,6 +81,7 @@ export class BillingRepository {
         where: { tenantId: params.tenantId },
         create: {
           tenantId: params.tenantId,
+          planId: params.planId,
           providerSubscriptionId: params.providerSubscriptionId,
           status: SubscriptionStatus.ACTIVE,
           currentPeriodEnd,

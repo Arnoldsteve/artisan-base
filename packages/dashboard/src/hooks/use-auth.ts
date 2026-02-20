@@ -17,8 +17,10 @@ export function useAuth() {
   const [user, setUser] = useState<StaffMember | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [token, setToken] = useState<string | null>(null);
-  const [tenantId, setTenantId] = useState<string | null>(null); // real DB id
-  const [subdomain, setSubdomain] = useState<string | null>(null); // for x-tenant-id header
+  const [tenantId, setTenantId] = useState<string | null>(null); 
+  const [baseCurrency, setBaseCurrency] = useState<string | null>(null); 
+  const [timezone, setTimezone] = useState<string | null>(null);         
+  const [subdomain, setSubdomain] = useState<string | null>(null); 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +28,8 @@ export function useAuth() {
       const tokenFromCookie = Cookies.get("accessToken");
       const subdomainFromCookie = Cookies.get("selectedOrgSubdomain");
       const tenantIdFromCookie = Cookies.get("selectedTenantId");
+      const currencyFromCookie = Cookies.get("selectedCurrency");
+      const timezoneFromCookie = Cookies.get("selectedTimezone");
 
       if (tokenFromCookie && subdomainFromCookie) {
         apiClient.setAuthToken(tokenFromCookie);
@@ -33,6 +37,8 @@ export function useAuth() {
         setToken(tokenFromCookie);
         setSubdomain(subdomainFromCookie);
         setTenantId(tenantIdFromCookie ?? null);
+        setBaseCurrency(currencyFromCookie ?? null);
+        setTimezone(timezoneFromCookie ?? null);
 
         try {
           const profile = await authService.getProfile();
@@ -82,13 +88,11 @@ export function useAuth() {
       setToken(accessToken);
       apiClient.setAuthToken(accessToken);
 
-      // ✅ Case 1: No tenant yet → onboarding to create store
       if (!organizations || organizations.length === 0) {
         router.push("/onboarding/create-store");
         return;
       }
 
-      // ✅ Case 2: Has tenant → store both subdomain and real id
       const selectedTenant = organizations[0];
 
       setTenants(organizations);
@@ -157,6 +161,8 @@ export function useAuth() {
       // A. Update Context State
       setTenantId(tenant.id);
       setSubdomain(tenant.subdomain);
+      setBaseCurrency(tenant.baseCurrency); 
+      setTimezone(tenant.timezone);         
 
       // B. Update API Singleton Headers
       apiClient.setTenantId(tenant.id);
@@ -167,9 +173,10 @@ export function useAuth() {
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax" as const,
       };
-      Cookies.set("selectedOrgSubdomain", tenant.subdomain, cookieOptions);
       Cookies.set("selectedTenantId", tenant.id, cookieOptions);
-
+      Cookies.set("selectedOrgSubdomain", tenant.subdomain, cookieOptions);
+      Cookies.set("selectedCurrency", tenant.baseCurrency, cookieOptions);
+      Cookies.set("selectedTimezone", tenant.timezone, cookieOptions);
       /**
        * TOP 1% ENTERPRISE LOGIC: The Cache Nuke
        * We physically remove all data from the React Query cache.
@@ -187,8 +194,10 @@ export function useAuth() {
     user,
     tenants,
     token,
-    tenantId, // real DB id — used for bootstrap
-    subdomain, // subdomain — used for x-tenant-id header
+    tenantId,
+    subdomain,
+    baseCurrency, 
+    timezone,   
     isLoading,
     isAuthenticated: !isLoading && !!user,
     signUp,

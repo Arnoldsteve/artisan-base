@@ -10,8 +10,10 @@ interface AuthContextType {
   user: StaffMember | null;
   tenants: Tenant[];
   token: string | null;
-  tenantId: string | null;   // real DB id — for bootstrap
-  subdomain: string | null;  // subdomain — for x-tenant-id header
+  tenantId: string | null;   
+  subdomain: string | null;  
+  baseCurrency: string | null; 
+  timezone: string | null;     
   isLoading: boolean;
   isAuthenticated: boolean;
   signUp: (data: SignUpDto) => Promise<void>;

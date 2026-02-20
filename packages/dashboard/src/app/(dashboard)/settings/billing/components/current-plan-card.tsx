@@ -22,7 +22,7 @@ interface CurrentPlanCardProps {
 
 export function CurrentPlanCard({ subscription, isKenya }: CurrentPlanCardProps) {
   const { cancel, isCancelling } = useBilling();
-
+   console.log("subscription", subscription)
   const getStatusColor = (status: SubscriptionStatus) => {
     switch (status) {
       case SubscriptionStatus.ACTIVE:
