@@ -19,6 +19,7 @@ import { CustomerModule } from './customer/customer.module';
 import { CommonCacheModule } from './common/cache/common-cache.module';
 import { BillingModule } from './billing/billing.module'
 import { PlanModule } from './plan/plan.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PlanModule } from './plan/plan.module';
     OrderModule,
     PaymentModule,
     CustomerModule,
+    ReviewModule,
   ],
   controllers: [],
   providers: [],

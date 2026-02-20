@@ -9,9 +9,9 @@ import {
   Users,
   GalleryVerticalEnd,
   BarChart3,
-  PieChart,
   Settings2,
   LayoutDashboard,
+  Star, // Added for Reviews
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
@@ -25,33 +25,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@repo/ui/components/ui/sidebar";
-import { title } from "process";
 import { useAuthContext } from "@/contexts/auth-context";
 
-// This is sample data.
 const data = {
-  user: {
-    name: "Steve Arnold",
-    email: "stevearnold@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Satechs Solutions",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Syparn Inc.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Safaricom LLC.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
       title: "Dashboard",
@@ -92,8 +68,21 @@ const data = {
         },
       ],
     },
+    // ==================== NEW REVIEWS SECTION ====================
     {
-      title: "Customers", // use recency, frequency, and monetary value (RFM model)
+      title: "Reviews",
+      url: "#",
+      icon: Star,
+      items: [
+        {
+          title: "Product Reviews",
+          url: "/reviews",
+        },
+      ],
+    },
+    // =============================================================
+    {
+      title: "Customers",
       url: "#",
       icon: Users,
       items: [
@@ -102,8 +91,8 @@ const data = {
           url: "/customers",
         },
         { title: "Loyal Customers", url: "/loyal-customers" },
-        { title: "Big Spenders", url: "big-spenders" },
-        { title: "At Risk", url: "at-risk" },
+        { title: "Big Spenders", url: "/big-spenders" },
+        { title: "At Risk", url: "/at-risk" },
       ],
     },
     {
@@ -152,8 +141,10 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { tenants } = useAuthContext();
+  
+  // Enterprise Standard: Mapping backend tenants to UI Switcher teams
   const mappedTeams = tenants.map((tenant) => ({
-    id: tenant.id, // Ensure this is added!
+    id: tenant.id, // Mandatory for context switching
     name: tenant.name,
     logo: GalleryVerticalEnd,
     plan: tenant.status || "Active",
