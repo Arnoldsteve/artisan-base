@@ -2,138 +2,101 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@repo/ui/components/ui/button";
+import { LayoutGrid, ArrowRight } from "lucide-react";
+import { useTopCategories } from "@/hooks/use-categories";
 import { CategoriesLoading } from "./skeletons/category-card-skeleton";
-import { useCategories } from "@/hooks/use-categories";
+import { useTenantContext } from "@/contexts/tenant-context";
+import CategoryCard from "./category-card";
 
+/**
+ * TOP 1% ARCHITECTURE: Hybrid Category Showcase
+ * Automatically switches between 'Marketplace Collections' and 'Store Collections'
+ * based on the active URL context.
+ */
 export const CategoryShowcase = memo(function CategoryShowcase() {
-  const { data: response, isLoading, error, refetch } = useCategories();
-  const categories = response?.data || [];
+  const { tenant } = useTenantContext();
+
+  // 1. PERFORMANCE: Fetch only the top 12 categories for the home page.
+  // millions of users: This uses a long staleTime (1 hour) to reduce DB load.
+  const { 
+    data: categories, 
+    isLoading, 
+    isError, 
+    refetch 
+  } = useTopCategories(12);
 
   if (isLoading) {
     return (
-      <section className="py-16">
+      <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
-          <div className="text-start mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-1">
-              Shop by Category
-            </h2>
-          </div>
+          <div className="h-8 w-48 bg-muted animate-pulse rounded mb-8" />
           <CategoriesLoading />
         </div>
       </section>
     );
   }
 
-
-   if (error) {
+  if (isError) {
     return (
-      <section className="py-4">
-        <div className="container mx-auto px-4">
-          <div className="text-start mb-6">
-            <h2 className="text-2xl font-bold text-foreground mb-1">
-              Shop by Category
-            </h2>
-          </div>
-
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">
-              Unable to load categories. Please try again.
-            </p>
-            <Button onClick={() => refetch()} variant="outline">
-              Retry
-            </Button>
-          </div>
-        </div>
-      </section>
+      <div className="py-20 text-center border-y bg-muted/5">
+        <p className="text-muted-foreground mb-4 font-medium">
+          We couldn't load the collections right now.
+        </p>
+        <Button onClick={() => refetch()} variant="outline" size="sm">
+          Retry Loading
+        </Button>
+      </div>
     );
   }
 
-  if (error || !categories.length) {
-    return (
-      <section className="py-4">
-        <div className="container mx-auto px-4">
-          <div className="text-start mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-1">
-              Shop by Category
-            </h2>
-          </div>
+  if (!categories?.length) return null;
 
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              No categories available at the moment.
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Enterprise Standard: Dynamic routing for the "View All" link
+  const viewAllLink = tenant 
+    ? `/shop/${tenant.subdomain}/categories` 
+    : "/categories";
 
   return (
-    <section className="py-4">
+    <section className="py-12 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-start mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-1">
-            Shop by Category
-          </h2>
+        {/* Header Section */}
+        <div className="flex items-end justify-between mb-10">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-blue-600">
+              <LayoutGrid className="size-4" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                Discover
+              </span>
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
+              {tenant ? "Shop by Collection" : "Global Marketplace"}
+            </h2>
+          </div>
+          
+          <Link 
+            href={viewAllLink} 
+            className="hidden md:flex items-center gap-2 text-sm font-bold text-blue-600 hover:gap-3 transition-all"
+          >
+            Explore All <ArrowRight className="size-4" />
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {categories.slice(0, 12).map((category: any) => (
-            <Link
-              key={category.id}
-              href={`/categories/${category.slug}`}
-              className="group block"
-            >
-              <div className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] flex flex-col h-full">
-                <div className="aspect-video relative overflow-hidden">
-                  <Image
-                    src={
-                      category.image ||
-                      `https://picsum.photos/400/400?random=${category.id}`
-                    }
-                    alt={category.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                </div>
-
-                {/* Content section stretches evenly */}
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {category.name}
-                  </h3>
-
-                  {/* Spacer pushes button to bottom */}
-                  <div className="flex-1" />
-
-                  {category.description && (
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {category.description}
-                    </p>
-                  )}
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-auto truncate text-ellipsis whitespace-nowrap"
-                    title={`Explore ${category.name}`} 
-                  >
-                    Explore {category.name}
-                  </Button>
-                </div>
-              </div>
-            </Link>
+        {/* Grid Section: Reusing the Refactored CategoryCard */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          {categories.map((category) => (
+            <CategoryCard 
+              key={category.id} 
+              category={category} 
+              variant="default" 
+            />
           ))}
         </div>
 
-        <div className="text-start mt-12">
-          <Button asChild variant="default" className="w-full sm:w-auto">
-            <Link href="/categories">View All Categories</Link>
+        {/* Mobile View All Action */}
+        <div className="mt-12 md:hidden">
+          <Button asChild variant="outline" className="w-full h-12 font-bold uppercase tracking-widest">
+            <Link href={viewAllLink}>View All Categories</Link>
           </Button>
         </div>
       </div>

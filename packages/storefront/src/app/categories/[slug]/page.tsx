@@ -14,6 +14,8 @@ async function fetchCategory(slug: string) {
     // millions of users: Using slug for SEO instead of internal IDs
     // Note: Ensure your backend CategoryController has a /slug/:slug endpoint
     const category = await categoryService.getCategoryBySlug(slug);
+
+    console.debug(`[Server] Fetched category for slug: ${slug}`, category);
     return category;
   } catch (e) {
     console.error(`[Server] Error fetching category: ${slug}`, e);

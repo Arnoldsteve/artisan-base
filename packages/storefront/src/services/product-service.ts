@@ -50,7 +50,7 @@ export class ProductService {
     limit = 10,
   ): Promise<CursorPaginatedResponse<Product>> {
     return apiClient.get<CursorPaginatedResponse<Product>>(
-      "/products/featured",
+      "/products", // later  add featured from the db and add a new endpoint for featured products
       { limit },
     );
   }

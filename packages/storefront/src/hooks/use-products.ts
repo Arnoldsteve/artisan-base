@@ -56,3 +56,78 @@ export const useNewArrivals = (limit = 10) => {
     staleTime: 1000 * 60 * 10,
   });
 };
+
+
+/**
+ * TOP 1% ARCHITECTURE: Context-Aware Featured Products
+ * millions of users: Fetches store-specific featured items if in a shop context,
+ * or global featured items if in marketplace mode.
+ */
+export const useFeaturedProducts = (params: { limit?: number } = {}) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useQuery({
+    // Cache Partitioning: Ensures Store A and Store B don't leak into each other
+    queryKey: ["featured-products", tenant?.id, params.limit],
+    
+    queryFn: () => productService.getFeaturedProducts(params.limit),
+    
+    // Safety: Don't fetch until we know which "Bubble" we are in
+    enabled: !isTenantLoading,
+    
+    // Performance: Featured products are good candidates for longer cache times
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+};
+
+/**
+ * TOP 1% ARCHITECTURE: Infinite Featured Products
+ * millions of users: Optimized for "Load More" browsing of curated items.
+ */
+export const useInfiniteFeaturedProducts = (limit = 12) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useInfiniteQuery({
+    // Cache Partitioning: Isolate marketplace featured vs store featured
+    queryKey: ["featured-products-infinite", tenant?.id, limit],
+    
+    queryFn: ({ pageParam }) =>
+      productService.getFeaturedProducts({
+        limit,
+        cursor: pageParam,
+      }),
+      
+    initialPageParam: undefined as string | undefined,
+    
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+
+    enabled: !isTenantLoading,
+  });
+};
+
+/**
+ * TOP 1% ARCHITECTURE: Infinite New Arrivals
+ * millions of users: Fetches products sorted by 'createdAt' descending.
+ * Automatically handles Tenant Isolation vs Global Marketplace modes.
+ */
+export const useInfiniteNewArrivals = (limit = 12) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useInfiniteQuery({
+    queryKey: ["new-arrivals-infinite", tenant?.id, limit],
+    
+    queryFn: ({ pageParam }) =>
+      productService.getProducts({
+        limit,
+        cursor: pageParam,
+        sortBy: "createdAt", // Database-level sorting
+        sortOrder: "desc",
+      }),
+      
+    initialPageParam: undefined as string | undefined,
+    
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+
+    enabled: !isTenantLoading,
+  });
+};

@@ -56,6 +56,11 @@ export class CategoryRepository {
     return this.prisma.client.category.paginate({
       options,
       where,
+      include: {
+        _count: {
+          select: { products: true }
+        }
+      },
       cache: true,
     });
   }

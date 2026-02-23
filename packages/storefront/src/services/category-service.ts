@@ -15,7 +15,9 @@ export class CategoryService {
   async getCategories(
     params: CategoryFilters = {}
   ): Promise<CursorPaginatedResponse<Category>> {
-    return apiClient.get<CursorPaginatedResponse<Category>>("/categories", params);
+    const categories = await apiClient.get<CursorPaginatedResponse<Category>>("/categories", params);
+    console.debug(`[Client] Fetched categories with params:`, params, categories);
+    return categories;  
   }
 
   /**
@@ -35,6 +37,7 @@ export class CategoryService {
     
     // Robust extraction: handles both wrapped { data } and direct objects
     const category = response?.data ? response.data : response;
+    console.debug(`[Client] Fetched category for slug: ${slug}`, category);
 
     if (!category || !category.id) {
       throw new Error(`Category not found for slug: ${slug}`);
