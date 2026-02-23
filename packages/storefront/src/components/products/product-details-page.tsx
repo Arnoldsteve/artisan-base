@@ -28,6 +28,7 @@ import { Product } from "@/types/product";
 import ProductDetailsSkeleton from "@/skeletons/products/product-details-skeleton";
 import { Label } from "@repo/ui/components/ui/label";
 import { useTenantContext } from "@/contexts/tenant-context";
+import { resolveProductImages } from "@/lib/product-utils";
 
 interface ProductDetailsPageProps {
   initialProduct: Product;
@@ -54,9 +55,8 @@ export default function ProductDetailsPage({ initialProduct }: ProductDetailsPag
   if (isLoading && !product) return <ProductDetailsSkeleton />;
   if (!product) return <div className="p-20 text-center text-muted-foreground">Product no longer available.</div>;
 
-  const imageList = product.images?.length > 0 
-    ? product.images.map(img => img.url) 
-    : [`https://picsum.photos/seed/${product.id}/600/600`];
+ const imageList = useMemo(() => resolveProductImages(product || initialProduct), [product, initialProduct]);
+  
 
   const handleAddToCart = () => {
     addToCart({

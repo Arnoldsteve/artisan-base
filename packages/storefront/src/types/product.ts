@@ -57,6 +57,16 @@ export interface Product {
   updatedAt: string;
 }
 
+/**
+ * In your DB, this is a Json field. 
+ * On the frontend, we force it into this predictable structure.
+ */
+export interface ProductImage {
+  url: string;
+  alt?: string;
+  isPrimary?: boolean;
+}
+
 // Optimized filter types for Marketplace Search
 export type SortField = "name" | "price" | "rating" | "createdAt";
 export type SortOrder = "asc" | "desc";
