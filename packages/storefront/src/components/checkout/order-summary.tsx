@@ -1,147 +1,155 @@
-import React from "react";
+"use client";
+
+import React, { useMemo } from "react";
 import { useCart } from "@/hooks/use-cart";
 import {
-  Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { Loader2, ShoppingBag, Store } from "lucide-react";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { Button } from "@repo/ui/components/ui/button";
 import { useCheckoutContext } from "@/contexts/checkout-context";
-import { shippingOptions } from "@/lib/shipping-options";
-import { FREE_SHIPPING_THRESHOLD, TAX_RATE } from "@/lib/constants";
 import { formatMoney } from "@/lib/money";
+
+// Constants for platform-wide calculations
+const TAX_RATE = 0.16; // 16% VAT for Kenya market
 
 export const OrderSummary: React.FC = () => {
   const {
     submitOrder,
     previousStep,
     isLoading,
-    selectedShippingOption,
     customer,
     shippingAddress,
     selectedPaymentMethod,
+    selectedShippingOption,
   } = useCheckoutContext();
 
   const { items, getTotalPrice } = useCart();
 
+  /**
+   * TOP 1% LOGIC: Grouping items by Vendor for the summary
+   */
+  const groupedItems = useMemo(() => {
+    return items.reduce((acc, item) => {
+      if (!acc[item.tenantId]) {
+        acc[item.tenantId] = { name: item.tenantName || "Artisan", items: [] };
+      }
+      acc[item.tenantId].items.push(item);
+      return acc;
+    }, {} as Record<string, { name: string; items: typeof items }>);
+  }, [items]);
+
   const subtotal = getTotalPrice();
-
-  // Pick shipping option (fallback = first option)
-  const option = selectedShippingOption || shippingOptions[0];
-
-  // Apply free shipping rule
-  let shipping = option.price;
-  if (subtotal > FREE_SHIPPING_THRESHOLD && option.id === "standard") {
-    shipping = 0;
-  }
-
+  const shipping = selectedShippingOption?.price || 0;
   const tax = subtotal * TAX_RATE;
   const total = subtotal + shipping + tax;
 
-  //  Check if all checkout steps are completed
-  const isCheckoutComplete =
+  // Security & Validation Gate
+  const isReadyToShip =
     !!customer &&
     !!shippingAddress &&
-    !!selectedShippingOption &&
-    !!selectedPaymentMethod;
+    !!selectedPaymentMethod &&
+    items.length > 0;
 
   return (
-    <div className="sticky top-8 mx-0">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <ShoppingBag className="h-5 w-5 mr-2" />
-          Order Summary
+    <div className="sticky top-24">
+      <CardHeader className="px-0 pt-0">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <ShoppingBag className="h-5 w-5 text-blue-600" />
+          Review Order
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 px-2">
-        <div className="space-y-3">
-          {items.length === 0 ? (
-            <div className="text-muted-foreground text-sm">
-              No items in cart.
-            </div>
-          ) : (
-            items.map((item) => (
-              <div key={item.id} className="flex justify-between items-start">
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Qty: {item.quantity}
+      
+      <CardContent className="space-y-6 px-0 pb-0">
+        {/* 1. Itemized List Grouped by Store */}
+        <div className="space-y-6 max-h-[40vh] overflow-y-auto pr-2 scrollbar-thin">
+          {Object.entries(groupedItems).map(([tenantId, group]) => (
+            <div key={tenantId} className="space-y-3">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Store className="h-3 w-3" />
+                From {group.name}
+              </div>
+              {group.items.map((item) => (
+                <div key={item.id} className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium line-clamp-1">{item.name}</p>
+                    <p className="text-[11px] text-muted-foreground">Qty: {item.quantity}</p>
+                  </div>
+                  <p className="text-sm font-semibold tabular-nums">
+                    {formatMoney(item.price * item.quantity, "KES")}
                   </p>
                 </div>
-                <p className="font-medium">
-                  Ksh {(Number(item.price) * item.quantity).toFixed(2)}
-                </p>
-              </div>
-            ))
-          )}
+              ))}
+            </div>
+          ))}
         </div>
 
         <Separator />
 
-        <div className="space-y-2">
+        {/* 2. Financial Breakdown */}
+        <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span>Subtotal</span>
-            <span>Ksh {subtotal.toFixed(2)}</span>
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium tabular-nums">{formatMoney(subtotal, "KES")}</span>
           </div>
 
           <div className="flex justify-between text-sm">
-            <span>Shipping</span>
-            <div className="text-right">
-              {shipping === 0 ? (
-                <div>
-                  <span className="text-green-600 font-medium">Free</span>
-                  <p className="text-xs text-muted-foreground">
-                    Orders over {formatMoney(FREE_SHIPPING_THRESHOLD)}
-                  </p>
-                </div>
-              ) : (
-                <span>Ksh {shipping.toFixed(2)}</span>
-              )}
-            </div>
+            <span className="text-muted-foreground">Shipping</span>
+            <span className="font-medium tabular-nums">
+              {shipping === 0 ? "FREE" : formatMoney(shipping, "KES")}
+            </span>
           </div>
 
           <div className="flex justify-between text-sm">
-            <span>Tax</span>
-            <span>Ksh {tax.toFixed(2)}</span>
+            <span className="text-muted-foreground">Est. VAT (16%)</span>
+            <span className="font-medium tabular-nums">{formatMoney(tax, "KES")}</span>
           </div>
 
-          <Separator />
+          <Separator className="my-2" />
 
-          <div className="flex justify-between font-semibold text-lg">
-            <span>Total</span>
-            <span>Ksh {total.toFixed(2)}</span>
+          <div className="flex justify-between items-baseline">
+            <span className="font-bold text-lg">Total</span>
+            <span className="font-extrabold text-2xl text-blue-600 tabular-nums">
+              {formatMoney(total, "KES")}
+            </span>
           </div>
         </div>
 
-        <div className="space-y-3 pt-4">
+        {/* 3. Primary Actions */}
+        <div className="pt-4 space-y-3">
           <Button
-            variant={"default"}
+            variant="default"
             onClick={submitOrder}
-            className="bg-blue-500 hover:bg-blue-600 w-full"
-            disabled={items.length === 0 || isLoading || !isCheckoutComplete}
-            size="lg"
+            className="w-full h-14 text-base font-bold uppercase tracking-widest bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+            disabled={!isReadyToShip || isLoading}
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Placing Order...
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
               </>
             ) : (
-              "Place Order"
+              "Complete Purchase"
             )}
           </Button>
 
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={previousStep}
-            className="border border-blue-500 text-blue-500 hover:text-blue-600 w-full"
+            className="w-full text-muted-foreground font-medium"
+            disabled={isLoading}
           >
-            Back to Payment
+            Return to Step {Math.max(1, 1)}
           </Button>
         </div>
+
+        {/* 4. Security Trust Badge */}
+        <p className="text-[10px] text-center text-muted-foreground uppercase tracking-tighter pt-2">
+          Secure Multi-Vendor Checkout via Artisan Base
+        </p>
       </CardContent>
     </div>
   );

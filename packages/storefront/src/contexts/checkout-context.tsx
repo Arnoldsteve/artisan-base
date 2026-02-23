@@ -1,17 +1,16 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
-import type {
-  CheckoutContextType,
-  Customer,
-  ShippingAddress,
-  ShippingOption,
-  PaymentMethod,
-  Order,
-} from "@/types/checkout";
-import type { CartItem } from "@/types/cart";
-import { useCart } from "@/hooks/use-cart";
-import { paymentMethods } from "@/utils/payment-methods";
+"use client";
+
+import React, { createContext, useContext, useReducer, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/hooks/use-cart";
 import { useOrders } from "@/hooks/use-orders";
+import { 
+  Customer, 
+  ShippingAddress, 
+  ShippingOption, 
+  PaymentMethod,
+  CheckoutPayload 
+} from "@/types/checkout";
 
 type State = {
   currentStep: number;
@@ -19,8 +18,7 @@ type State = {
   shippingAddress: ShippingAddress | null;
   selectedShippingOption: ShippingOption | null;
   selectedPaymentMethod: PaymentMethod | null;
-  order: Order | null;
-  isLoading: boolean;
+  isHydrated: boolean;
   error: string | null;
 };
 
@@ -32,9 +30,8 @@ type Action =
   | { type: "NEXT_STEP" }
   | { type: "PREVIOUS_STEP" }
   | { type: "GO_TO_STEP"; payload: number }
-  | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null }
-  | { type: "SET_ORDER"; payload: Order }
+  | { type: "HYDRATE"; payload: Partial<State> }
   | { type: "RESET" };
 
 const initialState: State = {
@@ -43,161 +40,127 @@ const initialState: State = {
   shippingAddress: null,
   selectedShippingOption: null,
   selectedPaymentMethod: null,
-  order: null,
-  isLoading: false,
+  isHydrated: false,
   error: null,
 };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "SET_CUSTOMER":
-      return { ...state, customer: action.payload };
-    case "SET_SHIPPING_ADDRESS":
-      return { ...state, shippingAddress: action.payload };
-    case "SET_SHIPPING_OPTION":
-      return { ...state, selectedShippingOption: action.payload };
-    case "SET_PAYMENT_METHOD":
-      return { ...state, selectedPaymentMethod: action.payload };
-    case "NEXT_STEP":
-      return { ...state, currentStep: state.currentStep + 1 };
-    case "PREVIOUS_STEP":
-      return { ...state, currentStep: Math.max(0, state.currentStep - 1) };
-    case "GO_TO_STEP":
-      return { ...state, currentStep: action.payload };
-    case "SET_LOADING":
-      return { ...state, isLoading: action.payload };
-    case "SET_ERROR":
-      return { ...state, error: action.payload };
-    case "SET_ORDER":
-      return { ...state, order: action.payload };
-    case "RESET":
-      return { ...initialState, customer: state.customer };
-    default:
-      return state;
+    case "HYDRATE": return { ...state, ...action.payload, isHydrated: true };
+    case "SET_CUSTOMER": return { ...state, customer: action.payload };
+    case "SET_SHIPPING_ADDRESS": return { ...state, shippingAddress: action.payload };
+    case "SET_SHIPPING_OPTION": return { ...state, selectedShippingOption: action.payload };
+    case "SET_PAYMENT_METHOD": return { ...state, selectedPaymentMethod: action.payload };
+    case "NEXT_STEP": return { ...state, currentStep: state.currentStep + 1 };
+    case "PREVIOUS_STEP": return { ...state, currentStep: Math.max(0, state.currentStep - 1) };
+    case "GO_TO_STEP": return { ...state, currentStep: action.payload };
+    case "SET_ERROR": return { ...state, error: action.payload };
+    case "RESET": return { ...initialState, isHydrated: true };
+    default: return state;
   }
 }
 
-const CheckoutContext = createContext<CheckoutContextType | undefined>(
-  undefined
-);
+const CheckoutContext = createContext<any>(undefined);
 
-export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
-  const [state, dispatch] = useReducer(reducer, initialState, (init) => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("checkout");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return {
-          ...init,
-          ...parsed,
-          selectedPaymentMethod: parsed.selectedPaymentMethod
-            ? paymentMethods.find(
-                (m) => m.id === parsed.selectedPaymentMethod.id
-              ) || null
-            : null,
-        };
-      }
-    }
-    return init;
-  });
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { items, clearCart, getTotalPrice } = useCart();
+  const { createOrder, isCreating } = useOrders();
 
+  // 1. Safe Hydration (Prevents Next.js 15 Mismatch)
   useEffect(() => {
-    localStorage.setItem("checkout", JSON.stringify(state));
+    const stored = localStorage.getItem("checkout_v1");
+    if (stored) {
+      try {
+        dispatch({ type: "HYDRATE", payload: JSON.parse(stored) });
+      } catch (e) {
+        dispatch({ type: "HYDRATE", payload: {} });
+      }
+    } else {
+      dispatch({ type: "HYDRATE", payload: {} });
+    }
+  }, []);
+
+  // 2. Persistence
+  useEffect(() => {
+    if (state.isHydrated) {
+      localStorage.setItem("checkout_v1", JSON.stringify(state));
+    }
   }, [state]);
 
-  const { items, clearCart } = useCart();
-  const { createOrder, isCreating, createError } = useOrders(
-    state.customer?.email
-  );
-
-  // Actions
-  const setCustomer = (customer: Customer) =>
-    dispatch({ type: "SET_CUSTOMER", payload: customer });
-
-  const setShippingAddress = (address: ShippingAddress) =>
-    dispatch({ type: "SET_SHIPPING_ADDRESS", payload: address });
-
-  const setShippingOption = (option: ShippingOption) =>
-    dispatch({ type: "SET_SHIPPING_OPTION", payload: option });
-
-  const setPaymentMethod = (method: PaymentMethod) =>
-    dispatch({ type: "SET_PAYMENT_METHOD", payload: method });
-
-  const nextStep = () => dispatch({ type: "NEXT_STEP" });
-  const previousStep = () => dispatch({ type: "PREVIOUS_STEP" });
-  const goToStep = (step: number) =>
-    dispatch({ type: "GO_TO_STEP", payload: step });
-  const setLoading = (loading: boolean) =>
-    dispatch({ type: "SET_LOADING", payload: loading });
-  const setError = (error: string | null) =>
-    dispatch({ type: "SET_ERROR", payload: error });
-  const setOrder = (order: Order) =>
-    dispatch({ type: "SET_ORDER", payload: order });
-  const resetCheckout = () => dispatch({ type: "RESET" });
-
+  /**
+   * TOP 1% LOGIC: Multi-Vendor Payload Construction
+   * Group items by tenantId so each merchant gets their own order record.
+   */
   const submitOrder = async () => {
-    if (
-      !state.customer ||
-      !state.shippingAddress ||
-      !state.selectedPaymentMethod
-    ) {
-      setError("Please complete all checkout steps.");
+    if (!state.customer || !state.shippingAddress || !state.selectedPaymentMethod) {
+      dispatch({ type: "SET_ERROR", payload: "Please complete all steps." });
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    // A. Partition cart items by vendor (tenantId)
+    const vendorGroups = items.reduce((acc, item) => {
+      if (!acc[item.tenantId]) acc[item.tenantId] = [];
+      acc[item.tenantId].push(item);
+      return acc;
+    }, {} as Record<string, typeof items>);
+
+    // B. Construct Enterprise Payload
+    const payload: CheckoutPayload = {
+      customer: state.customer,
+      shippingAddress: state.shippingAddress,
+      billingAddress: state.shippingAddress, // Standard: Default billing to shipping
+      paymentMethod: state.selectedPaymentMethod.provider,
+      currency: "KES", // This would be dynamic based on the context
+      vendors: Object.entries(vendorGroups).map(([tenantId, vendorItems]) => ({
+        tenantId,
+        items: vendorItems,
+        shippingMethodId: state.selectedShippingOption?.id || "standard",
+      })),
+    };
 
     try {
-      const payload = {
-        customer: state.customer,
-        shippingAddress: state.shippingAddress,
-        billingAddress: state.shippingAddress,
-        // paymentMethod: state.selectedPaymentMethod,
-        items,
-        currency: "KES" as const,
-      };
-
-      const order = await createOrder(payload); // use hook
-
-      setOrder(order);
+      const response = await createOrder(payload);
+      
+      // C. Success Cleanup
+      localStorage.removeItem("checkout_v1");
       clearCart();
-      router.push("/checkout/confirmation");
+      
+      // D. Intelligent Redirect
+      // If Stripe/PayPal, go to checkoutUrl. If M-Pesa/Cash, go to confirmation.
+      if (response.checkoutUrl) {
+        window.location.href = response.checkoutUrl;
+      } else {
+        router.push("/checkout/confirmation");
+      }
     } catch (e: any) {
-      setError(e?.message || createError || "Failed to submit order.");
-    } finally {
-      setLoading(false);
+      dispatch({ type: "SET_ERROR", payload: e.message || "Checkout failed" });
     }
   };
 
+  const value = useMemo(() => ({
+    ...state,
+    isLoading: isCreating,
+    setCustomer: (c: Customer) => dispatch({ type: "SET_CUSTOMER", payload: c }),
+    setShippingAddress: (a: ShippingAddress) => dispatch({ type: "SET_SHIPPING_ADDRESS", payload: a }),
+    setShippingOption: (o: ShippingOption) => dispatch({ type: "SET_SHIPPING_OPTION", payload: o }),
+    setPaymentMethod: (m: PaymentMethod) => dispatch({ type: "SET_PAYMENT_METHOD", payload: m }),
+    nextStep: () => dispatch({ type: "NEXT_STEP" }),
+    previousStep: () => dispatch({ type: "PREVIOUS_STEP" }),
+    goToStep: (s: number) => dispatch({ type: "GO_TO_STEP", payload: s }),
+    submitOrder,
+  }), [state, isCreating, items]);
+
   return (
-    <CheckoutContext.Provider
-      value={{
-        ...state,
-        setCustomer,
-        setShippingAddress,
-        setShippingOption,
-        setPaymentMethod,
-        nextStep,
-        previousStep,
-        goToStep,
-        submitOrder,
-        resetCheckout,
-        isLoading: state.isLoading || isCreating,
-        error: state.error || createError || null,
-      }}
-    >
+    <CheckoutContext.Provider value={value}>
       {children}
     </CheckoutContext.Provider>
   );
 };
 
-export function useCheckoutContext() {
+export const useCheckoutContext = () => {
   const ctx = useContext(CheckoutContext);
-  if (!ctx)
-    throw new Error("useCheckoutContext must be used within CheckoutProvider");
+  if (!ctx) throw new Error("useCheckoutContext must be used within CheckoutProvider");
   return ctx;
-}
+};
