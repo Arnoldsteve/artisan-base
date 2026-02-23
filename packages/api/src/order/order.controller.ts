@@ -6,73 +6,101 @@ import {
   Delete,
   Param,
   Body,
-  Query,
-  ParseIntPipe,
   HttpCode,
   HttpStatus,
   UseGuards,
+  Req,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader, ApiResponse } from '@nestjs/swagger';
+
+// --- Guards & Decorators ---
 import { Roles } from '@/auth/decorators/roles.decorator';
 import { Public } from '@/auth/decorators/public.decorator';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { TenantMembershipGuard } from '@/auth/guards/tenant-membership.guard';
 import { TenantRolesGuard } from '@/auth/guards/tenant-roles.guard';
-
-import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { Pagination } from '@/common/pagination/decorators/get-pagination.decorator';
 import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
+// --- Business Logic ---
+import { OrderService } from './order.service';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { CheckoutPayloadDto } from './dto/checkout-payload.dto';
+
 @ApiTags('Orders')
-@ApiHeader({ name: 'x-tenant-id', required: true })
+/**
+ * TOP 1% ARCHITECTURE: Optional Header
+ * Required for Dashboard management (Isolation).
+ * Optional for Marketplace Checkout (Global).
+ */
+@ApiHeader({ 
+  name: 'x-tenant-id', 
+  required: false, 
+  description: 'Required for Dashboard. Omit for Global Multi-vendor Checkout.' 
+})
 @Controller('orders')
 @UseGuards(JwtAuthGuard, TenantMembershipGuard, TenantRolesGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  // =======================
-  // PUBLIC STORE FRONTEND
-  // =======================
+  // ===========================================================================
+  // 1. PUBLIC STOREFRONT (Discovery & Checkout)
+  // ===========================================================================
 
+  /**
+   * GLOBAL ACTION: Multi-Vendor Checkout
+   * millions of users: This handles the Jumia-style payload where items
+   * are grouped by vendor. It creates separate orders in one transaction.
+   */
   @Public()
-  @Get()
-  @ApiOperation({ summary: 'List orders for a customer (Public Storefront)' })
-  async findAll(@Pagination() options: PageOptionsDto) {
-    return this.orderService.findAll(options);
+  @Post('checkout')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Place a marketplace order (Supports multiple vendors)' })
+  async checkout(@Body() dto: CheckoutPayloadDto) {
+    return this.orderService.createMarketplaceOrder(dto);
   }
 
   @Public()
-  @Get(':id')
-  @ApiOperation({ summary: 'Get order details by ID (Public Storefront)' })
+  @Get('track/:id')
+  @ApiOperation({ summary: 'Guest tracking: Get order details by ID' })
   async findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
   }
 
-  @Public()
-  @Get('customer/:customerId')
-  @ApiOperation({ summary: 'Get all orders for a customer (Public Storefront)' })
-  async findByCustomer(@Param('customerId') customerId: string) {
-    return this.orderService.findByCustomer(customerId);
+  // ===========================================================================
+  // 2. PRIVATE DASHBOARD (Merchant Management)
+  // ===========================================================================
+
+  /**
+   * STORE ACTION: List orders for the current tenant.
+   * millions of users: Filtered automatically by x-tenant-id.
+   */
+  @ApiBearerAuth()
+  @Get()
+  @UseGuards(TenantMembershipGuard)
+  @ApiOperation({ summary: 'List all orders for your store (Dashboard)' })
+  async findAll(@Pagination() options: PageOptionsDto) {
+    return this.orderService.findAll(options);
   }
 
-  // =======================
-  // PRIVATE DASHBOARD
-  // =======================
-
+  /**
+   * STORE ACTION: Manual Order Creation
+   * Used by merchants to create orders for walk-in customers (POS).
+   */
   @ApiBearerAuth()
-  @Post()
+  @Post('manual')
   @Roles('OWNER', 'ADMIN', 'MANAGER')
-  @ApiOperation({ summary: 'Create a new order (Dashboard)' })
-  async create(@Body() dto: CreateOrderDto) {
+  @UseGuards(TenantMembershipGuard, TenantRolesGuard)
+  @ApiOperation({ summary: 'Manually create an order for your store' })
+  async createManualOrder(@Body() dto: any) {
     return this.orderService.create(dto);
   }
 
   @ApiBearerAuth()
   @Patch(':id')
   @Roles('OWNER', 'ADMIN', 'MANAGER')
-  @ApiOperation({ summary: 'Update an order (Dashboard)' })
+  @UseGuards(TenantMembershipGuard, TenantRolesGuard)
+  @ApiOperation({ summary: 'Update order status or details' })
   async update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return this.orderService.update(id, dto);
   }
@@ -80,20 +108,10 @@ export class OrderController {
   @ApiBearerAuth()
   @Delete(':id')
   @Roles('OWNER', 'ADMIN')
+  @UseGuards(TenantMembershipGuard, TenantRolesGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete an order (Dashboard)' })
+  @ApiOperation({ summary: 'Permanently remove an order' })
   async remove(@Param('id') id: string) {
     await this.orderService.remove(id);
-  }
-
-  @ApiBearerAuth()
-  @Post(':id/items')
-  @Roles('OWNER', 'ADMIN', 'MANAGER')
-  @ApiOperation({ summary: 'Add items to an existing order (Dashboard)' })
-  async addItems(
-    @Param('id') id: string,
-    @Body() body: { items: CreateOrderDto['items'] },
-  ) {
-    return this.orderService.addItems(id, body.items);
   }
 }

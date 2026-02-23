@@ -22,6 +22,7 @@ export class TenantContextMiddleware implements NestMiddleware {
       '/products/slug',
       '/categories',
       '/reviews',
+      '/orders',
     ]
 
     // 2. Identify "Platform" routes (Login, Onboarding)
