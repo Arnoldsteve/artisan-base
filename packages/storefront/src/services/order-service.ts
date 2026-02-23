@@ -1,46 +1,51 @@
 import { apiClient } from "@/lib/api-client";
-import { CartItem } from "@/types/cart";
-import type {
-  Customer,
-  ShippingAddress,
-  ShippingOption,
-  PaymentMethod,
-} from "@/types/checkout";
+import { CheckoutPayload, OrderResponse } from "@/types/checkout";
+import { Order } from "@/types/orders";
+import { ApiResponse } from "@/types/shared";
 
+/**
+ * SOLID Principle: Single Responsibility
+ * This service handles the lifecycle of an Order from the Storefront side.
+ * It supports both Global Marketplace and Isolated Storefront contexts.
+ */
 export class OrderService {
-  async getOrders(email: string): Promise<any[]> {
-    if (!email) return [];
-    const response = await apiClient.get<any>("/api/v1/storefront/orders", {
-      email,
-    });
-    return response;
+  /**
+   * ACTION: Place Order (The Checkout Handshake)
+   * millions of users: This endpoint takes the Multi-Vendor payload and 
+   * returns a list of Order IDs and a Payment Reference.
+   */
+  async placeOrder(payload: CheckoutPayload): Promise<OrderResponse> {
+    // Note: If x-tenant-id header is present, the backend treats this as an isolated order.
+    // If missing, it processes as a global marketplace multi-vendor checkout.
+    return apiClient.post<OrderResponse>("/orders", payload);
   }
 
-  async getOrder(orderId: string, email?: string): Promise<any> {
-    console.log("Fetching order with ID:", orderId, "for email:", email);
-    if (!orderId) return null;
-    const response = await apiClient.get<any>(
-      `/api/v1/storefront/orders/${orderId}`,
-      { email }
-    );
-    return response;
+  /**
+   * PUBLIC: Get a specific order by ID.
+   * Useful for the confirmation page and guest tracking.
+   */
+  async getById(id: string): Promise<Order> {
+    const response = await apiClient.get<ApiResponse<Order>>(`/orders/${id}`);
+    return response.data;
   }
 
-  async createOrder(payload: {
-    customer?: Customer;
-    shippingAddress: ShippingAddress;
-    billingAddress: ShippingAddress;
-    paymentMethod?: string; 
-    items: { productId: string; quantity: number; variantId?: string }[];
-    currency: "KES";
-    notes?: string;
-    shippingAmount?: number;
-  }): Promise<any> {
-    const response = await apiClient.post<any>(
-      "/api/v1/storefront/orders",
-      payload
+  /**
+   * AUTHENTICATED: Get order history for a specific customer.
+   */
+  async getByCustomer(customerId: string): Promise<Order[]> {
+    const response = await apiClient.get<ApiResponse<Order[]>>(
+      `/orders/customer/${customerId}`
     );
-    return response;
+    return response.data;
+  }
+
+  /**
+   * GLOBAL: List all public orders (if enabled on backend).
+   * millions of users: Delegated to the Enterprise Pagination engine.
+   */
+  async getAll(params: any = {}): Promise<Order[]> {
+    const response = await apiClient.get<ApiResponse<Order[]>>("/orders", params);
+    return response.data;
   }
 }
 
