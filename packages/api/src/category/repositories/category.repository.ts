@@ -21,6 +21,22 @@ export class CategoryRepository {
     });
   }
 
+  /**
+   * Resolve category by slug.
+   * millions of users: Leverages the Prisma Extension to automatically 
+   * filter by tenantId (Storefront mode) or return global (Marketplace mode).
+   */
+  async findBySlugIsolated(slug: string): Promise<Category | null> {
+    return this.prisma.client.category.findFirst({
+      where: { slug },
+      include: {
+        _count: {
+          select: { products: true }
+        }
+      }
+    });
+  }
+  
   async findById(id: string, tenantId: string): Promise<Category | null> {
     return this.prisma.client.category.findFirst({
       where: {

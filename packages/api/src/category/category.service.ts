@@ -39,6 +39,20 @@ export class CategoryService {
     return this.categoryRepo.list(options);
   }
 
+  /**
+   * PUBLIC ACTION: Find category by its SEO slug.
+   * millions of users: Required for human-readable URLs and Marketplace discovery.
+   */
+  async findBySlug(slug: string) {
+    const category = await this.categoryRepo.findBySlugIsolated(slug);
+
+    if (!category) {
+      throw new NotFoundException(`Category with slug '${slug}' not found.`);
+    }
+
+    return category;
+  }
+  
   async findOne(id: string) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 

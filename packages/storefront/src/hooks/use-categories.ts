@@ -1,63 +1,61 @@
-import {
-  useQuery,
-  useInfiniteQuery,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import { categoryService } from "@/services/category-service";
-import {
-  Category,
-  CategorySearchParams,
-  CursorPaginatedResponse,
-  ProductSearchParams,
-} from "@/types";
+"use client";
 
-// Query keys for categories
-export const categoryKeys = {
-  all: ["categories"] as const,
-  lists: () => [...categoryKeys.all, "list"] as const,
-  list: (filters: CategorySearchParams) =>
-    [...categoryKeys.lists(), filters] as const,
-  detail: (id: string) => [...categoryKeys.all, "detail", id] as const,
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { categoryService } from "@/services/category-service";
+import { useTenantContext } from "@/contexts/tenant-context";
+import { CategoryFilters } from "@/types/category";
+
+/**
+ * TOP 1% ARCHITECTURE: Context-Aware Categories Hook
+ * Automatically partitions the cache using the tenantId from the URL context.
+ */
+export const useCategories = (filters: CategoryFilters = {}, limit = 20) => {
+  // 1. Detect Context: If null, we are in Global Marketplace mode.
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  const CATEGORIES_KEY = ["storefront-categories", tenant?.id];
+
+  return useInfiniteQuery({
+    queryKey: [...CATEGORIES_KEY, "list", filters, limit],
+    queryFn: ({ pageParam }) =>
+      categoryService.getCategories({
+        ...filters,
+        limit,
+        cursor: pageParam,
+      }),
+    initialPageParam: undefined as string | undefined,
+    
+    // 2. Cursor Pagination Logic
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+
+    // Wait for the URL slug to be resolved before fetching
+    enabled: !isTenantLoading,
+  });
 };
 
-// Fetch single category
-export function useCategory(
-  id: string,
-  options?: Partial<UseQueryOptions<Category | null>> & {
-    initialData?: Category;
-  }
-) {
+/**
+ * Hook for Single Category Details
+ */
+export const useCategory = (id: string | null) => {
+  const { tenant } = useTenantContext();
+
   return useQuery({
-    queryKey: categoryKeys.detail(id),
-    queryFn: () => categoryService.getCategoryById(id),
-    enabled: !!id,
-    staleTime: 0,
-    gcTime: 30 * 60 * 1000,
-    initialData: options?.initialData,
-    ...options,
+    queryKey: ["category-detail", tenant?.id, id],
+    queryFn: () => categoryService.getCategoryById(id!),
+    enabled: !!id && !!tenant?.id,
+    staleTime: 1000 * 60 * 30, // Category details change very rarely
   });
-}
+};
 
-// Fetch categories for normal sections (featured, homepage, etc.)
-export function useCategories(params: ProductSearchParams = {}) {
-  return useQuery<CursorPaginatedResponse<Category>>({
-    queryKey: categoryKeys.list(params),
-    queryFn: () => categoryService.getCategories(params),
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-  });
-}
+/**
+ * Hook for Top Categories (Navigation/Home Page)
+ */
+export const useTopCategories = (limit = 6) => {
+  const { tenant } = useTenantContext();
 
-// Infinite scroll for categories
-export function useInfiniteCategories(params: CategorySearchParams = {}) {
-  return useInfiniteQuery({
-    queryKey: categoryKeys.list(params),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      categoryService.getCategories({ ...params, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: CursorPaginatedResponse<Category>) =>
-      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
+  return useQuery({
+    queryKey: ["top-categories", tenant?.id, limit],
+    queryFn: () => categoryService.getTopCategories(limit),
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour for high performance
   });
-}
+};

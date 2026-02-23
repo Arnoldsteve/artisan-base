@@ -44,6 +44,17 @@ export class CategoryController {
   }
 
   @Public()
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get category details by SEO slug' })
+  async findBySlug(@Param('slug') slug: string) {
+    const category = await this.categoryService.findBySlug(slug);
+    return {
+      success: true,
+      data: category,
+    };
+  }
+  
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get a single category by ID (Public Storefront)' })
   async findOne(@Param('id') id: string) {
