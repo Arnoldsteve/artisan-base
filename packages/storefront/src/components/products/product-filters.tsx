@@ -10,14 +10,14 @@ import {
 } from "@repo/ui/components/ui/select";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
-import { ProductFilters as FiltersType } from "@/types"; 
+import { ProductFilters as FiltersType, SortField } from "@/types/product"; 
 
 interface ProductFiltersProps {
   categories: { id: string; name: string }[];
   selectedCategory: string;
   setSelectedCategory: (value: string) => void;
-  sortBy: FiltersType["sortBy"]; 
-  setSortBy: (value: FiltersType["sortBy"]) => void;
+  sortBy: string; 
+  setSortBy: (value: any) => void;
   priceRange: [number, number]; 
   setPriceRange: (value: [number, number]) => void;
   onApplyPriceFilter: () => void;
@@ -36,19 +36,21 @@ export function ProductFilters({
   hasUnappliedPriceChanges,
 }: ProductFiltersProps) {
   return (
-    <div className="bg-card border rounded-lg p-6 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+    <div className="bg-card border rounded-sm p-4 mb-6 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Category Filter */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Category</label>
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">
+            Category
+          </label>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
+            <SelectTrigger className="rounded-sm">
+              <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category.id} value={category.name}>
+                <SelectItem key={category.id} value={category.id}>
                   {category.name}
                 </SelectItem>
               ))}
@@ -58,59 +60,49 @@ export function ProductFilters({
 
         {/* Sort By Filter */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Sort By</label>
-          <Select
-            value={sortBy}
-            onValueChange={(value) => setSortBy(value as FiltersType["sortBy"])}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select sort" />
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">
+            Sort Results
+          </label>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="rounded-sm">
+              <SelectValue placeholder="Sort by..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Name A–Z</SelectItem>
-              <SelectItem value="price-low">Price: Low → High</SelectItem>
-              <SelectItem value="price-high">Price: High → Low</SelectItem>
+              <SelectItem value="createdAt">Newest First</SelectItem>
+              <SelectItem value="price-low">Price: Low to High</SelectItem>
+              <SelectItem value="price-high">Price: High to Low</SelectItem>
+              <SelectItem value="rating">Top Rated</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Price Range Filter */}
         <div>
-          <label className="text-sm font-medium mb-2 block">
-            Price Range: Ksh {priceRange[0].toLocaleString()} - Ksh {priceRange[1].toLocaleString()}
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">
+            Price (KES)
           </label>
-          <div className="flex space-x-2 mb-2">
+          <div className="flex items-center gap-2">
             <Input
               type="number"
               placeholder="Min"
               value={priceRange[0]}
-              onChange={(e) =>
-                setPriceRange([Number(e.target.value), priceRange[1]])
-              }
-              className="w-24"
+              onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+              className="h-9 rounded-sm"
             />
-            <span className="self-center">-</span>
+            <span className="text-muted-foreground">-</span>
             <Input
               type="number"
               placeholder="Max"
               value={priceRange[1]}
-              onChange={(e) =>
-                setPriceRange([priceRange[0], Number(e.target.value)])
-              }
-              className="w-24"
+              onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+              className="h-9 rounded-sm"
             />
+            {hasUnappliedPriceChanges && (
+              <Button onClick={onApplyPriceFilter} size="sm" className="h-9 rounded-sm">
+                Apply
+              </Button>
+            )}
           </div>
-          
-          {/* Apply Button - Only shows when there are unapplied changes */}
-          {hasUnappliedPriceChanges && (
-            <Button
-              onClick={onApplyPriceFilter}
-              size="sm"
-              className="w-full"
-            >
-              Apply Price Filter
-            </Button>
-          )}
         </div>
       </div>
     </div>

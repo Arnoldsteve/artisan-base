@@ -29,7 +29,6 @@ export class TenantRepository {
   async findById(id: string): Promise<Tenant | null> {
     return this.prisma.tenant.findUnique({
       where: { id },
-      
     });
   }
 
@@ -40,6 +39,26 @@ export class TenantRepository {
     return this.prisma.tenant.update({
       where: { id },
       data,
+    });
+  }
+
+  /**
+   * GLOBAL ACTION: Find a tenant by its subdomain/slug.
+   * This is used by the storefront to resolve 'artisanbase.com/shop/slug'
+   * into a real tenantId for data isolation.
+   */
+
+  async findBySubdomain(subdomain: string) {
+    return this.prisma.tenant.findUnique({
+      where: { subdomain },
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        baseCurrency: true,
+        settings: true,
+        status: true,
+      },
     });
   }
 }

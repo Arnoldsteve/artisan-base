@@ -9,6 +9,8 @@ import { TenantContextService } from '../../common/tenant-context/tenant-context
  * Enterprise Integrated Pagination & Cache Extension
  * This allows a "Single-Call" approach for high-performance data listing.
  */
+// ... (imports)
+
 export const paginationExtension = (
   cacheHelper: CacheHelperService,
   tenantContext: TenantContextService
@@ -25,9 +27,13 @@ export const paginationExtension = (
             ttl?: number 
           }
         ): Promise<PageDto<Prisma.Result<T, A, 'findMany'>[number]>> {
-          const tenantId = tenantContext.getTenantIdOrThrow();
+          /**
+           * TOP 1% LOGIC: Optional Isolation
+           * If tenantId is missing (Marketplace mode), we fallback to 'global'.
+           * This allows the same .paginate() method to work for both modes.
+           */
+          const tenantId = tenantContext.getTenantId() || 'global';
           
-          // Delegate the orchestration to the Logic Engine
           return executePagination<any>(
             this, 
             args, 

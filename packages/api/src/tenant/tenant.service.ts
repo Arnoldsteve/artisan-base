@@ -90,4 +90,20 @@ export class TenantService {
   async listStaffMembers(options: PageOptionsDto) {
     return this.memberRepo.listByTenant(options);
   }
+
+   /**
+   * PUBLIC RESOLUTION: Translates a URL slug into a real store profile.
+   * This is the "Entry Point" for the storefront.
+   */
+  async resolveStoreBySlug(slug: string) {
+    const store = await this.tenantRepo.findBySubdomain(slug);
+
+    if (!store || store.status !== 'ACTIVE') {
+      throw new NotFoundException(`Store with URL '${slug}' not found or is currently inactive.`);
+    }
+
+    // Enterprise Scale: This object provides the 'tenantId' to the frontend 
+    // so it can start sending the x-tenant-id header.
+    return store;
+  }
 }

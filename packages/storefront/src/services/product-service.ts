@@ -1,136 +1,73 @@
 import { apiClient } from "@/lib/api-client";
-import { cleanParams } from "@/lib/clean-params";
-import {
-  Product,
-  Category,
-  ProductSearchParams,
-  ApiResponse,
-  CursorPaginatedResponse,
-} from "@/types";
+import { 
+  Product, 
+  ProductFilters 
+} from "@/types/product";
+import { ApiResponse, CursorPaginatedResponse } from "@/types/shared";
 
-// Helper function to normalize product
-function normalizeProduct(product: any): Product {
-  return {
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    description: product.description || "",
-    price: Number(product.price) || 0,
-    currency: product.currency || "KES",
-    originalPrice: product.originalPrice
-      ? Number(product.originalPrice)
-      : undefined,
-    image: product.image || (product.images && product.images[0]) || "",
-    images: product.images || [],
-    categories: product.categories || [],
-    categoryId: product.categoryId || "",
-    rating: product.rating ?? 0,
-    reviewCount: product.reviewCount ?? 0,
-    inventoryQuantity: product.inventoryQuantity ?? 0,
-    sku: product.sku || "",
-    tags: product.tags || [],
-    isActive: product.isActive ?? true,
-    createdAt: product.createdAt,
-    updatedAt: product.updatedAt,
-  };
-}
-
+/**
+ * SOLID Principle: Single Responsibility
+ * This service is purely an orchestrator for fetching product data.
+ * All sorting, filtering, and arrival logic is handled by the Backend 
+ * via Query Parameters for maximum scale.
+ */
 export class ProductService {
-  constructor() {}
-
-  private sortProducts(
-    products: Product[],
-    sortBy?: string,
-    sortOrder: "asc" | "desc" = "desc"
-  ): Product[] {
-    if (!sortBy) return products;
-    return [...products].sort((a, b) => {
-      let aVal: any, bVal: any;
-      switch (sortBy) {
-        case "name":
-          aVal = a.name.toLowerCase();
-          bVal = b.name.toLowerCase();
-          break;
-        case "price":
-          aVal = a.price;
-          bVal = b.price;
-          break;
-        case "rating":
-          aVal = a.rating;
-          bVal = b.rating;
-          break;
-        case "createdAt":
-          aVal = new Date(a.createdAt).getTime();
-          bVal = new Date(b.createdAt).getTime();
-          break;
-        default:
-          return 0;
-      }
-      return sortOrder === "asc"
-        ? aVal > bVal
-          ? 1
-          : -1
-        : aVal < bVal
-          ? 1
-          : -1;
-    });
-  }
-
+  /**
+   * GLOBAL & TENANT: Fetch products.
+   * If TenantProvider has set a tenantId, this returns store-specific products.
+   * If not, it returns global marketplace products.
+   */
   async getProducts(
-    params: ProductSearchParams = {}
+    params: ProductFilters & { limit?: number; cursor?: string } = {}
   ): Promise<CursorPaginatedResponse<Product>> {
-    const cleanedParams = cleanParams(params);
-
-    const response = await apiClient.get<CursorPaginatedResponse<Product>>(
-      "/api/v1/storefront/products",
-      cleanedParams
-    );
-
-    console.log("api response in product service", response);
-    return response;
-  }
-
-  async getProduct(id: string): Promise<Product> {
-    const response = await apiClient.get<ApiResponse<Product>>(
-      `/api/v1/storefront/products/${id}`
-    );
-    if (response.success) return normalizeProduct(response.data);
-    throw new Error("Product not found");
-  }
-
-  async getFeaturedProducts(params?: {
-    limit?: number;
-    cursor?: string;
-  }): Promise<CursorPaginatedResponse<Product>> {
-    const response = await apiClient.get<CursorPaginatedResponse<Product>>(
-      "/api/v1/storefront/products/featured",
+    return apiClient.get<CursorPaginatedResponse<Product>>(
+      "/products", 
       params
     );
-
-    return response;
   }
 
-  async getNewArrivals(limit = 24): Promise<Product[]> {
-    const allProducts = await this.getProducts({ limit: 100 });
-    return this.sortProducts(allProducts.data, "createdAt", "desc").slice(
-      0,
-      limit
+  /**
+   * PUBLIC: Get a specific product by its URL slug.
+   */
+  async getProductBySlug(slug: string): Promise<Product> {
+    const response = await apiClient.get<ApiResponse<Product>>(
+      `/products/slug/${slug}`
+    );
+    return response.data;
+  }
+
+  /**
+   * PERFORMANCE: Fetch featured products.
+   * Backend uses an 'isFeatured' index for sub-millisecond response.
+   */
+  async getFeaturedProducts(limit = 10): Promise<CursorPaginatedResponse<Product>> {
+    return apiClient.get<CursorPaginatedResponse<Product>>(
+      "/products/featured",
+      { limit }
     );
   }
 
-  async searchProducts(query: string, limit = 10): Promise<Product[]> {
+  /**
+   * PERFORMANCE: Fetch new arrivals.
+   * No client-side sorting. Backend handles 'ORDER BY createdAt DESC'.
+   */
+  async getNewArrivals(limit = 10): Promise<CursorPaginatedResponse<Product>> {
+    return apiClient.get<CursorPaginatedResponse<Product>>(
+      "/products",
+      { limit, sortBy: "createdAt", sortOrder: "desc" }
+    );
+  }
+
+  /**
+   * SEARCH: Full-text search support.
+   */
+  async search(query: string, limit = 10): Promise<Product[]> {
     if (!query.trim()) return [];
     const response = await apiClient.get<ApiResponse<Product[]>>(
-      "/storefront/products/search",
+      "/products/search",
       { q: query, limit }
     );
-    return response.success ? response.data : [];
-  }
-
-  async getProductBySlug(slug: string) {
-    return apiClient.get<ApiResponse<Product>>(
-      `/api/v1/storefront/products/slug/${slug}`
-    );
+    return response.data;
   }
 }
 

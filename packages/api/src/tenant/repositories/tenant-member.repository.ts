@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, TenantMember, TenantUserRole } from '@generated/prisma/client';
 import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
-import { PageDto } from '@/common/pagination/dtos/page.dto';
 
 @Injectable()
 export class TenantMemberRepository {

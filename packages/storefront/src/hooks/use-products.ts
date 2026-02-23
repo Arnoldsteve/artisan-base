@@ -1,126 +1,68 @@
-import {
-  useQuery,
-  useInfiniteQuery,
-  UseQueryOptions,
-} from "@tanstack/react-query";
-import { productService } from "@/services/product-service";
-import {
-  Product,
-  ProductSearchParams,
-  PaginatedResponse,
-  CursorPaginatedResponse,
-  Category,
-} from "@/types";
+"use client";
 
-export const productKeys = {
-  all: ["products"] as const,
-  lists: () => [...productKeys.all, "list"] as const,
-  list: (filters: ProductSearchParams) =>
-    [...productKeys.lists(), filters] as const,
-  details: () => [...productKeys.all, "detail"] as const,
-  detail: (id: string) => [...productKeys.details(), id] as const,
-  featured: (limit?: number) =>
-    limit
-      ? ([...productKeys.all, "featured", limit] as const)
-      : ([...productKeys.all, "featured"] as const),
-  newArrivals: () => [...productKeys.all, "new-arrivals"] as const,
-  categories: () => [...productKeys.all, "categories"] as const,
-  search: (query: string) => [...productKeys.all, "search", query] as const,
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { productService } from "@/services/product-service";
+import { useTenantContext } from "@/contexts/tenant-context";
+import { ProductFilters } from "@/types/product";
+
+/**
+ * TOP 1% ARCHITECTURE: Context-Aware Infinite Products Hook
+ * This hook handles the discovery of millions of products using
+ * Cursor-based pagination for maximum performance.
+ */
+export const useProducts = (filters: ProductFilters = {}, limit = 12) => {
+  // 1. Detect Context: If tenantId exists, we are in a Storefront.
+  // If null, we are in the Global Marketplace.
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useInfiniteQuery({
+    /**
+     * Cache Partitioning:
+     * The key includes tenant.id, making the cache isolated per store.
+     */
+    queryKey: ["storefront-products", tenant?.id, filters],
+
+    queryFn: ({ pageParam }) =>
+      productService.getProducts({
+        ...filters,
+        limit,
+        cursor: pageParam,
+      }),
+
+    initialPageParam: undefined as string | undefined,
+
+    // 2. Cursor Logic: Tells TanStack Query how to find the next "page"
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+
+    // Only fetch if we are not busy resolving the store from the URL
+    enabled: !isTenantLoading,
+  });
 };
 
-export function useProducts(
-  params: ProductSearchParams = {},
-  options?: UseQueryOptions<CursorPaginatedResponse<Product>>
-) {
-  return useQuery<CursorPaginatedResponse<Product>>({
-    queryKey: productKeys.list(params),
-    queryFn: () => productService.getProducts(params),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    ...options,
-  });
-}
+/**
+ * Hook for Single Product Details by Slug
+ */
+export const useProductBySlug = (slug: string) => {
+  const { tenant } = useTenantContext();
 
-export function useInfiniteProducts(params: ProductSearchParams = {}) {
-  return useInfiniteQuery({
-    queryKey: productKeys.list(params),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      productService.getProducts({ ...params, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
-      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-}
-
-export function useProduct(
-  id: string,
-  options?: Partial<UseQueryOptions<Product>> & { initialData?: Product }
-) {
   return useQuery({
-    queryKey: ["product", id],
-    queryFn: () => productService.getProduct(id),
-    enabled: !!id,
-    staleTime: 0,
-    gcTime: 30 * 60 * 1000,
-    initialData: options?.initialData,
-    ...options,
+    // Key includes tenantId to ensure we get the right version of a product slug
+    queryKey: ["product-detail", tenant?.id, slug],
+    queryFn: () => productService.getProductBySlug(slug),
+    enabled: !!slug,
+    staleTime: 1000 * 60 * 5, // Detail pages are safe to cache for 5 mins
   });
-}
+};
 
-interface UseFeaturedProductsOptions {
-  limit?: number;
-}
+/**
+ * Hook for New Arrivals (Discovery Section)
+ */
+export const useNewArrivals = (limit = 10) => {
+  const { tenant } = useTenantContext();
 
-export function useFeaturedProducts({
-  limit,
-}: UseFeaturedProductsOptions = {}) {
-  return useQuery<CursorPaginatedResponse<Product>>({
-    queryKey: productKeys.featured(limit),
-    queryFn: () => productService.getFeaturedProducts({ limit }),
-    staleTime: 15 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
-}
-
-export function useInfiniteFeaturedProducts(params: { limit?: number } = {}) {
-  return useInfiniteQuery({
-    queryKey: productKeys.featured(params.limit),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      productService.getFeaturedProducts({ ...params, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
-      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-}
-
-export function useNewArrivals(limit: number = 12) {
   return useQuery({
-    queryKey: productKeys.newArrivals(),
+    queryKey: ["new-arrivals", tenant?.id, limit],
     queryFn: () => productService.getNewArrivals(limit),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+    staleTime: 1000 * 60 * 10, // Arrivals are safe to cache longer
   });
-}
-
-export function useProductSearch(query: string, limit: number = 10) {
-  return useQuery({
-    queryKey: productKeys.search(query),
-    queryFn: () => productService.searchProducts(query, limit),
-    enabled: !!query.trim(),
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
-  });
-}
-
-export function useFilteredProducts(filters: ProductSearchParams) {
-  return useQuery({
-    queryKey: productKeys.list(filters),
-    queryFn: () => productService.getProducts(filters),
-    staleTime: 3 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-}
+};
