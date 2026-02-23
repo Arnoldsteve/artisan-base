@@ -2,13 +2,22 @@ import { createMetadata } from "@/lib/metadata";
 import ProductDetailsPage from "@/components/products/product-details-page";
 import { productService } from "@/services/product-service";
 import { formatMoney } from "@/lib/money";
+import { notFound } from "next/navigation";
 
-async function fetchProduct(identifier: string) {
+/**
+ * TOP 1% ARCHITECTURE: Server-Side Fetching
+ * For millions of users, SEO is the primary driver of traffic.
+ * This server component ensures Google sees the full product content instantly.
+ */
+async function fetchProduct(slug: string) {
   try {
-    const product = await productService.getProduct(identifier);
+    // FIX: Using the refactored slug lookup
+    // In this 'Global' route, we don't send x-tenant-id, allowing 
+    // the backend to return the product from any artisan store.
+    const product = await productService.getProductBySlug(slug);
     return product;
   } catch (e) {
-    console.error("Error fetching product:", e);
+    console.error(`[Server] Error fetching product slug: ${slug}`, e);
     return null;
   }
 }
@@ -27,31 +36,21 @@ export async function generateMetadata({
 
   if (!product) {
     return createMetadata({
-      title: "Product Not Found - Artisan Base",
-      description: "This product does not exist or has been removed.",
+      title: "Product Not Found | Artisan Base",
+      description: "The handcrafted item you are looking for is no longer available.",
     });
   }
 
   const formattedPrice = formatMoney(product.price, product.currency);
-  const inStock = product.inventoryQuantity > 0;
-
-  const description = product.description
-    ? `${product.description.slice(0, 150)}... | ${formattedPrice} | ${inStock ? "In Stock" : "Out of Stock"} | Handcrafted with care.`
-    : `Buy ${product.name} for ${formattedPrice}. Handcrafted artisan product. ${inStock ? "Available now" : "Currently unavailable"}.`;
-
+  
   return createMetadata({
-    title: `${product.name} | Buy Handcrafted ${product.categories?.[0]?.name || 'Artisan Product'} - Artisan Base`,
-    description,
-
+    title: `${product.name} | ${product.sku} | Artisan Base`,
+    description: product.description?.slice(0, 160) || `Buy ${product.name} for ${formattedPrice}.`,
     openGraph: {
       title: product.name,
       images: [
         {
-          url:
-            typeof product.image === "string"
-              ? product.image
-              : (product.image as { url?: string })?.url ||
-                "/default-image.jpg",
+          url: product.images?.[0]?.url || "/default-og.png",
           width: 1200,
           height: 630,
           alt: product.name,
@@ -69,6 +68,14 @@ export default async function Page({
   const { slug } = await params;
   const product = await fetchProduct(slug);
 
-  if (!product) return <div className="justify-center">Product not found.</div>;
+  // Enterprise Standard: Use Next.js notFound() to trigger the 404 page
+  if (!product) {
+    notFound();
+  }
+
+  /**
+   * SOLID: The Page handles data fetching (Server) 
+   * and delegates the UI to a Client Component.
+   */
   return <ProductDetailsPage initialProduct={product} />;
 }

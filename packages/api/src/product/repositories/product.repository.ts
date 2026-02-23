@@ -28,33 +28,61 @@ export class ProductRepository {
   }
 
   /**
-   * FIX: Changed to findFirst.
-   * findUnique requires the compound key { tenantId_slug: { ... } }.
-   * findFirst allows us to use just 'slug' because the extension adds the tenantId.
+   * Used for the Product Detail Page.
+   * Includes Merchant info so the customer can visit the specific store.
    */
   async findBySlug(slug: string): Promise<Product | null> {
     return this.prisma.client.product.findFirst({
       where: { slug },
+      include: {
+        tenant: {
+          select: {
+            name: true,
+            subdomain: true,
+          },
+        },
+        variants: true,
+        categories: { include: { category: true } },
+      },
     });
   }
 
   /**
    * Enterprise Standard: The Repository defines the "Shape" and "Policy".
-   * This implementation now leverages the full Cache + Pagination + Isolation pipeline.
+   * Optimized for both Global Marketplace and Isolated Storefronts.
    */
   async list(options: PageOptionsDto): Promise<PageDto<Product>> {
     const where: Prisma.ProductWhereInput = {
       isActive: true,
       ...(options.search && {
-        name: { contains: options.search, mode: 'insensitive' },
+        OR: [
+          { name: { contains: options.search, mode: 'insensitive' } },
+          { sku: { contains: options.search, mode: 'insensitive' } },
+        ],
       }),
     };
 
-    // ONE CALL: Security + Pagination + Cache + Metadata
+    /**
+     * TOP 1% ARCHITECTURE: Eager Loading Merchant Identity
+     * In a marketplace, we MUST know who the seller is.
+     * We select only 'name' and 'subdomain' to keep the payload lean for millions of rows.
+     */
     return this.prisma.client.product.paginate({
       options,
       where,
-      include: { categories: { include: { category: true } } },
+      include: {
+        tenant: {
+          select: {
+            name: true,
+            subdomain: true,
+          },
+        },
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+      },
       cache: true,
     });
   }

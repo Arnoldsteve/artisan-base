@@ -33,10 +33,6 @@ export class ProductService {
       inventoryQuantity: dto.inventoryQuantity,
       images: dto.images as any,
       isActive: dto.isActive,
-      /**
-       * FIX: Nested creates for join tables also need the tenantId
-       * because ProductCategory is an isolated model.
-       */
       categories: dto.categoryIds ? {
         create: dto.categoryIds.map(id => ({ 
           categoryId: id,
@@ -46,14 +42,33 @@ export class ProductService {
     });
   }
 
-  /**
+ /**
    * Enterprise Standard: Clean "One-Liner" Service.
-   * Business logic only orchestrates; pagination and data shape are delegated to the Repository.
+   * Logic: The Repository handles the 'Shape' and the Extension handles 'Isolation'.
+   * Result: Works for both Global Marketplace and Isolated Storefronts.
    */
   async findAll(options: PageOptionsDto) {
     return this.productRepo.list(options);
   }
 
+   /**
+   * PUBLIC ACTION: Fetch product by URL Slug.
+   * millions of users: Critical for SEO and social sharing.
+   */
+  async findBySlug(slug: string) {
+    const product = await this.productRepo.findBySlug(slug);
+    
+    if (!product || !product.isActive) {
+      throw new NotFoundException(`Product '${slug}' not found or is no longer available.`);
+    }
+
+    return product;
+  }
+
+  
+  /**
+   * PRIVATE ACTION: Fetch by ID (Internal/Dashboard use).
+   */
   async findOne(id: string) {
     const product = await this.productRepo.findById(id);
     if (!product) throw new NotFoundException('Product not found');

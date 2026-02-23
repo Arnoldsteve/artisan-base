@@ -19,6 +19,7 @@ export class TenantContextMiddleware implements NestMiddleware {
     // AND without a tenant header (Marketplace).
     const storefrontDiscoveryPaths = [
       '/products',
+      '/products/slug',
       '/categories',
       '/reviews',
     ]

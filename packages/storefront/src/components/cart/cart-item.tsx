@@ -1,92 +1,100 @@
+"use client";
+
 import React from "react";
-import { CartItem as CartItemType } from "@/types/cart";
-import { useCart } from "@/hooks/use-cart";
 import Image from "next/image";
+import Link from "next/link";
+import { Trash2, Minus, Plus } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { formatMoney } from "@/lib/money";
-import { Trash } from "lucide-react";
-import Link from "next/link";
-import { Separator } from "@repo/ui/components/ui/separator";
+import { CartItem as CartItemType } from "@/types/cart";
+import { useCart } from "@/hooks/use-cart";
 
 interface CartItemProps {
   item: CartItemType;
 }
 
+/**
+ * SOLID Principle: Single Responsibility
+ * This component is responsible for rendering an individual row in the cart
+ * and providing direct hooks into the quantity/removal logic.
+ */
 export const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCart();
 
+  const isLowStock = item.inventoryQuantity > 0 && item.inventoryQuantity <= 5;
+
   return (
-    <div className="border-b last:border-b-0">
-      <Link
-        href={`/products/${item.slug}`}
-        className="flex items-center justify-between gap-4 py-3 hover:bg-muted/30 transition-colors rounded-md"
-      >
-        <div className="flex items-center gap-4">
-          <div className="flex-shrink-0">
-            <Image
-              src={
-                item.image || `https://picsum.photos/400/400?random=${item.id}`
-              }
-              alt={item.name}
-              width={90}
-              height={90}
-              className="rounded object-cover"
-            />
-          </div>
+    <div className="flex items-start gap-4 py-4 first:pt-0 last:pb-0 border-b last:border-b-0">
+      {/* 1. Product Thumbnail */}
+      <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
+        <Image
+          src={item.image || `https://picsum.photos/200/200?random=${item.id}`}
+          alt={item.name}
+          fill
+          className="object-cover"
+          sizes="96px"
+        />
+      </div>
 
-          <div className="flex-1">
-            <p className="text-sm hover:text-blue-500 hover:underline transition-colors">{item.name}</p>
-            <p className="text-sm text-muted-foreground line-clamp-1">
-              {item.description}
-            </p>
-            <div className="text-sm text-muted-foreground">
-              {formatMoney(item.price, "KES")} per unit
-            </div>
-            <p className="text-sm text-orange-500">Few units left</p>
-          </div>
-          </div>
-
-          <div className="hidden md:block font-semibold text-right min-w-[100px]">
+      {/* 2. Item Details */}
+      <div className="flex flex-1 flex-col">
+        <div className="flex justify-between text-base font-medium text-foreground">
+          <Link 
+            href={`/products/${item.slug}`} 
+            className="hover:text-blue-600 transition-colors line-clamp-1 pr-4"
+          >
+            {item.name}
+          </Link>
+          <p className="font-bold tabular-nums">
             {formatMoney(item.price * item.quantity, "KES")}
-          </div>
-      </Link>
-
-      <div className="flex items-center justify-between py-2">
-        <div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => removeFromCart(item.id)}
-            className="text-red-500 flex items-center gap-1"
-          >
-            <Trash className="h-3 w-3 text-red-500" />
-            Remove
-          </Button>
+          </p>
         </div>
+        
+        <p className="mt-1 text-xs text-muted-foreground">
+          Unit Price: {formatMoney(item.price, "KES")}
+        </p>
 
-        <div className="flex items-center gap-3">
+        {/* Inventory Feedback for high-scale conversion */}
+        {isLowStock && (
+          <p className="mt-1 text-[10px] font-bold text-orange-600 uppercase">
+            Only {item.inventoryQuantity} left in stock
+          </p>
+        )}
+
+        <div className="mt-4 flex items-center justify-between">
+          {/* 3. Quantity Controls */}
+          <div className="flex items-center rounded-sm border bg-background h-8">
+            <button
+              type="button"
+              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+              disabled={item.quantity <= 1}
+              className="px-2 hover:text-blue-600 disabled:opacity-30 transition-colors"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="w-8 text-center text-xs font-bold">{item.quantity}</span>
+            <button
+              type="button"
+              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+              disabled={item.quantity >= item.inventoryQuantity}
+              className="px-2 hover:text-blue-600 disabled:opacity-30 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+
+          {/* 4. Remove Button */}
           <Button
+            variant="ghost"
             size="sm"
-            variant="outline"
-            className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
-            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-            disabled={item.quantity <= 1}
+            onClick={() => removeFromCart(item.id)}
+            className="h-8 text-xs text-muted-foreground hover:text-destructive gap-1.5"
           >
-            -
-          </Button>
-          <span className="px-2">{item.quantity}</span>
-          <Button
-            size="sm"
-            variant="outline"
-            className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
-            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-            disabled={item.quantity >= item.inventoryQuantity}
-          >
-            +
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Remove</span>
           </Button>
         </div>
       </div>
-       <Separator/>
     </div>
   );
 };
