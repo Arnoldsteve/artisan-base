@@ -19,88 +19,144 @@ export class OrderService {
     private readonly tenantContext: TenantContextService,
   ) {}
 
-  /**
+ /**
    * TOP 1% LOGIC: Multi-Vendor Marketplace Checkout
+   * millions of users: Orchestrates a single transaction that splits a global cart 
+   * into isolated merchant orders with verified financial totals.
    */
   async createMarketplaceOrder(dto: CheckoutPayloadDto) {
-    const productIds = dto.vendors.flatMap(v => v.items.map(i => i.productId));
+    // 1. PERFORMANCE: Fetch all involved products once to get "Truth" prices
+    const productIds = dto.vendors.flatMap((v) =>
+      v.items.map((i) => i.productId),
+    );
     const dbProducts = await this.prisma.product.findMany({
-      where: { id: { in: productIds } }
+      where: { id: { in: productIds } },
     });
 
     try {
+      /**
+       * GLOBAL ATOMIC TRANSACTION
+       * We use 'this.prisma' (Base Client) because we need to write to 
+       * different tenant rows in a single database handshake.
+       */
       return await this.prisma.$transaction(async (tx) => {
-        // Step A: Upsert Customer
+        // --- Step A: Customer Identity Management ---
+        // We link the customer to the primary store in the checkout
         const customer = await tx.customer.upsert({
-          where: { tenantId_email: { tenantId: dto.vendors[0].tenantId, email: dto.customer.email } },
-          update: { phone: dto.customer.phone },
+          where: {
+            tenantId_email: {
+              tenantId: dto.vendors[0].tenantId,
+              email: dto.customer.email,
+            },
+          },
+          update: {
+            firstName: dto.customer.firstName,
+            lastName: dto.customer.lastName,
+            phone: dto.customer.phone,
+          },
           create: {
+            tenantId: dto.vendors[0].tenantId,
             email: dto.customer.email,
             firstName: dto.customer.firstName,
             lastName: dto.customer.lastName,
             phone: dto.customer.phone,
-            tenantId: dto.vendors[0].tenantId,
-          }
+          },
         });
 
         const orderIds: string[] = [];
+        let globalTotalAmount = 0; // Accumulator for the single payment record
 
-        // Step B: Multi-Vendor loop
+        // --- Step B: Vendor Isolation Loop ---
         for (const vendor of dto.vendors) {
           let vendorSubtotal = 0;
 
-          const orderItemsData = vendor.items.map(item => {
-            const dbProd = dbProducts.find(p => p.id === item.productId);
-            if (!dbProd) throw new BadRequestException(`Product ${item.productId} not found`);
-            
-            const lineTotal = Number(dbProd.price) * item.quantity;
+          // Map items and verify prices against the database (Anti-Fraud)
+          const orderItemsData = vendor.items.map((item) => {
+            const dbProduct = dbProducts.find((p) => p.id === item.productId);
+            if (!dbProduct) {
+              throw new BadRequestException(`Product ${item.productId} is no longer available.`);
+            }
+
+            const unitPrice = Number(dbProduct.price);
+            const lineTotal = unitPrice * item.quantity;
             vendorSubtotal += lineTotal;
 
             return {
-              productId: dbProd.id,
-              productName: dbProd.name,
-              unitPrice: dbProd.price,
+              productId: dbProduct.id,
+              productName: dbProduct.name,
+              unitPrice: unitPrice,
               quantity: item.quantity,
-              tenantId: vendor.tenantId,
+              tenantId: vendor.tenantId, // Stamp isolation on the line item
             };
           });
 
+          // Enterprise Financial Logic (Tax & Shipping distribution)
+          const TAX_RATE = 0.16; // 16% VAT Example
+          const vendorTax = vendorSubtotal * TAX_RATE;
+          const vendorShipping = 600; // Placeholder: In production, calculate based on vendor.shippingMethodId
+          const vendorTotal = vendorSubtotal + vendorTax + vendorShipping;
+
+          // Track for Global Payment entry
+          globalTotalAmount += vendorTotal;
+
+          // Create the isolated Order for this specific artisan
           const order = await tx.order.create({
             data: {
               tenantId: vendor.tenantId,
-              orderNumber: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+              orderNumber: `ORD-${Math.random().toString(36).substring(2, 11).toUpperCase()}`,
               status: OrderStatus.PENDING,
               paymentStatus: PaymentStatus.PENDING,
               currency: dto.currency,
-              totalAmount: vendorSubtotal,
+              
+              // POPULATING BREAKDOWN FIELDS (Fixes the 0.00 issue)
+              subtotal: vendorSubtotal,
+              taxAmount: vendorTax,
+              shippingAmount: vendorShipping,
+              totalAmount: vendorTotal,
+              
               shippingAddress: dto.shippingAddress as any,
-              // FIX for Error 1: Use shippingAddress as billing if billing is missing in DTO
-              billingAddress: (dto as any).billingAddress || dto.shippingAddress as any,
+              billingAddress: dto.shippingAddress as any, // Standard: Default billing to shipping
               customerId: customer.id,
-              items: { create: orderItemsData }
-            }
+              items: {
+                create: orderItemsData,
+              },
+            },
           });
 
           orderIds.push(order.id);
         }
 
+        // --- Step C: Create Unified Payment Audit Trail ---
         const paymentReference = `PAY-${Date.now()}`;
         await tx.payment.create({
           data: {
-            tenantId: dto.vendors[0].tenantId,
+            tenantId: dto.vendors[0].tenantId, // Primary store context
             type: PaymentType.ORDER,
             provider: dto.paymentProvider as any,
             providerTransactionId: paymentReference,
-            amount: 0, 
+            amount: globalTotalAmount, // Correct total of all sub-orders
             status: PaymentStatus.PENDING,
-            metadata: { orderIds }
-          }
+            metadata: {
+              orderIds,
+              customerEmail: customer.email,
+            },
+          },
         });
 
-        return { orderIds, paymentReference };
+        return {
+          orderIds,
+          paymentReference,
+          customer: {
+            email: customer.email,
+            firstName: customer.firstName,
+          },
+        };
       });
     } catch (error) {
-      throw new InternalServerErrorException('Checkout failed');
+      // Logic for logging and graceful failure at scale
+      if (error instanceof BadRequestException) throw error;
+      console.error('[Marketplace Order Error]:', error);
+      throw new InternalServerErrorException('Checkout failed. Our artisans are aware and we are fixing it.');
     }
   }
 
