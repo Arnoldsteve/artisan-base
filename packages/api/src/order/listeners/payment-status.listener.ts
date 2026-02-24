@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { PaymentUpdatedEvent } from '../../payment/payment.service';
 import { QUEUES, JOB_NAMES } from '../../common/queues/queue.constants';
+import { PAYMENT_EVENTS, PaymentUpdatedEvent } from '@/payment/events/payment.events';
 
 /**
  * SOLID Principle: Single Responsibility
@@ -22,7 +22,8 @@ export class PaymentStatusListener {
    * millions of users: Handled immediately after a Webhook or manual Verify.
    * We move the complex metadata logic to a BullMQ worker to keep the API responsive.
    */
-  @OnEvent('payment.updated')
+  // @OnEvent('payment.updated')
+  @OnEvent(PAYMENT_EVENTS.PAYMENT_UPDATED)
   async handlePaymentUpdated(event: PaymentUpdatedEvent) {
     this.logger.log(`Bridging Payment Update to Order Queue: ${event.paymentId}`);
 

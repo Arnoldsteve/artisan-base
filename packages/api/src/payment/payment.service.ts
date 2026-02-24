@@ -5,6 +5,7 @@ import { PaymentRepository } from './repositories/payment.repository';
 import { PaymentProviderRegistry } from './providers/payment-provider.registry';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
 import { PaymentInitParams } from './interfaces/payment-provider.interface';
+import { PAYMENT_EVENTS, PaymentUpdatedEvent } from './events/payment.events';
 
 export interface InitiatePaymentParams {
   orderId?: string;
@@ -16,14 +17,6 @@ export interface InitiatePaymentParams {
   description?: string;
   reference: string; // Internal 'PAY-...' reference
   metadata?: Record<string, any>;
-}
-
-export interface PaymentUpdatedEvent {
-  tenantId: string;
-  paymentId: string;
-  reference: string;
-  status: PaymentStatus;
-  rawPayload?: Record<string, any>;
 }
 
 @Injectable()
@@ -136,7 +129,8 @@ export class PaymentService {
       rawPayload: result.rawPayload,
     };
 
-    this.eventEmitter.emit('payment.updated', event);
+    // this.eventEmitter.emit('payment.updated', event);
+    this.eventEmitter.emit(PAYMENT_EVENTS.PAYMENT_UPDATED, event);
     this.logger.log(`Payment ${payment.id} [Ref: ${event.reference}] status updated to ${result.status}`);
 
     return { success: true };
@@ -152,7 +146,8 @@ export class PaymentService {
     if (payment.status !== result.status) {
       await this.paymentRepo.updateStatus(payment.id, payment.tenantId, result.status, result.rawPayload);
 
-      this.eventEmitter.emit('payment.updated', {
+      // this.eventEmitter.emit('payment.updated', {
+      this.eventEmitter.emit(PAYMENT_EVENTS.PAYMENT_UPDATED, {
         tenantId: payment.tenantId,
         paymentId: payment.id,
         reference: (payment.metadata as any)?.reference ?? '',
