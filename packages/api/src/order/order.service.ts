@@ -23,6 +23,9 @@ import {
   ORDER_EVENTS,
   OrderCreatedEvent,
 } from './events/order.events';
+import { PaymentService } from '@/payment/payment.service';
+import { PaymentProviderRegistry } from '@/payment/providers/payment-provider.registry';
+import { PaymentFulfillmentType } from '@/payment/interfaces/payment-provider.interface';
 
 @Injectable()
 export class OrderService {
@@ -33,6 +36,8 @@ export class OrderService {
     private readonly userRepo: UserRepository,
     private readonly tenantContext: TenantContextService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly paymentService: PaymentService, 
+    private readonly paymentRegistry: PaymentProviderRegistry, 
   ) {}
 
   /**
@@ -147,10 +152,30 @@ export class OrderService {
     });
 
     /**
-     * 4. EMIT EVENTS (Outside Transaction)
-     * We emit after the transaction succeeds to ensure background
-     * workers don't try to process records that were rolled back.
+     * TOP 1% LOGIC: Hybrid Fulfillment Check
+     * REDIRECT providers (PayPal/Stripe) are initiated synchronously.
+     * PUSH providers (Mpesa) remain in the background queue via the event.
      */
+
+    const providerStrategy = this.paymentRegistry.get(result.paymentProvider as any);
+    let checkoutUrl: string | undefined;
+
+    if (providerStrategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
+      // Initiate immediately to get the PayPal/Stripe URL for the frontend
+      const initResult = await this.tenantContext.run(result.orderResults[0].order.tenantId, async () => {
+        return await this.paymentService.initiate({
+          provider: result.paymentProvider as any,
+          amount: result.globalTotalAmount,
+          currency: result.currency,
+          reference: result.paymentReference,
+          phone: result.customer.phone,
+          description: `Marketplace Order: ${result.orderResults.length} stores`,
+          metadata: { orderIds: result.orderResults.map(r => r.order.id) }
+        });
+      });
+      
+      checkoutUrl = initResult.checkoutUrl;
+    }
 
     // A. Global Event: One Receipt for the Customer
     const checkoutEvent: CheckoutCompletedEvent = {
@@ -183,6 +208,7 @@ export class OrderService {
     return {
       orderIds: checkoutEvent.orderIds,
       paymentReference: checkoutEvent.paymentReference,
+      checkoutUrl,
     };
   }
 

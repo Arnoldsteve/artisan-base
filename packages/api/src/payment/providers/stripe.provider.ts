@@ -4,6 +4,7 @@ import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
 import Stripe from 'stripe';
 import {
   IPaymentProvider,
+  PaymentFulfillmentType,
   PaymentInitParams,
   PaymentInitResult,
   PaymentVerifyResult,
@@ -33,6 +34,10 @@ export class StripeProvider implements IPaymentProvider, OnModuleInit {
   getName(): PaymentProvider {
     return PaymentProvider.STRIPE;
   }
+
+  getFulfillmentType(): PaymentFulfillmentType {
+      return PaymentFulfillmentType.REDIRECT;
+    } 
 
   // ─── IPaymentProvider Implementation ────────────────────────────────────────
 

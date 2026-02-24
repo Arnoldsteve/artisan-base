@@ -15,8 +15,8 @@ export class TenantContextService {
    * Sets the tenant ID and runs the callback within the context.
    * This is typically called by the Middleware.
    */
-  run(tenantId: string, callback: () => void) {
-    TenantContextService.storage.run({ tenantId }, callback);
+  run<T>(tenantId: string, callback: () => T): T {
+    return TenantContextService.storage.run({ tenantId }, callback);
   }
 
   /**

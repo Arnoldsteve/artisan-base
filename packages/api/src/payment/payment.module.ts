@@ -8,6 +8,7 @@ import { PaymentProviderRegistry } from './providers/payment-provider.registry';
 import { MpesaProvider } from './providers/mpesa.provider';
 import { StripeProvider } from './providers/stripe.provider';
 import { PaymentProcessor } from './processors/payment.processor'; 
+import { PaypalProvider } from './providers/paypal.provider';
 
 /**
  * Pure Infrastructure Module.
@@ -29,10 +30,11 @@ import { PaymentProcessor } from './processors/payment.processor';
     PaymentProviderRegistry,
     MpesaProvider,
     StripeProvider,
+    PaypalProvider,
 
     // --- 3. Background Workers (Scalability) ---
-    PaymentProcessor, // ✅ ADDED: Orchestrates queue consumption
+    PaymentProcessor, 
   ],
-  exports: [PaymentService, PaymentRepository], 
+  exports: [PaymentService, PaymentRepository, PaymentProviderRegistry ], 
 })
 export class PaymentModule {}

@@ -1,10 +1,16 @@
-import { Injectable, OnModuleInit, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
 import { firstValueFrom } from 'rxjs';
 import {
   IPaymentProvider,
+  PaymentFulfillmentType,
   PaymentInitParams,
   PaymentInitResult,
   PaymentVerifyResult,
@@ -43,6 +49,15 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
     return PaymentProvider.MPESA;
   }
 
+  /**
+   * ✅ NEW: Implement Fulfillment Type
+   * millions of users: We return PUSH to signal that this is an
+   * asynchronous background-safe operation.
+   */
+  getFulfillmentType(): PaymentFulfillmentType {
+    return PaymentFulfillmentType.PUSH;
+  }
+
   // ─── Private Helpers ────────────────────────────────────────────────────────
 
   private async getAccessToken(): Promise<string> {
@@ -51,9 +66,12 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
     ).toString('base64');
 
     const { data } = await firstValueFrom(
-      this.http.get(`${this.baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-        headers: { Authorization: `Basic ${credentials}` },
-      }),
+      this.http.get(
+        `${this.baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+        {
+          headers: { Authorization: `Basic ${credentials}` },
+        },
+      ),
     );
 
     return data.access_token;
@@ -67,9 +85,9 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
   }
 
   private getPassword(timestamp: string): string {
-    return Buffer.from(
-      `${this.shortCode}${this.passkey}${timestamp}`,
-    ).toString('base64');
+    return Buffer.from(`${this.shortCode}${this.passkey}${timestamp}`).toString(
+      'base64',
+    );
   }
 
   // ─── IPaymentProvider Implementation ────────────────────────────────────────
@@ -83,8 +101,8 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
     const timestamp = this.getTimestamp();
     const password = this.getPassword(timestamp);
 
-     if (!params.phone) {
-       throw new BadRequestException('M-Pesa requires a valid phone number');
+    if (!params.phone) {
+      throw new BadRequestException('M-Pesa requires a valid phone number');
     }
 
     const phone = params.phone.replace(/^0/, '254').replace(/^\+/, '');
@@ -129,6 +147,7 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
   /**
    * Query STK Push status from Daraja
    */
+
   async verify(providerTransactionId: string): Promise<PaymentVerifyResult> {
     const token = await this.getAccessToken();
     const timestamp = this.getTimestamp();
@@ -147,13 +166,12 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
       ),
     );
 
-    // ResultCode 0 = success
     const status =
       data.ResultCode === '0'
         ? PaymentStatus.PAID
-        : data.ResultCode === '1032' // cancelled by user
-        ? PaymentStatus.FAILED
-        : PaymentStatus.PENDING;
+        : data.ResultCode === '1032'
+          ? PaymentStatus.FAILED
+          : PaymentStatus.PENDING;
 
     return {
       providerTransactionId,
@@ -166,7 +184,10 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
    * Parses Mpesa callback from Daraja
    * POST /payments/webhook/mpesa
    */
-  async handleWebhook(payload: Record<string, any>): Promise<PaymentVerifyResult> {
+
+  async handleWebhook(
+    payload: Record<string, any>,
+  ): Promise<PaymentVerifyResult> {
     const stkCallback = payload?.Body?.stkCallback;
 
     if (!stkCallback) {
@@ -183,17 +204,13 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
       case 0:
         status = PaymentStatus.PAID;
         break;
-      case 1032: // User cancelled
-      case 1037: // Timeout
+      case 1032:
+      case 1037:
         status = PaymentStatus.FAILED;
         break;
       default:
         status = PaymentStatus.FAILED;
     }
-
-    this.logger.log(
-      `Mpesa webhook | CheckoutRequestID: ${checkoutRequestId} | ResultCode: ${resultCode} | Status: ${status}`,
-    );
 
     return {
       providerTransactionId: checkoutRequestId,
