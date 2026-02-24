@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscriptionProviderRegistry } from './subscription-provider.registry';
 import { BillingRepository } from '../repositories/billing.repository';
-import { PaymentService, PaymentUpdatedEvent } from '@/payment/payment.service';
+import { PaymentService } from '@/payment/payment.service';
 import { PaymentProvider } from '@generated/prisma/client';
 import {
   ISubscriptionProvider,
@@ -13,6 +13,7 @@ import {
   ChangePlanParams,
   SubscriptionWebhookResult,
 } from '../interfaces/subscription-provider.interface';
+import { PaymentUpdatedEvent } from '@/payment/events/payment.events';
 
 /**
  * Manual Subscription Provider.

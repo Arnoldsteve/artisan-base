@@ -4,7 +4,7 @@ import { Job } from 'bullmq';
 import { QUEUES, JOB_NAMES } from '../../common/queues/queue.constants';
 import { PrismaService } from '@/prisma/prisma.service';
 import { PaymentStatus, OrderStatus } from '@generated/prisma/client';
-import { PaymentUpdatedEvent } from '../../payment/payment.service';
+import { PaymentUpdatedEvent } from '@/payment/events/payment.events';
 
 /**
  * TOP 1% ARCHITECTURE: Background Order Processor
