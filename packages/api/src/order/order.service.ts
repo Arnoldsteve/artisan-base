@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { OrderRepository } from './repositories/order.repository';
 import { ProductRepository } from '@/product/repositories/product.repository';
 import { UserRepository } from '@/user/repositories/user.repository';
@@ -7,9 +12,17 @@ import { TenantContextService } from '@/common/tenant-context/tenant-context.ser
 import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 import { CheckoutPayloadDto } from './dto/checkout-payload.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { PaymentStatus, OrderStatus, PaymentType } from '@generated/prisma/client';
+import {
+  PaymentStatus,
+  OrderStatus,
+  PaymentType,
+} from '@generated/prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CheckoutCompletedEvent, ORDER_EVENTS, OrderCreatedEvent } from './events/order.events';
+import {
+  CheckoutCompletedEvent,
+  ORDER_EVENTS,
+  OrderCreatedEvent,
+} from './events/order.events';
 
 @Injectable()
 export class OrderService {
@@ -19,17 +32,18 @@ export class OrderService {
     private readonly productRepo: ProductRepository,
     private readonly userRepo: UserRepository,
     private readonly tenantContext: TenantContextService,
-    private readonly eventEmitter: EventEmitter2, 
-
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
- /**
+  /**
    * TOP 1% LOGIC: Multi-Vendor Marketplace Checkout
-   * millions of users: Orchestrates a single transaction that splits a global cart 
+   * millions of users: Orchestrates a single transaction that splits a global cart
    * into isolated merchant orders with verified financial totals.
    */
- async createMarketplaceOrder(dto: CheckoutPayloadDto) {
-    const productIds = dto.vendors.flatMap((v) => v.items.map((i) => i.productId));
+  async createMarketplaceOrder(dto: CheckoutPayloadDto) {
+    const productIds = dto.vendors.flatMap((v) =>
+      v.items.map((i) => i.productId),
+    );
     const dbProducts = await this.prisma.product.findMany({
       where: { id: { in: productIds } },
     });
@@ -40,7 +54,12 @@ export class OrderService {
     const result = await this.prisma.$transaction(async (tx) => {
       // Step A: Upsert Customer
       const customer = await tx.customer.upsert({
-        where: { tenantId_email: { tenantId: dto.vendors[0].tenantId, email: dto.customer.email } },
+        where: {
+          tenantId_email: {
+            tenantId: dto.vendors[0].tenantId,
+            email: dto.customer.email,
+          },
+        },
         update: { phone: dto.customer.phone },
         create: {
           tenantId: dto.vendors[0].tenantId,
@@ -59,8 +78,9 @@ export class OrderService {
         let vendorSubtotal = 0;
         const orderItemsData = vendor.items.map((item) => {
           const dbProduct = dbProducts.find((p) => p.id === item.productId);
-          if (!dbProduct) throw new BadRequestException(`Product ${item.productId} missing.`);
-          
+          if (!dbProduct)
+            throw new BadRequestException(`Product ${item.productId} missing.`);
+
           const unitPrice = Number(dbProduct.price);
           vendorSubtotal += unitPrice * item.quantity;
 
@@ -109,7 +129,10 @@ export class OrderService {
           providerTransactionId: paymentReference,
           amount: globalTotalAmount,
           status: PaymentStatus.PENDING,
-          metadata: { orderIds: orderResults.map(r => r.order.id) },
+          metadata: {
+            orderIds: orderResults.map((r) => r.order.id),
+            reference: paymentReference,
+          },
         },
       });
 
@@ -119,27 +142,27 @@ export class OrderService {
         paymentReference,
         globalTotalAmount,
         currency: dto.currency,
-        paymentProvider: dto.paymentProvider
+        paymentProvider: dto.paymentProvider,
       };
     });
 
     /**
      * 4. EMIT EVENTS (Outside Transaction)
-     * We emit after the transaction succeeds to ensure background 
+     * We emit after the transaction succeeds to ensure background
      * workers don't try to process records that were rolled back.
      */
 
     // A. Global Event: One Receipt for the Customer
     const checkoutEvent: CheckoutCompletedEvent = {
-      orderIds: result.orderResults.map(r => r.order.id),
+      orderIds: result.orderResults.map((r) => r.order.id),
       paymentReference: result.paymentReference,
       paymentProvider: result.paymentProvider as any,
       customerId: result.customer.id,
       customerEmail: result.customer.email,
-      customerPhone: result.customer.phone, 
+      customerPhone: result.customer.phone,
       totalAmount: result.globalTotalAmount,
       currency: result.currency,
-      tenantIds: result.orderResults.map(r => r.order.tenantId),
+      tenantIds: result.orderResults.map((r) => r.order.tenantId),
     };
     this.eventEmitter.emit(ORDER_EVENTS.CHECKOUT_COMPLETED, checkoutEvent);
 
@@ -180,7 +203,7 @@ export class OrderService {
   /**
    * FIX for Error 2: Match new Repo signature (2 args)
    */
- async update(id: string, dto: UpdateOrderDto) {
+  async update(id: string, dto: UpdateOrderDto) {
     // 1. Ensure order exists first (Business Rule)
     const order = await this.findOne(id);
 

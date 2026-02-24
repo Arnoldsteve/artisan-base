@@ -143,7 +143,7 @@ export const columns: ColumnDef<Order>[] = [
     accessorKey: "paymentStatus",
     header: "Payment",
     cell: React.memo(({ row }) => {
-      const status = row.getValue("paymesstStatus") as PaymentStatus;
+      const status = row.getValue("paymentStatus") as PaymentStatus;
       return (
         <span
           style={{ color: getPaymentStatusColor(status) }}
