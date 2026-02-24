@@ -29,8 +29,8 @@ import { QueueRateLimiter } from './rate-limiter';
             maxRetriesPerRequest: null,
             // ⚡ Performance: Disable ready check for cloud providers (Upstash)
             enableReadyCheck: false,
-            connectTimeout: 30000,
-            keepAlive: 30000,
+            connectTimeout: 300000,
+            keepAlive: 300000,
           },
           defaultJobOptions: {
             // ⚡ Resilience: Exponential backoff for failed jobs (Email/API failure)
