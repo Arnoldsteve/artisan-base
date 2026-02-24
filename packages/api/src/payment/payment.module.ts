@@ -7,30 +7,32 @@ import { PaymentRepository } from './repositories/payment.repository';
 import { PaymentProviderRegistry } from './providers/payment-provider.registry';
 import { MpesaProvider } from './providers/mpesa.provider';
 import { StripeProvider } from './providers/stripe.provider';
+import { PaymentProcessor } from './processors/payment.processor'; 
 
 /**
  * Pure Infrastructure Module.
- * Owns: registry, providers, repository, controller.
- * Exports: PaymentService only — callers (OrderModule, BillingModule) import this.
+ * Owns: registry, providers, repository, controller, and background workers.
+ * millions of users: Exports only the Service to maintain strict encapsulation.
  */
 @Module({
   imports: [
-    HttpModule,     // MpesaProvider needs HttpService for Daraja API
-    ConfigModule,   // Providers need ConfigService for keys
+    HttpModule,     // Required for external API calls (Daraja/Stripe)
+    ConfigModule,   // Required for environment secrets
   ],
   controllers: [PaymentController],
   providers: [
-    // Core
+    // --- 1. Core Logic & Data ---
     PaymentService,
     PaymentRepository,
 
-    // Registry — must be first so providers can register into it
+    // --- 2. Registry & Strategies (Open/Closed Principle) ---
     PaymentProviderRegistry,
-
-    // Providers — self-register via onModuleInit
     MpesaProvider,
     StripeProvider,
+
+    // --- 3. Background Workers (Scalability) ---
+    PaymentProcessor, // ✅ ADDED: Orchestrates queue consumption
   ],
-  exports: [PaymentService], // BillingModule + OrderModule import this
+  exports: [PaymentService, PaymentRepository], 
 })
 export class PaymentModule {}

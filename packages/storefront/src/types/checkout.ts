@@ -31,9 +31,10 @@ export interface ShippingOption {
 
 export interface PaymentMethod {
   id: string;
+  type: string;
   name: string;
   icon: string;
-  description: string;
+  code: string;
   provider: string; 
 }
 

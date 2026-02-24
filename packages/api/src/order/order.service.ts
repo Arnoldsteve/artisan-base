@@ -73,8 +73,8 @@ export class OrderService {
           };
         });
 
-        const vendorTax = vendorSubtotal * 0.16;
-        const vendorShipping = 600; 
+        const vendorTax = vendorSubtotal * 0; // Simplified tax logic for demo, was 1.16 which is 16% VAT
+        const vendorShipping = 0; // Simplified for demo
         const vendorTotal = vendorSubtotal + vendorTax + vendorShipping;
         globalTotalAmount += vendorTotal;
 
@@ -136,6 +136,7 @@ export class OrderService {
       paymentProvider: result.paymentProvider as any,
       customerId: result.customer.id,
       customerEmail: result.customer.email,
+      customerPhone: result.customer.phone, 
       totalAmount: result.globalTotalAmount,
       currency: result.currency,
       tenantIds: result.orderResults.map(r => r.order.tenantId),

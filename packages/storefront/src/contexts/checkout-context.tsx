@@ -140,7 +140,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
         postalCode: state.shippingAddress.postalCode,
         country: state.shippingAddress.country,
       },
-      paymentProvider: (state.selectedPaymentMethod?.provider || "CASH").toUpperCase() as any, 
+      paymentProvider: (state.selectedPaymentMethod?.provider).toUpperCase() as any, 
       currency: "KES",
       vendors: Object.entries(vendorGroups).map(([tenantId, mappedItems]) => ({
         tenantId,
@@ -149,6 +149,8 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       })),
     };
 
+    // console.log("Submitting Order with Payload:", payload);
+    // return
     try {
       const response = await createOrder(payload);
       

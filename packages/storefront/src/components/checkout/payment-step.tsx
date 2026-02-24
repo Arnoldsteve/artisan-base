@@ -10,10 +10,9 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
 import { paymentSchema } from "@/validation-schemas/payment-schema";
-import { paymentMethods } from "@/utils/payment-methods"; // This utility now contains the 'provider' key
+import { paymentMethods } from "@/utils/payment-methods";
 import { RequiredLabel } from "../RequiredLabel";
 import { ArrowLeft, ArrowRight, CreditCard, Wallet, Landmark, ShieldCheck } from "lucide-react";
-import { PaymentWarning } from "./payment-warning";
 import { cn } from "@repo/ui/lib/utils";
 
 export const PaymentStep: React.FC = () => {

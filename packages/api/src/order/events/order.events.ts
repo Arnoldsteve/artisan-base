@@ -29,6 +29,7 @@ export interface CheckoutCompletedEvent {
   paymentProvider: PaymentProvider;
   customerId: string;
   customerEmail: string;
+  customerPhone: string; 
   totalAmount: number;        // Grand total across all vendors
   currency: Currency;
   tenantIds: string[];        // All merchants involved

@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger, BadRequestException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
@@ -83,7 +83,10 @@ export class MpesaProvider implements IPaymentProvider, OnModuleInit {
     const timestamp = this.getTimestamp();
     const password = this.getPassword(timestamp);
 
-    // Mpesa expects amount as integer, phone in 254XXXXXXXXX format
+     if (!params.phone) {
+       throw new BadRequestException('M-Pesa requires a valid phone number');
+    }
+
     const phone = params.phone.replace(/^0/, '254').replace(/^\+/, '');
     const amount = Math.ceil(params.amount);
 
