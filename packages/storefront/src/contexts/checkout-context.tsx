@@ -155,6 +155,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       })),
     };
 
+    // console.log("Submitting checkout payload:", payload); // Debug log to verify structure
+    // return
+
     try {
       // 3. SECURE SUBMISSION
       const response = await createOrder(payload);

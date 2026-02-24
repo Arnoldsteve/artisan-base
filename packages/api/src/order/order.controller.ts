@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader, ApiResponse } from '@nestjs/swagger';
 
@@ -57,6 +58,8 @@ export class OrderController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Place a marketplace order (Supports multiple vendors)' })
   async checkout(@Body() dto: CheckoutPayloadDto) {
+    Logger.log('Received checkout payload:', JSON.stringify(dto, null, 2));
+    // return
     return this.orderService.createMarketplaceOrder(dto);
   }
 

@@ -36,6 +36,11 @@ export const ProductCard = memo(function ProductCard({
   const handleAddToCart = useCallback(() => {
     addToCart({
       id: product.id,
+
+      tenantId: product.tenantId, 
+      tenantName: (product as any).tenant?.name || "Artisan Store",
+      tenantSubdomain: (product as any).tenant?.subdomain,
+      
       name: product.name,
       price: Number(product.price),
       slug: product.slug,
