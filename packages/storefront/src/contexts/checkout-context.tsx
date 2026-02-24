@@ -1,16 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useMemo,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/use-cart";
 import { useOrders } from "@/hooks/use-orders";
-import { 
-  Customer, 
-  ShippingAddress, 
-  ShippingOption, 
+import {
+  Customer,
+  ShippingAddress,
+  ShippingOption,
   PaymentMethod,
-  CheckoutPayload 
+  CheckoutPayload,
 } from "@/types/checkout";
+import { toast } from "sonner";
 
 type State = {
   currentStep: number;
@@ -46,23 +53,36 @@ const initialState: State = {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "HYDRATE": return { ...state, ...action.payload, isHydrated: true };
-    case "SET_CUSTOMER": return { ...state, customer: action.payload };
-    case "SET_SHIPPING_ADDRESS": return { ...state, shippingAddress: action.payload };
-    case "SET_SHIPPING_OPTION": return { ...state, selectedShippingOption: action.payload };
-    case "SET_PAYMENT_METHOD": return { ...state, selectedPaymentMethod: action.payload };
-    case "NEXT_STEP": return { ...state, currentStep: state.currentStep + 1 };
-    case "PREVIOUS_STEP": return { ...state, currentStep: Math.max(0, state.currentStep - 1) };
-    case "GO_TO_STEP": return { ...state, currentStep: action.payload };
-    case "SET_ERROR": return { ...state, error: action.payload };
-    case "RESET": return { ...initialState, isHydrated: true };
-    default: return state;
+    case "HYDRATE":
+      return { ...state, ...action.payload, isHydrated: true };
+    case "SET_CUSTOMER":
+      return { ...state, customer: action.payload };
+    case "SET_SHIPPING_ADDRESS":
+      return { ...state, shippingAddress: action.payload };
+    case "SET_SHIPPING_OPTION":
+      return { ...state, selectedShippingOption: action.payload };
+    case "SET_PAYMENT_METHOD":
+      return { ...state, selectedPaymentMethod: action.payload };
+    case "NEXT_STEP":
+      return { ...state, currentStep: state.currentStep + 1 };
+    case "PREVIOUS_STEP":
+      return { ...state, currentStep: Math.max(0, state.currentStep - 1) };
+    case "GO_TO_STEP":
+      return { ...state, currentStep: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload };
+    case "RESET":
+      return { ...initialState, isHydrated: true };
+    default:
+      return state;
   }
 }
 
 const CheckoutContext = createContext<any>(undefined);
 
-export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
   const { items, clearCart, getTotalPrice } = useCart();
@@ -89,68 +109,90 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [state]);
 
-  /**
-   * TOP 1% LOGIC: Multi-Vendor Payload Construction
-   * Group items by tenantId so each merchant gets their own order record.
+/**
+   * TOP 1% LOGIC: Secure Payload Mapping
+   * Clears "property should not exist" and "state is empty" errors.
    */
   const submitOrder = async () => {
     if (!state.customer || !state.shippingAddress || !state.selectedPaymentMethod) {
-      dispatch({ type: "SET_ERROR", payload: "Please complete all steps." });
+      dispatch({ type: "SET_ERROR", payload: "Please complete all checkout steps." });
       return;
     }
 
-    // A. Partition cart items by vendor (tenantId)
+    // 1. DATA SCRUBBING: Group items and strip names/prices (Anti-Fraud)
     const vendorGroups = items.reduce((acc, item) => {
       if (!acc[item.tenantId]) acc[item.tenantId] = [];
-      acc[item.tenantId].push(item);
+      
+      acc[item.tenantId].push({
+        productId: item.id, // Maps 'id' to 'productId'
+        quantity: item.quantity,
+      });
       return acc;
-    }, {} as Record<string, typeof items>);
+    }, {} as Record<string, { productId: string; quantity: number }[]>);
 
-    // B. Construct Enterprise Payload
+    // 2. CONSTRUCT PAYLOAD: Explicitly selecting ONLY allowed fields
     const payload: CheckoutPayload = {
-      customer: state.customer,
-      shippingAddress: state.shippingAddress,
-      billingAddress: state.shippingAddress, // Standard: Default billing to shipping
-      paymentMethod: state.selectedPaymentMethod.provider,
-      currency: "KES", // This would be dynamic based on the context
-      vendors: Object.entries(vendorGroups).map(([tenantId, vendorItems]) => ({
+      customer: {
+        firstName: state.customer.firstName,
+        lastName: state.customer.lastName,
+        email: state.customer.email,
+        phone: state.customer.phone,
+      },
+      shippingAddress: {
+        addressLine1: state.shippingAddress.addressLine1,
+        addressLine2: state.shippingAddress.addressLine2,
+        city: state.shippingAddress.city,
+        state: state.shippingAddress.state, 
+        postalCode: state.shippingAddress.postalCode,
+        country: state.shippingAddress.country,
+      },
+      paymentProvider: (state.selectedPaymentMethod?.provider || "CASH").toUpperCase() as any, 
+      currency: "KES",
+      vendors: Object.entries(vendorGroups).map(([tenantId, mappedItems]) => ({
         tenantId,
-        items: vendorItems,
+        items: mappedItems,
         shippingMethodId: state.selectedShippingOption?.id || "standard",
       })),
     };
 
     try {
+      // 3. SECURE SUBMISSION
       const response = await createOrder(payload);
       
-      // C. Success Cleanup
       localStorage.removeItem("checkout_v1");
       clearCart();
       
-      // D. Intelligent Redirect
-      // If Stripe/PayPal, go to checkoutUrl. If M-Pesa/Cash, go to confirmation.
       if (response.checkoutUrl) {
         window.location.href = response.checkoutUrl;
       } else {
         router.push("/checkout/confirmation");
       }
     } catch (e: any) {
-      dispatch({ type: "SET_ERROR", payload: e.message || "Checkout failed" });
+      const errorMessage = e.message || "Checkout failed. Please try again.";
+      dispatch({ type: "SET_ERROR", payload: errorMessage });
+      toast.error(errorMessage);
     }
   };
 
-  const value = useMemo(() => ({
-    ...state,
-    isLoading: isCreating,
-    setCustomer: (c: Customer) => dispatch({ type: "SET_CUSTOMER", payload: c }),
-    setShippingAddress: (a: ShippingAddress) => dispatch({ type: "SET_SHIPPING_ADDRESS", payload: a }),
-    setShippingOption: (o: ShippingOption) => dispatch({ type: "SET_SHIPPING_OPTION", payload: o }),
-    setPaymentMethod: (m: PaymentMethod) => dispatch({ type: "SET_PAYMENT_METHOD", payload: m }),
-    nextStep: () => dispatch({ type: "NEXT_STEP" }),
-    previousStep: () => dispatch({ type: "PREVIOUS_STEP" }),
-    goToStep: (s: number) => dispatch({ type: "GO_TO_STEP", payload: s }),
-    submitOrder,
-  }), [state, isCreating, items]);
+  const value = useMemo(
+    () => ({
+      ...state,
+      isLoading: isCreating,
+      setCustomer: (c: Customer) =>
+        dispatch({ type: "SET_CUSTOMER", payload: c }),
+      setShippingAddress: (a: ShippingAddress) =>
+        dispatch({ type: "SET_SHIPPING_ADDRESS", payload: a }),
+      setShippingOption: (o: ShippingOption) =>
+        dispatch({ type: "SET_SHIPPING_OPTION", payload: o }),
+      setPaymentMethod: (m: PaymentMethod) =>
+        dispatch({ type: "SET_PAYMENT_METHOD", payload: m }),
+      nextStep: () => dispatch({ type: "NEXT_STEP" }),
+      previousStep: () => dispatch({ type: "PREVIOUS_STEP" }),
+      goToStep: (s: number) => dispatch({ type: "GO_TO_STEP", payload: s }),
+      submitOrder,
+    }),
+    [state, isCreating, items],
+  );
 
   return (
     <CheckoutContext.Provider value={value}>
@@ -161,6 +203,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useCheckoutContext = () => {
   const ctx = useContext(CheckoutContext);
-  if (!ctx) throw new Error("useCheckoutContext must be used within CheckoutProvider");
+  if (!ctx)
+    throw new Error("useCheckoutContext must be used within CheckoutProvider");
   return ctx;
 };

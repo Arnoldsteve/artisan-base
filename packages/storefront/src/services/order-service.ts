@@ -17,7 +17,7 @@ export class OrderService {
   async placeOrder(payload: CheckoutPayload): Promise<OrderResponse> {
     // Note: If x-tenant-id header is present, the backend treats this as an isolated order.
     // If missing, it processes as a global marketplace multi-vendor checkout.
-    return apiClient.post<OrderResponse>("/orders", payload);
+    return apiClient.post<OrderResponse>("/orders/checkout", payload);
   }
 
   /**
