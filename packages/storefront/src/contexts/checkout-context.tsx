@@ -25,6 +25,7 @@ type State = {
   shippingAddress: ShippingAddress | null;
   selectedShippingOption: ShippingOption | null;
   selectedPaymentMethod: PaymentMethod | null;
+  order: any | null; // Added to state
   isHydrated: boolean;
   error: string | null;
 };
@@ -38,6 +39,7 @@ type Action =
   | { type: "PREVIOUS_STEP" }
   | { type: "GO_TO_STEP"; payload: number }
   | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_ORDER"; payload: any }
   | { type: "HYDRATE"; payload: Partial<State> }
   | { type: "RESET" };
 
@@ -47,6 +49,7 @@ const initialState: State = {
   shippingAddress: null,
   selectedShippingOption: null,
   selectedPaymentMethod: null,
+  order: null,
   isHydrated: false,
   error: null,
 };
@@ -69,6 +72,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, currentStep: Math.max(0, state.currentStep - 1) };
     case "GO_TO_STEP":
       return { ...state, currentStep: action.payload };
+    case "SET_ORDER":
+      return { ...state, order: action.payload };
     case "SET_ERROR":
       return { ...state, error: action.payload };
     case "RESET":
@@ -85,10 +90,9 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { items, clearCart, getTotalPrice } = useCart();
+  const { items, clearCart } = useCart();
   const { createOrder, isCreating } = useOrders();
 
-  // 1. Safe Hydration (Prevents Next.js 15 Mismatch)
   useEffect(() => {
     const stored = localStorage.getItem("checkout_v1");
     if (stored) {
@@ -102,16 +106,14 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // 2. Persistence
   useEffect(() => {
     if (state.isHydrated) {
       localStorage.setItem("checkout_v1", JSON.stringify(state));
     }
   }, [state]);
 
-/**
-   * TOP 1% LOGIC: Secure Payload Mapping
-   * Clears "property should not exist" and "state is empty" errors.
+  /**
+   * TOP 1% LOGIC: Secure Payload Mapping & State Persistence
    */
   const submitOrder = async () => {
     if (!state.customer || !state.shippingAddress || !state.selectedPaymentMethod) {
@@ -119,25 +121,17 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    // 1. DATA SCRUBBING: Group items and strip names/prices (Anti-Fraud)
     const vendorGroups = items.reduce((acc, item) => {
       if (!acc[item.tenantId]) acc[item.tenantId] = [];
-      
       acc[item.tenantId].push({
-        productId: item.id, // Maps 'id' to 'productId'
+        productId: item.id,
         quantity: item.quantity,
       });
       return acc;
     }, {} as Record<string, { productId: string; quantity: number }[]>);
 
-    // 2. CONSTRUCT PAYLOAD: Explicitly selecting ONLY allowed fields
     const payload: CheckoutPayload = {
-      customer: {
-        firstName: state.customer.firstName,
-        lastName: state.customer.lastName,
-        email: state.customer.email,
-        phone: state.customer.phone,
-      },
+      customer: state.customer,
       shippingAddress: {
         addressLine1: state.shippingAddress.addressLine1,
         addressLine2: state.shippingAddress.addressLine2,
@@ -155,14 +149,18 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
       })),
     };
 
-    // console.log("Submitting checkout payload:", payload); // Debug log to verify structure
-    // return
-
     try {
-      // 3. SECURE SUBMISSION
       const response = await createOrder(payload);
       
-      localStorage.removeItem("checkout_v1");
+      /**
+       * TOP 1% FIX: 
+       * 1. Save order to state so Confirmation Page can see it.
+       * 2. DO NOT removeItem from localStorage yet (let resetCheckout handle it).
+       * 3. Set step to 4 (Confirmation).
+       */
+      dispatch({ type: "SET_ORDER", payload: response });
+      dispatch({ type: "GO_TO_STEP", payload: 4 });
+      
       clearCart();
       
       if (response.checkoutUrl) {
@@ -177,22 +175,29 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  /**
+   * Enterprise Cleanup Logic: 
+   * Only wipes data when the user explicitly clicks "Continue Shopping"
+   * on the confirmation page.
+   */
+  const resetCheckout = () => {
+    localStorage.removeItem("checkout_v1");
+    dispatch({ type: "RESET" });
+  };
+
   const value = useMemo(
     () => ({
       ...state,
       isLoading: isCreating,
-      setCustomer: (c: Customer) =>
-        dispatch({ type: "SET_CUSTOMER", payload: c }),
-      setShippingAddress: (a: ShippingAddress) =>
-        dispatch({ type: "SET_SHIPPING_ADDRESS", payload: a }),
-      setShippingOption: (o: ShippingOption) =>
-        dispatch({ type: "SET_SHIPPING_OPTION", payload: o }),
-      setPaymentMethod: (m: PaymentMethod) =>
-        dispatch({ type: "SET_PAYMENT_METHOD", payload: m }),
+      setCustomer: (c: Customer) => dispatch({ type: "SET_CUSTOMER", payload: c }),
+      setShippingAddress: (a: ShippingAddress) => dispatch({ type: "SET_SHIPPING_ADDRESS", payload: a }),
+      setShippingOption: (o: ShippingOption) => dispatch({ type: "SET_SHIPPING_OPTION", payload: o }),
+      setPaymentMethod: (m: PaymentMethod) => dispatch({ type: "SET_PAYMENT_METHOD", payload: m }),
       nextStep: () => dispatch({ type: "NEXT_STEP" }),
       previousStep: () => dispatch({ type: "PREVIOUS_STEP" }),
       goToStep: (s: number) => dispatch({ type: "GO_TO_STEP", payload: s }),
       submitOrder,
+      resetCheckout,
     }),
     [state, isCreating, items],
   );
@@ -206,7 +211,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useCheckoutContext = () => {
   const ctx = useContext(CheckoutContext);
-  if (!ctx)
-    throw new Error("useCheckoutContext must be used within CheckoutProvider");
+  if (!ctx) throw new Error("useCheckoutContext must be used within CheckoutProvider");
   return ctx;
 };

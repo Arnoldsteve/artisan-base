@@ -20,6 +20,7 @@ import { CommonCacheModule } from './common/cache/common-cache.module';
 import { BillingModule } from './billing/billing.module'
 import { PlanModule } from './plan/plan.module';
 import { ReviewModule } from './review/review.module';
+import { QueuesModule } from './common/queues/queues.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ReviewModule } from './review/review.module';
     }),
     
     AuthModule,
+    QueuesModule,
     
     // 2. Core Modules (Single instances shared across the app)
     CommonCacheModule, // 1. This must be here to enable the @Global() providers
