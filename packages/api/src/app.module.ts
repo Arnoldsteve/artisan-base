@@ -21,6 +21,7 @@ import { BillingModule } from './billing/billing.module'
 import { PlanModule } from './plan/plan.module';
 import { ReviewModule } from './review/review.module';
 import { QueuesModule } from './common/queues/queues.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { QueuesModule } from './common/queues/queues.module';
     PaymentModule,
     CustomerModule,
     ReviewModule,
+    AnalyticsModule,
   ],
   controllers: [],
   providers: [],

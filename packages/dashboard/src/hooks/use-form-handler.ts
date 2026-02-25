@@ -31,8 +31,6 @@ export function useFormHandler<TData, TResponse>(
     setIsLoading(true);
     setError(null);
 
-    console.log("auth data", data)
-
     try {
       const response = await submitFn(data);
 

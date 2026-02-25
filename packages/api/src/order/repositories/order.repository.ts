@@ -91,6 +91,16 @@ export class OrderRepository {
   }
 
   /**
+   * millions of users: Returns the total count of orders for the active tenant.
+   * Leverages the isolated client to ensure the count is scoped automatically.
+   */
+  async count(where?: Prisma.OrderWhereInput): Promise<number> {
+    return this.prisma.client.order.count({
+      where,
+    });
+  }
+  
+  /**
    * CUSTOMER PORTAL: Find all orders for a specific customer email/ID.
    */
   async findByCustomer(customerId: string): Promise<Order[]> {

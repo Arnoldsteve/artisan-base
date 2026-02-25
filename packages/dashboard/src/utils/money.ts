@@ -7,21 +7,20 @@ interface FormatOptions {
   precision?: number;
 }
 
-/**
- * Enterprise Money Formatter
- * Supports Decimal.js, thousand separators, and optional currency symbols.
- */
 export function formatMoney(
   amount: number | string | Decimal, 
-  currency: Currency = Currency.KES,
+  currency: string | null | undefined = Currency.KES, // Accept null/undefined
   options: FormatOptions = { showSymbol: true, precision: 2 }
 ) {
   const { showSymbol = true, precision = 2 } = options;
   
-  // Convert Decimal.js or string to number safely
+  // 1. Safe Value Conversion
   const value = amount instanceof Decimal ? amount.toNumber() : Number(amount) || 0;
 
-  // 1. Logic for "Clean Numbers" (No Symbol)
+  // 2. Safe Currency Normalization
+  // If currency is null, undefined, or empty, default to KES
+  const activeCurrency = (currency && currency.trim() !== "") ? currency : Currency.KES;
+
   if (!showSymbol) {
     return value.toLocaleString("en-KE", {
       minimumFractionDigits: precision,
@@ -29,13 +28,14 @@ export function formatMoney(
     });
   }
 
-  // 2. Logic for Standard Display (With Symbol)
-  if (currency === Currency.KES) {
+  // 3. Optimized KES path
+  if (activeCurrency === Currency.KES) {
     return `Ksh ${value.toLocaleString("en-KE", {
       minimumFractionDigits: precision,
       maximumFractionDigits: precision,
     })}`;
   }
 
-  return formatCurrency(value, currency);
+  // 4. Global Path
+  return formatCurrency(value, activeCurrency);
 }
