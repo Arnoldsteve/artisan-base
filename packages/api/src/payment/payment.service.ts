@@ -119,7 +119,6 @@ export class PaymentService {
       rawPayload: result.rawPayload,
     };
 
-    // this.eventEmitter.emit('payment.updated', event);
     this.eventEmitter.emit(PAYMENT_EVENTS.PAYMENT_UPDATED, event);
     this.logger.log(`Payment ${payment.id} [Ref: ${event.reference}] status updated to ${result.status}`);
 
@@ -136,7 +135,6 @@ export class PaymentService {
     if (payment.status !== result.status) {
       await this.paymentRepo.updateStatus(payment.id, payment.tenantId, result.status, result.rawPayload);
 
-      // this.eventEmitter.emit('payment.updated', {
       this.eventEmitter.emit(PAYMENT_EVENTS.PAYMENT_UPDATED, {
         tenantId: payment.tenantId,
         paymentId: payment.id,

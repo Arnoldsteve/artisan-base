@@ -84,14 +84,14 @@ function StatCard({
 
 export function StatsOverview({ overview, currency }: StatsOverviewProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 pt-4">
       {/* 1. Total Revenue with Real Trend */}
       <StatCard
         title="Total Revenue"
         value={formatMoney(overview.totalRevenue, currency as Currency)}
         description="vs previous 30d"
         icon={DollarSign}
-        trend={overview.revenueTrend} // ✅ Real Data from Backend
+        trend={overview.revenueTrend} 
       />
 
       {/* 2. Total Orders with Real Trend */}
@@ -100,7 +100,7 @@ export function StatsOverview({ overview, currency }: StatsOverviewProps) {
         value={overview.totalOrders.toLocaleString()}
         description="vs previous 30d"
         icon={ShoppingBag}
-        trend={overview.ordersTrend} // ✅ Real Data from Backend
+        trend={overview.ordersTrend} 
       />
 
       {/* 3. Average Order Value (AOV) */}

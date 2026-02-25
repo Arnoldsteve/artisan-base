@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PaymentStatus } from '@generated/prisma/client';
-import { PaymentUpdatedEvent } from '@/payment/events/payment.events';
+import { PAYMENT_EVENTS, PaymentUpdatedEvent } from '@/payment/events/payment.events';
 import { QUEUES, JOB_NAMES } from '../../common/queues/queue.constants';
 
 /**
@@ -23,7 +23,7 @@ export class AnalyticsListener {
    * millions of users: Handled when any payment status changes.
    * Logic: We only care when money is officially 'PAID' to update revenue charts.
    */
-  @OnEvent('payment.updated')
+  @OnEvent(PAYMENT_EVENTS.PAYMENT_UPDATED)
   async handlePaymentUpdated(event: PaymentUpdatedEvent) {
     if (event.status === PaymentStatus.PAID) {
       this.logger.log(`Bridging PAID status to Analytics Queue: ${event.paymentId}`);
