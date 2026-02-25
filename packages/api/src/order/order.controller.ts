@@ -67,7 +67,11 @@ export class OrderController {
   @Get('track/:id')
   @ApiOperation({ summary: 'Guest tracking: Get order details by ID' })
   async findOne(@Param('id') id: string) {
-    return this.orderService.findOne(id);
+    const order = await this.orderService.findOne(id);
+    return {
+      success: true,
+      data: order,
+    };
   }
 
   // ===========================================================================
@@ -84,6 +88,22 @@ export class OrderController {
   @ApiOperation({ summary: 'List all orders for your store (Dashboard)' })
   async findAll(@Pagination() options: PageOptionsDto) {
     return this.orderService.findAll(options);
+  }
+
+  /**
+   * STORE ACTION: Get single order details for the dashboard.
+   * millions of users: Inherits x-tenant-id isolation from the class/guard.
+   */
+  @ApiBearerAuth()
+  @Get(':id') 
+  @UseGuards(TenantMembershipGuard)
+  @ApiOperation({ summary: 'Get full order details (Isolated/Private)' })
+  async findOneDashboard(@Param('id') id: string) {
+    const order = await this.orderService.findOne(id);
+    return {
+      success: true,
+      data: order,
+    };
   }
 
   /**

@@ -19,8 +19,10 @@ export class OrderService {
     return apiClient.get<PaginatedResponse<Order>>("/orders", params);
   }
 
-   async getById(orderId: string): Promise<Order> {
-    return apiClient.get<Order>(`/orders/${orderId}`);
+ async getById(orderId: string): Promise<Order> {
+    const response = await apiClient.get<any>(`/orders/${orderId}`);
+    
+    return response?.data ? response.data : response;
   }
 
   async createOrder(orderData: CreateOrderDto): Promise<Order> {
