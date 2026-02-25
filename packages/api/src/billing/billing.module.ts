@@ -4,42 +4,31 @@ import { ConfigModule } from '@nestjs/config';
 import { BillingService } from './billing.service';
 import { BillingController } from './billing.controller';
 import { BillingRepository } from './repositories/billing.repository';
-import { SubscriptionProviderRegistry } from './providers/subscription-provider.registry';
-import { StripeSubscriptionProvider } from './providers/stripe-subscription.provider';
-import { MpesaSubscriptionProvider } from './providers/mpesa-subscription.provider';
 import { BillingSchedulerService } from './scheduler/billing-scheduler.service';
 import { PaymentModule } from '@/payment/payment.module';
 import { PlanModule } from '@/plan/plan.module';
+import { BillingPaymentListener } from './listeners/billing-payment.listener';
+import { BillingProcessor } from './processors/billing.processor';
 
 /**
- * Billing Module.
- * Owns: subscription lifecycle, plan management, scheduler, webhooks.
- * Imports PaymentModule — delegates actual money movement to it.
- * Emits business events — notification layer listens externally.
+ * millions of users: Clean Domain Module.
+ * Since QueuesModule is @Global, we don't need to import BullModule.registerQueue here.
+ * The listeners just use @InjectQueue(QUEUES.PAYMENTS).
  */
 @Module({
   imports: [
-    ScheduleModule.forRoot(), // Required for @Cron decorators
+    ScheduleModule.forRoot(),
     ConfigModule,
-    PaymentModule,            // MpesaSubscriptionProvider needs PaymentService
+    PaymentModule,
     PlanModule,
-
   ],
   controllers: [BillingController],
   providers: [
-    // Core
     BillingService,
     BillingRepository,
-
-    // Registry — must be before providers
-    SubscriptionProviderRegistry,
-
-    // Providers — self-register via onModuleInit
-    StripeSubscriptionProvider,
-    MpesaSubscriptionProvider,
-
-    // Scheduler
     BillingSchedulerService,
+    BillingPaymentListener,
+    BillingProcessor,
   ],
   exports: [BillingService],
 })

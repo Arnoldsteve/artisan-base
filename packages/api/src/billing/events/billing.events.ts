@@ -1,4 +1,4 @@
-import { Currency } from '@generated/prisma/client';
+import { BillingCycle, Currency } from '@generated/prisma/client';
 
 /**
  * Billing Event Payloads.
@@ -32,6 +32,8 @@ export interface SubscriptionCreatedEvent {
   currentPeriodEnd: Date;
   checkoutUrl?: string;       // Stripe — redirect to this
   stkPushRequestId?: string;  // Mpesa — STK push sent
+  billingCycle: BillingCycle; 
+  phone?: string;   
 }
 
 export interface SubscriptionRenewedEvent {

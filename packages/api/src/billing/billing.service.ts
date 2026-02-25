@@ -1,27 +1,26 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
 import { BillingRepository } from './repositories/billing.repository';
-import { SubscriptionProviderRegistry } from './providers/subscription-provider.registry';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { ChangePlanDto } from './dto/change-plan.dto';
 import { BILLING_EVENTS } from './events/billing.events';
-import { SubscriptionWebhookResult } from './interfaces/subscription-provider.interface';
 import { PlanService } from '@/plan/plan.service';
+import { PaymentService } from '@/payment/payment.service';
+import { PaymentProviderRegistry } from '@/payment/providers/payment-provider.registry';
+import { PaymentFulfillmentType } from '@/payment/interfaces/payment-provider.interface';
+import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
 
   constructor(
+    private readonly prisma: PrismaService,
     private readonly planService: PlanService,
     private readonly billingRepo: BillingRepository,
-    private readonly registry: SubscriptionProviderRegistry,
+    private readonly paymentService: PaymentService,
+    private readonly paymentRegistry: PaymentProviderRegistry,
     private readonly tenantContext: TenantContextService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -41,194 +40,126 @@ export class BillingService {
     return subscription;
   }
 
+  /**
+   * TOP 1% LOGIC: Universal Subscription Provisioning
+   * millions of users: This method coordinates with the Payment Module 
+   * to handle both African (M-Pesa) and Global (Stripe) flows.
+   */
   async subscribe(dto: CreateSubscriptionDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 
-    // 1. Validate plan exists
-    const plan = await this.planService.findById(dto.planId);
+    // 1. Logic: Identity & Plan Validation
+    const [plan, tenant] = await Promise.all([
+      this.planService.findById(dto.planId),
+      this.billingRepo.findTenantById(tenantId),
+    ]);
 
-    // 2. Get tenant directly — don't rely on subscription record existing
-    const tenant = await this.billingRepo.findTenantById(tenantId);
     if (!tenant) throw new BadRequestException('Tenant not found');
-
     const currency = tenant.baseCurrency;
 
-    // 3. Validate provider-specific fields
-    if (currency === 'KES' && !dto.phone) {
-      throw new BadRequestException('Phone number is required for Mpesa billing');
+    // 2. Identify the correct Provider (Strategy Pattern)
+    const providerType = currency === 'KES' ? 'MPESA' : 'STRIPE';
+    const strategy = this.paymentRegistry.get(providerType as any);
+    
+    // 3. Generate a Unique Reference for this financial event
+    const reference = `SUB-${tenantId.slice(-6)}-${Date.now()}`;
+
+    let checkoutUrl: string | undefined;
+
+    // 4. HYBRID FLOW: If the provider requires a Redirect (Stripe/PayPal)
+    // we must initialize it SYNC to get the URL for the frontend.
+    if (strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
+      const result = await this.paymentService.initiate({
+        provider: providerType as any,
+        amount: Number(plan.price),
+        currency,
+        reference,
+        description: `Subscription: ${plan.name} (${dto.billingCycle})`,
+        metadata: { type: 'SUBSCRIPTION', planId: plan.id, billingCycle: dto.billingCycle }
+      });
+      checkoutUrl = result.checkoutUrl;
     }
-    if (currency !== 'KES' && !dto.stripePriceId) {
-      throw new BadRequestException('Stripe Price ID is required for card billing');
-    }
 
-    // 4. Resolve correct provider via currency
-    const provider = this.registry.getForCurrency(currency);
-
-    // 5. Create subscription via provider
-    const result = await provider.create({
-      tenantId,
-      planId: dto.planId,
-      stripePriceId: dto.stripePriceId,
-      amount: Number(plan.price),
-      currency,
-      phone: dto.phone,
-      billingCycle: dto.billingCycle,
-    });
-
-    this.logger.log(
-      `Subscription created | Tenant: ${tenantId} | Plan: ${plan.name} | Mode: ${provider.getBillingMode()}`,
-    );
-
+    /**
+     * 5. EVENT EMISSION: 
+     * If provider is PUSH (Mpesa), the 'BillingPaymentListener' will 
+     * see this event and add a job to BullMQ to trigger the STK Push.
+     */
     this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CREATED, {
       tenantId,
       planId: dto.planId,
-      billingMode: provider.getBillingMode(),
+      billingCycle: dto.billingCycle,
       currency,
-      currentPeriodEnd: result.currentPeriodEnd,
-      checkoutUrl: result.checkoutUrl,
-      stkPushRequestId: result.stkPushRequestId,
+      amount: Number(plan.price),
+      phone: dto.phone,
+      reference,
+      checkoutUrl,
+      billingMode: strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT ? 'AUTOMATED' : 'MANUAL',
     });
 
-    return result;
+    return {
+      success: true,
+      reference,
+      checkoutUrl, // Frontend will redirect if present
+    };
   }
 
+  /**
+   * ACTION: Upgrade or Downgrade Plan.
+   * millions of users: Orchestrates the plan change via the Payment Module.
+   */
   async changePlan(dto: ChangePlanDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
+    const subscription = await this.getSubscription();
 
-    const subscription = await this.billingRepo.findByTenantId(tenantId);
-    if (!subscription) throw new NotFoundException('No active subscription found');
+    const plan = await this.planService.findById(dto.newPlanId);
+    const strategy = this.paymentRegistry.get(subscription.tenant.baseCurrency === 'KES' ? 'MPESA' : 'STRIPE');
 
-    const oldPlanId = subscription.tenant.planId;
+    const reference = `UPG-${tenantId.slice(-6)}-${Date.now()}`;
 
-    const provider = this.registry.getForCurrency(
-      subscription.tenant.baseCurrency,
-    );
-
-    const result = await provider.changePlan({
-      providerSubscriptionId: subscription.providerSubscriptionId,
-      newPlanId: dto.newPlanId,
-      newStripePriceId: dto.newStripePriceId,
-      newAmount: dto.newAmount,
-    });
-
-    this.logger.log(`Plan changed | Tenant: ${tenantId} | New Plan: ${dto.newPlanId}`);
+    // If it's a redirect-based upgrade (e.g. Stripe checkout for new price)
+    let checkoutUrl: string | undefined;
+    if (strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
+      const result = await this.paymentService.initiate({
+        provider: strategy.getName(),
+        amount: Number(plan.price),
+        currency: subscription.tenant.baseCurrency,
+        reference,
+        metadata: { type: 'SUBSCRIPTION', planId: plan.id, isUpgrade: true }
+      });
+      checkoutUrl = result.checkoutUrl;
+    }
 
     this.eventEmitter.emit(BILLING_EVENTS.PLAN_CHANGED, {
       tenantId,
-      oldPlanId,
+      oldPlanId: subscription.planId,
       newPlanId: dto.newPlanId,
-      currency: subscription.tenant.baseCurrency,
+      reference,
+      checkoutUrl
     });
 
-    return result;
+    return { success: true, checkoutUrl };
   }
+  
+  // ─── Management ──────────────────────────────────────────────────────────────
 
   async cancel(immediately: boolean = false) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
+    const subscription = await this.getSubscription();
 
-    const subscription = await this.billingRepo.findByTenantId(tenantId);
-    if (!subscription) throw new NotFoundException('No active subscription found');
-
-    const provider = this.registry.getForCurrency(
-      subscription.tenant.baseCurrency,
-    );
-
-    await provider.cancel({
-      providerSubscriptionId: subscription.providerSubscriptionId,
-      immediately,
-    });
-
-    this.logger.log(`Subscription cancelled | Tenant: ${tenantId} | Immediately: ${immediately}`);
-
+    // Note: Actual cancellation logic with the provider (Stripe) 
+    // happens in the background worker triggered by this event.
     this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CANCELED, {
       tenantId,
-      canceledAt: new Date(),
+      providerSubscriptionId: subscription.providerSubscriptionId,
       immediately,
     });
 
     return { success: true, immediately };
   }
 
-  // ─── Webhooks ────────────────────────────────────────────────────────────────
-
-  async handleStripeWebhook(payload: Record<string, any>, signature: string) {
-    const provider = this.registry.getForMode('AUTOMATED');
-    const result = await provider.handleWebhook(payload, signature);
-
-    if (!result.providerSubscriptionId) return { success: true };
-
-    await this.processWebhookResult(result);
-    return { success: true };
-  }
-
-
-  // ─── History ─────────────────────────────────────────────────────────────────
-
-  /**
-   * Business Logic: Retrieve historical payment records for the active tenant.
-   */
   async getHistory() {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
     return this.billingRepo.findPaymentHistory(tenantId);
-  }
-
-  // ─── Private Helpers ─────────────────────────────────────────────────────────
-
-  private async processWebhookResult(result: SubscriptionWebhookResult) {
-    const subscription = await this.billingRepo.findByProviderSubscriptionId(
-      result.providerSubscriptionId,
-    );
-
-    if (!subscription) {
-      this.logger.warn(
-        `Subscription not found for provider ID: ${result.providerSubscriptionId}`,
-      );
-      return;
-    }
-
-    switch (result.status) {
-      case 'ACTIVE':
-        await this.billingRepo.activateSubscription({
-          tenantId: subscription.tenantId,
-          planId: subscription.tenant.id,
-          providerSubscriptionId: result.providerSubscriptionId,
-          billingMode: 'AUTOMATED',
-          currentPeriodEnd: result.currentPeriodEnd,
-        });
-
-        this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_RENEWED, {
-          tenantId: subscription.tenantId,
-          currentPeriodEnd: result.currentPeriodEnd,
-        });
-        break;
-
-      case 'PAST_DUE':
-        await this.billingRepo.updateSubscriptionStatus(
-          subscription.tenantId,
-          'PAST_DUE',
-        );
-
-        this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_PAST_DUE, {
-          tenantId: subscription.tenantId,
-          currentPeriodEnd: subscription.currentPeriodEnd,
-        });
-        break;
-
-      case 'CANCELED':
-        await this.billingRepo.updateSubscriptionStatus(
-          subscription.tenantId,
-          'CANCELED',
-        );
-
-        this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CANCELED, {
-          tenantId: subscription.tenantId,
-          canceledAt: new Date(),
-          immediately: false,
-        });
-        break;
-
-      default:
-        this.logger.warn(`Unhandled subscription status: ${result.status}`);
-    }
   }
 }
