@@ -1,17 +1,17 @@
 /**
  * SOLID Principle: Single Source of Truth
- * These interfaces define the data returned by the high-performance 
- * analytics pre-aggregation engine.
+ * Refactored to include growth trends for intelligent dashboard insights.
  */
 
 export interface DashboardOverview {
   totalRevenue: number;
+  revenueTrend: number; // ✅ NEW: Percentage change vs previous 30 days
+  
   totalOrders: number;
+  ordersTrend: number;  // ✅ NEW: Percentage change vs previous 30 days
+  
   avgOrderValue: number;
   daysTracked: number;
-  // Prepared for growth: 
-  // totalCustomers?: number;
-  // revenueChangePercentage?: number;
 }
 
 export interface DailyChartData {

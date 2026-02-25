@@ -2,11 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { AnalyticsRepository } from './repositories/analytics.repository';
 import { OrderRepository } from '../order/repositories/order.repository';
 
-/**
- * SOLID Principle: Single Responsibility
- * This service transforms raw pre-aggregated data into 
- * actionable insights for the merchant dashboard.
- */
 @Injectable()
 export class AnalyticsService {
   constructor(
@@ -14,41 +9,65 @@ export class AnalyticsService {
     private readonly orderRepo: OrderRepository,
   ) {}
 
-  /**
-   * millions of users: Fetches a complete overview for the Home Page.
-   * Leverages pre-aggregated summary tables for sub-100ms response times.
-   */
   async getDashboardSummary(tenantId: string) {
-    // 1. PERFORMANCE: Fetch last 30 days of pre-calculated data
-    const dailyStats = await this.analyticsRepo.getDailyStats(tenantId, 30);
+    // 1. PERFORMANCE: Fetch 60 days of pre-aggregated data in one trip
+    // millions of users: This is much faster than running two separate queries
+    const sixtyDayStats = await this.analyticsRepo.getDailyStats(tenantId, 60);
 
-    // 2. LIVE STATS: Fetch current counts (Cached or via optimized Index)
-    const totalOrders = await this.orderRepo.count();
+    // 2. DATA SPLITTING: 
+    // Current Period = 0 to 29 days ago
+    // Previous Period = 30 to 59 days ago
+    const currentPeriod = sixtyDayStats.filter(s => s.dateKey >= this.getDaysAgo(30));
+    const previousPeriod = sixtyDayStats.filter(s => s.dateKey < this.getDaysAgo(30));
 
-    // 3. LOGIC: Calculate aggregate totals from the summary rows
-    const totalRevenue = dailyStats.reduce(
-      (sum, day) => sum + Number(day.totalRevenue), 
-      0
-    );
+    // 3. AGGREGATION: Calculate totals for both periods
+    const currentRevenue = currentPeriod.reduce((sum, s) => sum + Number(s.totalRevenue), 0);
+    const previousRevenue = previousPeriod.reduce((sum, s) => sum + Number(s.totalRevenue), 0);
 
-    /**
-     * TOP 1% LOGIC: Trend Analysis
-     * In a real enterprise app, we would calculate 'change percentage' 
-     * by comparing this 30-day window to the previous one.
-     */
+    const currentOrders = currentPeriod.reduce((sum, s) => sum + s.orderCount, 0);
+    const previousOrders = previousPeriod.reduce((sum, s) => sum + s.orderCount, 0);
+
+    // 4. LOGIC: Calculate Percentage Trends
+    const revenueTrend = this.calculateTrend(currentRevenue, previousRevenue);
+    const ordersTrend = this.calculateTrend(currentOrders, previousOrders);
+
+    // 5. LIVE STATS: Real-time count
+    const totalOrdersCount = await this.orderRepo.count();
+
     return {
       overview: {
-        totalRevenue,
-        totalOrders,
-        avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
-        daysTracked: dailyStats.length,
+        totalRevenue: currentRevenue,
+        revenueTrend, // e.g. 12.5 (meaning +12.5%)
+        totalOrders: totalOrdersCount,
+        ordersTrend,
+        avgOrderValue: currentOrders > 0 ? currentRevenue / currentOrders : 0,
+        daysTracked: sixtyDayStats.length,
       },
-      // Data formatted for Recharts/Chart.js on the frontend
-      chartData: dailyStats.map(stat => ({
+      // Front-end only needs the last 30 days for the chart
+      chartData: currentPeriod.map(stat => ({
         date: stat.dateKey.toISOString().split('T')[0],
         revenue: Number(stat.totalRevenue),
         orders: stat.orderCount,
       })),
     };
+  }
+
+  // --- TOP 1% PRIVATE HELPERS ---
+
+  /**
+   * Calculates percentage change between two numbers.
+   * millions of users: Handles division by zero for new stores.
+   */
+  private calculateTrend(current: number, previous: number): number {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    const change = ((current - previous) / previous) * 100;
+    return parseFloat(change.toFixed(1)); // Return rounded to 1 decimal
+  }
+
+  private getDaysAgo(days: number): Date {
+    const date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - days);
+    return date;
   }
 }

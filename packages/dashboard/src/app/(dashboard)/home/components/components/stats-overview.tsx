@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   Users,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Minus
 } from "lucide-react";
 import { DashboardOverview } from "@/types/analytics";
 import { formatMoney } from "@/utils/money";
@@ -25,8 +26,7 @@ interface StatsOverviewProps {
 }
 
 /**
- * SOLID Principle: Single Responsibility
- * This internal component is the visual standard for all KPI cards.
+ * Enterprise Standard: Visualizing Trends
  */
 function StatCard({ 
   title, 
@@ -39,8 +39,13 @@ function StatCard({
   value: string | number; 
   description: string; 
   icon: any;
-  trend?: { value: number; isPositive: boolean };
+  trend?: number; // Raw percentage from backend
 }) {
+  // Logic: Identify if growth is positive, negative, or flat
+  const isPositive = trend && trend > 0;
+  const isNegative = trend && trend < 0;
+  const isNeutral = trend === 0;
+
   return (
     <Card className="rounded-sm shadow-sm border border-border bg-white overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -56,10 +61,16 @@ function StatCard({
           {value}
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          {trend && (
-            <span className={`flex items-center text-[10px] font-bold ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {trend.isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-              {trend.value}%
+          {trend !== undefined && (
+            <span className={`flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+              isPositive ? 'bg-green-50 text-green-600' : 
+              isNegative ? 'bg-red-50 text-red-600' : 
+              'bg-gray-50 text-gray-600'
+            }`}>
+              {isPositive && <ArrowUpRight className="h-2.5 w-2.5 mr-0.5" />}
+              {isNegative && <ArrowDownRight className="h-2.5 w-2.5 mr-0.5" />}
+              {isNeutral && <Minus className="h-2.5 w-2.5 mr-0.5" />}
+              {Math.abs(trend)}%
             </span>
           )}
           <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
@@ -73,24 +84,23 @@ function StatCard({
 
 export function StatsOverview({ overview, currency }: StatsOverviewProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 pt-4">
-      {/* 1. Total Revenue (Currency Localized) */}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* 1. Total Revenue with Real Trend */}
       <StatCard
         title="Total Revenue"
         value={formatMoney(overview.totalRevenue, currency as Currency)}
-        description="Since shop launch"
+        description="vs previous 30d"
         icon={DollarSign}
-        // Trend logic can be wired here once backend provides history comparison
-        trend={{ value: 12, isPositive: true }} 
+        trend={overview.revenueTrend} // ✅ Real Data from Backend
       />
 
-      {/* 2. Total Orders */}
+      {/* 2. Total Orders with Real Trend */}
       <StatCard
         title="Total Orders"
         value={overview.totalOrders.toLocaleString()}
-        description="Across all categories"
+        description="vs previous 30d"
         icon={ShoppingBag}
-        trend={{ value: 8, isPositive: true }}
+        trend={overview.ordersTrend} // ✅ Real Data from Backend
       />
 
       {/* 3. Average Order Value (AOV) */}
@@ -101,11 +111,11 @@ export function StatsOverview({ overview, currency }: StatsOverviewProps) {
         icon={TrendingUp}
       />
 
-      {/* 4. Active Reach */}
+      {/* 4. Operations Count */}
       <StatCard
-        title="Global Presence"
+        title="Active Reach"
         value={`${overview.daysTracked}`}
-        description="Days of operations"
+        description="Days active on platform"
         icon={Users}
       />
     </div>
