@@ -164,6 +164,7 @@ export class OrderService {
       // Initiate immediately to get the PayPal/Stripe URL for the frontend
       const initResult = await this.tenantContext.run(result.orderResults[0].order.tenantId, async () => {
         return await this.paymentService.initiate({
+          type: PaymentType.ORDER,
           provider: result.paymentProvider as any,
           amount: result.globalTotalAmount,
           currency: result.currency,

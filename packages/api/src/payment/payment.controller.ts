@@ -18,12 +18,18 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { PaymentProvider } from '@generated/prisma/client';
-import { PaymentService, InitiatePaymentParams } from './payment.service';
+import { PaymentProvider, PaymentType } from '@generated/prisma/client';
+import { PaymentService } from './payment.service';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { InitiatePaymentParams } from './interfaces/payment-provider.interface';
 
 export class InitiatePaymentDto implements InitiatePaymentParams {
+  @ ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  type: PaymentType;
+
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

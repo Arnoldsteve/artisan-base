@@ -4,20 +4,9 @@ import { PaymentStatus, PaymentProvider, PaymentType } from '@generated/prisma/c
 import { PaymentRepository } from './repositories/payment.repository';
 import { PaymentProviderRegistry } from './providers/payment-provider.registry';
 import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
-import { PaymentInitParams } from './interfaces/payment-provider.interface';
+import { InitiatePaymentParams } from './interfaces/payment-provider.interface';
 import { PAYMENT_EVENTS, PaymentUpdatedEvent } from './events/payment.events';
 
-export interface InitiatePaymentParams {
-  orderId?: string;
-  provider: PaymentProvider;
-  amount: number;
-  currency: string;
-  phone?: string;
-  returnUrl?: string;
-  description?: string;
-  reference: string; // Internal 'PAY-...' reference
-  metadata?: Record<string, any>;
-}
 
 @Injectable()
 export class PaymentService {
@@ -78,8 +67,9 @@ export class PaymentService {
      */
     const payment = await this.paymentRepo.create({
       tenantId,
-      type: params.metadata?.type === 'SUBSCRIPTION' ? 'SUBSCRIPTION' : 'ORDER',
-      orderId: params.orderId,
+      type: params.metadata?.type === PaymentType.SUBSCRIPTION 
+        ? PaymentType.SUBSCRIPTION 
+        : PaymentType.ORDER,
       provider: params.provider,
       amount: params.amount,
       status: PaymentStatus.PENDING,

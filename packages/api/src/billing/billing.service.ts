@@ -10,6 +10,7 @@ import { PaymentService } from '@/payment/payment.service';
 import { PaymentProviderRegistry } from '@/payment/providers/payment-provider.registry';
 import { PaymentFulfillmentType } from '@/payment/interfaces/payment-provider.interface';
 import { PrismaService } from '@/prisma/prisma.service';
+import { PaymentStatus, PaymentType } from '@generated/prisma/client';
 
 @Injectable()
 export class BillingService {
@@ -45,10 +46,9 @@ export class BillingService {
    * millions of users: This method coordinates with the Payment Module 
    * to handle both African (M-Pesa) and Global (Stripe) flows.
    */
-  async subscribe(dto: CreateSubscriptionDto) {
+    async subscribe(dto: CreateSubscriptionDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
 
-    // 1. Logic: Identity & Plan Validation
     const [plan, tenant] = await Promise.all([
       this.planService.findById(dto.planId),
       this.billingRepo.findTenantById(tenantId),
@@ -56,35 +56,50 @@ export class BillingService {
 
     if (!tenant) throw new BadRequestException('Tenant not found');
     const currency = tenant.baseCurrency;
-
-    // 2. Identify the correct Provider (Strategy Pattern)
     const providerType = currency === 'KES' ? 'MPESA' : 'STRIPE';
     const strategy = this.paymentRegistry.get(providerType as any);
     
-    // 3. Generate a Unique Reference for this financial event
     const reference = `SUB-${tenantId.slice(-6)}-${Date.now()}`;
+
+    /**
+     * 1. CREATE DB RECORD FIRST (Standard across all modules)
+     * We create the pending record using the base client to ensure 
+     * the 'planId' and 'type' are persisted immediately.
+     */
+    const payment = await this.prisma.payment.create({
+      data: {
+        tenantId,
+        type: PaymentType.SUBSCRIPTION,
+        provider: providerType as any,
+        amount: Number(plan.price),
+        status: PaymentStatus.PENDING,
+        providerTransactionId: reference, // Temporary internal ref
+        metadata: {
+          planId: plan.id,
+          billingCycle: dto.billingCycle,
+          reference: reference,
+          type: PaymentType.SUBSCRIPTION,
+        }
+      }
+    });
 
     let checkoutUrl: string | undefined;
 
-    // 4. HYBRID FLOW: If the provider requires a Redirect (Stripe/PayPal)
-    // we must initialize it SYNC to get the URL for the frontend.
+    // 2. HYBRID FLOW: If Redirect (Stripe), initialize synchronously
     if (strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
       const result = await this.paymentService.initiate({
+        type: PaymentType.SUBSCRIPTION,
         provider: providerType as any,
         amount: Number(plan.price),
         currency,
         reference,
-        description: `Subscription: ${plan.name} (${dto.billingCycle})`,
-        metadata: { type: 'SUBSCRIPTION', planId: plan.id, billingCycle: dto.billingCycle }
+        description: `Subscription: ${plan.name}`,
+        metadata: { type: PaymentType.SUBSCRIPTION, planId: plan.id }
       });
       checkoutUrl = result.checkoutUrl;
     }
 
-    /**
-     * 5. EVENT EMISSION: 
-     * If provider is PUSH (Mpesa), the 'BillingPaymentListener' will 
-     * see this event and add a job to BullMQ to trigger the STK Push.
-     */
+    // 3. EMIT EVENT: The Listener will now find the record we just created
     this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CREATED, {
       tenantId,
       planId: dto.planId,
@@ -99,8 +114,9 @@ export class BillingService {
 
     return {
       success: true,
+      paymentId: payment.id,
       reference,
-      checkoutUrl, // Frontend will redirect if present
+      checkoutUrl,
     };
   }
 
@@ -108,24 +124,44 @@ export class BillingService {
    * ACTION: Upgrade or Downgrade Plan.
    * millions of users: Orchestrates the plan change via the Payment Module.
    */
+  
   async changePlan(dto: ChangePlanDto) {
     const tenantId = this.tenantContext.getTenantIdOrThrow();
     const subscription = await this.getSubscription();
-
     const plan = await this.planService.findById(dto.newPlanId);
-    const strategy = this.paymentRegistry.get(subscription.tenant.baseCurrency === 'KES' ? 'MPESA' : 'STRIPE');
 
+    const providerType = subscription.tenant.baseCurrency === 'KES' ? 'MPESA' : 'STRIPE';
     const reference = `UPG-${tenantId.slice(-6)}-${Date.now()}`;
 
-    // If it's a redirect-based upgrade (e.g. Stripe checkout for new price)
+    // Create the record first
+    await this.prisma.payment.create({
+      data: {
+        tenantId,
+        type: PaymentType.SUBSCRIPTION,
+        provider: providerType as any,
+        amount: Number(plan.price),
+        status: PaymentStatus.PENDING,
+        providerTransactionId: reference,
+        metadata: {
+          planId: plan.id,
+          isUpgrade: true,
+          reference: reference,
+          type: PaymentType.SUBSCRIPTION
+        }
+      }
+    });
+
     let checkoutUrl: string | undefined;
+    const strategy = this.paymentRegistry.get(providerType as any);
+
     if (strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
       const result = await this.paymentService.initiate({
+        type: PaymentType.SUBSCRIPTION,
         provider: strategy.getName(),
         amount: Number(plan.price),
         currency: subscription.tenant.baseCurrency,
         reference,
-        metadata: { type: 'SUBSCRIPTION', planId: plan.id, isUpgrade: true }
+        metadata: { type: PaymentType.SUBSCRIPTION, planId: plan.id, isUpgrade: true }
       });
       checkoutUrl = result.checkoutUrl;
     }
@@ -140,6 +176,7 @@ export class BillingService {
 
     return { success: true, checkoutUrl };
   }
+
   
   // ─── Management ──────────────────────────────────────────────────────────────
 
@@ -151,7 +188,7 @@ export class BillingService {
     // happens in the background worker triggered by this event.
     this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CANCELED, {
       tenantId,
-      providerSubscriptionId: subscription.providerSubscriptionId,
+      paymentId: subscription.paymentId,
       immediately,
     });
 

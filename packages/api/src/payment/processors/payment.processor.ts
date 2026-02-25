@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { QUEUES } from '../../common/queues/queue.constants';
+import { JOB_NAMES, QUEUES } from '../../common/queues/queue.constants';
 import { PaymentService } from '../payment.service';
 import { TenantContextService } from '../../common/tenant-context/tenant-context.service';
 import { CheckoutCompletedEvent } from '../../order/events/order.events';
@@ -31,10 +31,10 @@ export class PaymentProcessor extends WorkerHost {
     this.logger.log(`Processing ${job.name} [ID: ${job.id}]`);
 
     switch (job.name) {
-      case 'INITIALIZE_CHECKOUT_PAYMENT':
+      case JOB_NAMES.INITIALIZE_CHECKOUT_PAYMENT:
         return this.handleCheckoutPayment(job.data);
 
-      case 'INITIALIZE_SUBSCRIPTION_PAYMENT':
+      case JOB_NAMES.INITIALIZE_SUBSCRIPTION_PAYMENT:
         return this.handleSubscriptionPayment(job.data);
 
       default:
@@ -61,6 +61,7 @@ export class PaymentProcessor extends WorkerHost {
         this.logger.debug(`Initiating ${data.paymentProvider} for Ref: ${data.paymentReference}`);
 
         return await this.paymentService.initiate({
+          type: PaymentType.ORDER,
           provider: data.paymentProvider,
           amount: data.totalAmount,
           currency: data.currency,
@@ -90,6 +91,7 @@ export class PaymentProcessor extends WorkerHost {
         this.logger.debug(`Initiating Sub Payment for Tenant: ${data.tenantId} | Ref: ${data.reference}`);
 
         return await this.paymentService.initiate({
+          type: PaymentType.SUBSCRIPTION,
           provider: data.currency === 'KES' ? 'MPESA' : 'STRIPE',
           amount: data.amount,
           currency: data.currency,

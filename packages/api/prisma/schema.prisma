@@ -187,7 +187,6 @@ model Order {
   customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId      String?
   items           OrderItem[]
-  payments        Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -217,15 +216,12 @@ model Payment {
   id                      String          @id @default(cuid())
   tenantId                String
   type                    PaymentType     @default(ORDER)
-  orderId                 String?         // Optional — null for subscription payments
   provider                PaymentProvider
   providerTransactionId   String
   amount                  Decimal         @db.Decimal(10, 2)
   status                  PaymentStatus   @default(PENDING)
+  subscription            TenantSubscription?
   metadata                Json?
-
-  order                   Order?          @relation(fields: [orderId], references: [id])
-
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 
@@ -328,11 +324,12 @@ model TenantSubscription {
   tenantId               String                @unique
   planId                 String                
   status                 SubscriptionStatus    @default(ACTIVE)
-  providerSubscriptionId String?               @unique
+  paymentId              String?               @unique
   currentPeriodEnd       DateTime
   
   tenant                 Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan                   SubscriptionPlan      @relation(fields: [planId], references: [id]) 
+  payment          Payment?           @relation(fields: [paymentId], references: [id])
 }
 
 // ===============================================

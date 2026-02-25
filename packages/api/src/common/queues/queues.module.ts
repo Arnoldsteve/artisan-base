@@ -52,6 +52,7 @@ import { QueueRateLimiter } from './rate-limiter';
       { name: QUEUES.NOTIFICATIONS },
       { name: QUEUES.ORDER_PROCESSING },
       { name: QUEUES.PAYMENTS },
+      { name: QUEUES.BILLING }, 
       { name: QUEUES.ANALYTICS },
       { name: QUEUES.IMAGE_PROCESSING },
     ),

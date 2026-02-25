@@ -57,9 +57,9 @@ export class BillingRepository {
     });
   }
 
-  async findByProviderSubscriptionId(providerSubscriptionId: string) {
+  async findByPaymentId(paymentId: string) {
     return this.prisma.tenantSubscription.findFirst({
-      where: { providerSubscriptionId },
+      where: { paymentId },
       include: {
         plan: true,
         tenant: {
@@ -82,12 +82,13 @@ export class BillingRepository {
         create: {
           tenantId: params.tenantId,
           planId: params.planId,
-          providerSubscriptionId: params.providerSubscriptionId,
+          paymentId: params.providerSubscriptionId,
           status: SubscriptionStatus.ACTIVE,
           currentPeriodEnd,
         },
         update: {
-          providerSubscriptionId: params.providerSubscriptionId,
+          planId: params.planId, 
+          paymentId: params.providerSubscriptionId,
           status: SubscriptionStatus.ACTIVE,
           currentPeriodEnd,
         },
@@ -116,9 +117,9 @@ export class BillingRepository {
     });
   }
 
-  async cancelSubscription(providerSubscriptionId: string): Promise<void> {
+  async cancelSubscription(paymentId: string): Promise<void> {
     await this.prisma.tenantSubscription.updateMany({
-      where: { providerSubscriptionId },
+      where: { paymentId },
       data: { status: SubscriptionStatus.CANCELED },
     });
   }

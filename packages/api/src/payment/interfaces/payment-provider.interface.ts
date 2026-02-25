@@ -1,4 +1,4 @@
-import { PaymentProvider, PaymentStatus } from '@generated/prisma/client';
+import { PaymentProvider, PaymentStatus, PaymentType } from '@generated/prisma/client';
 
 /**
  * TOP 1% ARCHITECTURE: Fulfillment Strategy
@@ -65,5 +65,18 @@ export interface PaymentInitParams {
   returnUrl?: string;       // Stripe/PayPal specific
   description?: string;
   reference: string;        // Internal Platform Reference (PAY-xxx)
+  metadata?: Record<string, any>;
+}
+
+export interface InitiatePaymentParams {
+  type: PaymentType; 
+  orderId?: string;
+  provider: PaymentProvider;
+  amount: number;
+  currency: string;
+  phone?: string;
+  returnUrl?: string;
+  description?: string;
+  reference: string; // Internal 'PAY-...' reference
   metadata?: Record<string, any>;
 }
