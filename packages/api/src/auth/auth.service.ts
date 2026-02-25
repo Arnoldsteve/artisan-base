@@ -1,200 +1,185 @@
 import {
-  ConflictException,
   Injectable,
   UnauthorizedException,
-  Inject,
   ForbiddenException,
-  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
-import { IAuthRepository } from './interfaces/auth-repository.interface';
-import { SignUpDto } from './dto/signup.dto';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UserRepository } from '@/user/repositories/user.repository';
+import { TenantMemberRepository } from '@/tenant/repositories/tenant-member.repository';
+import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { LoginDto } from './dto/login.dto';
-import { UserProfileResponseDto } from './dto/user-profile.dto';
-import { randomBytes, createHash } from 'crypto';
+import * as bcrypt from 'bcrypt';
+import { TenantRepository } from '@/tenant/repositories/tenant.repository';
+import { ProductRepository } from '@/product/repositories/product.repository';
+import { CategoryRepository } from '@/category/repositories/category.repository';
+// import { crypto } from 'crypto'; // For hashing the refresh token
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('AuthRepository') private readonly authRepository: IAuthRepository,
-    private jwtService: JwtService,
+    private readonly userRepo: UserRepository,
+    private readonly memberRepo: TenantMemberRepository,
+    private readonly tenantRepo: TenantRepository,
+    private readonly productRepo: ProductRepository,
+    private readonly categoryRepo: CategoryRepository,
+    private readonly tokenRepo: RefreshTokenRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
-  // ------------------- SIGNUP -------------------
-  async signUp(signUpDto: SignUpDto, ipAddress?: string, userAgent?: string) {
-    const { email, password, firstName, lastName } = signUpDto;
-
-    const existingUser = await this.authRepository.findUserByEmail(email);
-    if (existingUser) {
-      throw new ConflictException('Email already in use.');
+  /**
+   * Validates the user's credentials.
+   * Standard for Millions of Users: We only return the user if the password matches.
+   */
+  async validateUser(dto: LoginDto) {
+    const user = await this.userRepo.findByEmail(dto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await this.authRepository.createUser({
-      email,
-      hashedPassword,
-      firstName,
-      lastName,
-    });
-
-    const { hashedPassword: _, ...userWithoutPassword } = user;
-
-    const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '120m' });
-
-    // Create and store Refresh Token (with IP & user-agent tracking)
-    const { refreshToken } = await this.createAndStoreRefreshToken(
-      user.id,
-      ipAddress,
-      userAgent,
+    const isPasswordMatching = await bcrypt.compare(
+      dto.password,
+      user.hashedPassword,
     );
+    if (!isPasswordMatching) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Return user without the password
+    const { hashedPassword, ...result } = user;
+    return result;
+  }
+
+  /**
+   * The Login Flow:
+   * 1. Generates Access Token (Short-lived)
+   * 2. Generates Refresh Token (Long-lived & Persisted)
+   * 3. Discovers available Tenants for this user
+   */
+  async login(user: any) {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      globalRole: user.globalRole,
+    };
+
+    // Find which tenants this user can access
+    const memberships = await this.memberRepo.listByUser(user.id);
+    const tenants = memberships.map((m) => ({
+      id: m.tenantId,
+      name: m.tenant.name,
+      subdomain: m.tenant.subdomain,
+      role: m.role,
+      baseCurrency: m.tenant.baseCurrency, 
+      timezone: m.tenant.timezone,   
+    }));
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = await this.createRefreshToken(user.id);
 
     return {
-      message: 'Signup successful',
-      accessToken,
-      refreshToken,
-      user: userWithoutPassword,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        globalRole: user.globalRole,
+      },
+      tenants, // Tells the frontend which stores this user can manage
+      backend_tokens: {
+        accessToken,
+        refreshToken,
+      },
     };
   }
 
-  // ------------------- LOGIN -------------------
-  async login(loginDto: LoginDto, ipAddress?: string, userAgent?: string) {
-    const { email, password } = loginDto;
+  async getProfile(userId: string) {
+    const user = await this.userRepo.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
 
-    const user = await this.authRepository.findUserByEmail(email);
-    if (!user || !(await bcrypt.compare(password, user.hashedPassword))) {
-      throw new UnauthorizedException(
-        'Invalid credentials. Please check your email and password.',
-      );
-    }
-
-    const organizations = await this.authRepository.findTenantsByOwnerId(
-      user.id,
-    );
-
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '120m' });
-
-    // Create Refresh Token and save in DB
-    const { refreshToken } = await this.createAndStoreRefreshToken(
-      user.id,
-      ipAddress,
-      userAgent,
-    );
-
-    const { hashedPassword: _, ...userWithoutPassword } = user;
+    const memberships = await this.memberRepo.listByUser(userId);
 
     return {
-      message: 'Login successful',
-      accessToken,
-      refreshToken,
-      user: userWithoutPassword,
-      organizations,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        globalRole: user.globalRole,
+      },
+      organizations: memberships.map((m) => ({
+        id: m.tenantId,
+        name: m.tenant.name,
+        subdomain: m.tenant.subdomain,
+        role: m.role,
+      })),
     };
   }
 
-  // ------------------- PROFILE -------------------
-  async getProfile(userId: string): Promise<UserProfileResponseDto> {
-    return this.authRepository.getProfile(userId);
+  /**
+   * The Master Handshake.
+   * Aggregates everything the dashboard needs on first load:
+   * user profile, tenant details, products, and categories.
+   */
+  async bootstrap(userId: string, tenantId: string) {
+    const [user, tenant, membership, productsCount, categoriesCount] =
+      await Promise.all([
+        this.userRepo.findById(userId),
+        this.tenantRepo.findById(tenantId),
+        this.memberRepo.findByTenantAndUser(tenantId, userId),
+        this.productRepo.count(),
+        this.categoryRepo.count(),
+      ]);
+
+    if (!user) throw new NotFoundException('User not found');
+    if (!tenant) throw new NotFoundException('Tenant not found');
+    if (!membership)
+      throw new NotFoundException('User is not a member of this tenant');
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        globalRole: user.globalRole,
+        tenantRole: membership.role,
+      },
+      tenant: {
+        id: tenant.id,
+        name: tenant.name,
+        subdomain: tenant.subdomain,
+        baseCurrency: tenant.baseCurrency, 
+        timezone: tenant.timezone, 
+      },
+      productsCount,
+      categoriesCount,
+    };
   }
 
-  // ------------------- REFRESH TOKEN HELPER -------------------
-  private async createAndStoreRefreshToken(
-    userId: string,
-    ipAddress?: string,
-    userAgent?: string,
-  ): Promise<{ refreshToken: string }> {
-    // Generate a random token
-    const refreshToken = randomBytes(64).toString('hex');
+  /**
+   * Helper to create and persist a refresh token.
+   */
+  private async createRefreshToken(userId: string): Promise<string> {
+    const token =
+      Math.random().toString(36).substring(2) +
+      Math.random().toString(36).substring(2);
+    const tokenHash = this.hashToken(token);
 
-    // Hash before saving to DB (never store plain tokens)
-    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    // Set expiration to 7 days
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
 
-    // 30 days validity
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    await this.authRepository.createRefreshToken({
+    await this.tokenRepo.create({
       userId,
       tokenHash,
-      ipAddress,
-      userAgent,
       expiresAt,
     });
 
-    return { refreshToken };
+    return token;
   }
 
-  // ------------------- REFRESH SESSION -------------------
-  async refreshSession(
-    refreshToken: string,
-    ipAddress?: string,
-    userAgent?: string,
-  ) {
-    if (!refreshToken) {
-      throw new BadRequestException('Refresh token is required');
-    }
-
-    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
-    const storedToken =
-      await this.authRepository.findRefreshTokenByHash(tokenHash);
-
-    if (
-      !storedToken ||
-      storedToken.revoked ||
-      storedToken.expiresAt < new Date()
-    ) {
-      throw new ForbiddenException('Invalid or expired refresh token.');
-    }
-
-    // Rotate token
-    await this.authRepository.revokeRefreshTokenById(storedToken.id);
-    const { refreshToken: newRefreshToken } =
-      await this.createAndStoreRefreshToken(
-        storedToken.userId,
-        ipAddress,
-        userAgent,
-      );
-
-    // Issue new access token
-    const payload = { sub: storedToken.userId };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-
-    return { accessToken, refreshToken: newRefreshToken };
+  private hashToken(token: string): string {
+    return require('crypto').createHash('sha256').update(token).digest('hex');
   }
-
-  // ------------------- LOGOUT -------------------
-  async logout(refreshToken: string) {
-    if (!refreshToken) {
-      throw new BadRequestException('Refresh token is required');
-    }
-    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
-    await this.authRepository.revokeRefreshTokenByHash(tokenHash);
-    return { message: 'Logged out successfully' };
-  }
-
-  // src/auth/auth.service.ts
-async forgotPassword(email: string, ipAddress?: string, userAgent?: string) {
-  const user = await this.authRepository.findUserByEmail(email);
-
-  // Always return success to avoid leaking email existence
-  if (!user) {
-    return { message: 'If an account with that email exists, you will receive a reset link.' };
-  }
-
-  // Generate secure token
-  const resetToken = randomBytes(32).toString('hex');
-  const resetTokenHash = createHash('sha256').update(resetToken).digest('hex');
-  const resetTokenExpiry = new Date(Date.now() + 3600_000); // 1 hour
-
-  // Save token & expiry in DB (you can add resetToken & expiry fields to user table)
-  await this.authRepository.savePasswordResetToken(user.id, resetTokenHash, resetTokenExpiry);
-
-  // TODO: Send reset email
-  // await this.mailService.sendPasswordResetEmail(user.email, resetToken);
-
-  return { message: 'If an account with that email exists, you will receive a reset link.' };
-}
-
 }

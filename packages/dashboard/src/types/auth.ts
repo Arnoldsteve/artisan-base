@@ -1,4 +1,4 @@
-import { User } from "./users";
+import { StaffMember } from "./staff";
 import { Tenant } from "./tenant";
 
 export interface LoginDto {
@@ -14,18 +14,21 @@ export interface SignUpDto {
 }
 
 export interface LoginResponse {
-  message: string;
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-  organizations: Tenant[];
+  user: StaffMember;
+  tenants: Tenant[];         // ← was organizations
+  backend_tokens: {          // ← was flat accessToken/refreshToken
+    accessToken: string;
+    refreshToken: string;
+  };
 }
 
 export interface SignUpResponse {
   message: string;
-  accessToken: string;
-  refreshToken: string;
-  user: User;
+  data: {
+    userId: string;
+    tenantId: string;
+    subdomain: string;
+  };
 }
 
 export interface ForgotPassword {
@@ -33,6 +36,11 @@ export interface ForgotPassword {
 }
 
 export interface ResetPassword {
-  token : string,
-  newPassword: string
+  token: string;
+  newPassword: string;
+}
+
+export interface ProfileResponse {
+  user: StaffMember;
+  organizations: Tenant[];
 }

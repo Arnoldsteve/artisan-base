@@ -1,30 +1,39 @@
 {
   "compilerOptions": {
-    "jsx": "react",
     "module": "commonjs",
+    "target": "ES2023",
+    "rootDir": ".",
+    "outDir": "./dist",
+
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
+    "strictPropertyInitialization": false,
+
     "sourceMap": true,
-    "outDir": "./dist",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false,
 
-    "baseUrl": "./",
+    "baseUrl": ".",
+    // "ignoreDeprecations": "6.0",
+
     "paths": {
-      // This line maps the alias directly to the generated Prisma client folder
-      "@prisma/client/management": ["./generated/management"],
-
-      // (Optional but Recommended) Add this for cleaner imports from your 'src' folder
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@generated/*": ["generated/*"]
     }
-  }
+  },
+  "include": ["src", "generated"],
+  "exclude": [
+    "node_modules", 
+    "dist",
+    "src/dashboard/**",      
+    "src/billing/**",    
+    "src/ABC",
+    "src/platform",
+    "src/shared",
+    "src/supabase",
+    "src/storefront"
+  ]
 }

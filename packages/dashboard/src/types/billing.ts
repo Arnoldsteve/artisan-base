@@ -1,55 +1,67 @@
-export type BillingCycle = "MONTHLY" | "YEARLY";
-
-export interface PlanFeatures {
-  productLimit: number | 'unlimited';
-  teamMemberLimit: number | 'unlimited';
-  hasAnalytics: boolean;
-  hasCustomDomain: boolean;
-  prioritySupport?: boolean;
-  advancedReporting?: boolean;
-  dedicatedAccountManager?: boolean;
-}
-
-export interface Plan {
-  id: string;
-  name: string;
-  price: string;
-  billingCycle: BillingCycle;
-  features: PlanFeatures;
-  createdAt: string;
-}
-
-export type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "PAST_DUE" | "UNPAID";
-
-export interface Subscription {
-  id: string;
-  status: SubscriptionStatus;
-  currentPeriodEnd: string;
-  currentPeriodStart: string;
-  plan: Plan; 
-}
-
-export type InvoiceStatus = "PAID" | "DUE" | "FAILED" | "UNPAID" | "CANCELLED";
-
-export interface Invoice {
-  id: string;
-  date: string;
-  amount: string;
-  status: InvoiceStatus;
-  invoicePdfUrl?: string; 
-}
-
+import { Currency } from "./currency";
 
 /**
- * A generic interface for a standardized API response.
- * @template T The type of the data payload.
+ * SOLID Principle: Single Source of Truth
+ * Matches the 'SubscriptionStatus' enum in your Prisma schema.
  */
-export interface ApiResponse<T> {
-  data: T;
+export enum SubscriptionStatus {
+  ACTIVE = 'ACTIVE',
+  PAST_DUE = 'PAST_DUE',
+  CANCELED = 'CANCELED',
+  UNPAID = 'UNPAID',
 }
 
-// Specific response types for each billing endpoint
-export type GetPlansResponse = ApiResponse<Plan[]>;
-export type GetSubscriptionResponse = ApiResponse<Subscription>;
-export type GetInvoicesResponse = ApiResponse<Invoice[]>;
-export type ChangePlanResponse = ApiResponse<{ success: boolean; message: string; }>;
+export enum BillingCycle {
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
+}
+
+/**
+ * Represents a platform-level Pricing Plan
+ */
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  billingCycle: BillingCycle;
+  features: Record<string, any>; // JSON features from your schema
+  providerPlanId?: string;       // Stripe Price ID
+}
+
+/**
+ * Represents the current Store's subscription record
+ */
+export interface TenantSubscription {
+  id: string;
+  tenantId: string;
+  status: SubscriptionStatus;
+  providerSubscriptionId?: string;
+  currentPeriodEnd: string;
+  plan?: SubscriptionPlan; // Populated via include
+}
+
+/**
+ * DTO for the 'Subscribe' action
+ * Note: Intelligently handles both M-Pesa (phone) and Stripe (stripePriceId)
+ */
+export interface CreateSubscriptionDto {
+  planId: string;
+  billingCycle: BillingCycle;
+  stripePriceId?: string; // Required if Currency is USD/GBP/EUR
+  phone?: string;         // Required if Currency is KES (M-Pesa)
+}
+
+export interface ChangePlanDto {
+  newPlanId: string;
+  newStripePriceId?: string;
+  newAmount?: number;
+}
+
+export interface BillingHistoryItem {
+  id: string;
+  amount: number;
+  provider: string;
+  status: string;
+  createdAt: string;
+  metadata?: any;
+}

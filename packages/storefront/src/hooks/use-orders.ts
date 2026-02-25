@@ -1,62 +1,83 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { orderService } from "@/services/order-service";
-import type { CartItem } from "@/types/cart";
-import type { Customer, ShippingAddress, PaymentMethod, Order } from "@/types/checkout";
+import { toast } from "sonner";
+import { useAuthContext } from "@/contexts/auth-context";
+import { useTenantContext } from "@/contexts/tenant-context";
+import { CheckoutPayload, OrderResponse } from "@/types/checkout";
+import { Order } from "@/types/orders";
 
-type CreateOrderPayload = {
-  customer?: Customer;
-  shippingAddress: ShippingAddress;
-  billingAddress: ShippingAddress;
-  paymentMethod?: PaymentMethod;
-  items: CartItem[];
-  currency: "KES"; // or other enum value
-  notes?: string;
-  shippingAmount?: number;
-};
-
-export function useOrders(email: string | undefined) {
+/**
+ * TOP 1% ARCHITECTURE: Context-Aware Order Hook
+ * This hook partitions the cache by tenantId and handles the 
+ * secure transition from Cart to Order.
+ */
+export const useOrders = (customerId?: string) => {
   const queryClient = useQueryClient();
+  const { tenant } = useTenantContext();
+  const { isAuthenticated } = useAuthContext();
 
-  // Fetch orders
+  // Cache partitioned by Store context and Customer context
+  const ORDERS_QUERY_KEY = ["storefront-orders", tenant?.id, customerId];
+
+  // --- 1. Fetch Order History (Authenticated) ---
   const ordersQuery = useQuery({
-    queryKey: ["orders", email],
-    queryFn: () => (email ? orderService.getOrders(email) : Promise.resolve([])),
-    enabled: !!email,
+    queryKey: [...ORDERS_QUERY_KEY, "list"],
+    queryFn: () => {
+      if (customerId) return orderService.getByCustomer(customerId);
+      return orderService.getAll();
+    },
+    // Only fetch if the user is logged in or a specific store is selected
+    enabled: isAuthenticated || !!tenant?.id,
+    placeholderData: keepPreviousData,
   });
 
-  // Create order mutation
-  const createOrderMutation = useMutation({
-    mutationFn: async (payload: CreateOrderPayload) => {
-      // Transform payload to match backend DTO
-      const transformed = {
-        customer: payload.customer,
-        shippingAddress: payload.shippingAddress,
-        billingAddress: payload.billingAddress,
-        items: payload.items.map((item) => ({
-          productId: item.id,
-          quantity: item.quantity,
-          ...(item.variantId ? { variantId: item.variantId } : {}),
-        })),
-        paymentMethod: payload.paymentMethod?.code, // must match PaymentProvider enum
-        currency: payload.currency,
-        notes: payload.notes,
-        shippingAmount: payload.shippingAmount,
-      };
-
-      const response = await orderService.createOrder(transformed);
-      return response.order as Order;
+  // --- 2. Mutation: Place Order (The Checkout Trigger) ---
+  const placeOrderMutation = useMutation({
+    mutationFn: (payload: CheckoutPayload) => orderService.placeOrder(payload),
+    onSuccess: (response: OrderResponse) => {
+      // Invalidate cache so history is fresh
+      queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+      
+      /**
+       * Scale Tip: We don't toast success here because the 
+       * CheckoutContext handles the redirect to the confirmation page.
+       */
     },
-    onSuccess: (order) => {
-      queryClient.setQueryData(["orders", email], (old: Order[] | undefined) =>
-        old ? [order, ...old] : [order]
-      );
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || "Failed to process order";
+      toast.error(msg);
     },
   });
 
   return {
-    ...ordersQuery,
-    createOrder: createOrderMutation.mutateAsync,
-    isCreating: createOrderMutation.isPending,
-    createError: createOrderMutation.error?.message || null,
+    orders: ordersQuery.data || [],
+    isLoading: ordersQuery.isLoading,
+    isError: ordersQuery.isError,
+    
+    // Action: Place Order
+    createOrder: placeOrderMutation.mutateAsync, // Use async for the Context handler
+    isCreating: placeOrderMutation.isPending,
+    createError: (placeOrderMutation.error as any)?.message || null,
   };
-}
+};
+
+/**
+ * Hook for Single Order Tracking
+ */
+export const useOrderDetails = (orderId: string | null) => {
+  const { tenant } = useTenantContext();
+
+  return useQuery({
+    queryKey: ["order-detail", tenant?.id, orderId],
+    queryFn: () => orderService.getById(orderId!),
+    enabled: !!orderId,
+    staleTime: 1000 * 60 * 2, // Orders status updates can be cached for 2 mins
+  });
+};

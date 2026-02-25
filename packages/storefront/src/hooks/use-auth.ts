@@ -11,7 +11,7 @@ export function useAuth() {
       setLoading(true);
       try {
         const data = await apiClient.get<any>(
-          "/api/v1/storefront/auth/profile"
+          "/auth/profile"
         );
         setUser(data);
         setIsAuthenticated(true);

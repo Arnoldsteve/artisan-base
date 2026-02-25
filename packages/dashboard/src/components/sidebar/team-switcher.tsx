@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { ChevronsUpDown, Plus } from "lucide-react"
+import { useAuthContext } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 import {
   DropdownMenu,
@@ -23,13 +25,26 @@ export function TeamSwitcher({
   teams,
 }: {
   teams: {
+    id: string         // Added ID: essential for row-isolation switching
     name: string
     logo: React.ElementType
     plan: string
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const router = useRouter()
+  
+  // Connect to the Global Auth Context
+  const { tenantId, selectTenant, tenants } = useAuthContext()
+
+  /**
+   * Derived State: Instead of local useState, we find the active team 
+   * from the global context ID. This ensures that if you refresh the page, 
+   * the UI stays on the correct store stored in your Cookies.
+   */
+  const activeTeam = React.useMemo(() => {
+    return teams.find((t) => t.id === tenantId) || teams[0]
+  }, [tenantId, teams])
 
   if (!activeTeam) {
     return null
@@ -61,13 +76,17 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              My Stores
             </DropdownMenuLabel>
             {teams.map((team, index) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className="gap-2 p-2"
+                key={team.id}
+                onClick={() => {
+                  // Re-identify the original tenant object to update Cookies/Headers
+                  const fullTenant = tenants.find(t => t.id === team.id)
+                  if (fullTenant) selectTenant(fullTenant)
+                }}
+                className="gap-2 p-2 cursor-pointer"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
                   <team.logo className="size-3.5 shrink-0" />
@@ -77,11 +96,14 @@ export function TeamSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem 
+              className="gap-2 p-2 cursor-pointer"
+              onClick={() => router.push("/tenant/new")} // Routes to Scenario 2: Add Store
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
-              <div className="text-muted-foreground font-medium">Add team</div>
+              <div className="text-muted-foreground font-medium">Add store</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

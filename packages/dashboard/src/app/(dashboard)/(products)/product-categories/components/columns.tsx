@@ -79,6 +79,15 @@ export const columns: ColumnDef<
   },
 
   {
+    accessorKey: "slug",
+    header: "Slug",
+    cell: ({row}) => {
+      const slug= row.getValue("slug") as string;
+      return slug;
+    }
+  },
+
+  {
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => {

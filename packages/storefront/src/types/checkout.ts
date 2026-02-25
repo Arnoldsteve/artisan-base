@@ -1,18 +1,24 @@
 import { CartItem } from "./cart";
+import { Currency } from "./currency";
 
 export interface Customer {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  // countryCode?: string;
+  phone: string;
 }
 
+/**
+ * TOP 1% ARCHITECTURE: Standardized ISO Address
+ * We remove firstName/lastName here because they are already 
+ * provided in the 'Customer' object of the payload.
+ */
 export interface ShippingAddress {
-  street: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
-  region?: string;
-  zipCode: string;
+  state: string;
+  postalCode: string;
   country: string;
 }
 
@@ -21,52 +27,31 @@ export interface ShippingOption {
   name: string;
   price: number;
   estimatedDays: string;
-  description: string;
 }
 
 export interface PaymentMethod {
   id: string;
-  code: string; 
-  // type: "credit_card" | "paypal" | "bank_transfer";
   type: string;
   name: string;
-  icon?: string;
+  icon: string;
+  code: string;
+  provider: string; 
 }
 
-export interface Order {
-  id: string;
-  orderNumber: string;
+export interface CheckoutPayload {
   customer: Customer;
   shippingAddress: ShippingAddress;
-  shippingOption: ShippingOption;
-  paymentMethod: PaymentMethod;
-  items: CartItem[];
-  subtotal: number;
-  shippingCost: number;
-  tax: number;
-  total: number;
-  status: "pending" | "processing" | "shipped" | "delivered";
-  createdAt: Date;
-  estimatedDelivery: Date;
+  paymentProvider: string; 
+  currency: Currency;
+  vendors: {
+    tenantId: string;
+    items: { productId: string; quantity: number }[];
+    shippingMethodId: string;
+  }[];
 }
 
-export interface CheckoutContextType {
-  currentStep: number;
-  customer: Customer | null;
-  shippingAddress: ShippingAddress | null;
-  selectedShippingOption: ShippingOption | null;
-  selectedPaymentMethod: PaymentMethod | null;
-  order: Order | null;
-  isLoading: boolean;
-  error: string | null;
-
-  setCustomer: (customer: Customer) => void;
-  setShippingAddress: (address: ShippingAddress) => void;
-  setShippingOption: (option: ShippingOption) => void;
-  setPaymentMethod: (method: PaymentMethod) => void;
-  nextStep: () => void;
-  previousStep: () => void;
-  goToStep: (step: number) => void;
-  submitOrder: () => Promise<void>;
-  resetCheckout: () => void;
+export interface OrderResponse {
+  orderIds: string[];
+  paymentReference: string;
+  checkoutUrl?: string;
 }

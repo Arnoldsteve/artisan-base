@@ -1,28 +1,46 @@
 import { apiClient } from "@/lib/client-api";
 import { 
-  CreateTenantDto, 
-  CreateTenantResponse,
+  Tenant,
+  CreateStoreDto, 
+  UpdateTenantDto,
   AvailabilityResponse 
 } from "@/types/tenant";
 
-
 export class TenantService {
-
-  async createTenant(tenantData: CreateTenantDto): Promise<CreateTenantResponse> {
-    return apiClient.post<CreateTenantResponse>("/tenants", tenantData);
-  }
-
- 
+  /**
+   * Public: Check if a subdomain is taken
+   */
   async checkSubdomainAvailability(subdomain: string): Promise<AvailabilityResponse> {
-    return apiClient.get<AvailabilityResponse>(`/tenants/availability?subdomain=${subdomain}`);
-
+    return apiClient.get<AvailabilityResponse>(`/onboarding/check-subdomain`, { subdomain });
   }
 
-  // You can add other tenant-related service methods here in the future,
-  // for example, to fetch a list of all tenants a user belongs to.
-  // async getMyTenants(): Promise<Tenant[]> {
-  //   return apiClient.get<Tenant[]>("/tenants/my-tenants");
-  // }
+  /**
+   * Private: Get profile of the current store context
+   */
+  async getProfile(): Promise<Tenant> {
+    return apiClient.get<Tenant>("/tenant/profile");
+  }
+
+  /**
+   * Private: Update current store settings
+   */
+  async update(data: UpdateTenantDto): Promise<Tenant> {
+    return apiClient.patch<Tenant>("/tenant/settings", data);
+  }
+
+  /**
+   * Private: Create a new store (Scenario 2 - Switcher)
+   */
+  async provisionStore(data: CreateStoreDto): Promise<Tenant> {
+    return apiClient.post<Tenant>("/tenant", data);
+  }
+
+  /**
+   * Private: Delete store (Danger Zone)
+   */
+  async delete(): Promise<void> {
+    return apiClient.delete("/tenant");
+  }
 }
 
 export const tenantService = new TenantService();

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-// Error class remains the same
+// Error class for consistent error handling across the platform
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -15,12 +15,13 @@ export class ApiError extends Error {
 
 export class ApiClient {
   private client: AxiosInstance;
+  private tenantId: string | null = null; // State for dynamic isolation
 
   constructor(
     baseURL: string = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
   ) {
     this.client = axios.create({
-      baseURL,
+      baseURL: `${baseURL}/api/v1`, // Standardized base path
       timeout: 60000,
       headers: {
         "Content-Type": "application/json",
@@ -28,14 +29,26 @@ export class ApiClient {
       withCredentials: true,
     });
 
-    // Add tenant header
+    /**
+     * TOP 1% ARCHITECTURE: Dynamic Header Interceptor
+     * This interceptor injects the current tenant context into 
+     * every single outgoing request automatically.
+     */
     this.client.interceptors.request.use((config) => {
-      config.headers = config.headers || {};
-      config.headers["x-tenant-id"] = "satechs";
+      if (this.tenantId) {
+        config.headers["x-tenant-id"] = this.tenantId;
+      }
       return config;
     });
 
     this.setupInterceptors();
+  }
+
+  /**
+   * Called by the TenantProvider once a URL slug is resolved.
+   */
+  public setTenantId(id: string | null): void {
+    this.tenantId = id;
   }
 
   private setupInterceptors(): void {
@@ -72,8 +85,8 @@ export class ApiClient {
     return this.request<T>({ method: "post", url, data });
   }
 
-  put<T>(url: string, data?: any): Promise<T> {
-    return this.request<T>({ method: "put", url, data });
+  patch<T>(url: string, data?: any): Promise<T> {
+    return this.request<T>({ method: 'patch', url, data });
   }
 
   delete<T>(url: string): Promise<T> {

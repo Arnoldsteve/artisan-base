@@ -1,159 +1,109 @@
 import {
   Injectable,
-  InternalServerErrorException,
+  NotFoundException,
+  ForbiddenException,
   ConflictException,
-  BadRequestException,
-  Logger,
-  Inject,
-  NotFoundException
 } from '@nestjs/common';
-import { ITenantRepository } from './interfaces/tenant-repository.interface';
-import { Tenant } from 'generated/management';
+import { TenantRepository } from './repositories/tenant.repository';
+import { TenantMemberRepository } from './repositories/tenant-member.repository';
+import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { CreateStoreDto } from './dto/create-store.dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import { TenantUserRole } from '@generated/prisma/client';
+import { PageOptionsDto } from '@/common/pagination/dtos/page-options.dto';
 
 @Injectable()
 export class TenantService {
-  private readonly logger = new Logger(TenantService.name);
-
   constructor(
-    @Inject('TenantRepository')
-    private readonly tenantRepository: ITenantRepository,
+    private readonly prisma: PrismaService,
+    private readonly tenantRepo: TenantRepository,
+    private readonly memberRepo: TenantMemberRepository,
   ) {}
 
-  async getTenantMetadata(tenantId: string) {
-    const tenant = await this.tenantRepository.findTenantById(tenantId);
-
-    if (!tenant) {
-      throw new NotFoundException(`Tenant with ID '${tenantId}' not found.`);
+  /**
+   * SOLID Principle: Single Responsibility
+   * This is the REUSABLE "provisioning" logic.
+   * It ensures a Store and its Owner Membership are created together or not at all.
+   */
+  async provisionStore(userId: string, dto: CreateStoreDto) {
+    // 1. Global uniqueness check for subdomain
+    const exists = await this.tenantRepo.existsBySubdomain(dto.subdomain);
+    if (exists) {
+      throw new ConflictException('This subdomain is already taken');
     }
 
-    // We can customize the returned object later if needed
-    return tenant;
-  }
-
-
-  async createTenant(ownerId: string, subdomain: string, storeName: string) {
-    const dbSchema = `tenant_${subdomain.replace(/-/g, '_')}`;
-    let newTenant: Tenant | null = null;
-    let schemaCreated = false;
-
-    try {
-      // STEP 0: Validate owner exists
-      const owner = await this.tenantRepository.findUserById(ownerId);
-      if (!owner)
-        throw new BadRequestException(
-          `Owner with ID '${ownerId}' does not exist`,
-        );
-      this.logger.log(`Step 0/4: Verified owner '${ownerId}' exists`);
-
-      // STEP 1: Check if subdomain already exists
-      const existingTenant =
-        await this.tenantRepository.findTenantBySubdomain(subdomain);
-      if (existingTenant)
-        throw new ConflictException(
-          `Subdomain '${subdomain}' is already taken`,
-        );
-      this.logger.log(
-        `Step 1/4: Verified subdomain '${subdomain}' is available`,
-      );
-
-      // STEP 2: Create the Tenant record
-      newTenant = await this.tenantRepository.createTenant({
-        ownerId,
-        subdomain,
-        name: storeName,
-        dbSchema,
-        status: 'ACTIVE',
+    // 2. Atomic Transaction (Platform Level)
+    // We use the base 'this.prisma' because the tenant context is not yet established.
+    return this.prisma.$transaction(async (tx) => {
+      // Step A: Create Tenant
+      const tenant = await tx.tenant.create({
+        data: {
+          name: dto.name,
+          subdomain: dto.subdomain,
+          ownerId: userId,
+          status: 'ACTIVE',
+          baseCurrency: dto.currency || 'KES',
+          timezone: dto.timezone || 'Africa/Nairobi',
+          settings: {},
+        },
       });
-      this.logger.log(`Step 2/4: Created Tenant record for ${subdomain}`);
 
-      // STEP 3: Create the schema
-      await this.tenantRepository.executeRaw(
-        `CREATE SCHEMA IF NOT EXISTS "${dbSchema}";`,
-      );
-      schemaCreated = true;
-      this.logger.log(`Step 3/4: Created schema "${dbSchema}"`);
+      // Step B: Create Membership linkage
+      await tx.tenantMember.create({
+        data: {
+          tenantId: tenant.id,
+          userId: userId,
+          role: TenantUserRole.OWNER,
+          isActive: true,
+        },
+      });
 
-      // STEP 4: Apply migration SQL to the schema
-      const migrationSql = await this.tenantRepository.readTenantMigrationSql();
-      this.logger.log('Read tenant migration SQL file.');
+      return tenant;
+    });
+  }
 
-      const sqlStatements = migrationSql
-        .split(';')
-        .filter((s) => s.trim() !== '');
-      await this.tenantRepository.executeRaw(
-        `SET search_path TO "${dbSchema}";`,
-      );
-
-      for (const stmt of sqlStatements) {
-        await this.tenantRepository.executeRaw(stmt);
-      }
-
-      await this.tenantRepository.executeRaw(`SET search_path TO "public";`);
-      this.logger.log(`Step 4/4: Successfully migrated schema: ${dbSchema}`);
-
-      return newTenant;
-    } catch (error) {
-      this.logger.error(
-        `Failed to create tenant for subdomain ${subdomain}. Rolling back...`,
-        error.stack,
-      );
-      await this.rollbackTenant(newTenant, dbSchema, subdomain, schemaCreated);
-      if (
-        error instanceof ConflictException ||
-        error instanceof BadRequestException
-      )
-        throw error;
-      throw new InternalServerErrorException('Could not initialize the store.');
+  /**
+   * Business Logic: Get store profile via Repository.
+   */
+  async getStoreProfile(tenantId: string) {
+    const store = await this.tenantRepo.findById(tenantId);
+    if (!store || store.deletedAt) {
+      throw new NotFoundException('Store not found');
     }
+    return store;
   }
 
-  private async rollbackTenant(
-    newTenant: Tenant | null,
-    dbSchema: string,
-    subdomain: string,
-    schemaCreated: boolean,
-  ) {
-    try {
-      if (newTenant) {
-        await this.tenantRepository.deleteTenantById(newTenant.id);
-        this.logger.warn(`Rolled back: Deleted Tenant record for ${subdomain}`);
-      }
-
-      if (schemaCreated) {
-        await this.tenantRepository.executeRaw(
-          `DROP SCHEMA IF EXISTS "${dbSchema}" CASCADE;`,
-        );
-        this.logger.warn(`Rolled back: Dropped schema ${dbSchema}`);
-      }
-    } catch (rollbackError) {
-      this.logger.error(
-        `Failed to rollback tenant ${subdomain}:`,
-        rollbackError.stack,
-      );
+  /**
+   * Business Logic: Orchestrate store update.
+   */
+  async updateStore(tenantId: string, dto: UpdateTenantDto) {
+    const store = await this.getStoreProfile(tenantId);
+    if (store.status !== 'ACTIVE') {
+      throw new ForbiddenException('Cannot update a non-active store');
     }
+    return this.tenantRepo.update(tenantId, dto);
   }
 
-  async isSubdomainAvailable(subdomain: string): Promise<boolean> {
-    const existing =
-      await this.tenantRepository.findTenantBySubdomain(subdomain);
-    return !existing;
+  /**
+   * Business Logic: Paginated staff listing.
+   */
+  async listStaffMembers(options: PageOptionsDto) {
+    return this.memberRepo.listByTenant(options);
   }
 
-  async suggestAlternativeSubdomains(base: string): Promise<string[]> {
-    const suggestions: string[] = [];
-    for (let i = 1; i <= 5; i++) {
-      const suggestion = `${base}-${i}`;
-      if (await this.isSubdomainAvailable(suggestion))
-        suggestions.push(suggestion);
+   /**
+   * PUBLIC RESOLUTION: Translates a URL slug into a real store profile.
+   * This is the "Entry Point" for the storefront.
+   */
+  async resolveStoreBySlug(slug: string) {
+    const store = await this.tenantRepo.findBySubdomain(slug);
+
+    if (!store || store.status !== 'ACTIVE') {
+      throw new NotFoundException(`Store with URL '${slug}' not found or is currently inactive.`);
     }
-    return suggestions;
-  }
 
-  async getSettings(tenantId: string) {
-    return this.tenantRepository.getSettings(tenantId);
-  }
-
-  async updateSettings(tenantId: string, settings: any) {
-    return this.tenantRepository.updateSettings(tenantId, settings);
+    // Enterprise Scale: This object provides the 'tenantId' to the frontend 
+    // so it can start sending the x-tenant-id header.
+    return store;
   }
 }

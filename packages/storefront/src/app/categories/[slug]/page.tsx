@@ -1,14 +1,24 @@
-import CategoryDetailsPage from "@/components/category/category-description-page";
 import { createMetadata } from "@/lib/metadata";
+import CategoryDetailsPage from "@/components/category/category-description-page";
 import { categoryService } from "@/services/category-service";
+import { notFound } from "next/navigation";
 import React from "react";
 
-async function fetchCategory(identifier: string) {
+/**
+ * TOP 1% ARCHITECTURE: SEO & Identity Handshake
+ * We fetch the category on the server to ensure Google/Social Media 
+ * can see the metadata instantly.
+ */
+async function fetchCategory(slug: string) {
   try {
-    const category = await categoryService.getCategoryById(identifier);
+    // millions of users: Using slug for SEO instead of internal IDs
+    // Note: Ensure your backend CategoryController has a /slug/:slug endpoint
+    const category = await categoryService.getCategoryBySlug(slug);
+
+    console.debug(`[Server] Fetched category for slug: ${slug}`, category);
     return category;
   } catch (e) {
-    console.error("error fetching categories", e);
+    console.error(`[Server] Error fetching category: ${slug}`, e);
     return null;
   }
 }
@@ -17,101 +27,50 @@ interface PageParams {
   slug: string;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<PageParams>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<PageParams> }) {
   const { slug } = await params;
   const category = await fetchCategory(slug);
 
   if (!category) {
     return createMetadata({
-      title: "Category Not Found - Artisan Base",
-      description: "This category does not exist or has been removed.",
-      robots: {
-        index: false,
-        follow: true,
-      },
+      title: "Category Not Found | Artisan Base",
+      description: "This artisan collection is no longer available.",
     });
   }
 
-  // Create rich description
-  const description = category.description
-    ? `${category.description.slice(0, 150)}... Browse our collection of handcrafted ${category.name.toLowerCase()} from talented artisans.`
-    : `Discover unique handcrafted ${category.name.toLowerCase()} from talented artisans. Quality products made with care and craftsmanship.`;
-
-  const categoryImage = typeof category.image === "string"
-    ? category.image
-    : ((category.image as unknown as { url?: string })?.url || "/default-category.jpg");
-
   return createMetadata({
     title: `${category.name} | Handcrafted Artisan Products - Artisan Base`,
-    description,
-
+    description: category.description?.slice(0, 160) || `Browse our unique ${category.name} collection.`,
     openGraph: {
       title: `Shop Handcrafted ${category.name}`,
-      description: category.description || `Browse our curated collection of handmade ${category.name.toLowerCase()}.`,
-      url: `https://artisan-base-storefront.vercel.app/categories/${slug}`,
-      images: [
-        {
-          url: categoryImage,
-          width: 1200,
-          height: 630,
-          alt: `${category.name} category`,
-        },
-      ],
-    },
-
-    twitter: {
-      card: "summary_large_image",
-      title: `Shop Handcrafted ${category.name}`,
-      description: category.description?.slice(0, 160) || `Handcrafted ${category.name.toLowerCase()} from talented artisans`,
-      images: [categoryImage],
+      url: `https://artisan-base.com/categories/${slug}`,
+      images: [{ url: "/default-category-og.png" }], // Scale tip: Use category.image if available
     },
   });
 }
 
-export default async function page({
-  params,
-}: {
-  params: Promise<PageParams>;
-}) {
+export default async function Page({ params }: { params: Promise<PageParams> }) {
   const { slug } = await params;
-  console.log("slug", slug);
-  
   const category = await fetchCategory(slug);
 
   if (!category) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Category Not Found</h1>
-        <p className="text-muted-foreground">
-          This category does not exist or has been removed.
-        </p>
-      </div>
-    );
+    notFound();
   }
 
-  // Generate Category JSON-LD structured data
-  const categoryJsonLd = {
+  // Generate Category JSON-LD (Search Engine Optimization)
+  const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": category.name,
-    "description": category.description || `Handcrafted ${category.name}`,
-    "url": `https://artisan-base-storefront.vercel.app/categories/${slug}`,
-    ...(category.image && {
-      "image": typeof category.image === "string"
-        ? category.image
-        : (category.image as { url?: string })?.url,
-    }),
+    "description": category.description,
+    "url": `https://artisan-base.com/categories/${slug}`,
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(categoryJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <CategoryDetailsPage initialCategory={category} />
     </>

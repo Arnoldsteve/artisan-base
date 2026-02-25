@@ -1,5 +1,9 @@
 import { Table } from "@tanstack/react-table";
 
+export interface ReviewTableMeta<TData = any> {
+  openDeleteDialog: (review: TData) => void;
+}
+
 export interface ProductTableMeta<TData = any> {
   openDeleteDialog: (product: TData) => void;
   openEditSheet: (product: TData) => void;

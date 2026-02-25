@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client"
+  output = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===============================================
+// 1. MANAGEMENT & AUTHENTICATION (Global)
+// ===============================================
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  firstName      String?
+  lastName       String?
+  globalRole     GlobalRole @default(USER)
+  
+  // Relations
+  memberships    TenantMember[] // One user can belong to many tenants
+  ownedTenants   Tenant[]       @relation("TenantOwner")
+  refreshTokens  RefreshToken[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime? // Soft delete for compliance
+
+  @@map("users")
+}
+
+model Tenant {
+  id                  String                @id @default(cuid())
+  name                String
+  subdomain           String                @unique
+  customDomain        String?               @unique
+  status              TenantStatus          @default(PENDING)
+  
+  // Localization (African/Global scale)
+  timezone            String                @default("UTC")
+  locale              String                @default("en-US")
+  baseCurrency        Currency              @default(USD)
+  
+  ownerId             String
+  planId              String?
+  settings            Json?                 @default("{}")
+  
+  // Management Relations
+  owner               User                  @relation("TenantOwner", fields: [ownerId], references: [id])
+  plan                SubscriptionPlan?     @relation(fields: [planId], references: [id])
+  members             TenantMember[]
+  subscription        TenantSubscription?
+  
+  // Data Isolation Relations
+  products            Product[]
+  categories          Category[]
+  orders              Order[]
+  customers           Customer[]
+  reviews             Review[]
+  analytics           AnalyticsDailyRevenue[]
+
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+
+  @@index([ownerId])
+  @@index([status])
+  @@map("tenants")
+}
+
+model TenantMember {
+  id        String            @id @default(cuid())
+  tenantId  String
+  userId    String
+  role      TenantUserRole    @default(STAFF)
+  isActive  Boolean           @default(true)
+  
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([tenantId, userId]) // A user has one role per tenant
+  @@index([userId])
+  @@map("tenant_members")
+}
+
+// ===============================================
+// 2. E-COMMERCE ENGINE (Row Isolated)
+// ===============================================
+
+model Product {
+  id                String  @id @default(cuid())
+  tenantId          String
+  name              String
+  slug              String
+  description       String? @db.Text
+  price             Decimal @db.Decimal(10, 2)
+  sku               String?
+  inventoryQuantity Int     @default(0)
+  isActive          Boolean @default(true)
+  images            Json    @default("[]")
+  
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categories        ProductCategory[]
+  variants          ProductVariant[]
+  reviews           Review[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? 
+
+  @@unique([tenantId, slug])
+  @@unique([tenantId, sku])
+  @@index([tenantId, createdAt]) // Optimized for dashboard "recent products"
+  @@map("products")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  slug        String
+  description String?
+  
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products    ProductCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("categories")
+}
+
+model ProductCategory {
+  tenantId   String
+  productId  String
+  categoryId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([tenantId])
+  @@map("product_categories")
+}
+
+model ProductVariant {
+  id                String  @id @default(cuid())
+  tenantId          String
+  productId         String
+  name              String
+  sku               String?
+  inventoryQuantity Int     @default(0)
+  price             Decimal? @db.Decimal(10, 2)
+  attributes        Json @default("{}")
+  
+  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, sku])
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  tenantId        String
+  orderNumber     String        
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  currency        Currency
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  subtotal        Decimal       @db.Decimal(10, 2) @default(0)
+  
+  // Tax & Shipping (Global Compliance)
+  taxAmount       Decimal       @db.Decimal(10, 2) @default(0)
+  shippingAmount  Decimal       @db.Decimal(10, 2) @default(0)
+  
+  shippingAddress Json
+  billingAddress  Json
+  
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId      String?
+  items           OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, createdAt])
+  @@index([customerId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  tenantId    String
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+  productName String
+  productId   String?
+  
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+
+  @@index([tenantId])
+  @@map("order_items")
+}
+
+model Payment {
+  id                      String          @id @default(cuid())
+  tenantId                String
+  type                    PaymentType     @default(ORDER)
+  provider                PaymentProvider
+  providerTransactionId   String
+  amount                  Decimal         @db.Decimal(10, 2)
+  status                  PaymentStatus   @default(PENDING)
+  subscription            TenantSubscription?
+  metadata                Json?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  @@unique([tenantId, provider, providerTransactionId])
+  @@index([tenantId])
+  @@index([type])
+  @@map("payments")
+}
+model Customer {
+  id             String    @id @default(cuid())
+  tenantId       String
+  email          String    
+  phone          String?
+  firstName      String?
+  lastName       String?
+  
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders         Order[]
+  reviews        Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("customers")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  tenantId   String
+  rating     Int
+  comment    String?
+  
+  // Relations
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+  
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+  
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  @@index([tenantId, productId])
+  @@index([tenantId, customerId]) // Added for fast customer-history lookups
+  @@map("reviews")
+}
+// ===============================================
+// 3. ANALYTICS (Pre-Aggregated for Millions of Rows)
+// ===============================================
+
+model AnalyticsDailyRevenue {
+  tenantId          String
+  dateKey           DateTime @db.Date
+  totalRevenue      Decimal  @db.Decimal(14, 2) @default(0)
+  orderCount        Int      @default(0)
+  
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@id([tenantId, dateKey])
+  @@map("analytics_daily_revenue")
+}
+
+// ===============================================
+// 4. INFRASTRUCTURE MODELS
+// ===============================================
+
+model RefreshToken {
+  id            String   @id @default(cuid())
+  userId        String
+  tokenHash     String   @unique
+  expiresAt     DateTime
+  revoked       Boolean  @default(false)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model SubscriptionPlan {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal      @db.Decimal(10, 2)
+  billingCycle  BillingCycle
+  features      Json
+  stripePriceId String?      // Stripe price ID for automated billing
+  isActive      Boolean      @default(true)
+  tenants       Tenant[]
+  subscriptions TenantSubscription[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("subscription_plans")
+}
+
+model TenantSubscription {
+  id                     String                @id @default(cuid())
+  tenantId               String                @unique
+  planId                 String                
+  status                 SubscriptionStatus    @default(ACTIVE)
+  paymentId              String?               @unique
+  currentPeriodEnd       DateTime
+  
+  tenant                 Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan                   SubscriptionPlan      @relation(fields: [planId], references: [id]) 
+  payment          Payment?           @relation(fields: [paymentId], references: [id])
+}
+
+// ===============================================
+// 5. ENUMS (Global & African Support)
+// ===============================================
+
+enum GlobalRole {
+  SUPER_ADMIN
+  SUPPORT
+  USER
+}
+
+enum TenantUserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  MPESA         // Kenya/East Africa
+  AIRTEL_MONEY  // Africa
+  MTN_MOMO      // West/East Africa
+  FLUTTERWAVE   // Pan-African
+  PAYSTACK      // Pan-African
+  CASH
+  BANK_TRANSFER
+}
+
+enum PaymentType {
+  ORDER
+  SUBSCRIPTION
+}
+
+enum Currency {
+  // Global Tier 1
+  USD
+  EUR
+  GBP
+  JPY
+
+  // East Africa
+  KES
+  UGX
+  TZS
+
+  // West & South Africa
+  NGN
+  GHS
+  ZAR
+
+  // Others
+  INR
+  CAD
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}

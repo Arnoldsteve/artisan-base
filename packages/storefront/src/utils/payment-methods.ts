@@ -1,23 +1,28 @@
-export const paymentMethods = [
+import { PaymentMethod } from "@/types/checkout";
+
+export const paymentMethods: PaymentMethod[] = [
   {
     id: "credit_card",
     type: "credit_card",
     name: "Credit Card",
     icon: "credit-card",
-    code: "CC", // short label
+    code: "CC",
+    provider: "STRIPE", 
+  },
+  {
+    id: "mpesa",
+    type: "mobile_money",
+    name: "M-Pesa",
+    icon: "smartphone",
+    code: "MP",
+    provider: "MPESA", 
   },
   {
     id: "paypal",
     type: "paypal",
     name: "PayPal",
     icon: "paypal",
-    code: "PP", // short label
-  },
-   {
-    id: "mpesa",
-    type: "mobile_money",
-    name: "M-Pesa",
-    icon: "smartphone", // pick an icon you have (lucide, heroicons, etc.)
-    code: "MP", // short label
+    code: "PP",
+    provider: "PAYPAL", 
   },
 ];

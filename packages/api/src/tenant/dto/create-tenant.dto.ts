@@ -1,4 +1,3 @@
-// In packages/api/src/tenant/dto/create-tenant.dto.ts
 import { 
   IsNotEmpty, 
   IsString, 

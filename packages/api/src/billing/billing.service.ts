@@ -1,166 +1,202 @@
-import {
-  Injectable,
-  Inject,
-  Scope,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { RequestWithTenant } from '../common/interfaces/request-with-tenant.interface';
-import { TenantSubscription } from '@prisma/client/management';
-import { StripeService } from '../shared/payment-providers/stripe/stripe.service';
-import { CreateCheckoutDto } from './dto/create-checkout.dto';
-import Stripe from 'stripe';
-import { IBillingRepository } from './interfaces/billing-repository.interface';
-// We also inject the plans service to look up plans by ID
-import { PlatformPlansService } from '../platform/plans/platform-plans.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TenantContextService } from '@/common/tenant-context/tenant-context.service';
+import { BillingRepository } from './repositories/billing.repository';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { ChangePlanDto } from './dto/change-plan.dto';
+import { BILLING_EVENTS } from './events/billing.events';
+import { PlanService } from '@/plan/plan.service';
+import { PaymentService } from '@/payment/payment.service';
+import { PaymentProviderRegistry } from '@/payment/providers/payment-provider.registry';
+import { PaymentFulfillmentType } from '@/payment/interfaces/payment-provider.interface';
+import { PrismaService } from '@/prisma/prisma.service';
+import { PaymentStatus, PaymentType } from '@generated/prisma/client';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
 
   constructor(
-    // Inject the repository via its interface token
-    @Inject(IBillingRepository)
-    private readonly billingRepository: IBillingRepository,
-    // We keep the PrismaService for tenant lookups in the checkout flow
     private readonly prisma: PrismaService,
-    private readonly plansService: PlatformPlansService,
-    private readonly stripeService: StripeService,
-    private readonly configService: ConfigService,
-    @Inject(REQUEST) private readonly request: RequestWithTenant,
+    private readonly planService: PlanService,
+    private readonly billingRepo: BillingRepository,
+    private readonly paymentService: PaymentService,
+    private readonly paymentRegistry: PaymentProviderRegistry,
+    private readonly tenantContext: TenantContextService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async getSubscription(): Promise<TenantSubscription | null> {
-    const { id: tenantId } = this.request.tenant;
-    return this.billingRepository.getSubscription(tenantId);
+  // ─── Plans ───────────────────────────────────────────────────────────────────
+
+  async getPlans() {
+    return this.billingRepo.findAllPlans();
   }
 
-  async createCheckoutSession(
-    dto: CreateCheckoutDto,
-  ): Promise<{ checkoutUrl: string }> {
-    const { id: tenantId } = this.request.tenant;
-    // Logger.log("tenantId in billing service", tenantId);
+  // ─── Subscription ────────────────────────────────────────────────────────────
 
-    // The service is responsible for validating the plan
-    const planToSubscribe = await this.plansService.findPlanById(dto.planId);
-    // Logger.log("planToSubscribe from billing service", planToSubscribe)
-    if (!planToSubscribe || !planToSubscribe.providerPlanId) {
-      throw new NotFoundException(
-        `Plan with ID '${dto.planId}' not found or not configured for payment.`,
-      );
-    }
-
-    Logger.debug('log before finding tenant');
-    let tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: { owner: true },
-    });
-    Logger.log('tenant from billing service', tenant);
-
-    if (!tenant) {
-      throw new NotFoundException(`Authenticated tenant could not be found.`);
-    }
-
-    let stripeCustomerId = tenant.stripeCustomerId;
-    if (!stripeCustomerId) {
-      this.logger.log(`Creating Stripe customer for tenant: ${tenantId}`);
-      const stripeCustomer = await this.stripeService.createCustomer({
-        email: tenant.owner.email,
-        name: tenant.name,
-        metadata: { tenantId: tenant.id },
-      });
-      stripeCustomerId = stripeCustomer.id;
-
-      // Update the tenant with the new Stripe Customer ID
-      await this.prisma.tenant.update({
-        where: { id: tenantId },
-        data: { stripeCustomerId },
-      });
-    }
-
-    const session = await this.stripeService.createCheckoutSession({
-      customer: stripeCustomerId,
-      line_items: [{ price: planToSubscribe.providerPlanId, quantity: 1 }],
-      mode: 'subscription',
-      client_reference_id: tenant.id,
-      success_url: `${this.configService.get('DASHBOARD_URL')}/dashboard/settings?payment=success`,
-      cancel_url: `${this.configService.get('DASHBOARD_URL')}/dashboard/settings`,
-    });
-
-    if (!session.url) {
-      throw new Error('Failed to create Stripe Checkout Session URL.');
-    }
-
-    return { checkoutUrl: session.url };
+  async getSubscription() {
+    const tenantId = this.tenantContext.getTenantIdOrThrow();
+    const subscription = await this.billingRepo.findByTenantId(tenantId);
+    if (!subscription) throw new NotFoundException(`No subscription found for tenant`);
+    return subscription;
   }
 
-  async fulfillSubscription(session: Stripe.Checkout.Session): Promise<void> {
-    const tenantId = session.client_reference_id;
-    const stripeSubscriptionId = session.subscription as string;
+  /**
+   * TOP 1% LOGIC: Universal Subscription Provisioning
+   * millions of users: This method coordinates with the Payment Module 
+   * to handle both African (M-Pesa) and Global (Stripe) flows.
+   */
+    async subscribe(dto: CreateSubscriptionDto) {
+    const tenantId = this.tenantContext.getTenantIdOrThrow();
 
-    if (!tenantId || !stripeSubscriptionId) {
-      this.logger.error(
-        `Webhook Error: Missing tenantId or subscriptionId in session`,
-        session,
-      );
-      return;
-    }
+    const [plan, tenant] = await Promise.all([
+      this.planService.findById(dto.planId),
+      this.billingRepo.findTenantById(tenantId),
+    ]);
 
-    this.logger.log(
-      `Fulfilling subscription for tenant: ${tenantId}, Stripe Sub ID: ${stripeSubscriptionId}`,
-    );
+    if (!tenant) throw new BadRequestException('Tenant not found');
+    const currency = tenant.baseCurrency;
+    const providerType = currency === 'KES' ? 'MPESA' : 'STRIPE';
+    const strategy = this.paymentRegistry.get(providerType as any);
+    
+    const reference = `SUB-${tenantId.slice(-6)}-${Date.now()}`;
 
-    const subscriptionDetails: Stripe.Subscription =
-      await this.stripeService.getSubscription(stripeSubscriptionId);
-
-    const priceId = subscriptionDetails.items.data[0].price.id;
-
-    const plan = await this.prisma.subscriptionPlan.findUnique({
-      where: { providerPlanId: priceId },
+    /**
+     * 1. CREATE DB RECORD FIRST (Standard across all modules)
+     * We create the pending record using the base client to ensure 
+     * the 'planId' and 'type' are persisted immediately.
+     */
+    const payment = await this.prisma.payment.create({
+      data: {
+        tenantId,
+        type: PaymentType.SUBSCRIPTION,
+        provider: providerType as any,
+        amount: Number(plan.price),
+        status: PaymentStatus.PENDING,
+        providerTransactionId: reference, // Temporary internal ref
+        metadata: {
+          planId: plan.id,
+          billingCycle: dto.billingCycle,
+          reference: reference,
+          type: PaymentType.SUBSCRIPTION,
+        }
+      }
     });
 
-    if (!plan) {
-      this.logger.error(
-        `Webhook Error: Could not find internal plan matching Stripe Price ID: ${priceId}`,
-      );
-      return;
+    let checkoutUrl: string | undefined;
+
+    // 2. HYBRID FLOW: If Redirect (Stripe), initialize synchronously
+    if (strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
+      const result = await this.paymentService.initiate({
+        type: PaymentType.SUBSCRIPTION,
+        provider: providerType as any,
+        amount: Number(plan.price),
+        currency,
+        reference,
+        description: `Subscription: ${plan.name}`,
+        metadata: { type: PaymentType.SUBSCRIPTION, planId: plan.id }
+      });
+      checkoutUrl = result.checkoutUrl;
     }
 
-    // 1. The service's job is to prepare this clean, standardized data object.
-    const fulfillmentData = {
-      planId: plan.id,
-      provider: 'STRIPE',
-      providerSubscriptionId: subscriptionDetails.id,
-      currentPeriodStart: new Date(
-        (subscriptionDetails as any).current_period_start * 1000,
-      ),
-      currentPeriodEnd: new Date(
-        (subscriptionDetails as any).current_period_end * 1000,
-      ),
-      payment: {
-        amount: plan.price.toString(),
-        currency: (session.currency || 'usd').toUpperCase(),
-        providerTransactionId: session.payment_intent as string,
-      },
+    // 3. EMIT EVENT: The Listener will now find the record we just created
+    this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CREATED, {
+      tenantId,
+      planId: dto.planId,
+      billingCycle: dto.billingCycle,
+      currency,
+      amount: Number(plan.price),
+      phone: dto.phone,
+      reference,
+      checkoutUrl,
+      billingMode: strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT ? 'AUTOMATED' : 'MANUAL',
+    });
+
+    return {
+      success: true,
+      paymentId: payment.id,
+      reference,
+      checkoutUrl,
     };
-
-    // 2. Delegate the entire database transaction to the repository.
-    await this.billingRepository.fulfillSubscription(tenantId, fulfillmentData);
-
-    this.logger.log(
-      `Successfully fulfilled subscription for tenant: ${tenantId}`,
-    );
   }
 
-  async getInvoicesForCurrentTenant(): Promise<any[]> {
-    const { id: tenantId } = this.request.tenant;
-    this.logger.log(`Fetching invoices for tenant: ${tenantId}`);
+  /**
+   * ACTION: Upgrade or Downgrade Plan.
+   * millions of users: Orchestrates the plan change via the Payment Module.
+   */
+  
+  async changePlan(dto: ChangePlanDto) {
+    const tenantId = this.tenantContext.getTenantIdOrThrow();
+    const subscription = await this.getSubscription();
+    const plan = await this.planService.findById(dto.newPlanId);
 
-    const invoices =
-      await this.billingRepository.getInvoicesForTenant(tenantId);
-    return invoices;
+    const providerType = subscription.tenant.baseCurrency === 'KES' ? 'MPESA' : 'STRIPE';
+    const reference = `UPG-${tenantId.slice(-6)}-${Date.now()}`;
+
+    // Create the record first
+    await this.prisma.payment.create({
+      data: {
+        tenantId,
+        type: PaymentType.SUBSCRIPTION,
+        provider: providerType as any,
+        amount: Number(plan.price),
+        status: PaymentStatus.PENDING,
+        providerTransactionId: reference,
+        metadata: {
+          planId: plan.id,
+          isUpgrade: true,
+          reference: reference,
+          type: PaymentType.SUBSCRIPTION
+        }
+      }
+    });
+
+    let checkoutUrl: string | undefined;
+    const strategy = this.paymentRegistry.get(providerType as any);
+
+    if (strategy.getFulfillmentType() === PaymentFulfillmentType.REDIRECT) {
+      const result = await this.paymentService.initiate({
+        type: PaymentType.SUBSCRIPTION,
+        provider: strategy.getName(),
+        amount: Number(plan.price),
+        currency: subscription.tenant.baseCurrency,
+        reference,
+        metadata: { type: PaymentType.SUBSCRIPTION, planId: plan.id, isUpgrade: true }
+      });
+      checkoutUrl = result.checkoutUrl;
+    }
+
+    this.eventEmitter.emit(BILLING_EVENTS.PLAN_CHANGED, {
+      tenantId,
+      oldPlanId: subscription.planId,
+      newPlanId: dto.newPlanId,
+      reference,
+      checkoutUrl
+    });
+
+    return { success: true, checkoutUrl };
+  }
+
+  
+  // ─── Management ──────────────────────────────────────────────────────────────
+
+  async cancel(immediately: boolean = false) {
+    const tenantId = this.tenantContext.getTenantIdOrThrow();
+    const subscription = await this.getSubscription();
+
+    // Note: Actual cancellation logic with the provider (Stripe) 
+    // happens in the background worker triggered by this event.
+    this.eventEmitter.emit(BILLING_EVENTS.SUBSCRIPTION_CANCELED, {
+      tenantId,
+      paymentId: subscription.paymentId,
+      immediately,
+    });
+
+    return { success: true, immediately };
+  }
+
+  async getHistory() {
+    const tenantId = this.tenantContext.getTenantIdOrThrow();
+    return this.billingRepo.findPaymentHistory(tenantId);
   }
 }

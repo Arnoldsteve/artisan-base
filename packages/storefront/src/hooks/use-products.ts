@@ -1,126 +1,133 @@
+"use client";
+
 import {
-  useQuery,
   useInfiniteQuery,
-  UseQueryOptions,
+  useQuery,
 } from "@tanstack/react-query";
 import { productService } from "@/services/product-service";
-import {
-  Product,
-  ProductSearchParams,
-  PaginatedResponse,
-  CursorPaginatedResponse,
-  Category,
-} from "@/types";
+import { useTenantContext } from "@/contexts/tenant-context";
+import { ProductFilters, Product } from "@/types/product";
 
-export const productKeys = {
-  all: ["products"] as const,
-  lists: () => [...productKeys.all, "list"] as const,
-  list: (filters: ProductSearchParams) =>
-    [...productKeys.lists(), filters] as const,
-  details: () => [...productKeys.all, "detail"] as const,
-  detail: (id: string) => [...productKeys.details(), id] as const,
-  featured: (limit?: number) =>
-    limit
-      ? ([...productKeys.all, "featured", limit] as const)
-      : ([...productKeys.all, "featured"] as const),
-  newArrivals: () => [...productKeys.all, "new-arrivals"] as const,
-  categories: () => [...productKeys.all, "categories"] as const,
-  search: (query: string) => [...productKeys.all, "search", query] as const,
+/**
+ * Hook for Listing Products (Infinite Scroll)
+ */
+export const useProducts = (filters: ProductFilters = {}, limit = 12) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useInfiniteQuery({
+    queryKey: ["storefront-products", tenant?.id, filters],
+    queryFn: ({ pageParam }) =>
+      productService.getProducts({
+        ...filters,
+        limit,
+        cursor: pageParam,
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+    enabled: !isTenantLoading,
+  });
 };
 
-export function useProducts(
-  params: ProductSearchParams = {},
-  options?: UseQueryOptions<CursorPaginatedResponse<Product>>
-) {
-  return useQuery<CursorPaginatedResponse<Product>>({
-    queryKey: productKeys.list(params),
-    queryFn: () => productService.getProducts(params),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    ...options,
-  });
-}
+/**
+ * FIX: Renamed from useProductBySlug to useProduct to resolve TS2724.
+ * Includes optional support for initialData (SEO Hydration).
+ */
+export const useProduct = (slug: string, options?: { initialData?: Product }) => {
+  const { tenant } = useTenantContext();
 
-export function useInfiniteProducts(params: ProductSearchParams = {}) {
-  return useInfiniteQuery({
-    queryKey: productKeys.list(params),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      productService.getProducts({ ...params, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
-      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-}
-
-export function useProduct(
-  id: string,
-  options?: Partial<UseQueryOptions<Product>> & { initialData?: Product }
-) {
   return useQuery({
-    queryKey: ["product", id],
-    queryFn: () => productService.getProduct(id),
-    enabled: !!id,
-    staleTime: 0,
-    gcTime: 30 * 60 * 1000,
+    queryKey: ["product-detail", tenant?.id, slug],
+    queryFn: () => productService.getProductBySlug(slug),
+    enabled: !!slug,
     initialData: options?.initialData,
-    ...options,
+    staleTime: 1000 * 60 * 5, 
   });
-}
+};
 
-interface UseFeaturedProductsOptions {
-  limit?: number;
-}
+/**
+ * Hook for New Arrivals
+ */
+export const useNewArrivals = (limit = 10) => {
+  const { tenant } = useTenantContext();
 
-export function useFeaturedProducts({
-  limit,
-}: UseFeaturedProductsOptions = {}) {
-  return useQuery<CursorPaginatedResponse<Product>>({
-    queryKey: productKeys.featured(limit),
-    queryFn: () => productService.getFeaturedProducts({ limit }),
-    staleTime: 15 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
-}
-
-export function useInfiniteFeaturedProducts(params: { limit?: number } = {}) {
-  return useInfiniteQuery({
-    queryKey: productKeys.featured(params.limit),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      productService.getFeaturedProducts({ ...params, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: CursorPaginatedResponse<Product>) =>
-      lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-}
-
-export function useNewArrivals(limit: number = 12) {
   return useQuery({
-    queryKey: productKeys.newArrivals(),
+    queryKey: ["new-arrivals", tenant?.id, limit],
     queryFn: () => productService.getNewArrivals(limit),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+    staleTime: 1000 * 60 * 10,
   });
-}
+};
 
-export function useProductSearch(query: string, limit: number = 10) {
-  return useQuery({
-    queryKey: productKeys.search(query),
-    queryFn: () => productService.searchProducts(query, limit),
-    enabled: !!query.trim(),
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
-  });
-}
 
-export function useFilteredProducts(filters: ProductSearchParams) {
+/**
+ * TOP 1% ARCHITECTURE: Context-Aware Featured Products
+ * millions of users: Fetches store-specific featured items if in a shop context,
+ * or global featured items if in marketplace mode.
+ */
+export const useFeaturedProducts = (params: { limit?: number } = {}) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
   return useQuery({
-    queryKey: productKeys.list(filters),
-    queryFn: () => productService.getProducts(filters),
-    staleTime: 3 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    // Cache Partitioning: Ensures Store A and Store B don't leak into each other
+    queryKey: ["featured-products", tenant?.id, params.limit],
+    
+    queryFn: () => productService.getFeaturedProducts(params.limit),
+    
+    // Safety: Don't fetch until we know which "Bubble" we are in
+    enabled: !isTenantLoading,
+    
+    // Performance: Featured products are good candidates for longer cache times
+    staleTime: 1000 * 60 * 15, // 15 minutes
   });
-}
+};
+
+/**
+ * TOP 1% ARCHITECTURE: Infinite Featured Products
+ * millions of users: Optimized for "Load More" browsing of curated items.
+ */
+export const useInfiniteFeaturedProducts = (limit = 12) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useInfiniteQuery({
+    // Cache Partitioning: Isolate marketplace featured vs store featured
+    queryKey: ["featured-products-infinite", tenant?.id, limit],
+    
+    queryFn: ({ pageParam }) =>
+      productService.getFeaturedProducts({
+        limit,
+        cursor: pageParam,
+      }),
+      
+    initialPageParam: undefined as string | undefined,
+    
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+
+    enabled: !isTenantLoading,
+  });
+};
+
+/**
+ * TOP 1% ARCHITECTURE: Infinite New Arrivals
+ * millions of users: Fetches products sorted by 'createdAt' descending.
+ * Automatically handles Tenant Isolation vs Global Marketplace modes.
+ */
+export const useInfiniteNewArrivals = (limit = 12) => {
+  const { tenant, isLoading: isTenantLoading } = useTenantContext();
+
+  return useInfiniteQuery({
+    queryKey: ["new-arrivals-infinite", tenant?.id, limit],
+    
+    queryFn: ({ pageParam }) =>
+      productService.getProducts({
+        limit,
+        cursor: pageParam,
+        sortBy: "createdAt", // Database-level sorting
+        sortOrder: "desc",
+      }),
+      
+    initialPageParam: undefined as string | undefined,
+    
+    getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
+
+    enabled: !isTenantLoading,
+  });
+};

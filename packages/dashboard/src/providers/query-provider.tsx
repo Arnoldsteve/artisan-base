@@ -4,24 +4,18 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-// ---- Centralized QueryClient factory ----
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // Prevent excessive refetches
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
         retry: (failureCount, error: any) => {
-          // Do not retry client errors
           if (error?.status >= 400 && error?.status < 500) return false;
           return failureCount < 3;
         },
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
-      },
-      mutations: {
-        retry: 1,
       },
     },
   });
@@ -30,27 +24,27 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined = undefined;
 
 function getQueryClient() {
-  if (typeof window === "undefined") {
-    // Always new on server
-    return makeQueryClient();
-  }
-  // Singleton in browser
+  if (typeof window === "undefined") return makeQueryClient();
   if (!browserQueryClient) browserQueryClient = makeQueryClient();
   return browserQueryClient;
 }
 
-// ---- Main Providers Wrapper ----
 export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      {/* 
+        TOP 1% ARCHITECTURE: 
+        AuthProvider is now a child of QueryClientProvider.
+        This allows useAuth to call useQueryClient() and clear the cache on tenant switch.
+      */}
+      <AuthProvider>
         {children}
         {process.env.NODE_ENV === "development" && (
           <ReactQueryDevtools initialIsOpen={false} />
         )}
-      </QueryClientProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

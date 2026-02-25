@@ -1,26 +1,37 @@
-export interface CreateTenantDto {
-    storeName: string;
-    subdomain: string;
-}
+import { Currency } from "./currency";
 
 export interface Tenant {
-    id: string;
-    subdomain: string;
-    customDomain?: string | null
-    name: string;
-    dbSchema: string;
-    status: string;
-    createdAt: string;
+  id: string;
+  name: string;
+  subdomain: string;
+  customDomain?: string | null;
+  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED';
+  baseCurrency: Currency;
+  timezone: string;
+  locale: string;
+  createdAt: string;
+  updatedAt: string;
+  ownerId: string;
+  settings: Record<string, any>;
 }
 
-export interface CreateTenantResponse {
-    success: boolean;
-    tenant: Tenant;
-    message: string;
-    url: string;
+/**
+ * Used for Scenario 2: Existing user adding a store via sidebar
+ */
+export interface CreateStoreDto {
+  name: string;
+  subdomain: string;
+  currency?: Currency;
+  timezone?: string;
+}
+
+export interface UpdateTenantDto {
+  name?: string;
+  currency?: Currency;
+  timezone?: string;
+  settings?: Record<string, any>;
 }
 
 export interface AvailabilityResponse {
-    isAvailable: boolean;
-    suggestions: string[];
+  available: boolean;
 }

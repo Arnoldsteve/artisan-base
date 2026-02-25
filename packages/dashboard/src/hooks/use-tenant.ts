@@ -1,75 +1,66 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { tenantService } from "@/services/tenant-service";
 import { toast } from "sonner";
-import {
-  CreateTenantDto,
-  CreateTenantResponse,
-  AvailabilityResponse,
-} from "@/types/tenant";
+import { tenantService } from "@/services/tenant-service";
 import { useAuthContext } from "@/contexts/auth-context";
-import { useDebounce } from "./use-debounce";
-import { useRouter } from "next/navigation";
+import { UpdateTenantDto, CreateStoreDto } from "@/types/tenant";
 
-const AVAILABILITY_QUERY_KEY = ["tenant-subdomain-availability"];
+export const useTenant = () => {
+  const queryClient = useQueryClient();
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
 
-/**
- * Hook for checking the availability of a subdomain.
- * Provides detailed status for immediate UI feedback.
- * @param subdomain The subdomain string to check.
- */
-export function useSubdomainAvailability(subdomain: string) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
+  const TENANT_QUERY_KEY = ["tenant", tenantId];
 
-  const debouncedSubdomain = useDebounce(subdomain, 500);
+  // 1. Fetch current active store profile
+  const tenantQuery = useQuery({
+    queryKey: TENANT_QUERY_KEY,
+    queryFn: () => tenantService.getProfile(),
+    enabled: isAuthenticated && !!tenantId && !isAuthLoading,
+  });
 
-  const isSubdomainValidLength = debouncedSubdomain.length > 2;
+  // 2. Update store profile
+  const updateTenantMutation = useMutation({
+    mutationFn: (data: UpdateTenantDto) => tenantService.update(data),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(TENANT_QUERY_KEY, updated);
+      toast.success("Store settings updated successfully");
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to update store"),
+  });
 
-  const isSubdomainValidFormat = /^[a-z0-9-]+$/.test(debouncedSubdomain);
+  // 3. Provision new store (Scenario 2)
+  const createStoreMutation = useMutation({
+    mutationFn: (data: CreateStoreDto) => tenantService.provisionStore(data),
+    onSuccess: (newStore) => {
+      toast.success(`Store "${newStore.name}" created successfully!`);
+      // Optional: Refresh global tenants list or switch to new store
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to create store"),
+  });
 
-  const query = useQuery<AvailabilityResponse>({
-    queryKey: [...AVAILABILITY_QUERY_KEY, debouncedSubdomain],
-    queryFn: () => tenantService.checkSubdomainAvailability(debouncedSubdomain),
-
-    enabled:
-      !isAuthLoading &&
-      isAuthenticated &&
-      isSubdomainValidLength &&
-      isSubdomainValidFormat,
+  // 4. Delete store (Danger Zone)
+  const deleteTenantMutation = useMutation({
+    mutationFn: () => tenantService.delete(),
+    onSuccess: () => {
+      toast.success("Store deleted permanently.");
+      window.location.href = "/"; // Redirect to global landing
+    },
+    onError: (err: any) => toast.error(err.message || "Deletion failed"),
   });
 
   return {
-    ...query,
-    isValidLength: isSubdomainValidLength,
-    isValidFormat: isSubdomainValidFormat,
-    isLoading:
-      query.isLoading && isSubdomainValidLength && isSubdomainValidFormat,
+    tenant: tenantQuery.data,
+    isLoading: tenantQuery.isLoading,
+    isError: tenantQuery.isError,
+    
+    updateTenant: updateTenantMutation.mutate,
+    isUpdating: updateTenantMutation.isPending,
+    
+    createStore: createStoreMutation.mutate,
+    isCreatingStore: createStoreMutation.isPending,
+    
+    deleteTenant: deleteTenantMutation.mutate,
+    isDeleting: deleteTenantMutation.isPending,
   };
-}
-
-export function useCreateTenant() {
-  const queryClient = useQueryClient();
-  const { selectTenant } = useAuthContext();
-  const router = useRouter();
-
-  return useMutation({
-    mutationFn: (data: CreateTenantDto) => tenantService.createTenant(data),
-    retry: false,
-    onSuccess: (response: CreateTenantResponse) => {
-      toast.success(
-        response.message ||
-          `Store "${response.tenant.name}" created successfully.`
-      );
-
-      selectTenant(response.tenant.subdomain);
-
-      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
-
-      router.push("/home");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create store.");
-    },
-  });
-}
+};

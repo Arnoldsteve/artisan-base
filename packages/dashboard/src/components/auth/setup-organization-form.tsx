@@ -68,7 +68,8 @@ export function SetupOrganizationForm() {
     const finalSubdomain = slugify(values.subdomain);
     form.setValue("subdomain", finalSubdomain, { shouldValidate: true });
 
-    if (!availability?.isAvailable) {
+    // ← changed: backend returns `available` not `isAvailable`
+    if (!availability?.available) {
       toast.error("Subdomain is already taken.");
       return;
     }
@@ -76,7 +77,8 @@ export function SetupOrganizationForm() {
     setCreationStep("Creating your store...");
 
     try {
-      await createTenant({ ...values, subdomain: finalSubdomain });
+      // ← changed: map storeName → name to match backend RegisterTenantDto
+      await createTenant({ name: values.storeName, subdomain: finalSubdomain });
     } catch (error) {
       setCreationStep("");
       console.error("Failed to create tenant:", error);
@@ -181,7 +183,8 @@ export function SetupOrganizationForm() {
         </p>
       );
 
-    if (availability?.isAvailable)
+    // ← changed: availability.available not availability.isAvailable
+    if (availability?.available)
       return (
         <p className="text-green-600 flex items-center text-xs">
           <CheckCircle className="mr-1 h-3 w-3" /> Available!

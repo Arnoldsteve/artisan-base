@@ -1,83 +1,78 @@
-import { useAuthContext } from "@/contexts/auth-context";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PaginatedResponse } from "@/types/shared";
+"use client";
+
 import {
-  CreateDashboardUserDto,
-  DashboardUser,
-  UpdateDashboardUserDto,
-} from "@/types/users";
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { useState } from "react";
+import { staffService } from "@/services/dashboard-user";
 import { toast } from "sonner";
-import { dashboardUserService } from "@/services/dashboard-user";
+import { StaffMember } from "@/types/staff";
+import { TenantUserRole } from "@/types/roles";
+import { useAuthContext } from "@/contexts/auth-context";
 
-export const DASHBOARD_USER_QUERY_KEY = ["dashboard-dashboardUsers"];
-
-/** Fetch paginated users */
-export function useDashboardUsers(
-  page = 1,
-  limit = 10,
-  search = "",
-  initialData?: PaginatedResponse<DashboardUser>
-) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<PaginatedResponse<DashboardUser>>({
-    queryKey: [...DASHBOARD_USER_QUERY_KEY, { page, limit, search }],
-    queryFn: () => dashboardUserService.getAll(page, limit, search),
-    enabled: !isAuthLoading && isAuthenticated,
-    initialData: page === 1 ? initialData : undefined,
-  });
-}
-
-/** Create user */
-export function useCreateDashboardUser() {
+// ---------------------------------------------------------
+// 1. Unified Hook for Managing the Staff List
+// ---------------------------------------------------------
+export const useStaffMembers = (initialLimit = 10) => {
   const queryClient = useQueryClient();
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
 
-  return useMutation<DashboardUser, Error, CreateDashboardUserDto>({
-    mutationFn: (data: CreateDashboardUserDto) =>
-      dashboardUserService.create(data),
-    onSuccess: (newUser) => {
-      toast.success(
-        `User "${[newUser.firstName, newUser.lastName].filter(Boolean).join(" ") || newUser.email}" created successfully.`
-      );
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create user.");
-    },
+  // Internal State for List Management
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(initialLimit);
+
+  // Cache key partitioned by tenantId
+  const STAFF_QUERY_KEY = ["staff", tenantId];
+
+  // --- Fetch Query ---
+  const staffQuery = useQuery({
+    queryKey: [...STAFF_QUERY_KEY, "list", { page, limit }],
+    queryFn: () => staffService.getAll(page, limit),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId,
+    placeholderData: keepPreviousData,
   });
-}
 
-/** Update user */
-export function useUpdateDashboardUser() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateDashboardUserDto }) =>
-      dashboardUserService.update(id, data),
-    onSuccess: (updatedUser) => {
-      toast.success(
-        `User "${[updatedUser.firstName, updatedUser.lastName].filter(Boolean).join(" ") || updatedUser.email} updated successfully.`
-      );
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
+  // --- Mutations ---
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ id, role }: { id: string; role: TenantUserRole }) =>
+      staffService.updateRole(id, role),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEY });
+      toast.success(`Role updated to ${updated.role}`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update user.");
-    },
+    onError: (err: any) => toast.error(err.response?.data?.message || "Update failed"),
   });
-}
 
-/** Delete user */
-export function useDeleteDashboardUser() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => dashboardUserService.delete(id),
+  const removeStaffMutation = useMutation({
+    mutationFn: (id: string) => staffService.remove(id),
     onSuccess: () => {
-      toast.success("User deleted successfully.");
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_USER_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEY });
+      toast.success("Staff member removed successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete user.");
-    },
+    onError: (err: any) => toast.error(err.response?.data?.message || "Removal failed"),
   });
-}
+
+  return {
+    // Data & Meta
+    staff: staffQuery.data?.data || [],
+    meta: staffQuery.data?.meta,
+    isLoading: staffQuery.isLoading,
+    isFetching: staffQuery.isFetching,
+    isError: staffQuery.isError,
+
+    // State Management
+    page,
+    setPage,
+    limit,
+    setLimit,
+
+    // Actions
+    updateRole: updateRoleMutation.mutate,
+    isUpdating: updateRoleMutation.isPending,
+    removeStaff: removeStaffMutation.mutate,
+    isRemoving: removeStaffMutation.isPending,
+  };
+};

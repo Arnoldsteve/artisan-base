@@ -1,80 +1,105 @@
-// File: packages/dashboard/src/hooks/use-categories.ts
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import { useState } from "react";
 import { categoryService } from "@/services/category-service";
 import { toast } from "sonner";
 import { Category, CreateCategoryDto, UpdateCategoryDto } from "@/types/categories";
 import { useAuthContext } from "@/contexts/auth-context";
-import { PaginatedResponse } from "@/types/shared";
 
-export const CATEGORIES_QUERY_KEY = ["dashboard-categories"];
-
-export function useCategories(
-  page = 1,
-  limit = 10,
-  search = "",
-  initialData?: PaginatedResponse<Category>
-) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<PaginatedResponse<Category>>({
-    queryKey: [...CATEGORIES_QUERY_KEY, { page, limit, search }],
-    queryFn: () => categoryService.getCategories(page, limit, search),
-    enabled: !isAuthLoading && isAuthenticated,
-    initialData: page === 1 ? initialData : undefined,
-  });
-}
-
-export function useCategory(categoryId: string | null) {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuthContext();
-
-  return useQuery<Category>({
-    queryKey: [...CATEGORIES_QUERY_KEY, categoryId],
-    queryFn: () => categoryService.getCategoryById(categoryId!),
-    enabled: !isAuthLoading && isAuthenticated && !!categoryId,
-  });
-}
-
-export function useCreateCategory() {
+// ---------------------------------------------------------
+// 1. Unified Hook for Managing the Categories List
+// ---------------------------------------------------------
+export const useCategories = (initialLimit = 10) => {
   const queryClient = useQueryClient();
-  return useMutation({
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+  
+  // Internal State for List Management
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const CATEGORIES_QUERY_KEY = ["categories", tenantId];
+
+  // --- Fetch Query ---
+  const categoriesQuery = useQuery({
+    // Include tenantId for strict multi-tenant cache isolation
+    queryKey: [...CATEGORIES_QUERY_KEY, "list", { page, search, limit: initialLimit }],
+    queryFn: () => categoryService.getCategories(page, initialLimit, search),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
+
+  // --- Mutations ---
+  const createCategoryMutation = useMutation({
     mutationFn: (data: CreateCategoryDto) => categoryService.createCategory(data),
-    onSuccess: (newCategory) => {
-      toast.success(`Category "${newCategory.name}" created successfully.`);
+    onSuccess: (newCat) => {
       queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
+      toast.success(`Category "${newCat.name}" created successfully.`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create category.");
-    },
+    onError: (err: any) => toast.error(err.message || "Failed to create category"),
   });
-}
 
-export function useUpdateCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (variables: { id: string; data: UpdateCategoryDto }) =>
-      categoryService.updateCategory(variables.id, variables.data),
-    onSuccess: (updatedCategory) => {
-      toast.success(`Category "${updatedCategory.name}" updated successfully.`);
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateCategoryDto }) =>
+      categoryService.updateCategory(id, data),
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: [...CATEGORIES_QUERY_KEY, updatedCategory.id] });
+      queryClient.invalidateQueries({ queryKey: ["category", tenantId, updated.id] });
+      toast.success(`Category "${updated.name}" updated.`);
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update category.");
-    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
   });
-}
 
-export function useDeleteCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  const deleteCategoryMutation = useMutation({
     mutationFn: (id: string) => categoryService.deleteCategory(id),
     onSuccess: () => {
-      toast.success("Category deleted successfully.");
       queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
+      toast.success("Category deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete category.");
-    },
+    onError: (err: any) => toast.error(err.message || "Failed to delete category"),
   });
-}
+
+  // --- Return Unified Interface ---
+  return {
+    // Data & Meta
+    categories: categoriesQuery.data?.data || [],
+    meta: categoriesQuery.data?.meta,
+    isLoading: categoriesQuery.isLoading,
+    isFetching: categoriesQuery.isFetching,
+    isError: categoriesQuery.isError,
+
+    // State Management
+    page,
+    setPage,
+    search,
+    setSearch,
+
+    // Actions
+    createCategory: createCategoryMutation.mutate,
+    isCreating: createCategoryMutation.isPending,
+
+    updateCategory: updateCategoryMutation.mutate,
+    isUpdating: updateCategoryMutation.isPending,
+
+    deleteCategory: deleteCategoryMutation.mutate,
+    isDeleting: deleteCategoryMutation.isPending,
+  };
+};
+
+// ---------------------------------------------------------
+// 2. Hook for Single Category Details
+// ---------------------------------------------------------
+export const useCategory = (id: string | null) => {
+  const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+
+  return useQuery({
+    queryKey: ["category", tenantId, id],
+    queryFn: () => categoryService.getCategoryById(id!),
+    enabled: !isAuthLoading && isAuthenticated && !!tenantId && !!id,
+  });
+};

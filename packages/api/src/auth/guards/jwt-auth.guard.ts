@@ -1,11 +1,32 @@
-import { Injectable, Scope, ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
-@Injectable({ scope: Scope.REQUEST }) 
+/**
+ * SOLID Principle: Open/Closed
+ * This guard is open to extension via metadata. It checks if a route
+ * is marked with @Public() before attempting JWT verification.
+ */
+@Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  // You might need to add this constructor if you face issues with request context
-  // in more complex scenarios, but often just adding the scope is enough.
-  constructor() {
+  constructor(private reflector: Reflector) {
     super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    // 1. Check if the @Public() decorator is present on the method or the class
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // 2. If it is public, allow access immediately without checking for a token
+    if (isPublic) {
+      return true;
+    }
+
+    // 3. Otherwise, proceed with standard JWT verification
+    return super.canActivate(context);
   }
 }

@@ -36,11 +36,12 @@ export function SignupForm() {
 
   const { isLoading, error, handleSubmit } = useFormHandler(
     async (values: SignupFormValues) => {
+      // signUp calls /onboarding/register then auto-logins
+      // if no tenant exists it will redirect to /onboarding/create-store automatically
       await signUp(values);
     },
     {
       successMessage: "Account created! Let's set up your store.",
-      onSuccessRedirect: "/onboarding/create-store",
     }
   );
 

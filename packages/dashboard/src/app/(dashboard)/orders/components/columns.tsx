@@ -22,6 +22,7 @@ import React from "react";
 import { formatMoney } from "@/utils/money";
 import { formatDate } from "@/utils/date";
 import { OrderTableMeta, TableWithMeta } from "@/types/table-meta";
+import { Currency } from "@/types/currency";
 
 // REMOVE the global module declaration completely
 // No more: declare module "@tanstack/react-table" { ... }
@@ -96,7 +97,7 @@ export const columns: ColumnDef<Order>[] = [
     header: "Subtotal",
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("subtotal"));
-      return <div>{formatMoney(amount)}</div>;
+      return <div className="text-left tabular-nums" >{formatMoney(amount, Currency.KES, { showSymbol: false })}</div>;
     }),
   },
   {
@@ -104,7 +105,7 @@ export const columns: ColumnDef<Order>[] = [
     header: "Tax",
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("taxAmount"));
-      return <div>{formatMoney(amount)}</div>;
+      return <div className="text-left tabular-nums" >{formatMoney(amount, Currency.KES, { showSymbol: false })}</div>;
     }),
   },
   {
@@ -112,7 +113,7 @@ export const columns: ColumnDef<Order>[] = [
     header: "Shipping",
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("shippingAmount"));
-      return <div>{formatMoney(amount)}</div>;
+      return <div className="text-left tabular-nums" >{formatMoney(amount, Currency.KES, { showSymbol: false })}</div>;
     }),
   },
   {
@@ -120,7 +121,7 @@ export const columns: ColumnDef<Order>[] = [
     header: () => <div>Total</div>,
     cell: React.memo(({ row }) => {
       const amount = parseFloat(row.getValue("totalAmount"));
-      return <div>{formatMoney(amount)}</div>;
+      return <div className="text-left tabular-nums" >{formatMoney(amount, Currency.KES, { showSymbol: false })}</div>;
     }),
   },
   {

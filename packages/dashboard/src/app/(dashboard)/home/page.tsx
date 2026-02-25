@@ -1,10 +1,10 @@
-'use client';
-import HomePage from "@/components/home/home-page";
+import { DashboardWrapper } from "./components/dashboard-wrapper";
 
-
-export default function DashboardPage() {
-
-  return (
-    <HomePage/>
-  );
+/**
+ * SOLID Principle: Interface Segregation
+ * This page serves as the entry point, delegating all 
+ * client-side state and logic to the DashboardWrapper.
+ */
+export default function DashboardHomePage() {
+  return <DashboardWrapper />;
 }

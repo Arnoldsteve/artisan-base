@@ -1,19 +1,15 @@
-import { Global, Module } from '@nestjs/common';
-import { PrismaService } from './prisma.service'; // For the management DB
-import { TenantClientFactory } from './tenant-client-factory.service'; // Our singleton factory
-import { TenantPrismaService } from './tenant-prisma.service'; // Our request-scoped service
+import { Module, Global } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+import { TenantContextModule } from '../common/tenant-context/tenant-context.module';
+import { CommonCacheModule } from '../common/cache/common-cache.module';
 
-@Global()
+@Global() // Usually Prisma is global too
 @Module({
-  providers: [
-    PrismaService,         // Singleton for management DB
-    TenantClientFactory,   // Singleton factory for all tenant DBs
-    TenantPrismaService,   // Request-scoped service to get the correct tenant client
+  imports: [
+    TenantContextModule, 
+    CommonCacheModule // Explicitly import here as well to satisfy the dependency
   ],
-  exports: [
-    PrismaService,
-    TenantClientFactory,
-    TenantPrismaService,
-  ],
+  providers: [PrismaService],
+  exports: [PrismaService],
 })
 export class PrismaModule {}
