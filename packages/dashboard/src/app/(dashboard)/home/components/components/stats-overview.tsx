@@ -73,7 +73,7 @@ function StatCard({
 
 export function StatsOverview({ overview, currency }: StatsOverviewProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 pt-4">
       {/* 1. Total Revenue (Currency Localized) */}
       <StatCard
         title="Total Revenue"

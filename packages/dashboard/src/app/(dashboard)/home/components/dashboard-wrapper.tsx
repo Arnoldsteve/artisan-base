@@ -49,7 +49,7 @@ export function DashboardWrapper() {
     <div className="flex flex-col min-h-screen">
       <PageHeader 
         title="Store Overview" 
-        description="Monitor your artisan business performance in real-time."
+        // description="Monitor your artisan business performance in real-time."
       />
 
       <div className="px-4 pb-20 space-y-8">
