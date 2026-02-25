@@ -33,7 +33,9 @@ export interface SubscriptionCreatedEvent {
   checkoutUrl?: string;       // Stripe — redirect to this
   stkPushRequestId?: string;  // Mpesa — STK push sent
   billingCycle: BillingCycle; 
-  phone?: string;   
+  phone?: string;  
+  amount: number;    
+  reference: string;  
 }
 
 export interface SubscriptionRenewedEvent {

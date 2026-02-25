@@ -5,6 +5,8 @@ import { QUEUES } from '../../common/queues/queue.constants';
 import { PaymentService } from '../payment.service';
 import { TenantContextService } from '../../common/tenant-context/tenant-context.service';
 import { CheckoutCompletedEvent } from '../../order/events/order.events';
+import { SubscriptionCreatedEvent } from '@/billing/events/billing.events';
+import { PaymentType } from '@generated/prisma/enums';
 
 /**
  * TOP 1% ARCHITECTURE: Background Payment Processor
@@ -31,6 +33,9 @@ export class PaymentProcessor extends WorkerHost {
     switch (job.name) {
       case 'INITIALIZE_CHECKOUT_PAYMENT':
         return this.handleCheckoutPayment(job.data);
+
+      case 'INITIALIZE_SUBSCRIPTION_PAYMENT':
+        return this.handleSubscriptionPayment(job.data);
 
       default:
         this.logger.warn(`Unknown job name: ${job.name}`);
@@ -64,13 +69,42 @@ export class PaymentProcessor extends WorkerHost {
           description: `Marketplace Checkout: ${data.orderIds.length} orders`,
           metadata: {
             orderIds: data.orderIds,
-            type: 'ORDER_PAYMENT',
+            type: PaymentType.ORDER,
           },
         });
       } catch (error) {
         this.logger.error(`Payment initiation failed for ${data.paymentReference}`, error.stack);
         // Throwing here allows BullMQ to use its configured 'backoff' and retry automatically
         throw error; 
+      }
+    });
+  }
+
+  /**
+   * ✅ ADD THIS METHOD:
+   * billions of users: Handles background initiation for Store Subscriptions.
+   */
+  private async handleSubscriptionPayment(data: SubscriptionCreatedEvent) {
+    return this.tenantContext.run(data.tenantId, async () => {
+      try {
+        this.logger.debug(`Initiating Sub Payment for Tenant: ${data.tenantId} | Ref: ${data.reference}`);
+
+        return await this.paymentService.initiate({
+          provider: data.currency === 'KES' ? 'MPESA' : 'STRIPE',
+          amount: data.amount,
+          currency: data.currency,
+          reference: data.reference,
+          phone: data.phone,
+          description: `Store Subscription: ${data.tenantName}`,
+          metadata: {
+            planId: data.planId,
+            billingCycle: data.billingCycle,
+            type: PaymentType.SUBSCRIPTION, 
+          },
+        });
+      } catch (error) {
+        this.logger.error(`Subscription initiation failed for ${data.reference}`, error.stack);
+        throw error; // Triggers BullMQ retry
       }
     });
   }
