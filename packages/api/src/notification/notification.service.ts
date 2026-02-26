@@ -1,16 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { render } from '@react-email/render';
 import { MailService } from '../common/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
-// import { formatMoney } from '@/common/utils/money'; // Assuming this utility exists in common
 import { 
   CheckoutCompletedEvent, 
   OrderCreatedEvent 
 } from '../order/events/order.events';
 
+// --- Import Templates ---
+import { BuyerReceiptEmail } from './templates/buyer-receipt.email';
+import { MerchantOrderAlertEmail } from './templates/merchant-order-alert.email';
+
 /**
  * SOLID Principle: Single Responsibility
- * This service is responsible for the business logic of notifications.
- * It formats raw data into human-readable HTML templates.
+ * This service orchestrates data fetching and template rendering.
+ * It is the 'content engine' for the platform's communication.
  */
 @Injectable()
 export class NotificationService {
@@ -22,12 +26,14 @@ export class NotificationService {
   ) {}
 
   /**
-   * TOP 1% LOGIC: Consolidated Customer Receipt
-   * millions of users: Fetches data for all sub-orders in a transaction 
-   * to send ONE professional email instead of multiple spammy ones.
+   * TOP 1% LOGIC: Multi-Vendor Receipt Orchestration
+   * millions of users: Aggregates multiple isolated orders into one unified 
+   * React Email component to provide a professional marketplace experience.
    */
   async sendCustomerReceipt(payload: CheckoutCompletedEvent) {
-    // 1. Fetch full details for all orders in this checkout
+    this.logger.log(`Rendering consolidated receipt for: ${payload.customerEmail}`);
+
+    // 1. Fetch full details for the consolidated view
     const orders = await this.prisma.order.findMany({
       where: { id: { in: payload.orderIds } },
       include: { 
@@ -36,91 +42,65 @@ export class NotificationService {
       }
     });
 
-    // 2. Generate the HTML Line Items (Multi-vendor aware)
-    let itemsHtml = '';
-    orders.forEach(order => {
-      itemsHtml += `<tr style="background-color: #f8fafc;"><td colspan="2" style="padding: 8px; font-weight: bold; font-size: 12px; color: #475569;">SOLD BY: ${order.tenant.name}</td></tr>`;
-      order.items.forEach(item => {
-        itemsHtml += `
-          <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-weight: 600;">${item.productName}</div>
-              <div style="font-size: 12px; color: #64748b;">Qty: ${item.quantity}</div>
-            </td>
-            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">
-              KES ${(parseFloat(item.unitPrice.toString()) * item.quantity).toLocaleString()}
-            </td>
-          </tr>
-        `;
-      });
-    });
+    // 2. Map data to the template's expected structure
+    const vendorGroups = orders.map(order => ({
+      merchantName: order.tenant.name,
+      items: order.items.map(item => ({
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice),
+      }))
+    }));
 
-    // 3. Construct the full email
-    const html = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; padding: 20px;">
-        <h1 style="color: #2563eb; font-size: 24px; font-weight: 800;">ORDER CONFIRMED</h1>
-        <p>Hi there,</p>
-        <p>Thank you for your purchase from <strong>Artisan Base</strong>. We've notified our artisans, and they are preparing your goods.</p>
-        
-        <div style="background: #f1f5f9; padding: 15px; border-radius: 4px; margin: 20px 0;">
-          <div style="font-size: 12px; color: #64748b;">Payment Reference</div>
-          <div style="font-family: monospace; font-weight: bold;">${payload.paymentReference}</div>
-        </div>
+    // 3. Render React component to static HTML string
+    const html = await render(
+      BuyerReceiptEmail({
+        customerName: payload.customerEmail.split('@')[0], // Fallback if name missing
+        paymentReference: payload.paymentReference,
+        totalAmount: payload.totalAmount.toLocaleString(),
+        currency: payload.currency,
+        vendors: vendorGroups,
+      })
+    );
 
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr>
-              <th style="text-align: left; padding: 12px; background: #f8fafc; font-size: 12px;">ITEM</th>
-              <th style="text-align: right; padding: 12px; background: #f8fafc; font-size: 12px;">PRICE</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
-
-        <div style="margin-top: 20px; text-align: right;">
-          <div style="font-size: 14px; color: #64748b;">Total Amount Paid</div>
-          <div style="font-size: 24px; font-weight: 900; color: #2563eb;">KES ${payload.totalAmount.toLocaleString()}</div>
-        </div>
-      </div>
-    `;
-
+    // 4. Delegate delivery to the infrastructure layer
     return this.mailService.sendMail({
       to: payload.customerEmail,
-      subject: `Receipt for your Artisan Base Order [${payload.paymentReference}]`,
+      subject: `Receipt for your Order [${payload.paymentReference}]`,
       html,
     });
   }
 
   /**
-   * TOP 1% LOGIC: Merchant New Order Alert
-   * Notifies a specific artisan that they have money waiting in the dashboard.
+   * millions of users: Notifies the specific store owner of a new sale.
    */
   async sendMerchantOrderAlert(payload: OrderCreatedEvent) {
+    // 1. Resolve the human owner of the tenant
     const merchant = await this.prisma.tenantMember.findFirst({
       where: { tenantId: payload.tenantId, role: 'OWNER' },
       include: { user: true }
     });
 
-    if (!merchant) return;
+    if (!merchant) {
+      this.logger.warn(`No owner found to notify for tenant: ${payload.tenantId}`);
+      return;
+    }
 
-    const html = `
-      <div style="font-family: sans-serif; padding: 20px;">
-        <h2>You have a new sale!</h2>
-        <p>Order <strong>#${payload.orderNumber}</strong> has been placed in your store.</p>
-        <p><strong>Amount:</strong> KES ${payload.totalAmount.toLocaleString()}</p>
-        <p><strong>Items:</strong> ${payload.itemsCount}</p>
-        <a href="https://dashboard.artisan-base.com/orders/${payload.orderId}" 
-           style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-          Prepare for Fulfillment
-        </a>
-      </div>
-    `;
+    // 2. Render the merchant-specific template
+    const html = await render(
+      MerchantOrderAlertEmail({
+        merchantName: merchant.user.firstName || 'Artisan',
+        orderNumber: payload.orderNumber,
+        totalAmount: payload.totalAmount.toLocaleString(),
+        currency: payload.currency,
+        itemsCount: payload.itemsCount,
+        orderId: payload.orderId,
+      })
+    );
 
     return this.mailService.sendMail({
       to: merchant.user.email,
-      subject: `New Sale Alert: ${payload.orderNumber}`,
+      subject: `New Sale! Order #${payload.orderNumber}`,
       html,
     });
   }

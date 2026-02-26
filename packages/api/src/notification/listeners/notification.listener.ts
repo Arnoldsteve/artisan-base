@@ -50,6 +50,7 @@ export class NotificationListener {
 
     await this.notifyQueue.add(JOB_NAMES.NOTIFY_MERCHANT_NEW_ORDER, payload, {
       attempts: 1, // 2
+      backoff: { type: 'exponential', delay: 10000 }, // Wait 10s, then 20s, etc.
       removeOnComplete: true,
       removeOnFail: true,
     });
