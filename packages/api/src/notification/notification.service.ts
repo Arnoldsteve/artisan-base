@@ -10,6 +10,8 @@ import {
 // --- Import Templates ---
 import { BuyerReceiptEmail } from './templates/buyer-receipt.email';
 import { MerchantOrderAlertEmail } from './templates/merchant-order-alert.email';
+import PaymentConfirmationEmail from './templates/payment-confirmation.email';
+import { PaymentUpdatedEvent } from '@/payment/events/payment.events';
 
 /**
  * SOLID Principle: Single Responsibility
@@ -104,4 +106,48 @@ export class NotificationService {
       html,
     });
   }
+
+  async sendPaymentConfirmation(event: PaymentUpdatedEvent) {
+  // 1. Fetch payment + orders to get customer email
+  const payment = await this.prisma.payment.findUnique({
+    where: { id: event.paymentId },
+  });
+
+  if (!payment) {
+    this.logger.warn(`Payment not found for confirmation: ${event.paymentId}`);
+    return;
+  }
+
+  const orderIds: string[] = (payment.metadata as any)?.orderIds || [];
+  const orders = await this.prisma.order.findMany({
+    where: { id: { in: orderIds } },
+    include: { customer: true },
+  });
+
+  const customer = orders[0]?.customer;
+  if (!customer) {
+    this.logger.warn(`No customer found for payment: ${event.paymentId}`);
+    return;
+  }
+
+  const mpesaReceiptNumber = (event.rawPayload as any)?.Body?.stkCallback
+    ?.CallbackMetadata?.Item?.find((i: any) => i.Name === 'MpesaReceiptNumber')
+    ?.Value ?? 'N/A';
+
+  const html = await render(
+    PaymentConfirmationEmail({
+      customerName: customer.firstName || customer.email.split('@')[0],
+      paymentReference: (payment.metadata as any)?.reference ?? event.paymentId,
+      mpesaReceiptNumber,
+      amount: Number(payment.amount).toLocaleString(),
+      currency: 'KES',
+    })
+  );
+
+  return this.mailService.sendMail({
+    to: customer.email,
+    subject: `Payment Confirmed ✓ [${(payment.metadata as any)?.reference}]`,
+    html,
+  });
+}
 }

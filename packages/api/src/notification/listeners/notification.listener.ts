@@ -8,6 +8,12 @@ import {
   OrderCreatedEvent,
 } from '../../order/events/order.events';
 import { QUEUES, JOB_NAMES } from '../../common/queues/queue.constants';
+import {
+  PAYMENT_EVENTS,
+  PaymentUpdatedEvent,
+} from '@/payment/events/payment.events';
+import { PaymentStatus, PaymentType } from '@generated/prisma/client';
+import { PaymentRepository } from '@/payment/repositories/payment.repository';
 
 /**
  * SOLID Principle: Single Responsibility
@@ -19,8 +25,8 @@ export class NotificationListener {
   private readonly logger = new Logger(NotificationListener.name);
 
   constructor(
-    // Inject the global notifications queue defined in your QueuesModule
     @InjectQueue(QUEUES.NOTIFICATIONS) private readonly notifyQueue: Queue,
+    private readonly paymentRepo: PaymentRepository,
   ) {}
 
   /**
@@ -54,5 +60,24 @@ export class NotificationListener {
       removeOnComplete: true,
       removeOnFail: true,
     });
+  }
+
+  @OnEvent(PAYMENT_EVENTS.PAYMENT_UPDATED)
+  async handlePaymentUpdated(event: PaymentUpdatedEvent) {
+    const payment = await this.paymentRepo.findById(event.paymentId);
+
+    if (
+      payment?.type === PaymentType.ORDER &&
+      event.status === PaymentStatus.PAID
+    ) {
+      this.logger.log(`Queuing payment confirmation for: ${event.paymentId}`);
+
+      await this.notifyQueue.add(JOB_NAMES.SEND_PAYMENT_CONFIRMATION, event, {
+        attempts: 1,
+        backoff: { type: 'exponential', delay: 10000 },
+        removeOnComplete: true,
+        removeOnFail: true,
+      });
+    }
   }
 }

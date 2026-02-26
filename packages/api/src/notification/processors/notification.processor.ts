@@ -39,6 +39,9 @@ export class NotificationProcessor extends WorkerHost {
       case JOB_NAMES.NOTIFY_MERCHANT_NEW_ORDER:
         return this.handleMerchantAlert(job.data);
 
+      case JOB_NAMES.SEND_PAYMENT_CONFIRMATION:  
+        return this.handlePaymentConfirmation(job.data);
+
       default:
         this.logger.warn(`Unhandled notification job name: ${job.name}`);
     }
@@ -74,4 +77,14 @@ export class NotificationProcessor extends WorkerHost {
       }
     });
   }
+
+  private async handlePaymentConfirmation(data: any) {
+  try {
+    this.logger.debug(`Sending payment confirmation for payment: ${data.paymentId}`);
+    return await this.notificationService.sendPaymentConfirmation(data);
+  } catch (error) {
+    this.logger.error(`Failed to send payment confirmation: ${data.paymentId}`, error.stack);
+    throw error;
+  }
+}
 }

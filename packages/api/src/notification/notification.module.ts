@@ -7,6 +7,7 @@ import { NotificationProcessor } from './processors/notification.processor';
 import { QUEUES } from '../common/queues/queue.constants';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TenantContextModule } from '../common/tenant-context/tenant-context.module';
+import { PaymentRepository } from '@/payment/repositories/payment.repository';
 
 /**
  * SOLID Principle: Encapsulation
@@ -15,19 +16,15 @@ import { TenantContextModule } from '../common/tenant-context/tenant-context.mod
  */
 @Module({
   imports: [
-    PrismaModule,        // Required for fetching order/merchant details
-    TenantContextModule, // Required for re-establishing context in the worker
-    
-    // millions of users: We register the specific queue token for this module
-    BullModule.registerQueue({
-      name: QUEUES.NOTIFICATIONS,
-    }),
+    PrismaModule,        
+    TenantContextModule, 
   ],
   providers: [
     MailService,           // SMTP Infrastructure
     NotificationService,   // Content Generation Logic
     NotificationListener,  // Event Bridge (Producer)
     NotificationProcessor, // Background Worker (Consumer)
+    PaymentRepository,    // For fetching payment details in listeners
   ],
   exports: [
     NotificationService,   // Allows other modules to trigger manual emails
