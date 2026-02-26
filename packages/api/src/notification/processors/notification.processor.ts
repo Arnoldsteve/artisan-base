@@ -13,7 +13,7 @@ import { TenantContextService } from '../../common/tenant-context/tenant-context
 @Processor(QUEUES.NOTIFICATIONS, {
   limiter: {
     max: 1,
-    duration: 2000,
+    duration: 5000,
   },
 })
 export class NotificationProcessor extends WorkerHost {

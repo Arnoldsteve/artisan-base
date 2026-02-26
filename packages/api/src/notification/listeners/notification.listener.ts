@@ -33,9 +33,10 @@ export class NotificationListener {
 
     await this.notifyQueue.add(JOB_NAMES.PROCESS_ORDER_RECEIPT, payload, {
       // Enterprise Strategy: Emails can fail (SMTP timeout), so we retry.
-      attempts: 3,
+      attempts: 1, // 3
       backoff: { type: 'exponential', delay: 10000 }, // Wait 10s, then 20s, etc.
       removeOnComplete: true,
+      removeOnFail: true,
     });
   }
 
@@ -48,8 +49,9 @@ export class NotificationListener {
     this.logger.log(`Queuing merchant sale alert: ${payload.orderNumber}`);
 
     await this.notifyQueue.add(JOB_NAMES.NOTIFY_MERCHANT_NEW_ORDER, payload, {
-      attempts: 2,
+      attempts: 1, // 2
       removeOnComplete: true,
+      removeOnFail: true,
     });
   }
 }
