@@ -27,24 +27,24 @@ export function UserNav() {
 
   // --- Handle avatar URL or Blob ---
   useEffect(() => {
-    if (user?.avatarUrl instanceof Blob) {
-      const url = URL.createObjectURL(user.avatarUrl);
+    if (user?.user?.avatarUrl instanceof Blob) {
+      const url = URL.createObjectURL(user?.user?.avatarUrl);
       setAvatarSrc(url);
       return () => URL.revokeObjectURL(url);
-    } else if (typeof user?.avatarUrl === "string") {
-      setAvatarSrc(user.avatarUrl);
+    } else if (typeof user?.user?.avatarUrl === "string") {
+      setAvatarSrc(user?.user?.avatarUrl);
     } else {
       setAvatarSrc(undefined);
     }
-  }, [user?.avatarUrl]);
+  }, [user?.user?.avatarUrl]);
 
   if (!user) {
     return null;
   }
 
   const initials = (() => {
-    const firstName = user.firstName ?? "";
-    const lastName = user.lastName ?? "";
+    const firstName = user.user?.firstName ?? "";
+    const lastName = user.user?.lastName ?? "";
 
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`;
@@ -63,7 +63,7 @@ export function UserNav() {
           className="relative flex items-center gap-2 px-2"
         >
           <span>
-            {user.firstName} {user.lastName}
+            {user.user.firstName} {user.user?.lastName}
           </span>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
@@ -74,16 +74,16 @@ export function UserNav() {
             <Avatar className="h-9 w-9">
               <AvatarImage
                 src={avatarSrc}
-                alt={`${user.firstName ?? ""} ${user.lastName ?? ""}`}
+                alt={`${user.user.firstName ?? ""} ${user.user?.lastName ?? ""}`}
               />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">
-                {user.firstName} {user.lastName}
+                {user.user.firstName} {user.user?.lastName}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
+                {user.user.email}
               </p>
             </div>
           </div>

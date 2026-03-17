@@ -33,7 +33,7 @@ export function useAuth() {
 
       if (tokenFromCookie && subdomainFromCookie) {
         apiClient.setAuthToken(tokenFromCookie);
-        apiClient.setTenantId(tenantIdFromCookie);
+        apiClient.setTenantId(tenantIdFromCookie ?? null);
         setToken(tokenFromCookie);
         setSubdomain(subdomainFromCookie);
         setTenantId(tenantIdFromCookie ?? null);

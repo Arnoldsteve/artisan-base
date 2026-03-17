@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui/components/ui/dropdown-menu";
-import { DashboardUser } from "@/types/users";
+import { StaffMember as DashboardUser } from "@/types/staff"; 
 
 interface CellActionProps {
   data: DashboardUser;

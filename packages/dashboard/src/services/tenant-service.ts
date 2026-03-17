@@ -41,6 +41,11 @@ export class TenantService {
   async delete(): Promise<void> {
     return apiClient.delete("/tenant");
   }
+
+  // Inside tenantService
+  async checkAvailability(subdomain: string): Promise<{ available: boolean }> {
+    return apiClient.get(`/tenants/check-subdomain?subdomain=${subdomain}`);
+  }
 }
 
 export const tenantService = new TenantService();

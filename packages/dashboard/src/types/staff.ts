@@ -11,6 +11,7 @@ export interface StaffMember {
   user: {
     firstName: string | null;
     lastName: string | null;
+    avatarUrl?: string | null | Blob; 
     email: string;
   };
 }

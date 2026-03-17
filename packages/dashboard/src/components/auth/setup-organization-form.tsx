@@ -35,7 +35,7 @@ export function SetupOrganizationForm() {
   const form = useForm<CreateTenantFormData>({
     resolver: zodResolver(createTenantSchema),
     defaultValues: {
-      storeName: "",
+      name: "",
       subdomain: "",
     },
   });
@@ -52,8 +52,8 @@ export function SetupOrganizationForm() {
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === "storeName") {
-        form.setValue("subdomain", slugify(value.storeName || ""), {
+      if (name === "name") {
+        form.setValue("subdomain", slugify(value.name || ""), {
           shouldValidate: true,
         });
       }
@@ -77,8 +77,8 @@ export function SetupOrganizationForm() {
     setCreationStep("Creating your store...");
 
     try {
-      // ← changed: map storeName → name to match backend RegisterTenantDto
-      await createTenant({ name: values.storeName, subdomain: finalSubdomain });
+      // ← changed: map name → name to match backend RegisterTenantDto
+      await createTenant({ name: values.name, subdomain: finalSubdomain });
     } catch (error) {
       setCreationStep("");
       console.error("Failed to create tenant:", error);
@@ -95,7 +95,7 @@ export function SetupOrganizationForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="storeName"
+            name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Store Name</FormLabel>

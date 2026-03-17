@@ -64,3 +64,31 @@ export const useTenant = () => {
     isDeleting: deleteTenantMutation.isPending,
   };
 };
+
+
+// ⚡ ADD THIS: Standalone hook for the Setup Form
+export const useCreateTenant = () => {
+  return useMutation({
+    mutationFn: (data: CreateStoreDto) => tenantService.provisionStore(data),
+    onSuccess: (newStore) => {
+      toast.success(`Store "${newStore.name}" created successfully!`);
+      window.location.href = "/"; // Force refresh to load new tenant context
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to create store"),
+  });
+};
+
+// ⚡ ADD THIS: Subdomain validation hook for the Setup Form
+export const useSubdomainAvailability = (subdomain: string) => {
+  const query = useQuery({
+    queryKey: ["subdomain-check", subdomain],
+    queryFn: () => tenantService.checkAvailability(subdomain),
+    enabled: subdomain.length >= 3,
+  });
+
+  return {
+    ...query,
+    isValidFormat: /^[a-z0-9-]+$/.test(subdomain),
+    isValidLength: subdomain.length >= 3,
+  };
+};
