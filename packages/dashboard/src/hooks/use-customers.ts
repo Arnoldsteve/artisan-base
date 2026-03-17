@@ -15,31 +15,37 @@ import {
   UpdateCustomerDto 
 } from "@/types/customers";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types";
+
+export const CUSTOMERS_QUERY_KEY = ["customers"] as const;
 
 // ---------------------------------------------------------
 // 1. Unified Hook for Managing the Customers List
 // ---------------------------------------------------------
-export const useCustomers = (initialLimit = 10) => {
+export const useCustomers = (
+  initialLimit = 10, 
+  initialData?: PaginatedResponse<Customer>
+) => {
   const queryClient = useQueryClient();
   const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
   
-  // Internal state for list management
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  // TOP 1% ARCHITECTURE: Keys are isolated by tenantId
   const CUSTOMERS_QUERY_KEY = ["customers", tenantId];
 
-  // --- Fetch Query ---
   const customersQuery = useQuery({
     queryKey: [...CUSTOMERS_QUERY_KEY, "list", { page, search, limit: initialLimit }],
     queryFn: () => customerService.getAll(page, initialLimit, search),
     enabled: !isAuthLoading && isAuthenticated && !!tenantId,
     placeholderData: keepPreviousData,
+    initialData: page === 1 && !search ? initialData : undefined,
   });
 
-  // --- Mutations ---
-  const createCustomerMutation = useMutation({
+  // ... rest of your mutations (create, update, delete)
+
+  // ⚡ ADD THIS: Standalone Create Mutation
+  const createMutation = useMutation({
     mutationFn: (data: CreateCustomerDto) => customerService.create(data),
     onSuccess: (newCustomer) => {
       queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
@@ -48,25 +54,9 @@ export const useCustomers = (initialLimit = 10) => {
     onError: (err: any) => toast.error(err.message || "Failed to create customer"),
   });
 
-  const updateCustomerMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateCustomerDto }) =>
-      customerService.update(id, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["customer", tenantId, updated.id] });
-      toast.success("Customer updated successfully.");
-    },
-    onError: (err: any) => toast.error(err.message || "Update failed"),
-  });
-
-  const deleteCustomerMutation = useMutation({
-    mutationFn: (id: string) => customerService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
-      toast.success("Customer deleted successfully.");
-    },
-    onError: (err: any) => toast.error(err.message || "Delete failed"),
-  });
+  // Re-use the update/delete hooks we defined previously
+  const { updateCustomer, isUpdating } = useUpdateCustomer();
+  const { deleteCustomer, isDeleting } = useDeleteCustomer();
 
   return {
     // Data & State
@@ -80,13 +70,15 @@ export const useCustomers = (initialLimit = 10) => {
     search,
     setSearch,
 
-    // Actions
-    createCustomer: createCustomerMutation.mutate,
-    isCreating: createCustomerMutation.isPending,
-    updateCustomer: updateCustomerMutation.mutate,
-    isUpdating: updateCustomerMutation.isPending,
-    deleteCustomer: deleteCustomerMutation.mutate,
-    isDeleting: deleteCustomerMutation.isPending,
+    // 🎯 THE FIX: Add these two lines back to the return object
+    createCustomer: createMutation.mutate,
+    isCreating: createMutation.isPending,
+
+    // Other Actions
+    updateCustomer,
+    isUpdating,
+    deleteCustomer,
+    isDeleting,
   };
 };
 
@@ -101,4 +93,47 @@ export const useCustomer = (id: string | null) => {
     queryFn: () => customerService.getById(id!),
     enabled: !isAuthLoading && isAuthenticated && !!tenantId && !!id,
   });
+};
+
+// ⚡ 3. THE FIX: Standalone Update Hook for the Edit Page
+export const useUpdateCustomer = () => {
+  const queryClient = useQueryClient();
+  const { tenantId } = useAuthContext();
+
+  const mutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateCustomerDto }) =>
+      customerService.update(id, data),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["customer", tenantId, updated.id] });
+      toast.success("Customer profile updated.");
+    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
+  });
+
+  return {
+    updateCustomer: mutation.mutate,
+    isUpdating: mutation.isPending,
+    // Return the whole mutation object if needed by the caller
+    mutate: mutation.mutate,
+    isPending: mutation.isPending
+  };
+};
+
+// ⚡ 4. Standalone Delete Hook (Clean Architecture)
+export const useDeleteCustomer = () => {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (id: string) => customerService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CUSTOMERS_QUERY_KEY });
+      toast.success("Customer deleted.");
+    },
+    onError: (err: any) => toast.error(err.message || "Delete failed"),
+  });
+
+  return {
+    deleteCustomer: mutation.mutate,
+    isDeleting: mutation.isPending
+  };
 };

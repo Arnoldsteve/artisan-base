@@ -11,32 +11,37 @@ import { productService } from "@/services/product-service";
 import { toast } from "sonner";
 import { CreateProductDto, Product, UpdateProductDto } from "@/types/products";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types";
+
+export const PRODUCTS_QUERY_KEY = ["products"] as const;
+
 
 // ---------------------------------------------------------
 // 1. Unified Hook for Managing the Product List
 // ---------------------------------------------------------
-export const useProducts = (initialLimit = 10) => {
+export const useProducts = (initialLimit = 10, initialData?: PaginatedResponse<Product>) => {
   const queryClient = useQueryClient();
   const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
   
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  const PRODUCTS_QUERY_KEY = ["products", tenantId];
+  const scopedKey = [...PRODUCTS_QUERY_KEY, tenantId];
 
   // --- Fetch Query ---
   const productsQuery = useQuery({
-    queryKey: [...PRODUCTS_QUERY_KEY, "list", { page, search, limit: initialLimit }],
+    queryKey: [...scopedKey, "list", { page, search, limit: initialLimit }],
     queryFn: () => productService.getProducts(page, initialLimit, search),
     enabled: !isAuthLoading && isAuthenticated && !!tenantId,
     placeholderData: keepPreviousData,
+      initialData: page === 1 && !search ? initialData : undefined, 
   });
 
   // --- Mutations ---
   const createProductMutation = useMutation({
     mutationFn: (data: CreateProductDto) => productService.createProduct(data),
     onSuccess: (newProduct) => {
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: scopedKey });
       toast.success(`Product "${newProduct.name}" created successfully.`);
     },
     onError: (err: any) => toast.error(err.message || "Failed to create product"),
@@ -45,7 +50,7 @@ export const useProducts = (initialLimit = 10) => {
   const bulkCreateMutation = useMutation({
     mutationFn: (data: CreateProductDto[]) => productService.bulkCreateProducts(data),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: scopedKey });
       toast.success(`${res.count} products created successfully.`);
     },
     onError: (err: any) => toast.error(err.message || "Bulk upload failed"),
@@ -55,7 +60,7 @@ export const useProducts = (initialLimit = 10) => {
     mutationFn: ({ id, data }: { id: string; data: UpdateProductDto }) =>
       productService.updateProduct(id, data),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: scopedKey });
       queryClient.invalidateQueries({ queryKey: ["product", tenantId, updated.id] });
       toast.success(`Product "${updated.name}" updated.`);
     },
@@ -65,7 +70,7 @@ export const useProducts = (initialLimit = 10) => {
   const deleteProductMutation = useMutation({
     mutationFn: (id: string) => productService.deleteProduct(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: scopedKey });
       toast.success("Product deleted successfully");
     },
     onError: () => toast.error("Failed to delete product"),
@@ -107,5 +112,37 @@ export const useProduct = (id: string | null) => {
     queryKey: ["product", tenantId, id],
     queryFn: () => productService.getProductById(id!),
     enabled: !isAuthLoading && isAuthenticated && !!tenantId && !!id,
+  });
+};
+
+// ... existing useProduct hook
+
+// ⚡ 3. THE FIX: Standalone Hook for Category Assignment
+export const useAssignCategories = () => {
+  const queryClient = useQueryClient();
+  const { tenantId } = useAuthContext();
+
+  return useMutation({
+    mutationFn: ({ 
+      productId, 
+      categoryIds 
+    }: { 
+      productId: string; 
+      categoryIds: string[] 
+    }) => productService.assignCategories(productId, categoryIds),
+    
+    onSuccess: (_, variables) => {
+      // 🎯 TOP 1% PATTERN: Invalidate both list and specific product cache
+      // This ensures the new badges show up everywhere instantly
+      queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      queryClient.invalidateQueries({ 
+        queryKey: ["product", tenantId, variables.productId] 
+      });
+      
+      toast.success("Product categories updated successfully.");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update categories");
+    },
   });
 };

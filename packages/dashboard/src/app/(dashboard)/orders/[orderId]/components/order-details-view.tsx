@@ -38,7 +38,7 @@ export function OrderDetailsView({ orderId }: OrderDetailsViewProps) {
   if (isLoading) return <DataTableSkeleton />;
   if (isError || !order) return <div className="p-10 text-center text-muted-foreground">Order session expired or not found.</div>;
 
-  const shippingAddress = order.shippingAddress as any;
+  const shippingAddress = order.shippingAddress;
 
   return (
     <>

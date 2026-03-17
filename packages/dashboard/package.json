@@ -50,6 +50,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/xlsx": "^0.0.36",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
     "autoprefixer": "^10.4.21",
     "babel-jest": "^30.0.2",
     "eslint": "^9",

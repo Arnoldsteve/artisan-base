@@ -1,70 +1,68 @@
 import { apiClient } from "@/lib/client-api";
 import { Product } from "@/types/products";
+import {
+  SignedUploadUrlResponse,
+  FinalizeUploadPayload,
+} from "@/types/image-upload";
 
-interface SignedUrlResponse {
-  signedUrl: string; // The URL to upload the file to
-  path: string;      // The path of the file in Supabase storage
-  fileId: string;    // The unique ID for the image record
-}
-
-
+/**
+ * SOLID Principle: Single Responsibility
+ * This service handles the specialized multi-step lifecycle of product images.
+ */
 export class ImageUploadService {
   /**
-   * STEP 1: Asks the backend for a secure, one-time URL to upload a file to.
-   *
-   * @param productId The ID of the product to associate the image with.
-   * @param fileName The name of the file being uploaded.
-   * @param fileType The MIME type of the file (e.g., 'image/png').
-   * @returns A promise that resolves with the signed URL and necessary metadata.
+   * STEP 1: Request a signed URL from the backend.
    */
   async createSignedUploadUrl(
     productId: string,
     fileName: string,
-    fileType: string,
-  ): Promise<SignedUrlResponse> {
-    const endpoint = '/dashboard/storage/upload-url';
-    return apiClient.post<SignedUrlResponse>(endpoint, {
-      productId,
-      fileName,
-      fileType,
-    });
+    fileType: string
+  ): Promise<SignedUploadUrlResponse> {
+    return apiClient.post<SignedUploadUrlResponse>(
+      `/products/${productId}/images/signed-url`,
+      { fileName, fileType }
+    );
   }
 
   /**
-   * STEP 2: After the client uploads the file directly to the signed URL,
-   * this method tells the backend to finalize the process and save the image record to the product.
-   *
-   * @param productId The ID of the product.
-   * @param fileId The unique ID for the image, received from createSignedUploadUrl.
-   * @param path The storage path for the image, received from createSignedUploadUrl.
-   * @returns The updated product with the new image linked.
+   * STEP 2: Binary Upload (Direct to Provider).
+   * ⚡ FIX: Added this missing method.
+   * millions of users: Bypassing the backend saves bandwidth and prevents timeouts.
    */
-  async finalizeUpload(
-    productId: string,
-    fileId: string,
-    path: string,
-  ): Promise<Product> {
-    const endpoint = '/dashboard/storage/finalize-upload';
-    return apiClient.post<Product>(endpoint, {
-      productId,
-      fileId,
-      path,
+  async uploadBinary(signedUrl: string, file: File): Promise<void> {
+    const response = await fetch(signedUrl, {
+      method: "PUT",
+      body: file,
+      headers: { "Content-Type": file.type },
     });
+
+    if (!response.ok) {
+      throw new Error(`Cloud storage rejected the upload for ${file.name}`);
+    }
   }
 
   /**
-   * Deletes a specific image from a product by calling the backend endpoint.
-   *
-   * @param productId The ID of the product.
-   * @param imageId The ID of the image to be deleted.
-   * @returns The updated product after the image has been removed.
+   * STEP 3: Finalize the upload.
+   * ⚡ FIX: Refactored to accept the 'FinalizeUploadPayload' object 
+   * instead of 3 positional arguments. This makes the code cleaner and 
+   * resolves the "Expected 3 arguments" error in your hook.
    */
-  async deleteProductImage(
-    productId: string,
-    imageId: string,
-  ): Promise<Product> {
-    const endpoint = `/dashboard/storage/products/${productId}/images/${imageId}`;
-    return apiClient.delete<Product>(endpoint);
+  async finalizeUpload(payload: FinalizeUploadPayload): Promise<Product> {
+    const { productId, fileId, path } = payload;
+    
+    return apiClient.post<Product>(
+      `/products/${productId}/images/finalize`,
+      { fileId, path }
+    );
+  }
+
+  /**
+   * ACTION: Removes an image from a product.
+   */
+  async deleteProductImage(productId: string, imageId: string): Promise<Product> {
+    return apiClient.delete<Product>(
+      `/products/${productId}/images/${imageId}`
+    );
   }
 }
 

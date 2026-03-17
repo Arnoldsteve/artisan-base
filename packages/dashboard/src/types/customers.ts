@@ -1,5 +1,19 @@
 import { Order } from './orders'; 
 
+export interface Address {
+  id: string;
+  firstName: String;
+  lastName: string;
+  street: string;
+  city: string;
+  state?: string | null;
+  postalCode?: string | null;
+  country: string;
+  addressLine1: string;
+  addressLine2: string;
+  isDefault: boolean;
+}
+
 export interface Customer {
   id: string;
   tenantId: string;
@@ -9,11 +23,10 @@ export interface Customer {
   phone?: string | null;
   createdAt: string; 
   updatedAt: string;
-  
-  // Relations (Optional for list views)
+  addresses?: Address[];
+
   orders?: Order[];
 
-  // Computed stats for the dashboard
   _count?: {
     orders: number;
   };

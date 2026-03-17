@@ -38,6 +38,7 @@ import { FREE_SHIPPING_THRESHOLD } from "@/constants/shipping";
 import { shippingOptions } from "@/utils/shupping-options";
 import Image from "next/image";
 import { Separator } from "@repo/ui";
+import { Currency } from "@/types";
 
 /**
  * OrderItemState combines Product info with quantity for local state.
@@ -617,7 +618,7 @@ export function NewOrderForm({ initialOrder }: { initialOrder?: Order }) {
         quantity: item.quantity,
       })),
       shippingAmount,
-      currency: "KES",
+      currency: Currency.KES,
       notes,
     };
     console.log("Order Data:", orderData);

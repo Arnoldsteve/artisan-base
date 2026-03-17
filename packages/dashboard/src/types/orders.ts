@@ -58,9 +58,11 @@ export interface Order {
   subtotal: Decimal;
   shippingAmount: Decimal;
   taxAmount: Decimal;
+  currency: Currency;
   createdAt: string;
   customer: OrderCustomer | null;
   items: OrderItem[];
+  shippingAddress?: AddressDto | null; 
 }
 
 export interface ManualOrderItemDto {

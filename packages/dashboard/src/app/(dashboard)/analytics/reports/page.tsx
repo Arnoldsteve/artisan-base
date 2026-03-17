@@ -12,7 +12,7 @@ import { RevenueOrdersTrend } from "./components/revenue-orders-trend";
 import { OrderStatusFunnel } from "./components/order-status-funnel";
 import { RevenueBreakdown } from "./components/revenue-breakdown";
 import { BestSellingProductsTable } from "./components/best-selling-products-table";
-import { TopCustomersTable } from "./components/top-customers-table";
+// import { TopCustomersTable } from "./components/top-customers-table";
 import { RecentTransactionsTable } from "./components/recent-transactions-table";
 import { RefundsReturnsTable } from "./components/refunds-returns-table";
 import { useAnalyticsOverview } from "@/hooks/use-analytics-queries";
@@ -251,7 +251,7 @@ export default function ReportsPage() {
             <BestSellingProductsTable />
           </TabsContent>
           <TabsContent value="customers" className="mt-6">
-            <TopCustomersTable />
+            {/* <TopCustomersTable /> */}
           </TabsContent>
           <TabsContent value="transactions" className="mt-6">
             <RecentTransactionsTable />

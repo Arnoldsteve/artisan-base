@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PageHeader } from "@/components/shared/page-header";
-import { useDashboardSummary } from "@/hooks/use-analytics";
+import { useDashboardSummary } from "@/hooks";
 import { useAuthContext } from "@/contexts/auth-context";
 import { DataTableSkeleton } from "@/components/shared/data-table";
 import { StatsOverview } from "./components/stats-overview";

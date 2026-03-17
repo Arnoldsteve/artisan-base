@@ -28,7 +28,7 @@ export const useReviews = (initialLimit = 10) => {
   // --- Fetch Query ---
   const reviewsQuery = useQuery({
     queryKey: [...REVIEWS_QUERY_KEY, "list", { page, search, limit: initialLimit }],
-    queryFn: () => reviewService.getAll(), // Adjust service to accept params if needed
+    queryFn: () => reviewService.getAll(page, initialLimit, search), 
     enabled: !isAuthLoading && isAuthenticated && !!tenantId,
     placeholderData: keepPreviousData,
   });
@@ -46,8 +46,8 @@ export const useReviews = (initialLimit = 10) => {
 
   return {
     // Data & Meta
-    reviews: reviewsQuery.data || [],
-    // Note: If backend provides pagination metadata, map it here
+    reviews: reviewsQuery.data?.data || [],
+    meta: reviewsQuery.data?.meta,
     isLoading: reviewsQuery.isLoading,
     isFetching: reviewsQuery.isFetching,
     isError: reviewsQuery.isError,

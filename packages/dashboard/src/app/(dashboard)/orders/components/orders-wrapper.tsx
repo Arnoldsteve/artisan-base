@@ -28,7 +28,7 @@ import { OrderTableMeta } from "@/types/table-meta";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
 
 interface OrdersWrapperProps {
-  initialOrderData: PaginatedResponse<Order>;
+  initialOrderData?: PaginatedResponse<Order>;
 }
 
 export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
@@ -38,8 +38,6 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  // --- Unified Data Hook ---
-  // The hook now manages page, search, and all mutations internally.
   const {
     orders,
     meta,
@@ -50,9 +48,7 @@ export function OrdersWrapper({ initialOrderData }: OrdersWrapperProps) {
     setSearch,
     deleteOrder,
     isDeleting,
-    // Note: If you need batch delete, ensure it's exported from useOrders
-    // For now we'll handle the ones we refactored
-  } = useOrders(10); 
+  } = useOrders(10, initialOrderData); 
 
   // --- Modal/Dialog UI State ---
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);

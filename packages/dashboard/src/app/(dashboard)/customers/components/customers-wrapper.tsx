@@ -24,11 +24,15 @@ import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui";
 import { CustomerTableMeta } from "@/types/table-meta";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
+import { PaginatedResponse } from "@/types";
 
-export function CustomersWrapper() {
+interface CustomersWrapperProps {
+  initialCustomerData?: PaginatedResponse<Customer>;
+}
+
+export function CustomersWrapper({ initialCustomerData }: CustomersWrapperProps) {
   const router = useRouter();
 
-  // --- Unified Data Hook ---
   const {
     customers,
     meta,
@@ -44,7 +48,7 @@ export function CustomersWrapper() {
     isUpdating,
     deleteCustomer,
     isDeleting,
-  } = useCustomers(10);
+  } = useCustomers(10, initialCustomerData);
 
   // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);
