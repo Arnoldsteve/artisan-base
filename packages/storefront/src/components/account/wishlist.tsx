@@ -83,23 +83,24 @@ export const Wishlist: React.FC = () => {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        addToCart({
-                          id: item.id,
-                          name: item.name,
-                          price: item.price,
-                          slug: item.slug || item.id,
-                          description: item.description || "",
-                          image: item.image,
-                          quantity: 1,
-                          inventoryQuantity: item.inventoryQuantity,
-                        })
-                      }
-                      disabled={item.inventoryQuantity === 0}
-                      aria-label="Add to cart"
-                    >
+                   <Button
+                    size="sm"
+                    onClick={() =>
+                      addToCart({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        slug: item.slug || item.id,
+                        description: item.description || "", // This will now work
+                        image: item.image,
+                        quantity: 1,
+                        inventoryQuantity: item.inventoryQuantity,
+                        tenantId: item.tenantId, // ⚡ FIX: Crucial for multi-tenant cart logic
+                      })
+                    }
+                    disabled={item.inventoryQuantity === 0}
+                    aria-label="Add to cart"
+                  >
                       <ShoppingCart className="h-4 w-4 mr-1" />
                       {item.inventoryQuantity > 0
                         ? "Add to Cart"

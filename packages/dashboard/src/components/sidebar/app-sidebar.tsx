@@ -90,9 +90,9 @@ const data = {
           title: "All Customers",
           url: "/customers",
         },
-        { title: "Loyal Customers", url: "/loyal-customers" },
-        { title: "Big Spenders", url: "/big-spenders" },
-        { title: "At Risk", url: "/at-risk" },
+        // { title: "Loyal Customers", url: "/loyal-customers" },
+        // { title: "Big Spenders", url: "/big-spenders" },
+        // { title: "At Risk", url: "/at-risk" },
       ],
     },
     {

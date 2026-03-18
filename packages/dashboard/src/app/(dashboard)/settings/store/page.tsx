@@ -23,7 +23,7 @@ export default function StorePage() {
           <StoreDomainsForm
             initialData={{
               subdomain: tenant.subdomain,
-              customDomain: tenant.customDomain,
+              customDomain: tenant.customDomain ?? null,
             }}
           />
         </div>

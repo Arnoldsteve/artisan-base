@@ -23,8 +23,15 @@ import { Button } from "@repo/ui/components/ui/button";
 import { toast } from "sonner";
 import { CategoryTableMeta } from "@/types/table-meta";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
+import { PaginatedResponse } from "@/types";
 
-export function CategoriesWrapper() {
+interface CategoriesWrapperProps {
+  initialCategoryData?: PaginatedResponse<Category>;
+}
+
+
+
+export function CategoriesWrapper({ initialCategoryData }: CategoriesWrapperProps) {
   // --- Unified Data Hook ---
   const {
     categories,
@@ -40,7 +47,7 @@ export function CategoriesWrapper() {
     isUpdating,
     deleteCategory,
     isDeleting,
-  } = useCategories(10);
+  } = useCategories(10, initialCategoryData);
 
   // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);

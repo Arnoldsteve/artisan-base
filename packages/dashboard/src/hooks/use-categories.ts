@@ -11,11 +11,12 @@ import { categoryService } from "@/services/category-service";
 import { toast } from "sonner";
 import { Category, CreateCategoryDto, UpdateCategoryDto } from "@/types/categories";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types";
 
 // ---------------------------------------------------------
 // 1. Unified Hook for Managing the Categories List
 // ---------------------------------------------------------
-export const useCategories = (initialLimit = 10) => {
+export const useCategories = (initialLimit = 10, initialData?: PaginatedResponse<Category>) => {
   const queryClient = useQueryClient();
   const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
   
@@ -32,6 +33,7 @@ export const useCategories = (initialLimit = 10) => {
     queryFn: () => categoryService.getCategories(page, initialLimit, search),
     enabled: !isAuthLoading && isAuthenticated && !!tenantId,
     placeholderData: keepPreviousData,
+    initialData: page === 1 && !search ? initialData : undefined,
   });
 
   // --- Mutations ---

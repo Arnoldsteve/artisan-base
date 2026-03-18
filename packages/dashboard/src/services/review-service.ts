@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/client-api";
+import { PaginatedResponse } from "@/types";
 import { 
   Review, 
   CreateReviewDto, 
@@ -44,9 +45,11 @@ export class ReviewService {
    * PRIVATE (Dashboard): Fetch all reviews for the current tenant.
    * Note: This will be used by the global Reviews management page.
    */
-  async getAll(): Promise<Review[]> {
-    return apiClient.get<Review[]>("/reviews");
-  }
+ async getAll(page: number, limit: number, search: string): Promise<PaginatedResponse<Review>> {
+  return apiClient.get<PaginatedResponse<Review>>("/reviews", {
+    params: { page, limit, search }
+  });
+}
 }
 
 export const reviewService = new ReviewService();

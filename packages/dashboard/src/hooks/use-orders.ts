@@ -16,15 +16,18 @@ import {
   OrderStatus, 
   PaymentStatus 
 } from "@/types/orders";
+import { PaginatedResponse } from "@/types";
 
 // ---------------------------------------------------------
 // 1. Unified Hook for Managing the Orders List
 // ---------------------------------------------------------
-export const useOrders = (initialLimit = 10) => {
+export const useOrders = (
+  initialLimit = 10, 
+  initialData?: PaginatedResponse<Order>
+) => {
   const queryClient = useQueryClient();
   const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
   
-  // Internal State for List Management
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
@@ -32,12 +35,12 @@ export const useOrders = (initialLimit = 10) => {
 
   // --- Fetch Query ---
   const ordersQuery = useQuery({
-    // Include tenantId in Key for strict multi-tenant isolation
     queryKey: [...ORDERS_QUERY_KEY, "list", { page, search, initialLimit }],
     queryFn: () => orderService.getAll({ page, limit: initialLimit, search }),
-    // Only fetch if we have a valid store context
     enabled: !isAuthLoading && isAuthenticated && !!tenantId,
     placeholderData: keepPreviousData,
+    // 🎯 THE FIX: Hydrate with server-side data if available
+    initialData: page === 1 && !search ? initialData : undefined,
   });
 
   // --- Mutations ---

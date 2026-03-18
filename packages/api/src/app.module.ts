@@ -22,6 +22,7 @@ import { PlanModule } from './plan/plan.module';
 import { ReviewModule } from './review/review.module';
 import { QueuesModule } from './common/queues/queues.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     CustomerModule,
     ReviewModule,
     AnalyticsModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],

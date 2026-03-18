@@ -26,13 +26,13 @@ export function OrderStatusFunnel() {
   ];
 
   // Convert API response array into a map for easy lookup
-  const statusMap = new Map(
-    data?.map((item) => [item.status, item]) || []
+   const statusMap = new Map<string, OrderStatusData>(
+    data?.map((item: OrderStatusData) => [item.status.toLowerCase(), item]) || []
   );
 
   // Build final array with all statuses and default 0 if missing
-  const statuses = allStatuses.map((status) => {
-    // console.log("Processing status:", status.key);
+   const statuses = allStatuses.map((status) => {
+    // We search the map using the key defined in our static list
     const item = statusMap.get(status.key);
     return {
       ...status,

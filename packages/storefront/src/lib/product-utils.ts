@@ -2,26 +2,32 @@ import { Product } from "@/types/product";
 
 /**
  * TOP 1% LOGIC: Image Resolver
- * This function takes the raw JSON from the 'images' field 
- * and returns a guaranteed array of valid URL strings.
+ * 
+ * Responsibility: Normalizes product image data for UI consumption.
+ * millions of users: Prevents "Broken Image" layout shifts by ensuring 
+ * a high-quality fallback is always present.
  */
-export function resolveProductImages(product: any): string[] {
-  // Enterprise Standard: Use a consistent, high-quality placeholder
-  // We use Unsplash for a "Luxury" feel during development
-  const placeholder = `https://images.unsplash.com/photo-1547949003-9792a18a2601?w=800&q=80`; // A nice leather bag image
+export function resolveProductImages(product: Partial<Product> | null | undefined): string[] {
+  // Enterprise Standard: Consistent high-quality placeholder
+  const placeholder = `https://images.unsplash.com/photo-1547949003-9792a18a2601?w=800&q=80`;
 
-  if (!product.images || !Array.isArray(product.images) || product.images.length === 0) {
+  // 🛡️ Safety Guard: Handle null or products without image arrays
+  if (!product?.images || !Array.isArray(product.images) || product.images.length === 0) {
     return [placeholder];
   }
 
   const urls = product.images
-    .map((img: any) => {
+    .map((img) => {
+      // ⚡ Robust Extraction: Handle both raw strings and ProductImage objects
       const url = typeof img === "string" ? img : img?.url;
-      // If the URL is just a test placeholder like 'cdn.com', use our nice Unsplash image
-      if (url?.includes("cdn.com")) return placeholder;
+      
+      // Sanitization: If URL is a dummy placeholder from test data, swap for luxury placeholder
+      if (url?.includes("cdn.com") || url === "placeholder.jpg") return placeholder;
+      
       return url;
     })
-    .filter((url): url is string => !!url && url.trim() !== "");
+    // 🧹 Type Guard: Filter out empty strings, nulls, or undefined
+    .filter((url): url is string => !!url && typeof url === "string" && url.trim() !== "");
 
   return urls.length > 0 ? urls : [placeholder];
 }

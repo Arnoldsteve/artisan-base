@@ -53,8 +53,8 @@ export class ProductService {
     await apiClient.delete(`/products/${id}`);
   }
 
-  async assignCategories(productId: string, dto: AssignCategoriesToProductDto): Promise<void> {
-    await apiClient.patch(`//products/${productId}/categories`, dto);
+  async assignCategories(productId: string, categoryIds: string[]): Promise<Product> {
+    return apiClient.post(`/products/${productId}/categories`, { categoryIds });
   }
 
   async assignCategory(productId: string, categoryId: string): Promise<void> {

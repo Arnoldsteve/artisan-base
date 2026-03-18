@@ -39,22 +39,22 @@ export function NavUser() {
 
   // --- Handle avatar string vs Blob ---
   useEffect(() => {
-    if (user?.avatarUrl instanceof Blob) {
-      const url = URL.createObjectURL(user.avatarUrl);
+    if (user?.user?.avatarUrl instanceof Blob) {
+      const url = URL.createObjectURL(user?.user?.avatarUrl);
       setAvatarSrc(url);
       return () => URL.revokeObjectURL(url);
-    } else if (typeof user?.avatarUrl === "string") {
-      setAvatarSrc(user.avatarUrl);
+    } else if (typeof user?.user?.avatarUrl === "string") {
+      setAvatarSrc(user?.user?.avatarUrl);
     } else {
       setAvatarSrc(undefined);
     }
-  }, [user?.avatarUrl]);
+  }, [user?.user?.avatarUrl]);
 
   if (!user) return null;
 
   const initials = (() => {
-    const firstName = user.firstName ?? "";
-    const lastName = user.lastName ?? "";
+    const firstName = user.user.firstName ?? "";
+    const lastName = user?.user?.lastName ?? "";
 
     if (firstName && lastName) return `${firstName[0]}${lastName[0]}`;
     if (firstName) return firstName.slice(0, 2);
@@ -71,14 +71,14 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={avatarSrc} alt={user.firstName ?? "User"} />
+                <AvatarImage src={avatarSrc} alt={user.user.firstName ?? "User"} />
                 <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {user.firstName} {user.lastName}
+                  {user.user.firstName} {user?.user?.lastName}
                 </span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-xs">{user.user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -92,14 +92,14 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={avatarSrc} alt={user.firstName ?? "User"} />
+                  <AvatarImage src={avatarSrc} alt={user.user.firstName ?? "User"} />
                   <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {user.firstName} {user.lastName}
+                    {user.user.firstName} {user?.user?.lastName}
                   </span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate text-xs">{user.user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

@@ -3,7 +3,8 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { categoryService } from "@/services/category-service";
 import { useTenantContext } from "@/contexts/tenant-context";
-import { CategoryFilters } from "@/types/category";
+import { Category, CategoryFilters } from "@/types/category";
+// import { Category } from "@/types";
 
 /**
  * TOP 1% ARCHITECTURE: Context-Aware Categories Hook
@@ -35,17 +36,22 @@ export const useCategories = (filters: CategoryFilters = {}, limit = 20) => {
 
 /**
  * Hook for Single Category Details
+ * @param id - The category ID or Slug
+ * @param options - Standard React Query options (like initialData)
  */
-export const useCategory = (id: string | null) => {
+export const useCategory = (
+  id: string | null, 
+  options: { initialData?: Category } = {} 
+) => {
   const { tenant } = useTenantContext();
 
-  return useQuery({
+  return useQuery<Category>({
     queryKey: ["category-detail", tenant?.id, id],
     queryFn: () => categoryService.getCategoryById(id!),
     enabled: !!id && !!tenant?.id,
-    staleTime: 1000 * 60 * 30, // Category details change very rarely
+    ...options, 
   });
-};
+};;
 
 /**
  * Hook for Top Categories (Navigation/Home Page)
@@ -53,9 +59,8 @@ export const useCategory = (id: string | null) => {
 export const useTopCategories = (limit = 6) => {
   const { tenant } = useTenantContext();
 
-  return useQuery({
+  return useQuery<Category[]>({
     queryKey: ["top-categories", tenant?.id, limit],
     queryFn: () => categoryService.getTopCategories(limit),
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour for high performance
   });
 };

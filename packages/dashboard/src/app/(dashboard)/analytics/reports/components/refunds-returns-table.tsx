@@ -21,11 +21,11 @@ import { Download, Search, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { formatDate } from "@/utils/date";
 import { formatMoney } from "@/utils/money";
-import { useRefunds } from "@/hooks/use-analytics-queries";
+import { useRefundsAndReturns  } from "@/hooks/use-analytics-queries";
 
 export function RefundsReturnsTable() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data, isLoading, error } = useRefunds();
+  const { data, isLoading, error } = useRefundsAndReturns ();
   const refunds = data || [];
 
   const filteredData = refunds.filter(

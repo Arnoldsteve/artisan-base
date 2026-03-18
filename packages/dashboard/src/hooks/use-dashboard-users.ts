@@ -12,27 +12,29 @@ import { toast } from "sonner";
 import { StaffMember } from "@/types/staff";
 import { TenantUserRole } from "@/types/roles";
 import { useAuthContext } from "@/contexts/auth-context";
+import { PaginatedResponse } from "@/types";
 
 // ---------------------------------------------------------
 // 1. Unified Hook for Managing the Staff List
 // ---------------------------------------------------------
-export const useStaffMembers = (initialLimit = 10) => {
+export const useStaffMembers = (
+  initialLimit = 10, 
+  initialData?: PaginatedResponse<StaffMember>
+) => {
   const queryClient = useQueryClient();
   const { tenantId, isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
 
-  // Internal State for List Management
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(initialLimit);
 
-  // Cache key partitioned by tenantId
   const STAFF_QUERY_KEY = ["staff", tenantId];
 
-  // --- Fetch Query ---
   const staffQuery = useQuery({
     queryKey: [...STAFF_QUERY_KEY, "list", { page, limit }],
     queryFn: () => staffService.getAll(page, limit),
     enabled: !isAuthLoading && isAuthenticated && !!tenantId,
     placeholderData: keepPreviousData,
+    initialData: page === 1 ? initialData : undefined, 
   });
 
   // --- Mutations ---

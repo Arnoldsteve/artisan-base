@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { columns } from "./columns";
 import {
@@ -14,26 +14,26 @@ import {
 } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { CreateProductDto, Product } from "@/types/products";
-import { useProducts } from "@/hooks/use-products"; // Single hook import
+import { useProducts } from "@/hooks/use-products"; 
+import { PaginatedResponse } from "@/types/shared"; 
+
 
 // UI Components
 import { EditProductSheet } from "./edit-product-sheet";
 import { DeleteProductDialog } from "./delete-product-dialog";
-import { BulkDeleteAlertDialog } from "./bulk-delete-alert-dialog";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { Button } from "@repo/ui/components/ui/button";
-import { toast } from "sonner";
-import { ProductFormData } from "@/validation-schemas/products";
-import { ImageUploadDialog } from "./image-upload-dialog";
-import { CategoryAssignmentSheet } from "./category-assignment-sheet";
-import { ImagePreviewDialog } from "./image-preview-dialog";
 import { slugify } from "@/utils/slugify";
 import { ProductTableMeta } from "@/types/table-meta";
 import { BulkUploadDropdown } from "./bulk-upload-dropdown";
 import { BulkProductRow, BulkUploadModal } from "./bulk-upload-preview-modal";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
 
-export function ProductsWrapper() {
+interface ProductsWrapperProps {
+  initialProductData?: PaginatedResponse<Product>;
+}
+
+export function ProductsWrapper({ initialProductData }: ProductsWrapperProps) {
   // --- Unified Data Hook ---
   const {
     products,
@@ -52,7 +52,7 @@ export function ProductsWrapper() {
     isDeleting,
     bulkCreate,
     isBulkCreating,
-  } = useProducts(10);
+  } = useProducts(10, initialProductData);
 
   // --- Table UI State ---
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -74,15 +74,22 @@ export function ProductsWrapper() {
   const [bulkFile, setBulkFile] = useState<File | null>(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
-  // --- Handlers ---
-  const handleDuplicateProduct = (p: Product) => {
-    createProduct({
-      ...p,
-      name: `${p.name} (Copy)`,
-      slug: slugify(`${p.name}-copy`),
-      price: Number(p.price),
-    });
+ // --- Handlers ---
+const handleDuplicateProduct = (p: Product) => {
+  // ⚡ TOP 1% PATTERN: Explicit mapping for DTO safety
+  const duplicateData: CreateProductDto = {
+    name: `${p.name} (Copy)`,
+    slug: slugify(`${p.name}-copy`),
+    price: Number(p.price),
+    description: p.description ?? undefined,
+    sku: p.sku ?? undefined, 
+    inventoryQuantity: p.inventoryQuantity,
+    isActive: p.isActive,
+    isFeatured: p.isFeatured,
   };
+
+  createProduct(duplicateData);
+};
 
   const handleBulkImport = async (validRows: BulkProductRow[]) => {
     const cleanedRows: CreateProductDto[] = validRows.map((row) => ({

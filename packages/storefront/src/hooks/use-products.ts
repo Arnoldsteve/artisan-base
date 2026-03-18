@@ -67,16 +67,10 @@ export const useFeaturedProducts = (params: { limit?: number } = {}) => {
   const { tenant, isLoading: isTenantLoading } = useTenantContext();
 
   return useQuery({
-    // Cache Partitioning: Ensures Store A and Store B don't leak into each other
-    queryKey: ["featured-products", tenant?.id, params.limit],
-    
-    queryFn: () => productService.getFeaturedProducts(params.limit),
-    
-    // Safety: Don't fetch until we know which "Bubble" we are in
+    queryKey: ["featured-products", tenant?.id, params.limit],    
+    queryFn: () => productService.getFeaturedProducts(params),    
     enabled: !isTenantLoading,
     
-    // Performance: Featured products are good candidates for longer cache times
-    staleTime: 1000 * 60 * 15, // 15 minutes
   });
 };
 

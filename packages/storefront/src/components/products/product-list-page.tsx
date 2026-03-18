@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@repo/ui/components/ui/button";
@@ -25,8 +25,12 @@ export function ProductsContent() {
 
   // 1. Fetch Categories for Filter Dropdown
   const { data: catResponse, isLoading: isLoadingCats } = useCategories();
-  const categories = catResponse?.data || [];
 
+  // ⚡ FIX: Flatten the pages to get a single array of categories
+  const categories = useMemo(() => {
+    return catResponse?.pages.flatMap((page) => page.data) ?? [];
+  }, [catResponse]);
+  
   // 2. Infinite Products Fetch (Context Aware via Hook)
   const { 
     data, 

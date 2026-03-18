@@ -6,10 +6,11 @@ import { Customer } from "@/types/customers";
 import { Mail, Phone } from "lucide-react";
 
 export function CustomerContactCard({ customer }: { customer: Customer }) {
-  const defaultAddress =
-    customer.addresses && customer.addresses.length > 0
-      ? customer.addresses[0]
-      : null;
+const defaultAddress =
+  customer.addresses && customer.addresses.length > 0
+    ? customer.addresses[0]
+    : null;
+
 
   return (
     <Card className="shadow-none">

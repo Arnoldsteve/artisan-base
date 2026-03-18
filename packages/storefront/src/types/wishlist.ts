@@ -2,6 +2,7 @@
 
 export interface WishlistItem {
   id: string;
+  tenantId: string;          // CRITICAL: Identifies the merchant owner
   name: string;
   price: number;
   image: string;

@@ -5,6 +5,8 @@
     "rootDir": ".",
     "outDir": "./dist",
 
+    "jsx": "react",          
+    
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,

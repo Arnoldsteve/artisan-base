@@ -20,9 +20,6 @@ export class OrderListener {
   async handleCheckoutCompleted(payload: CheckoutCompletedEvent) {
     this.logger.log(`Routing Global Checkout to Queues: ${payload.paymentReference}`);
 
-    // 2. Use Centralized Job Names
-    await this.notifyQueue.add(JOB_NAMES.PROCESS_ORDER_RECEIPT, payload);
-
     await this.paymentQueue.add(JOB_NAMES.INITIALIZE_CHECKOUT_PAYMENT, payload, {
       priority: 1, // Payments are always priority 1
     });
@@ -31,9 +28,6 @@ export class OrderListener {
   @OnEvent(ORDER_EVENTS.ORDER_CREATED)
   async handleOrderCreated(payload: OrderCreatedEvent) {
     this.logger.log(`Routing Store Order to Queues: ${payload.orderNumber}`);
-
-    // Notify the specific Artisan/Merchant
-    await this.notifyQueue.add(JOB_NAMES.NOTIFY_MERCHANT_NEW_ORDER, payload);
 
     // Start background processing (Inventory, etc.)
     await this.orderQueue.add(JOB_NAMES.PROCESS_VENDOR_ORDER, payload);

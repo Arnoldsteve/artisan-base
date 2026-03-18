@@ -17,8 +17,13 @@ import { EditAddUserSheet } from "./edit-add-user-sheet";
 import { StaffMemberFormData } from "@/validation-schemas/staffMemberSchema";
 import { ConfirmActionModal } from "@/components/modals/confirm-action-modal";
 import { DataTablePagination } from "@/components/shared/data-table-footer";
+import { PaginatedResponse } from "@/types";
 
-export function TeamMembersWrapper() {
+interface TeamMembersWrapperProps {
+  initialUsersData?: PaginatedResponse<StaffMember>;
+}
+
+export function TeamMembersWrapper({ initialUsersData }: TeamMembersWrapperProps) {
   // --- Unified Data Hook ---
   const {
     staff,
@@ -32,7 +37,7 @@ export function TeamMembersWrapper() {
     isUpdating,
     removeStaff,
     isRemoving,
-  } = useStaffMembers(10);
+  } = useStaffMembers(10, initialUsersData);
 
   // --- UI State for Modals/Sheets ---
   const [isSheetOpen, setIsSheetOpen] = useState(false);
