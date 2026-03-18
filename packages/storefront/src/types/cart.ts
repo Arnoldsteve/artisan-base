@@ -18,6 +18,7 @@ export interface CartItem {
   // Enterprise Standard: Store metadata for UI grouping
   tenantName?: string;
   tenantSubdomain?: string;
+  description?: string; 
 }
 
 export interface CartContextType {

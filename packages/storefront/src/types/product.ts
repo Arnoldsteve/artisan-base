@@ -44,8 +44,15 @@ export interface Product {
   // Media
   images: ProductImage[];
   
-  // Relations (Eager loaded for performance)
-  categories: Category[];
+  /**
+   * ⚡ ENTERPRISE RELATION PATTERN: Many-to-Many Join
+   * Maps to Prisma's nested include structure:
+   * { categories: { include: { category: true } } }
+   */
+  categories: {
+    category: Category;
+  }[];
+
   variants: ProductVariant[];
   reviews?: Review[];
   
@@ -55,16 +62,6 @@ export interface Product {
   
   createdAt: string;
   updatedAt: string;
-}
-
-/**
- * In your DB, this is a Json field. 
- * On the frontend, we force it into this predictable structure.
- */
-export interface ProductImage {
-  url: string;
-  alt?: string;
-  isPrimary?: boolean;
 }
 
 // Optimized filter types for Marketplace Search

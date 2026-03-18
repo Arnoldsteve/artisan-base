@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { Product } from "@/types";
+import { Product } from "@/types/product";
 
 export class RecommendationService {
   /**

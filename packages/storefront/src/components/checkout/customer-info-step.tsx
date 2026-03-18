@@ -48,15 +48,19 @@ export const CustomerInfoStep: React.FC = () => {
    * millions of users: Prevents double-prefixing and removes national 
    * trunk prefixes (leading zeros) common in African markets.
    */
-  const onSubmit = (data: CustomerSchema) => {
+ const onSubmit = (data: CustomerSchema) => {
+    // ⚡ FIX: Use a fallback empty string if data.phone is undefined/null
+    const rawPhone = data.phone || "";
+
     // A. Strip all non-numeric characters from the input
-    let cleanLocalNumber = data.phone.replace(/\D/g, "");
+    let cleanLocalNumber = rawPhone.replace(/\D/g, "");
 
     // B. Remove leading zero (e.g., 0712 -> 712) - Standard for +254
     cleanLocalNumber = cleanLocalNumber.replace(/^0+/, "");
 
     // C. Re-construct International Format
-    const fullPhone = `${selectedCode}${cleanLocalNumber}`;
+    // Only prepend the code if there is actually a number
+    const fullPhone = cleanLocalNumber ? `${selectedCode}${cleanLocalNumber}` : "";
 
     setCustomer({
       firstName: data.firstName,

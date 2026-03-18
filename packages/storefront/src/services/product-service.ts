@@ -46,13 +46,22 @@ export class ProductService {
    * PERFORMANCE: Fetch featured products.
    * Backend uses an 'isFeatured' index for sub-millisecond response.
    */
-  async getFeaturedProducts(
-    limit = 10,
-  ): Promise<CursorPaginatedResponse<Product>> {
-    return apiClient.get<CursorPaginatedResponse<Product>>(
-      "/products", // later  add featured from the db and add a new endpoint for featured products
-      { limit },
-    );
+/**
+ * ⚡ Enterprise Refactor: Support Object-based params for Cursors
+ */
+  async getFeaturedProducts(params: { 
+    limit?: number; 
+    cursor?: string 
+  } | number = 5): Promise<CursorPaginatedResponse<Product>> {
+    
+    // Handle backward compatibility for when a raw number is passed
+    const queryParams = typeof params === 'number' 
+      ? { limit: params } 
+      : params;
+
+    return apiClient.get<CursorPaginatedResponse<Product>>("/products/featured", {
+      params: queryParams
+    });
   }
 
   /**
