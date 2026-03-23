@@ -51,8 +51,8 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: initialData.firstName || "",
-      lastName: initialData.lastName || "",
+      firstName: initialData?.firstName || "",
+      lastName: initialData?.lastName || "",
     },
   });
 
@@ -121,7 +121,7 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
               <FormLabel>Email Address</FormLabel>
               <FormControl>
                 {/* Email is a unique identifier; changes should happen via a verified flow */}
-                <Input readOnly disabled value={initialData.email} className="bg-muted/50" />
+                <Input readOnly disabled value={initialData?.email} className="bg-muted/50" />
               </FormControl>
               <p className="text-[11px] text-muted-foreground mt-1">
                 Email cannot be changed directly for security reasons.
