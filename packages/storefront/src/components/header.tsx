@@ -36,23 +36,6 @@ export function Header() {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    },
-    []
-  );
-
-  const handleSearchSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (searchQuery.trim()) {
-        router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
-      }
-    },
-    [searchQuery]
-  );
-
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
   }, []);
@@ -108,27 +91,6 @@ export function Header() {
             </Link>
           </nav>
 
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex max-w-md"
-          >
-            <div className="flex w-full rounded-lg border border-input overflow-hidden">
-              <Input
-                placeholder="Search for products..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="flex-1 border-none rounded-none focus:ring-0"
-              />
-              <Button
-                type="submit"
-                variant="default"
-                className="px-4 rounded-none"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          </form>
-
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             <CartButton onClick={() => router.push("/cart")} />
@@ -164,27 +126,6 @@ export function Header() {
               <Menu className="h-5 w-5" />
             )}
           </Button>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="md:hidden py-4 border-t">
-          <form onSubmit={handleSearchSubmit} className="md:hidden max-w-md">
-            <div className="flex w-full rounded-lg border border-input overflow-hidden">
-              <Input
-                placeholder="Search for products..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="flex-1 border-none rounded-none focus:ring-0"
-              />
-              <Button
-                type="submit"
-                variant="default"
-                className="px-4 rounded-none"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          </form>
         </div>
 
         {/* Mobile Menu */}

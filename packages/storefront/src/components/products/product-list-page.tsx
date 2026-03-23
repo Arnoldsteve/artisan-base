@@ -10,6 +10,7 @@ import { ProductFilters } from "./product-filters";
 import { ProductsLoading } from "@/components/skeletons/product-card-skeleton";
 import { useCategories } from "@/hooks/use-categories";
 import { useTenantContext } from "@/contexts/tenant-context";
+import { InfiniteLoader } from "@/components/shared/infinite-loader";
 
 export function ProductsContent() {
   const searchParams = useSearchParams();
@@ -19,7 +20,9 @@ export function ProductsContent() {
   // Filter State
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
-  const [appliedPriceRange, setAppliedPriceRange] = useState<[number, number]>([0, 1000000]);
+  const [appliedPriceRange, setAppliedPriceRange] = useState<[number, number]>([
+    0, 1000000,
+  ]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -30,43 +33,27 @@ export function ProductsContent() {
   const categories = useMemo(() => {
     return catResponse?.pages.flatMap((page) => page.data) ?? [];
   }, [catResponse]);
-  
+
   // 2. Infinite Products Fetch (Context Aware via Hook)
-  const { 
-    data, 
-    isLoading, 
-    isFetchingNextPage, 
-    fetchNextPage, 
-    hasNextPage 
-  } = useProducts({
-    search: searchQuery,
-    category: selectedCategory !== "all" ? selectedCategory : undefined,
-    minPrice: appliedPriceRange[0],
-    maxPrice: appliedPriceRange[1],
-    // Handle price sort mapping
-    sortBy: sortBy.includes('price') ? 'price' : sortBy as any,
-    sortOrder: sortBy === 'price-low' ? 'asc' : 'desc'
-  }, 24);
-
-  // 3. Infinite Scroll Intersection Observer
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!loaderRef.current || !hasNextPage || isFetchingNextPage) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) fetchNextPage();
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useProducts(
+      {
+        search: searchQuery,
+        category: selectedCategory !== "all" ? selectedCategory : undefined,
+        minPrice: appliedPriceRange[0],
+        maxPrice: appliedPriceRange[1],
+        // Handle price sort mapping
+        sortBy: sortBy.includes("price") ? "price" : (sortBy as any),
+        sortOrder: sortBy === "price-low" ? "asc" : "desc",
       },
-      { rootMargin: "400px" }
+      24,
     );
-
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   // Derived Data
   const products = data?.pages.flatMap((page) => page.data) ?? [];
-  const hasUnappliedPriceChanges = priceRange[0] !== appliedPriceRange[0] || priceRange[1] !== appliedPriceRange[1];
+  const hasUnappliedPriceChanges =
+    priceRange[0] !== appliedPriceRange[0] ||
+    priceRange[1] !== appliedPriceRange[1];
 
   if (isLoading && products.length === 0) return <ProductsLoading />;
 
@@ -111,8 +98,12 @@ export function ProductsContent() {
         {/* Product Grid */}
         {products.length === 0 && !isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 border rounded-lg border-dashed">
-            <h3 className="text-lg font-medium">No items match your criteria</h3>
-            <p className="text-muted-foreground">Try clearing your filters or search query.</p>
+            <h3 className="text-lg font-medium">
+              No items match your criteria
+            </h3>
+            <p className="text-muted-foreground">
+              Try clearing your filters or search query.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -122,18 +113,11 @@ export function ProductsContent() {
           </div>
         )}
 
-        {/* Infinite Loading Trigger */}
-        <div ref={loaderRef} className="py-12 flex justify-center">
-          {isFetchingNextPage ? (
-            <div className="flex items-center gap-2 text-muted-foreground animate-pulse">
-              <span>Loading more treasures...</span>
-            </div>
-          ) : hasNextPage ? (
-            <Button variant="ghost" onClick={() => fetchNextPage()}>Load More</Button>
-          ) : products.length > 0 && (
-            <p className="text-muted-foreground text-sm italic">You've reached the end of the collection.</p>
-          )}
-        </div>
+        <InfiniteLoader
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+        />
       </div>
     </section>
   );

@@ -2,25 +2,35 @@ import { apiClient } from "@/lib/api-client";
 
 /**
  * SOLID Principle: Single Responsibility
- * This service handles the initial handshake between the public URL 
- * and the isolated backend database rows.
+ * Refactored to include Branding and Metadata for the Shop Home Page.
  */
-
 export interface TenantProfile {
   id: string;
   name: string;
   subdomain: string;
   baseCurrency: string;
+
+  description?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  city?: string | null;
+
+  _count?: {
+    products: number;
+    reviews: number;
+  };
+
   settings: Record<string, any>;
+  averageRating?: number;
+  createdAt: string;
 }
 
 export class TenantService {
   /**
-   * PUBLIC: Resolves the store's unique ID and settings from the URL slug.
-   * Example: artisanbase.com/shop/modern-decor -> returns tenantId for 'modern-decor'
+   * PUBLIC: Resolves the store's unique ID and profile data from the URL slug.
+   * millions of users: Returns the branding assets needed for the first paint.
    */
   async resolveStore(slug: string): Promise<TenantProfile> {
-    // Note: This endpoint was whitelisted in our backend middleware
     return apiClient.get<TenantProfile>(`/tenant/resolve/${slug}`);
   }
 }

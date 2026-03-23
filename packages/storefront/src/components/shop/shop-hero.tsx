@@ -8,12 +8,12 @@ interface ShopHeroProps {
 }
 
 export function ShopHero({ bannerImage }: ShopHeroProps) {
-  // const defaultBanner = "https://images.unsplash.com/photo-1581539250439-c96689b516dd?w=1600&q=80";
+  const defaultBanner = "https://images.unsplash.com/photo-1581539250439-c96689b516dd?w=1600&q=80";
 
   return (
     <div className="relative h-[250px] md:h-[350px] w-full bg-slate-200 overflow-hidden">
       <img 
-        src={bannerImage} 
+        src={bannerImage || defaultBanner} 
         className="w-full h-full object-cover"
         alt="Artisan Shop Banner"
       />

@@ -8,6 +8,7 @@ import { CategoriesLoading } from "@/components/skeletons/category-card-skeleton
 import { useTenantContext } from "@/contexts/tenant-context";
 import { LayoutGrid, ArrowRight } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
+import { InfiniteLoader } from "@/components/shared/infinite-loader";
 
 /**
  * TOP 1% ARCHITECTURE: Context-Aware Infinite Categories List
@@ -31,24 +32,9 @@ export default function CategoryListPage() {
   // millions of users: flatMap is efficient for merging paginated batches
   const categories = useMemo(
     () => data?.pages.flatMap((page) => page.data) ?? [],
-    [data]
+    [data],
   );
 
-  // 3. Infinite Scroll Observer
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!loaderRef.current || !hasNextPage || isFetchingNextPage) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) fetchNextPage();
-      },
-      { rootMargin: "300px" } // Early load for smooth experience
-    );
-
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   if (isLoading && categories.length === 0) return <CategoriesLoading />;
 
@@ -85,7 +71,7 @@ export default function CategoryListPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {categories.map((category) => {
               // Enterprise Standard: Context-Aware Linking
-              const categoryLink = tenant 
+              const categoryLink = tenant
                 ? `/shop/${tenant.subdomain}/categories/${category.slug}`
                 : `/categories/${category.slug}`;
 
@@ -108,16 +94,18 @@ export default function CategoryListPage() {
                       {category._count?.products || 0} Items
                     </div>
                   </div>
-                  
+
                   <div className="p-5 flex flex-col flex-1">
                     <h3 className="text-lg font-bold text-foreground group-hover:text-blue-600 transition-colors">
                       {category.name}
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1 mb-4 flex-1">
-                      {category.description || `Explore our unique ${category.name.toLowerCase()} collection.`}
+                      {category.description ||
+                        `Explore our unique ${category.name.toLowerCase()} collection.`}
                     </p>
                     <div className="flex items-center gap-1 text-xs font-bold text-blue-600 uppercase tracking-tighter">
-                      Browse Collection <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                      Browse Collection{" "}
+                      <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
                 </Link>
@@ -126,24 +114,11 @@ export default function CategoryListPage() {
           </div>
         )}
 
-        {/* Infinite Loading Trigger */}
-        <div ref={loaderRef} className="py-20 flex flex-col items-center justify-center gap-4">
-          {isFetchingNextPage ? (
-            <div className="flex items-center gap-2 text-muted-foreground animate-pulse font-medium">
-              <span>Uncovering more collections...</span>
-            </div>
-          ) : hasNextPage ? (
-            <Button variant="outline" onClick={() => fetchNextPage()}>
-              Load More Categories
-            </Button>
-          ) : categories.length > 0 && (
-            <div className="h-px w-full max-w-md bg-gradient-to-r from-transparent via-border to-transparent relative">
-              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-4 text-xs text-muted-foreground italic">
-                End of marketplace
-              </span>
-            </div>
-          )}
-        </div>
+        <InfiniteLoader
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+        />
       </div>
     </section>
   );

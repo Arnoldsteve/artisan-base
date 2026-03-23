@@ -28,6 +28,12 @@ export const useProducts = (filters: ProductFilters = {}, limit = 12) => {
   });
 };
 
+export const useShopProducts = (filters: ProductFilters = {}, limit = 20) => {
+  // We leverage the existing 'useProducts' logic because it is already
+  // context-aware, but we rename the interface for semantic clarity.
+  return useProducts(filters, limit);
+};
+
 /**
  * FIX: Renamed from useProductBySlug to useProduct to resolve TS2724.
  * Includes optional support for initialData (SEO Hydration).
