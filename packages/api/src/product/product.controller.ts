@@ -9,6 +9,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -33,12 +35,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @ApiTags('Product Management')
-/**
- * TOP 1% ARCHITECTURE: Optional Header
- * We set required: false at the class level.
- * Public routes will proceed in 'Global Mode' if the header is missing.
- * Private routes are still protected by Guards that will check for the header.
- */
+
 @ApiHeader({
   name: 'x-tenant-id',
   required: false,
@@ -50,11 +47,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  /**
-   * PUBLIC: List products.
-   * millions of users: Returns Global data if x-tenant-id is missing.
-   * Returns Isolated data if x-tenant-id is present.
-   */
+
   @Public()
   @Get()
   @ApiOperation({ summary: 'List products (Marketplace or Storefront)' })
@@ -62,10 +55,16 @@ export class ProductController {
     return this.productService.findAll(options);
   }
 
-  /**
-   * PUBLIC: Get a specific product by its URL Slug.
-   * millions of users: Essential for SEO and Social Sharing.
-   */
+  @Public()
+  @Get('featured')
+  @ApiOperation({ summary: 'Get featured products for landing pages' })
+  @ApiResponse({ status: 200, description: 'List of featured products retrieved.' })
+  async findFeatured(@Query('limit') limit?: number) {
+    Logger.log("features route reached")
+    return this.productService.findFeatured(Number(limit) || 10);
+  }
+
+
   @Public()
   @Get('slug/:slug')
   @ApiOperation({ summary: 'Get product details by SEO slug' })
@@ -73,9 +72,6 @@ export class ProductController {
     return this.productService.findBySlug(slug);
   }
 
-  /**
-   * PUBLIC: Get a specific product by ID.
-   */
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get product details by ID' })

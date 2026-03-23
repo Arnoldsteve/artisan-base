@@ -28,6 +28,26 @@ export class ProductRepository {
   }
 
   /**
+   * DATABASE ACTION: findFeatured
+   * filters for products that are both active and marked as featured.
+   */
+  async findFeatured(limit: number) {
+    return this.prisma.client.product.findMany({
+      where: {
+        isActive: true,
+        // isFeatured: true, // Make sure this is in your schema.prisma!
+      },
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        categories: { include: { category: true } },
+      },
+    });
+  }
+
+  /**
    * Used for the Product Detail Page.
    * Includes Merchant info so the customer can visit the specific store.
    */

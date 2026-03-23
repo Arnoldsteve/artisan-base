@@ -51,6 +51,24 @@ export class ProductService {
     return this.productRepo.list(options);
   }
 
+  /**
+   * PUBLIC ACTION: Fetch Featured Products
+   * millions of users: Used for landing pages and high-conversion areas.
+   * Logic: Delegates to repo which filters by 'isFeatured: true' and 'isActive: true'.
+   */
+  async findFeatured(limit: number) {
+    // this.logger.debug(`Fetching ${limit} featured products...`);
+    
+    // ⚡ Logic: The productRepo.findFeatured will automatically apply 
+    // the 'tenantId' filter if the header was present in the request.
+    const products = await this.productRepo.findFeatured(limit);
+    
+    return {
+      success: true,
+      data: products,
+    };
+  }
+
    /**
    * PUBLIC ACTION: Fetch product by URL Slug.
    * millions of users: Critical for SEO and social sharing.
