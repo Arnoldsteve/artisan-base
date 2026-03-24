@@ -48,6 +48,7 @@ export function ProductsContent() {
       },
       24,
     );
+    console.log("product content data", data)
 
   // Derived Data
   const products = data?.pages.flatMap((page) => page.data) ?? [];

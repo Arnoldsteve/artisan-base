@@ -42,6 +42,12 @@ export class ProductRepository {
         createdAt: 'desc',
       },
       include: {
+        tenant: {
+          select: {
+            name: true,
+            subdomain: true,
+          },
+        },
         categories: { include: { category: true } },
       },
     });
